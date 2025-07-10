@@ -1,0 +1,26 @@
+{
+  "name": "@workspace/auth",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "env:load": "dotenv -e ../../.env --",
+    "auth:generate": "pnpm env:load pnpm dlx @better-auth/cli generate --output ../db/src/schemas/auth.ts --y",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@workspace/db": "workspace:*",
+    "@workspace/env": "workspace:*",
+    "bcryptjs": "^3.0.2",
+    "better-auth": "^1.2.8",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@workspace/tsconfig": "workspace:*",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./react": "./src/react.ts"
+  }
+}

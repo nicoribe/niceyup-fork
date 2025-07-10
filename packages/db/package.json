@@ -1,0 +1,29 @@
+{
+  "name": "@workspace/db",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "env:load": "dotenv -e ../../.env --",
+    "db:generate": "pnpm env:load drizzle-kit generate",
+    "db:push": "pnpm env:load drizzle-kit push",
+    "db:studio": "pnpm env:load drizzle-kit studio",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@workspace/env": "workspace:*",
+    "drizzle-orm": "^0.44.2",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/pg": "^8.15.4",
+    "@workspace/tsconfig": "workspace:*",
+    "drizzle-kit": "^0.31.1",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./orm": "./src/orm.ts"
+  }
+}
