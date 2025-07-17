@@ -45,7 +45,7 @@ app.register(fastifySwagger, {
       },
     },
     security: [{ apiKeyCookie: [], bearerAuth: [] }],
-    servers: [{ url: `${env.WEB_URL}/api` }],
+    servers: [{ url: `${env.API_URL}/api` }],
   },
   transform: jsonSchemaTransform,
 })
@@ -53,6 +53,7 @@ app.register(fastifySwagger, {
 app.register(fastifyScalar, {
   routePrefix: '/api/docs',
   configuration: {
+    pageTitle: 'Acme-Chat API',
     theme: 'saturn',
   },
 })
