@@ -1,19 +1,12 @@
-import { python } from '@trigger.dev/python'
 import { task } from '@trigger.dev/sdk'
-
-import { parsePyLogger, pyArgs, pyPath } from '../lib/utils'
+import { python } from '../python'
 
 export const helloWorld = task({
   id: 'hello-world',
   run: async () => {
-    const streamingResult = python.stream.runScript(
-      pyPath('main.py'),
-      pyArgs({ name: 'world' }),
-    )
+    const result = await python.main({ name: 'Davy Jones' })
 
-    for await (const chunk of streamingResult) {
-      parsePyLogger(chunk)
-    }
+    console.log(result)
 
     return {
       status: 'success',

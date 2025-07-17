@@ -44,6 +44,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@workspace/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
       '@workspace/env':
         specifier: workspace:*
         version: link:../../packages/env
