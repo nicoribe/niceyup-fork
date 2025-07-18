@@ -8,7 +8,10 @@ from database_client import DatabaseClient
 
 logger = PyLogger(__name__)
 
-async def main(dialect: Optional[str] = None, file_path: Optional[str] = None) -> None:
+async def main(
+    dialect: Optional[str] = None,
+    file_path: Optional[str] = None,
+) -> None:
     host = os.getenv("DATABASE_CLIENT_HOST")
     port = os.getenv("DATABASE_CLIENT_PORT")
     user = os.getenv("DATABASE_CLIENT_USER")

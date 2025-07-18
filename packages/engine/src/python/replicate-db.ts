@@ -2,10 +2,14 @@ import { python } from '@trigger.dev/python'
 import { pyArgs, pyPath, pyStreamingResult } from './utils'
 
 type ReplicateDbArgs = {
+  source_id: string
+  workspace_id: string
   dialect?: string
   file_path?: string
   tables_metadata?: {
-    [key: string]: string[]
+    [key: string]: {
+      column_name: string
+    }[]
   }
 }
 

@@ -9,6 +9,8 @@ const { dialect, host, port, user, password, database } = {
   user: 'mysql',
   password: 'supersecret',
   database: 'default',
+  // schema: 'public',
+  // file_path:`/workspace/${workspaceId}/sources/${sourceId}/uploads/${fileName}.sqlite`
 }
 
 export const getDbSchema = schemaTask({
@@ -19,11 +21,19 @@ export const getDbSchema = schemaTask({
   run: async (payload) => {
     logger.info('payload', payload)
 
-    const tables_metadata = await python.getDbSchema(
+    const tablesMetadata = await python.getDbSchema(
       { dialect },
-      { envVars: { host, port, user, password, database } },
+      {
+        envVars: {
+          host,
+          port,
+          user,
+          password,
+          database,
+        },
+      },
     )
 
-    return { tables_metadata }
+    return { tablesMetadata }
   },
 })

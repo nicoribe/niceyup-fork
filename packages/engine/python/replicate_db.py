@@ -10,6 +10,8 @@ from database_replicator import DatabaseReplicator
 logger = PyLogger(__name__)
 
 async def main(
+    source_id: str,
+    workspace_id: str,
     dialect: Optional[str] = None,
     file_path: Optional[str] = None,
     tables_metadata: Optional[dict] = None,
