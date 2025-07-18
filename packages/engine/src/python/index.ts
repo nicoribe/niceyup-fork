@@ -1,5 +1,9 @@
-import { main } from './main'
+import { getDbSchema } from './get-db-schema'
+import { helloWorld } from './hello-world'
+import { replicateDb } from './replicate-db'
 
 export const python = {
-  main,
+  helloWorld,
+  getDbSchema,
+  replicateDb,
 }

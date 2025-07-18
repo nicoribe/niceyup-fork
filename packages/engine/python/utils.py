@@ -1,17 +1,9 @@
-import json
-import logging
+from collections import defaultdict
 
-class PyLogger(logging.Logger):
-    def __init__(self, name: str):
-        super().__init__(name)
-
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-        handler.setFormatter(formatter)
-        handler.setLevel(logging.INFO)
-
-        self.addHandler(handler)
-
-    def info(self, msg: object, *args, **kwargs):
-        super().info(json.dumps(msg), *args, **kwargs)
+def group_columns_by_table(schema_metadata):
+    grouped = defaultdict(list)
+    for column in schema_metadata:
+        table = column['table_name']
+        column_info = {key: column[key] for key in column if key != 'table_name'}
+        grouped[table].append(column_info)
+    return dict(grouped)

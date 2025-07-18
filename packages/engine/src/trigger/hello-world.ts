@@ -1,16 +1,17 @@
-import { task } from '@trigger.dev/sdk'
+import { logger, schemaTask } from '@trigger.dev/sdk'
+import { z } from 'zod'
 import { python } from '../python'
 
-export const helloWorld = task({
+export const helloWorld = schemaTask({
   id: 'hello-world',
-  run: async () => {
-    const result = await python.main({ name: 'Davy Jones' })
+  schema: z.object({
+    name: z.string(), // Input: "Davy Jones"
+  }),
+  run: async (payload) => {
+    logger.info('payload', payload)
 
-    console.log(result)
+    const result = await python.helloWorld({ name: payload.name })
 
-    return {
-      status: 'success',
-      message: 'Job completed!',
-    }
+    return result // Output: "Hello world, Davy Jones!"
   },
 })

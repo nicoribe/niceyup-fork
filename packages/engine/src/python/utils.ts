@@ -8,17 +8,17 @@ export function pyArgs(args: Record<string, unknown>): string[] {
   return [JSON.stringify(args)]
 }
 
-type PyLogger = {
+type PyLogger<TResult> = {
   asctime: string
   name: string
   levelname: string
-  message: unknown
+  message: TResult
 }
 
-export function parsePyLogger(
+export function parsePyLogger<TResult>(
   pyLogger: string,
   { log }: { log?: false } = {},
-): Partial<PyLogger> {
+): Partial<PyLogger<TResult>> {
   const regex = /^(.+?) - (.+?) - (.+?) - (.+)$/
   const match = pyLogger.match(regex)
 
@@ -31,13 +31,16 @@ export function parsePyLogger(
   if (log !== false && message) {
     try {
       const parsed = JSON.parse(message)
+
       logger.info(parsed?.message || parsed, parsed)
+
+      return { asctime, name, levelname, message: parsed }
     } catch {
       logger.info(message)
     }
   }
 
-  return { asctime, name, levelname, message }
+  return { asctime, name, levelname, message } as Partial<PyLogger<TResult>>
 }
 
 type AsyncIterableStream<T> = AsyncIterable<T> & ReadableStream<T>

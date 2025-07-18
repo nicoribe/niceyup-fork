@@ -1,14 +1,12 @@
 import asyncio
 import json
 import sys
-import os
-
-from utils import PyLogger
+from py_logger import PyLogger
 
 logger = PyLogger(__name__)
 
 async def main(name: str) -> None:
-    logger.info(f"Hello, {name}!")
+    logger.info(f"Hello world, {name}!")
 
 if __name__ == "__main__":
     try:
