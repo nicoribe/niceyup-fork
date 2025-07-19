@@ -54,7 +54,7 @@ async def main(
     replicator.export_tables_to_parquet(tables_metadata)
     storage.cleanup_tmp_path() # Clean up tmp path
 
-    logger.info({
+    logger.warning({
         "status": "success",
         "message": "Database replicated successfully",
     })

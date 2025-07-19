@@ -30,7 +30,10 @@ async def main(
         file_path=file_path,
     )
 
-    logger.info({"status": "success", "message": client.get_db_schema()})
+    logger.warning({
+        "status": "success",
+        "message": client.get_db_schema(),
+    })
 
 if __name__ == "__main__":
     try:

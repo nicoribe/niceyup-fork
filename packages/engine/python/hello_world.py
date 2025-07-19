@@ -6,7 +6,7 @@ from py_logger import PyLogger
 logger = PyLogger(__name__)
 
 async def main(name: str) -> None:
-    logger.info(f"Hello world, {name}!")
+    logger.warning(f"Hello world, {name}!")
 
 if __name__ == "__main__":
     try:
