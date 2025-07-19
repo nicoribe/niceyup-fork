@@ -7,7 +7,7 @@ from py_logger import PyLogger
 from source_storage import SourceStorage
 from storage_provider import StorageProvider
 from database_client import DatabaseClient
-from database_replicator import DatabaseReplicator
+from database_replicator import DatabaseReplicator, TableMetadata
 
 logger = PyLogger(__name__)
 
@@ -16,7 +16,7 @@ async def main(
     workspace_id: str,
     dialect: Optional[str] = None,
     file_path: Optional[str] = None,
-    tables_metadata: Optional[dict] = None,
+    tables_metadata: Optional[TableMetadata] = None,
 ) -> None:
     host = os.getenv("DATABASE_CLIENT_HOST")
     port = os.getenv("DATABASE_CLIENT_PORT")
@@ -52,7 +52,7 @@ async def main(
     )
 
     replicator.export_tables_to_parquet(tables_metadata)
-    storage.cleanup_tmp_path()
+    storage.cleanup_tmp_path() # Clean up tmp path
 
     logger.info({
         "status": "success",
@@ -62,7 +62,7 @@ async def main(
 if __name__ == "__main__":
     try:
         if len(sys.argv) < 2:
-            logger.info({"status": "error", "message": "No args provided"})
+            logger.error({"status": "error", "message": "No args provided"})
             sys.exit(1)
         scriptArgs = json.loads(sys.argv[1])
         logger.info({ "status": None, "message": "Script started!", "args": scriptArgs })
@@ -70,5 +70,5 @@ if __name__ == "__main__":
         logger.info({"status": "success", "message": "Script ended!"})
         sys.exit(0)
     except Exception as e:
-        logger.info({"status": "error", "message": str(e)})
+        logger.error({"status": "error", "message": str(e)})
         sys.exit(1)

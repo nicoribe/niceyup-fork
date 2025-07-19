@@ -19,7 +19,7 @@ export const getDbSchema = schemaTask({
   run: async (payload) => {
     logger.info('payload', payload)
 
-    const tablesMetadata = await python.getDbSchema(
+    const result = await python.getDbSchema(
       { dialect },
       {
         envVars: {
@@ -28,11 +28,12 @@ export const getDbSchema = schemaTask({
           user,
           password,
           database,
+          // schema: 'public',
           // file_path:`/workspace/${workspaceId}/sources/${sourceId}/uploads/${fileName}.sqlite`
         },
       },
     )
 
-    return { tablesMetadata }
+    return result
   },
 })

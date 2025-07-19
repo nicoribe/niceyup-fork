@@ -5,8 +5,11 @@ from py_logger import PyLogger
 
 logger = PyLogger(__name__)
 
-async def main(name: str) -> None:
-    logger.info(f"Hello world, {name}!")
+async def main(source_id: str, workspace_id: str) -> None:
+    logger.warning({
+        "status": "success",
+        "message": f"Ingestion started for source {source_id} in workspace {workspace_id}"
+    })
 
 if __name__ == "__main__":
     try:

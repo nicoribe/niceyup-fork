@@ -13,5 +13,11 @@ class PyLogger(logging.Logger):
 
         self.addHandler(handler)
 
-    def info(self, msg: object, *args, **kwargs):
+    def info(self, msg: object, *args, **kwargs) -> None:
         super().info(json.dumps(msg), *args, **kwargs)
+
+    def warning(self, msg: object, *args, **kwargs) -> None:
+        super().warning(json.dumps(msg), *args, **kwargs)
+    
+    def error(self, msg: object, *args, **kwargs) -> None:
+        super().error(json.dumps(msg), *args, **kwargs)

@@ -8,22 +8,35 @@ export function pyArgs(args: Record<string, unknown>): string[] {
   return [JSON.stringify(args)]
 }
 
+type PyLoggerLevel = 'INFO' | 'WARNING' | 'ERROR' | string
+
 type PyLogger<TResult> = {
   asctime: string
   name: string
-  levelname: string
+  levelname: PyLoggerLevel
   message: TResult
 }
 
-// TODO: Add this to the logger
-// const pyLevelName = {
-//   CRITICAL: 'CRITICAL',
-//   ERROR: 'ERROR',
-//   WARNING: 'WARNING',
-//   INFO: 'INFO',
-//   DEBUG: 'DEBUG',
-//   NOTSET: 'NOTSET',
-// } as const
+function _pyLog(
+  level: PyLoggerLevel,
+  message: string,
+  metadata?: Record<string, unknown>,
+) {
+  switch (level) {
+    case 'INFO':
+      logger.info(message, metadata)
+      break
+    case 'WARNING':
+      logger.warn(message, metadata)
+      break
+    case 'ERROR':
+      logger.error(message, metadata)
+      break
+    default:
+      logger.log(message, metadata)
+      break
+  }
+}
 
 export function parsePyLogger<TResult>(
   pyLogger: string,
@@ -42,9 +55,11 @@ export function parsePyLogger<TResult>(
     try {
       const parsed = JSON.parse(message)
 
-      logger.info(parsed?.message || parsed, parsed)
+      _pyLog(levelname as PyLoggerLevel, parsed?.message || parsed, parsed)
 
-      return { asctime, name, levelname, message: parsed }
+      return { asctime, name, levelname, message: parsed } as Partial<
+        PyLogger<TResult>
+      >
     } catch {
       logger.info(message)
     }

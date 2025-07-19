@@ -1,12 +1,18 @@
 from database_client import DatabaseClient
 from source_storage import SourceStorage
+from typing import Dict, List, Optional, TypedDict
+
+class ColumnMetadata(TypedDict):
+    column_name: str
+
+TableMetadata = Dict[str, List[ColumnMetadata]]
 
 class DatabaseReplicator:
     def __init__(self, source: SourceStorage, client: DatabaseClient):
         self.source = source
         self.client = client
 
-    def create_tables_from_parquet(self):
+    def create_tables_from_parquet(self) -> None:
         if self.client.conn is None:
             self.client.connect()
 
@@ -22,7 +28,10 @@ class DatabaseReplicator:
 
             self.source.cleanup_tmp_file_dataset(file) # Cleanup tmp file
 
-    def export_tables_to_parquet(self, tables_metadata):
+    def export_tables_to_parquet(self, tables_metadata: Optional[TableMetadata] = None) -> None:
+        if tables_metadata is None:
+            return
+
         if self.client.conn is None:
             self.client.connect()
         

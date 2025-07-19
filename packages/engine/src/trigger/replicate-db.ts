@@ -47,6 +47,8 @@ export const replicateDb = schemaTask({
           user,
           password,
           database,
+          // schema: 'public',
+          // file_path:`/workspace/${workspaceId}/sources/${sourceId}/uploads/${fileName}.sqlite`
         },
       },
     )

@@ -16,7 +16,9 @@ type GetDbSchemaEnvVars = {
   schema?: string
 }
 
-type GetDbSchemaResult = TableMetadata[]
+type GetDbSchemaResult = {
+  tablesMetadata: TableMetadata[]
+}
 
 export async function getDbSchema(
   args: GetDbSchemaArgs,

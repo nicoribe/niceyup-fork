@@ -3,6 +3,12 @@ import { logger, metadata, schemaTask } from '@trigger.dev/sdk'
 import { z } from 'zod'
 import { parsePyLogger, pyArgs, pyPath } from '../python/utils'
 
+type AIMessageChunk = {
+  id: string
+  type: 'AIMessageChunk'
+  content: string
+}
+
 export const answer = schemaTask({
   id: 'answer',
   schema: z.object({
@@ -22,10 +28,10 @@ export const answer = schemaTask({
     let text = ''
 
     for await (const chunk of stream) {
-      const result = parsePyLogger<{ textDelta: string }>(chunk)?.message
+      const result = parsePyLogger<AIMessageChunk>(chunk)?.message
 
-      if (result && 'text_delta' in result) {
-        text += result.text_delta
+      if (result?.type === 'AIMessageChunk') {
+        text += result.content
       }
     }
 

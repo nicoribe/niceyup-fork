@@ -1,6 +1,13 @@
 import duckdb
-from sqlalchemy import create_engine, inspect
-from typing import Optional
+from sqlalchemy import create_engine, inspect, Engine
+from typing import Optional, TypedDict
+
+class TableMetadata(TypedDict):
+    table_name: str
+    column_name: str
+    data_type: str
+    foreign_table: str
+    foreign_column: str
 
 class DatabaseClient:
     def __init__(
@@ -22,9 +29,9 @@ class DatabaseClient:
         self.database = database
         self.schema = schema
         self.file_path = file_path
-        self.conn = None
+        self.conn: Optional[duckdb.DuckDBPyConnection] = None
 
-    def _create_engine(self):
+    def _create_engine(self) -> Engine:
         if self.dialect == "sqlite":
             return create_engine(f"sqlite:///{self.file_path}")
         
@@ -36,7 +43,7 @@ class DatabaseClient:
         
         raise ValueError(f"Invalid dialect: {self.dialect}")
 
-    def get_db_schema(self):
+    def get_db_schema(self) -> list[TableMetadata]:
         engine = self._create_engine()
         inspector = inspect(engine)
 
@@ -59,7 +66,7 @@ class DatabaseClient:
                 })
         return tables_metadata
 
-    def connect(self):
+    def connect(self) -> None:
         if self.conn is not None:
             return
         
@@ -80,7 +87,7 @@ class DatabaseClient:
             self.conn.load_extension("postgres")
             self.conn.execute(f"ATTACH 'host={self.host} port={self.port} user={self.user} password={self.password} dbname={self.database}' AS db (TYPE postgres, SCHEMA '{self.schema}', READ_ONLY)")
 
-    def execute(self, sql):
+    def execute(self, sql: str) -> duckdb.DuckDBPyConnection:
         if self.conn is None:
             self.connect()
         
@@ -89,7 +96,7 @@ class DatabaseClient:
         
         return self.conn.execute(sql)
 
-    def close(self):
+    def close(self) -> None:
         if self.conn is not None:
             self.conn.close()
             self.conn = None
