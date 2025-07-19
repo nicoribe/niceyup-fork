@@ -1,8 +1,19 @@
 import duckdb
 from sqlalchemy import create_engine, inspect
+from typing import Optional
 
 class DatabaseClient:
-    def __init__(self, dialect, host=None, port=None, user=None, password=None, database=None, schema=None, file_path=None):
+    def __init__(
+        self,
+        dialect: Optional[str] = None,
+        host: Optional[str] = None,
+        port: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        database: Optional[str] = None,
+        schema: Optional[str] = None,
+        file_path: Optional[str] = None,
+    ):
         self.dialect = dialect
         self.host = host
         self.port = port
@@ -13,7 +24,7 @@ class DatabaseClient:
         self.file_path = file_path
         self.conn = None
 
-    def _get_engine(self):
+    def _create_engine(self):
         if self.dialect == "sqlite":
             return create_engine(f"sqlite:///{self.file_path}")
         
@@ -26,7 +37,7 @@ class DatabaseClient:
         raise ValueError(f"Invalid dialect: {self.dialect}")
 
     def get_db_schema(self):
-        engine = self._get_engine()
+        engine = self._create_engine()
         inspector = inspect(engine)
 
         tables_metadata = []
@@ -82,26 +93,3 @@ class DatabaseClient:
         if self.conn is not None:
             self.conn.close()
             self.conn = None
-
-    def create_views_from_parquet(self, table_names, parquet_dir="./tmp/dataset"):
-        if self.conn is None:
-            self.connect()
-
-        if self.conn is None:
-            raise RuntimeError("Database connection not established.")
-        
-        for table_name in table_names:
-            file_glob = f"{parquet_dir}/{table_name}.parquet"
-            self.conn.execute(f"CREATE OR REPLACE VIEW {table_name} AS SELECT * FROM parquet_scan('{file_glob}')")
-
-    def export_table_to_parquet(self, table_name, columns, parquet_dir="./tmp/dataset"):
-        if self.conn is None:
-            self.connect()
-        
-        if self.conn is None:
-            raise RuntimeError("Database connection not established.")
-        
-        column_names = ", ".join(f'"{col}"' for col in columns)
-        result = self.conn.execute(f"SELECT {column_names} FROM db.{table_name}") 
-        result_df = result.fetchdf()
-        result_df.to_parquet(f"{parquet_dir}/{table_name}.parquet")

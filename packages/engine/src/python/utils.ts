@@ -15,6 +15,16 @@ type PyLogger<TResult> = {
   message: TResult
 }
 
+// TODO: Add this to the logger
+// const pyLevelName = {
+//   CRITICAL: 'CRITICAL',
+//   ERROR: 'ERROR',
+//   WARNING: 'WARNING',
+//   INFO: 'INFO',
+//   DEBUG: 'DEBUG',
+//   NOTSET: 'NOTSET',
+// } as const
+
 export function parsePyLogger<TResult>(
   pyLogger: string,
   { log }: { log?: false } = {},

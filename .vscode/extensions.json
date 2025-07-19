@@ -2,6 +2,8 @@
   "recommendations": [
     "prisma.prisma",
     "biomejs.biome",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "ms-python.python",
+    "anysphere.cursorpyright"
   ]
 }

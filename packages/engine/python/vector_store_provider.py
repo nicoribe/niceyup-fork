@@ -1,7 +1,6 @@
 from typing import List, Optional, Any
 from langchain_core.documents import Document
 from langchain_community.vectorstores.upstash import UpstashVectorStore
-
 from embeddings_provider import EmbeddingsProvider  
 
 class VectorStoreProvider(UpstashVectorStore):
@@ -9,7 +8,8 @@ class VectorStoreProvider(UpstashVectorStore):
 
     def __init__(self, embeddings: Optional[EmbeddingsProvider] = None, namespace: Optional[str] = None, **kwargs):
         self.namespace = namespace or self.DEFAULT
-        super().__init__(embedding=embeddings or EmbeddingsProvider(), namespace=self.namespace, **kwargs)
+        _embeddings = embeddings or EmbeddingsProvider()
+        super().__init__(embedding=_embeddings, namespace=self.namespace, **kwargs)
 
     def similarity_search(
         self,

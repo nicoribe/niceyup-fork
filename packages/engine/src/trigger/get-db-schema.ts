@@ -9,8 +9,6 @@ const { dialect, host, port, user, password, database } = {
   user: 'mysql',
   password: 'supersecret',
   database: 'default',
-  // schema: 'public',
-  // file_path:`/workspace/${workspaceId}/sources/${sourceId}/uploads/${fileName}.sqlite`
 }
 
 export const getDbSchema = schemaTask({
@@ -30,6 +28,7 @@ export const getDbSchema = schemaTask({
           user,
           password,
           database,
+          // file_path:`/workspace/${workspaceId}/sources/${sourceId}/uploads/${fileName}.sqlite`
         },
       },
     )

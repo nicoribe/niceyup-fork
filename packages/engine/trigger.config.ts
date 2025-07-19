@@ -21,7 +21,7 @@ export default defineConfig({
   build: {
     extensions: [
       pythonExtension({
-        // requirementsFile: 'python/requirements.txt',
+        requirementsFile: 'python/requirements.txt',
         devPythonBinaryPath: 'python/.venv/bin/python',
         scripts: ['python/**/*.py'],
       }),

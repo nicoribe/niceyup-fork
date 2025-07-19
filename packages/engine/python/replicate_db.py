@@ -4,6 +4,8 @@ import sys
 import os
 from typing import Optional
 from py_logger import PyLogger
+from source_storage import SourceStorage
+from storage_provider import StorageProvider
 from database_client import DatabaseClient
 from database_replicator import DatabaseReplicator
 
@@ -23,6 +25,11 @@ async def main(
     database = os.getenv("DATABASE_CLIENT_DATABASE")
     schema = os.getenv("DATABASE_CLIENT_SCHEMA")
 
+    storage = StorageProvider()
+    
+    if file_path:
+        tmp_file_path = storage.download_tmp_file(file_path)
+
     client = DatabaseClient(
         dialect=dialect,
         host=host,
@@ -31,12 +38,21 @@ async def main(
         password=password,
         database=database,
         schema=schema,
-        file_path=file_path,
+        file_path=tmp_file_path,
     )
 
-    replicator = DatabaseReplicator(client)
+    source = SourceStorage(
+        workspace_id=workspace_id,
+        source_id=source_id,
+        storage=storage,
+    )
+    replicator = DatabaseReplicator(
+        source=source,
+        client=client,
+    )
 
-    replicator.replicate(tables_metadata)
+    replicator.export_tables_to_parquet(tables_metadata)
+    storage.cleanup_tmp_path()
 
     logger.info({
         "status": "success",
