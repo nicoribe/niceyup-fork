@@ -2,13 +2,13 @@ import asyncio
 import json
 import sys
 from py_logger import PyLogger
-from llm_provider import LLMProvider
+from llm import LLM
 from langchain_core.messages import HumanMessage, SystemMessage
 
 logger = PyLogger(__name__)
 
 async def main(question: str) -> None:
-    llm = LLMProvider()
+    llm = LLM()
 
     ai_msg = llm.astream([
         SystemMessage(content="You are a helpful assistant! Your name is Davy Jones."),

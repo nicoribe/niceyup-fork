@@ -2,12 +2,12 @@ import { logger, schemaTask } from '@trigger.dev/sdk'
 import { z } from 'zod'
 import { python } from '../python'
 
-const { sourceId, workspaceId } = {
-  sourceId: 'xxxx-xxxx-xxxx-xxxx',
+const { workspaceId, sourceId } = {
   workspaceId: 'xxxx-xxxx-xxxx-xxxx',
+  sourceId: 'xxxx-xxxx-xxxx-xxxx',
 }
 
-export const runIngestion = schemaTask({
+export const runIngestionTask = schemaTask({
   id: 'run-ingestion',
   schema: z.object({
     sourceId: z.string(),
@@ -16,8 +16,8 @@ export const runIngestion = schemaTask({
     logger.info('payload', payload)
 
     const result = await python.runIngestion({
-      source_id: sourceId,
       workspace_id: workspaceId,
+      source_id: sourceId,
     })
 
     return result

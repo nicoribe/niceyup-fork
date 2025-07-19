@@ -9,7 +9,7 @@ type AIMessageChunk = {
   content: string
 }
 
-export const answer = schemaTask({
+export const answerTask = schemaTask({
   id: 'answer',
   schema: z.object({
     question: z.string(),

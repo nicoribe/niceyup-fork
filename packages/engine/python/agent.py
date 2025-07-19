@@ -1,18 +1,18 @@
 from typing import Optional
-from packages.engine.python.embeddings_provider import EmbeddingsProvider
-from packages.engine.python.llm_provider import LLMProvider
-from packages.engine.python.vector_store_provider import VectorStoreProvider
+from embeddings import Embeddings
+from llm import LLM
+from vector_store import VectorStore
 
 class Agent:
     def __init__(
         self,
-        llm: Optional[LLMProvider] = None,
-        embeddings: Optional[EmbeddingsProvider] = None,
-        vector_store: Optional[VectorStoreProvider] = None,
+        llm: Optional[LLM] = None,
+        embeddings: Optional[Embeddings] = None,
+        vector_store: Optional[VectorStore] = None,
     ):
-        self.llm = llm or LLMProvider()
-        self.embeddings = embeddings or EmbeddingsProvider()
-        self.vector_store = vector_store or VectorStoreProvider(embeddings=self.embeddings)
+        self.llm = llm or LLM()
+        self.embeddings = embeddings or Embeddings()
+        self.vector_store = vector_store or VectorStore(embeddings=self.embeddings)
 
     def _get_prompt(self):
         return """

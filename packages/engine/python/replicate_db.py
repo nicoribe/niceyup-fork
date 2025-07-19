@@ -4,16 +4,16 @@ import sys
 import os
 from typing import Optional
 from py_logger import PyLogger
-from source_storage import SourceStorage
 from storage_provider import StorageProvider
+from source_storage import SourceStorage
 from database_client import DatabaseClient
 from database_replicator import DatabaseReplicator, TableMetadata
 
 logger = PyLogger(__name__)
 
 async def main(
-    source_id: str,
     workspace_id: str,
+    source_id: str,
     dialect: Optional[str] = None,
     file_path: Optional[str] = None,
     tables_metadata: Optional[TableMetadata] = None,
@@ -25,7 +25,9 @@ async def main(
     database = os.getenv("DATABASE_CLIENT_DATABASE")
     schema = os.getenv("DATABASE_CLIENT_SCHEMA")
 
-    storage = StorageProvider()
+    storage = StorageProvider(
+        tmp_dir="./tmp",
+    )
     
     if file_path:
         tmp_file_path = storage.download_tmp_file(file_path)

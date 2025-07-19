@@ -11,7 +11,7 @@ const { dialect, host, port, user, password, database } = {
   database: 'default',
 }
 
-export const getDbSchema = schemaTask({
+export const getDbSchemaTask = schemaTask({
   id: 'get-db-schema',
   schema: z.object({
     sourceId: z.string(),

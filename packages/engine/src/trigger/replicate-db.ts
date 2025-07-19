@@ -2,9 +2,9 @@ import { logger, schemaTask } from '@trigger.dev/sdk'
 import { z } from 'zod'
 import { python } from '../python'
 
-const { sourceId, workspaceId } = {
-  sourceId: 'xxxx-xxxx-xxxx-xxxx',
+const { workspaceId, sourceId } = {
   workspaceId: 'xxxx-xxxx-xxxx-xxxx',
+  sourceId: 'xxxx-xxxx-xxxx-xxxx',
 }
 
 const { dialect, host, port, user, password, database } = {
@@ -20,7 +20,7 @@ const tablesMetadata = {
   users: [{ columnName: 'id' }, { columnName: 'username' }],
 }
 
-export const replicateDb = schemaTask({
+export const replicateDbTask = schemaTask({
   id: 'replicate-db',
   schema: z.object({
     sourceId: z.string(),
@@ -30,8 +30,8 @@ export const replicateDb = schemaTask({
 
     const result = await python.replicateDb(
       {
-        source_id: sourceId,
         workspace_id: workspaceId,
+        source_id: sourceId,
         dialect,
         tables_metadata: Object.fromEntries(
           Object.entries(tablesMetadata).map(([key, value]) => [

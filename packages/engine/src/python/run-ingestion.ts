@@ -2,8 +2,8 @@ import { python } from '@trigger.dev/python'
 import { pyArgs, pyPath, pyStreamingResult } from './utils'
 
 type RunIngestionArgs = {
-  source_id: string
   workspace_id: string
+  source_id: string
 }
 
 type RunIngestionResult = {
