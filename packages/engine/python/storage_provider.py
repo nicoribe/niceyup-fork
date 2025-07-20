@@ -36,7 +36,10 @@ class StorageProvider:
     def cleanup_tmp_path(self, path: Optional[str] = None) -> None:
         tmp_path = os.path.join(self.tmp_dir, path or "")
         if os.path.exists(tmp_path):
-            shutil.rmtree(tmp_path)
+            if os.path.isfile(tmp_path):
+                os.remove(tmp_path)
+            elif os.path.isdir(tmp_path):
+                shutil.rmtree(tmp_path)
 
     def download_tmp_file(self, file_path: str) -> str:
         tmp_path = self.make_tmp_path(file_path)

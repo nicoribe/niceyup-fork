@@ -14,7 +14,7 @@ logger = PyLogger(__name__)
 
 async def main(workspace_id: str,source_id: str) -> None:
     logger.warning({
-        "message": f'Ingestion started for source "{source_id}" in workspace "{workspace_id}"'
+        "message": f'Ingestion started for source "{source_id}" in workspace "{workspace_id}"',
     })
 
     storage = StorageProvider(

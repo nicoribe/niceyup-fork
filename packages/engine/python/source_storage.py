@@ -16,14 +16,20 @@ class SourceStorage:
     def root_path(self) -> str:
         return f"workspace/{self.workspace_id}/sources/{self.source_id}"
 
-    def make_tmp_path(self, path: Optional[str] = None) -> str:
+    def _make_tmp_path(self, path: Optional[str] = None) -> str:
         tmp_path = os.path.join(self.root_path(), path or "")
         self.storage.make_tmp_path(tmp_path)
         return tmp_path
 
-    def cleanup_tmp_path(self, path: Optional[str] = None) -> None:
+    def _cleanup_tmp_path(self, path: Optional[str] = None) -> None:
         tmp_path = os.path.join(self.root_path(), path or "")
         self.storage.cleanup_tmp_path(tmp_path)
+    
+    def make_tmp_file_dataset(self, file_name: str) -> str:
+        return self._make_tmp_path(f"datasets/{file_name}")
+
+    def cleanup_tmp_file_dataset(self, file_name: str) -> None:
+        self._cleanup_tmp_path(f"datasets/{file_name}")
 
     def upload_file_dataset(self, file_name: str) -> None:
         file_path = os.path.join(self.root_path(), f"datasets/{file_name}")
@@ -31,10 +37,7 @@ class SourceStorage:
 
     def download_file_dataset(self, file_name: str) -> str:
         full_path = os.path.join(self.root_path(), f"datasets/{file_name}")
-        return self.storage.client.download_tmp_file(full_path)
-    
-    def cleanup_tmp_file_dataset(self, file_name: str) -> None:
-        self.cleanup_tmp_path(f"datasets/{file_name}")
+        return self.storage.download_tmp_file(full_path)
 
     def list_files_dataset(self, extension: Optional[str] = None) -> list[str]:
         key = os.path.join(self.root_path(), "datasets")

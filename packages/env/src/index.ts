@@ -22,6 +22,8 @@ export const env = createEnv({
     CLOUDFLARE_ACCOUNT_ID: z.string(),
     CLOUDFLARE_ACCESS_KEY: z.string(),
     CLOUDFLARE_SECRET_KEY: z.string(),
+    UPSTASH_VECTOR_REST_URL: z.string(),
+    UPSTASH_VECTOR_REST_TOKEN: z.string(),
   },
   client: {},
   shared: {
@@ -46,6 +48,8 @@ export const env = createEnv({
     CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
     CLOUDFLARE_ACCESS_KEY: process.env.CLOUDFLARE_ACCESS_KEY,
     CLOUDFLARE_SECRET_KEY: process.env.CLOUDFLARE_SECRET_KEY,
+    UPSTASH_VECTOR_REST_URL: process.env.UPSTASH_VECTOR_REST_URL,
+    UPSTASH_VECTOR_REST_TOKEN: process.env.UPSTASH_VECTOR_REST_TOKEN,
 
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_WEB_URL: process.env.NEXT_PUBLIC_WEB_URL,
