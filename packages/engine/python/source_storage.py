@@ -18,8 +18,7 @@ class SourceStorage:
 
     def _make_tmp_path(self, path: Optional[str] = None) -> str:
         tmp_path = os.path.join(self.root_path(), path or "")
-        self.storage.make_tmp_path(tmp_path)
-        return tmp_path
+        return self.storage.make_tmp_path(tmp_path)
 
     def _cleanup_tmp_path(self, path: Optional[str] = None) -> None:
         tmp_path = os.path.join(self.root_path(), path or "")

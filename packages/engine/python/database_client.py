@@ -1,4 +1,6 @@
 import duckdb
+import uuid
+import os
 from sqlalchemy import create_engine, inspect, Engine
 from typing import Optional, TypedDict
 
@@ -20,6 +22,7 @@ class DatabaseClient:
         database: Optional[str] = None,
         schema: Optional[str] = None,
         file_path: Optional[str] = None,
+        tmp_dir: str = "/tmp",
     ):
         self.dialect = dialect
         self.host = host
@@ -29,9 +32,18 @@ class DatabaseClient:
         self.database = database
         self.schema = schema
         self.file_path = file_path
+
+        self._uuid = str(uuid.uuid4())
+        self.tmp_dir = tmp_dir
         self.conn: Optional[duckdb.DuckDBPyConnection] = None
 
-    def _create_engine(self) -> Engine:
+    def db_tmp_path(self) -> str:
+        return f"{self.tmp_dir}/{self._uuid}.db"
+
+    def uri(self) -> str:
+        return f"duckdb:///{self.db_tmp_path()}"
+
+    def create_engine(self) -> Engine:
         if self.dialect == "sqlite":
             return create_engine(f"sqlite:///{self.file_path}")
         
@@ -41,10 +53,11 @@ class DatabaseClient:
         elif self.dialect == "postgresql":
             return create_engine(f"postgresql+pg8000://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}")
         
-        raise ValueError(f"Invalid dialect: {self.dialect}")
+        else:
+            return create_engine(self.uri())
 
     def get_db_schema(self) -> list[TableMetadata]:
-        engine = self._create_engine()
+        engine = self.create_engine()
         inspector = inspect(engine)
 
         tables_metadata = []
@@ -64,13 +77,25 @@ class DatabaseClient:
                     "foreign_table": foreign_table,
                     "foreign_column": foreign_column,
                 })
+
+        engine.dispose()
         return tables_metadata
+
+    def execute(self, sql: str) -> duckdb.DuckDBPyConnection:
+        if self.conn is None:
+            self.connect()
+        
+        if self.conn is None:
+            raise RuntimeError("Database connection not established.")
+        
+        return self.conn.execute(sql)
 
     def connect(self) -> None:
         if self.conn is not None:
             return
         
-        self.conn = duckdb.connect()
+        self.make_tmp_path()
+        self.conn = duckdb.connect(database=self.db_tmp_path())
         
         if self.dialect == "sqlite":
             self.conn.install_extension("sqlite")
@@ -87,16 +112,15 @@ class DatabaseClient:
             self.conn.load_extension("postgres")
             self.conn.execute(f"ATTACH 'host={self.host} port={self.port} user={self.user} password={self.password} dbname={self.database}' AS db (TYPE postgres, SCHEMA '{self.schema}', READ_ONLY)")
 
-    def execute(self, sql: str) -> duckdb.DuckDBPyConnection:
-        if self.conn is None:
-            self.connect()
-        
-        if self.conn is None:
-            raise RuntimeError("Database connection not established.")
-        
-        return self.conn.execute(sql)
-
     def close(self) -> None:
         if self.conn is not None:
             self.conn.close()
             self.conn = None
+
+    def make_tmp_path(self) -> None:
+        if not os.path.exists(self.tmp_dir):
+            os.makedirs(self.tmp_dir)
+
+    def cleanup_tmp_path(self) -> None:
+        if os.path.exists(self.db_tmp_path()):
+            os.remove(self.db_tmp_path())

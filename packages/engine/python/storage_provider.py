@@ -6,7 +6,7 @@ from typing import Optional
 class StorageProvider:
     def __init__(
         self,
-        bucket_name: Optional[str] = None, 
+        bucket_name: Optional[str] = None,
         tmp_dir: str = "/tmp",
     ):
         self.client = boto3.client(

@@ -41,6 +41,7 @@ async def main(
         database=database,
         schema=schema,
         file_path=tmp_file_path,
+        tmp_dir="./tmp",
     )
 
     source = SourceStorage(
@@ -54,6 +55,8 @@ async def main(
     )
 
     replicator.export_tables_to_parquet(tables_metadata)
+
+    client.cleanup_tmp_path() # Close database client
     storage.cleanup_tmp_path() # Clean up tmp path
 
     logger.warning({
