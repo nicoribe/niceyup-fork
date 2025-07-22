@@ -3,7 +3,6 @@ import json
 import sys
 from py_logger import PyLogger
 from llm import LLM
-# from langchain_core.messages import SystemMessage, HumanMessage
 from typing import Annotated, TypedDict
 from langchain_community.utilities import SQLDatabase
 from langchain_core.prompts import ChatPromptTemplate
@@ -30,14 +29,7 @@ class QueryOutput(TypedDict):
 async def main(question: str) -> None:
     llm = LLM()
 
-    # ai_msg = llm.astream([
-    #     SystemMessage(content="You are a helpful assistant! Your name is Davy Jones."),
-    #     HumanMessage(content=question),
-    # ])
-
-    # async for chunk in ai_msg:
-    #     logger.warning(chunk.model_dump())
-
+    logger.warning("Initializing database...")
     workspace_id = "xxxx-xxxx-xxxx-xxxx"
     source_id = "xxxx-xxxx-xxxx-xxxx"
     storage = StorageProvider(tmp_dir="./tmp")
@@ -45,10 +37,10 @@ async def main(question: str) -> None:
     source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
     replicator = DatabaseReplicator(source=source, client=client)
     replicator.create_tables_from_parquet()
-    
+    logger.warning("Database initialized!")
+
     db = SQLDatabase.from_uri(client.uri())
-    # db = SQLDatabase.from_uri("mysql+pymysql://mysql:supersecret@localhost:3306/default")
-    # db = SQLDatabase.from_uri("postgresql+pg8000://postgres:supersecret@localhost:5432/default")
+    logger.warning("Starting graph building...")
 
     system_message = """
 Given an input question, create a syntactically correct {dialect} query to

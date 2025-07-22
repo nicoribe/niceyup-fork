@@ -8,8 +8,8 @@ class TableMetadata(TypedDict):
     table_name: str
     column_name: str
     data_type: str
-    foreign_table: str
-    foreign_column: str
+    foreign_table: Optional[str]
+    foreign_column: Optional[str]
 
 class DatabaseClient:
     def __init__(

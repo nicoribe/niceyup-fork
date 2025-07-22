@@ -2,12 +2,9 @@ import asyncio
 import json
 import sys
 from py_logger import PyLogger
-from storage_provider import StorageProvider
-from source_storage import SourceStorage
 from llm import LLM
 from embeddings import Embeddings
 from vector_store import VectorStore
-from agent import Agent
 from ingestor import Ingestor
 
 logger = PyLogger(__name__)
@@ -17,37 +14,22 @@ async def main(workspace_id: str,source_id: str) -> None:
         "message": f'Ingestion started for source "{source_id}" in workspace "{workspace_id}"',
     })
 
-    storage = StorageProvider(
-        tmp_dir="./tmp",
-    )
-
-    source = SourceStorage(
-        workspace_id=workspace_id,
-        source_id=source_id,
-        storage=storage,
-    )
-
     llm = LLM()
     embeddings = Embeddings()
     vector_store = VectorStore(
         embeddings=embeddings,
         workspace_id=workspace_id,
     )
-    agent = Agent(
-        llm=llm,
-        embeddings=embeddings,
-        vector_store=vector_store,
-    )
 
     ingestor = Ingestor(
-        source=source,
         llm=llm,
         embeddings=embeddings,
         vector_store=vector_store,
-        agent=agent,
     )
 
-    ingestor.run()
+    tables = []
+    ingestor.ingest_database_table_info(source_id, tables)
+    ingestor.ingest_database_column_proper_names(source_id, tables)
 
     logger.warning({
         "status": "success",
