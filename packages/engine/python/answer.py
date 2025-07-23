@@ -29,6 +29,14 @@ class QueryOutput(TypedDict):
 async def main(question: str) -> None:
     llm = LLM()
 
+    # ai_msg = llm.astream([
+    #     SystemMessage(content="You are a helpful assistant! Your name is Davy Jones."),
+    #     HumanMessage(content=question),
+    # ])
+
+    # async for chunk in ai_msg:
+    #     logger.warning(chunk.model_dump())
+
     workspace_id = "xxxx-xxxx-xxxx-xxxx"
     source_id = "xxxx-xxxx-xxxx-xxxx"
 
@@ -37,7 +45,7 @@ async def main(question: str) -> None:
 
     client = DatabaseClient(tmp_dir="./tmp")
     replicator = DatabaseReplicator(source=source, client=client)
-    replicator.create_tables_from_parquet()
+    replicator.create_tables_from_parquet(["product", "product_variant"])
 
     db = SQLDatabase.from_uri(client.uri())
 
@@ -93,8 +101,17 @@ Only use the following tables:
             f"SQL Query: {state['query']}\n"
             f"SQL Result: {state['result']}"
         )
-        response = llm.invoke(prompt)
-        return {"answer": response.content}
+        response = llm.stream(prompt)
+
+        content = ""
+        for chunk in response:
+            content += chunk.content
+            logger.info({
+                "message": "AIMessageChunk",
+                **chunk.model_dump(),
+            })
+
+        return {"answer": content}
 
     graph_builder = StateGraph(State).add_sequence(
         [write_query, execute_query, generate_answer]
@@ -109,12 +126,13 @@ Only use the following tables:
             "result": "",
             "answer": "",
         },
-        stream_mode="updates"
+        stream_mode="updates",
     )
 
     for step in steps:
+        step_name, = step
         logger.warning({
-            "message": "Step",
+            "message": step_name,
             "step": step,
         })
 
