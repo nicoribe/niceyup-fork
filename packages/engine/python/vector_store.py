@@ -1,4 +1,4 @@
-from typing import List, Optional, Any, Iterable
+from typing import List, Optional, Any
 from langchain_core.documents import Document
 from langchain_community.vectorstores.upstash import UpstashVectorStore
 from embeddings import Embeddings

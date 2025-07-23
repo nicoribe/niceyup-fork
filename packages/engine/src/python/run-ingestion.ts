@@ -19,9 +19,7 @@ export async function runIngestion(
     pyArgs(args),
   )
 
-  const result = await pyStreamingResult<{
-    message: RunIngestionResult
-  }>(streamingResult)
+  const result = await pyStreamingResult<RunIngestionResult>(streamingResult)
 
-  return result.message
+  return result
 }

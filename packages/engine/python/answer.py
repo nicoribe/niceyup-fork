@@ -29,18 +29,17 @@ class QueryOutput(TypedDict):
 async def main(question: str) -> None:
     llm = LLM()
 
-    logger.warning("Initializing database...")
     workspace_id = "xxxx-xxxx-xxxx-xxxx"
     source_id = "xxxx-xxxx-xxxx-xxxx"
+
     storage = StorageProvider(tmp_dir="./tmp")
-    client = DatabaseClient(tmp_dir="./tmp")
     source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
+
+    client = DatabaseClient(tmp_dir="./tmp")
     replicator = DatabaseReplicator(source=source, client=client)
     replicator.create_tables_from_parquet()
-    logger.warning("Database initialized!")
 
     db = SQLDatabase.from_uri(client.uri())
-    logger.warning("Starting graph building...")
 
     system_message = """
 Given an input question, create a syntactically correct {dialect} query to

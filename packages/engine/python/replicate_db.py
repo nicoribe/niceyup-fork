@@ -32,6 +32,13 @@ async def main(
     if file_path:
         tmp_file_path = storage.download_tmp_file(file_path)
 
+    
+    source = SourceStorage(
+        workspace_id=workspace_id,
+        source_id=source_id,
+        storage=storage,
+    )
+
     client = DatabaseClient(
         dialect=dialect,
         host=host,
@@ -44,11 +51,6 @@ async def main(
         tmp_dir="./tmp",
     )
 
-    source = SourceStorage(
-        workspace_id=workspace_id,
-        source_id=source_id,
-        storage=storage,
-    )
     replicator = DatabaseReplicator(
         source=source,
         client=client,
