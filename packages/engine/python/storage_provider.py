@@ -1,7 +1,7 @@
 import boto3
 import os
 import shutil
-from typing import Optional
+from typing import List, Optional
 
 class StorageProvider:
     def __init__(
@@ -51,7 +51,7 @@ class StorageProvider:
         self.client.upload_file(_tmp_path, self.bucket_name, file_path)
         self.cleanup_tmp_path(file_path)
 
-    def list_files(self, folder_path: str, extension: Optional[str] = None) -> list[str]:
+    def list_files(self, folder_path: str, extension: Optional[str] = None) -> List[str]:
         prefix = folder_path.strip('/') + '/'
         paginator = self.client.get_paginator("list_objects_v2")
         files = []

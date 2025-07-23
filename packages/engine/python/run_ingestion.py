@@ -1,11 +1,11 @@
 import asyncio
 import json
 import sys
+from typing import List, Optional
 from py_logger import PyLogger
-from llm import LLM
 from embeddings import Embeddings
 from vector_store import VectorStore
-from ingestor import Ingestor
+from ingestor import Ingestor, TableInfo, TableInfoWithColumnProperNames
 from storage_provider import StorageProvider
 from source_storage import SourceStorage
 from database_client import DatabaseClient
@@ -16,12 +16,14 @@ logger = PyLogger(__name__)
 async def main(
     workspace_id: str,
     source_id: str,
+    source_type: str,
+    tables_info: Optional[List[TableInfo]] = None,
+    columns_proper_names_by_tables: Optional[List[TableInfoWithColumnProperNames]] = None,
 ) -> None:
     logger.warning({
         "message": f'Ingestion started for source "{source_id}" in workspace "{workspace_id}"',
     })
 
-    llm = LLM()
     embeddings = Embeddings()
     vector_store = VectorStore(
         embeddings=embeddings,
@@ -29,45 +31,46 @@ async def main(
     )
 
     ingestor = Ingestor(
-        llm=llm,
         embeddings=embeddings,
         vector_store=vector_store,
     )
 
-    storage = StorageProvider(
-        tmp_dir="./tmp",
-    )
+    storage = StorageProvider(tmp_dir="./tmp")
+    source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
 
-    source = SourceStorage(
-        workspace_id=workspace_id,
-        source_id=source_id,
-        storage=storage,
-    )
+    if source_type == "structured":
+        if tables_info is not None:
+            ingestor.ingest_structured(
+                source_id=source_id,
+                tables=tables_info,
+            )
+            ingestor.ingest_structured_table_info(
+                source_id=source_id,
+                tables=tables_info,
+            )
 
-    if True: # TODO: Validate if the source is of the database type
-        client = DatabaseClient(
-            tmp_dir="./tmp",
-        )
+        if columns_proper_names_by_tables is not None:
+            table_names = [table["name"] for table in columns_proper_names_by_tables]
 
-        replicator = DatabaseReplicator(
-            source=source,
-            client=client,
-        )
-        replicator.create_tables_from_parquet()
+            if len(table_names) > 0:
+                client = DatabaseClient(tmp_dir="./tmp")
+                replicator = DatabaseReplicator(source=source, client=client)
+                replicator.create_tables_from_parquet(table_names=table_names)
 
-        tables_info = [] # TODO: Get tables info from the database
-        columns_proper_names_by_tables = [] # TODO: Get columns proper names from the database
+                tables_with_proper_names = []
+                for table in columns_proper_names_by_tables:
+                    for column in table["columns"]:
+                        result = client.execute(f'SELECT DISTINCT "{column["name"]}" FROM "{table["name"]}"')
+                        result_df = result.fetchdf() # TODO: Use fetch_df_chunk
+                        column["proper_names"] = result_df[column["name"]].tolist()
+                        tables_with_proper_names.append(table)
 
-        ingestor.ingest_database_table_info(
-            source_id=source_id,
-            tables=tables_info,
-        )
-        ingestor.ingest_database_column_proper_names(
-            source_id=source_id,
-            tables=columns_proper_names_by_tables,
-        )
+                ingestor.ingest_structured_column_proper_names(
+                    source_id=source_id,
+                    tables=tables_with_proper_names,
+                )
+                client.cleanup_tmp_path() # Clean up tmp path
 
-        client.cleanup_tmp_path() # Clean up tmp path
     storage.cleanup_tmp_path() # Clean up tmp path
 
     logger.warning({

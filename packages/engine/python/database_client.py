@@ -1,15 +1,18 @@
 import duckdb
 import uuid
 import os
+from typing import List, Optional, TypedDict
 from sqlalchemy import create_engine, inspect, Engine
-from typing import Optional, TypedDict
 
-class TableMetadata(TypedDict):
-    table_name: str
-    column_name: str
+class ColumnMetadata(TypedDict):
+    name: str
     data_type: str
     foreign_table: Optional[str]
     foreign_column: Optional[str]
+
+class TableMetadata(TypedDict):
+    name: str
+    columns: List[ColumnMetadata]
 
 class DatabaseClient:
     def __init__(
@@ -56,27 +59,31 @@ class DatabaseClient:
         else:
             return create_engine(self.uri())
 
-    def get_db_schema(self) -> list[TableMetadata]:
+    def get_db_schema(self) -> List[TableMetadata]:
         engine = self.create_engine()
         inspector = inspect(engine)
 
-        tables_metadata = []
+        tables_metadata_dict = {}
         for table_name in inspector.get_table_names(schema=self.schema):
             columns = inspector.get_columns(table_name)
             foreign_keys = inspector.get_foreign_keys(table_name)
+            tables_metadata_dict[table_name] = {
+                "name": table_name,
+                "columns": [],
+            }
             for col in columns:
                 column_name = col['name']
                 data_type = str(col['type'])
                 fk = next((fk for fk in foreign_keys if column_name in fk['constrained_columns']), None)
                 foreign_table = fk['referred_table'] if fk else None
                 foreign_column = fk['referred_columns'][0] if fk else None
-                tables_metadata.append({
-                    "table_name": table_name,
-                    "column_name": column_name,
+                tables_metadata_dict[table_name]["columns"].append({
+                    "name": column_name,
                     "data_type": data_type,
                     "foreign_table": foreign_table,
                     "foreign_column": foreign_column,
                 })
+        tables_metadata = list(tables_metadata_dict.values())
 
         engine.dispose()
         return tables_metadata

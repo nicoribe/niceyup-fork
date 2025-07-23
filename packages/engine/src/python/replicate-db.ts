@@ -7,10 +7,11 @@ type ReplicateDbArgs = {
   dialect?: string
   file_path?: string
   tables_metadata?: {
-    [key: string]: {
-      column_name: string
+    name: string
+    columns: {
+      name: string
     }[]
-  }
+  }[]
 }
 
 type ReplicateDbEnvVars = {

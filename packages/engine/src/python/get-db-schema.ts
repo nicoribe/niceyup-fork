@@ -17,7 +17,7 @@ type GetDbSchemaEnvVars = {
 }
 
 type GetDbSchemaResult = {
-  tablesMetadata: TableMetadata[]
+  tables_metadata: TableMetadata[]
 }
 
 export async function getDbSchema(
@@ -39,9 +39,7 @@ export async function getDbSchema(
     },
   )
 
-  const result = await pyStreamingResult<{
-    message: GetDbSchemaResult
-  }>(streamingResult)
+  const result = await pyStreamingResult<GetDbSchemaResult>(streamingResult)
 
-  return result.message
+  return result
 }

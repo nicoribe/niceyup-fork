@@ -16,6 +16,21 @@ class VectorStore(UpstashVectorStore):
         self.workspace_id = workspace_id or self.DEFAULT
         super().__init__(embedding=_embeddings, namespace=self.workspace_id, **kwargs)
 
+    def similarity_search_by_source_ids(
+        self,
+        source_ids: List[str],
+        query: str,
+        k: int = 10,
+        **kwargs: Any,
+    ) -> List[Document]:
+        _filter_by_sources = " OR ".join([f"__source_id: '{source_id}'" for source_id in source_ids])
+        _filter = (
+            "__collection: 'sources' AND "
+            f"({_filter_by_sources})"
+        )
+
+        return super().similarity_search(query, k=k, filter=_filter, namespace=self.workspace_id, **kwargs)
+
     def similarity_search(
         self,
         source_id: str,
@@ -28,7 +43,7 @@ class VectorStore(UpstashVectorStore):
         _filter = (
             f"__source_id: '{source_id}'"
             f" AND __collection: '{collection or self.DEFAULT}'"
-            (f" AND {filter}" if filter else "")
+            (f" AND {filter}" if filter is not None and filter != "" else "")
         )
 
         return super().similarity_search(query, k=k, filter=_filter, namespace=self.workspace_id, **kwargs)

@@ -16,9 +16,12 @@ const { dialect, host, port, user, password, database } = {
   database: 'default',
 }
 
-const tablesMetadata = {
-  users: [{ columnName: 'id' }, { columnName: 'username' }],
-}
+const tablesMetadata = [
+  {
+    name: 'users',
+    columns: [{ name: 'id' }, { name: 'username' }],
+  },
+]
 
 export const replicateDbTask = schemaTask({
   id: 'replicate-db',
@@ -33,12 +36,7 @@ export const replicateDbTask = schemaTask({
         workspace_id: workspaceId,
         source_id: sourceId,
         dialect,
-        tables_metadata: Object.fromEntries(
-          Object.entries(tablesMetadata).map(([key, value]) => [
-            key,
-            value.map((col) => ({ column_name: col.columnName })),
-          ]),
-        ),
+        tables_metadata: tablesMetadata,
       },
       {
         envVars: {

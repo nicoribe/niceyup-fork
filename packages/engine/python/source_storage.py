@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import List, Optional
 from storage_provider import StorageProvider
 
 class SourceStorage:
@@ -38,6 +38,6 @@ class SourceStorage:
         full_path = os.path.join(self.root_path(), f"datasets/{file_name}")
         return self.storage.download_tmp_file(full_path)
 
-    def list_files_dataset(self, extension: Optional[str] = None) -> list[str]:
+    def list_files_dataset(self, extension: Optional[str] = None) -> List[str]:
         key = os.path.join(self.root_path(), "datasets")
         return self.storage.list_files(key, extension)

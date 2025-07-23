@@ -1,7 +1,11 @@
-export type TableMetadata = {
-  table_name: string
-  column_name: string
+export type ColumnMetadata = {
+  name: string
   data_type: string
-  foreign_table: string | null
-  foreign_column: string | null
+  foreign_table?: string
+  foreign_column?: string
+}
+
+export type TableMetadata = {
+  name: string
+  columns: ColumnMetadata[]
 }
