@@ -1,9 +1,12 @@
 import asyncio
 import json
 import sys
-from typing import Annotated, TypedDict
+from typing import Annotated, List, TypedDict
 from py_logger import PyLogger
 from llm import LLM
+from embeddings import Embeddings
+from vector_store import VectorStore
+from agent import Agent
 from storage_provider import StorageProvider
 from source_storage import SourceStorage
 from database_client import DatabaseClient
@@ -17,9 +20,15 @@ logger = PyLogger(__name__)
 
 class State(TypedDict):
     question: str
+    table_info: str
     query: str
     result: str
     answer: str
+
+class TableInfoOutput(TypedDict):
+    """Relevant tables."""
+
+    tables: Annotated[List[str], ..., "Relevant tables."]
 
 class QueryOutput(TypedDict):
     """Generated SQL query."""
@@ -27,7 +36,12 @@ class QueryOutput(TypedDict):
     query: Annotated[str, ..., "Syntactically valid SQL query."]
 
 async def main(question: str) -> None:
+    workspace_id = "xxxx-xxxx-xxxx-xxxx"
+
     llm = LLM()
+    embeddings = Embeddings()
+    vector_store = VectorStore(embeddings=embeddings, workspace_id=workspace_id)
+    agent = Agent(llm=llm, embeddings=embeddings, vector_store=vector_store)
 
     # ai_msg = llm.astream([
     #     SystemMessage(content="You are a helpful assistant! Your name is Davy Jones."),
@@ -37,17 +51,34 @@ async def main(question: str) -> None:
     # async for chunk in ai_msg:
     #     logger.warning(chunk.model_dump())
 
-    workspace_id = "xxxx-xxxx-xxxx-xxxx"
     source_id = "xxxx-xxxx-xxxx-xxxx"
 
     storage = StorageProvider(tmp_dir="./tmp")
     source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
 
     client = DatabaseClient(tmp_dir="./tmp")
-    replicator = DatabaseReplicator(source=source, client=client)
-    replicator.create_tables_from_parquet(["product", "product_variant"])
 
-    db = SQLDatabase.from_uri(client.uri())
+    relevant_tables_system_message = """
+You are an assistant that helps identify which tables in a database schema are relevant to a given user question.
+
+Given a database schema and a natural language question, return a list of **only the relevant table names** that contain useful information to answer the question.
+
+Rules:
+- Only use table names from the provided schema.
+- Do not make up table names.
+- If a relevant table has a foreign key (FK) reference to another table, **also include that related table**, since it's likely part of the query join.
+- Focus on semantic relevance: include only the tables that would logically contribute to building a correct SQL query.
+- If the question can be answered using a single table, still check for any FKs that might be needed.
+
+Schema:
+{table_info}
+"""
+
+    relevant_tables_user_prompt = "Question: {input}"
+
+    relevant_tables_prompt_template = ChatPromptTemplate(
+        [("system", relevant_tables_system_message), ("user", relevant_tables_user_prompt)]
+    )
 
     system_message = """
 Given an input question, create a syntactically correct {dialect} query to
@@ -73,13 +104,44 @@ Only use the following tables:
         [("system", system_message), ("user", user_prompt)]
     )
 
+    def get_table_info(state: State):
+        """Get relevant tables from the database."""
+        docs = agent.get_structured_table_info(source_id=source_id, search=state["question"])
+        relevant_tables = [doc.metadata for doc in docs]
+
+        table_info = ""
+        for table in relevant_tables:
+            table_info += f'\nCREATE TABLE "{table["table_name"]}" (\n'
+            columns_info = []
+            for column in table['columns']:
+                references = ""
+                if column["foreign_table"] is not None and column["foreign_column"] is not None:
+                    references = f' REFERENCES "{column["foreign_table"]}" ("{column["foreign_column"]}")'
+                columns_info.append(f'    "{column["column_name"]}" {column["data_type"]}{references}')
+            table_info += ",\n".join(columns_info) + "\n)\n"
+
+        prompt = relevant_tables_prompt_template.invoke(
+            {
+                "table_info": table_info,
+                "input": state["question"],
+            }
+        )
+        structured_llm = llm.with_structured_output(TableInfoOutput)
+        result = structured_llm.invoke(prompt)
+
+        replicator = DatabaseReplicator(source=source, client=client)
+        replicator.create_tables_from_parquet(table_names=result["tables"])
+        db = SQLDatabase.from_uri(database_uri=client.uri())
+
+        return {"table_info": db.get_table_info()}
+
     def write_query(state: State):
         """Generate SQL query to fetch information."""
         prompt = query_prompt_template.invoke(
             {
-                "dialect": db.dialect,
+                "dialect": "DuckDB",
                 "top_k": 10,
-                "table_info": db.get_table_info(),
+                "table_info": state["table_info"],
                 "input": state["question"],
             }
         )
@@ -89,6 +151,7 @@ Only use the following tables:
 
     def execute_query(state: State):
         """Execute SQL query."""
+        db = SQLDatabase.from_uri(database_uri=client.uri())
         execute_query_tool = QuerySQLDatabaseTool(db=db)
         return {"result": execute_query_tool.invoke(state["query"])}
 
@@ -114,9 +177,9 @@ Only use the following tables:
         return {"answer": content}
 
     graph_builder = StateGraph(State).add_sequence(
-        [write_query, execute_query, generate_answer]
+        [get_table_info, write_query, execute_query, generate_answer]
     )
-    graph_builder.add_edge(START, "write_query")
+    graph_builder.add_edge(START, "get_table_info")
     graph = graph_builder.compile()
 
     steps = graph.stream(

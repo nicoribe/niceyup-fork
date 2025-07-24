@@ -31,7 +31,7 @@ class Agent:
             collection="structured_columns_proper_names",
             query=search,
             k=10,
-            filter=f"key: '{key}'",
+            filter=f"key = '{key}'",
         )
 
         return documents
