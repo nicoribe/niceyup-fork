@@ -30,7 +30,7 @@ class Agent:
             source_id=source_id,
             collection="structured_columns_proper_names",
             query=search,
-            k=10,
+            k=1,
             filter=f"key = '{key}'",
         )
 

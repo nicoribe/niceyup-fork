@@ -19,7 +19,7 @@ async def main(
     database = os.getenv("DATABASE_CLIENT_DATABASE")
     schema = os.getenv("DATABASE_CLIENT_SCHEMA")
 
-    client = DatabaseClient(
+    db_client = DatabaseClient(
         dialect=dialect,
         host=host,
         port=port,
@@ -30,7 +30,7 @@ async def main(
         file_path=file_path,
     )
 
-    db_schema = client.get_db_schema()
+    db_schema = db_client.get_db_schema()
 
     logger.warning({
         "tables_metadata": db_schema,

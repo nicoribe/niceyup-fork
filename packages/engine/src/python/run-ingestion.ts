@@ -1,4 +1,5 @@
 import { python } from '@trigger.dev/python'
+import { env } from '@workspace/env'
 import { pyArgs, pyPath, pyStreamingResult } from './utils'
 
 type ColumnInfo = {
@@ -43,6 +44,11 @@ export async function runIngestion(
   const streamingResult = python.stream.runScript(
     pyPath('run_ingestion'),
     pyArgs(args),
+    {
+      env: {
+        PYTHON_ENV: env.NODE_ENV,
+      },
+    },
   )
 
   const result = await pyStreamingResult<RunIngestionResult>(streamingResult)

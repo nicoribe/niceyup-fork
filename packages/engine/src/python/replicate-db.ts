@@ -1,4 +1,5 @@
 import { python } from '@trigger.dev/python'
+import { env } from '@workspace/env'
 import { pyArgs, pyPath, pyStreamingResult } from './utils'
 
 type ReplicateDbArgs = {
@@ -37,6 +38,7 @@ export async function replicateDb(
     pyArgs(args),
     {
       env: {
+        PYTHON_ENV: env.NODE_ENV,
         DATABASE_CLIENT_HOST: envVars?.host,
         DATABASE_CLIENT_PORT: envVars?.port,
         DATABASE_CLIENT_USER: envVars?.user,

@@ -37,6 +37,8 @@ class DatabaseClient:
         self.file_path = file_path
 
         self._uuid = str(uuid.uuid4())
+        if os.environ["PYTHON_ENV"] == "development":
+            tmp_dir = "./tmp"
         self.tmp_dir = tmp_dir
         self.conn: Optional[duckdb.DuckDBPyConnection] = None
 
@@ -131,3 +133,7 @@ class DatabaseClient:
     def cleanup_tmp_path(self) -> None:
         if os.path.exists(self.db_tmp_path()):
             os.remove(self.db_tmp_path())
+
+    def dispose(self) -> None:
+        self.close()
+        self.cleanup_tmp_path()

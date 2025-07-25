@@ -35,7 +35,7 @@ async def main(
         vector_store=vector_store,
     )
 
-    storage = StorageProvider(tmp_dir="./tmp")
+    storage = StorageProvider()
     source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
 
     if source_type == "structured":
@@ -53,14 +53,14 @@ async def main(
             table_names = [table["name"] for table in columns_proper_names_by_tables]
 
             if len(table_names) > 0:
-                client = DatabaseClient(tmp_dir="./tmp")
-                replicator = DatabaseReplicator(source=source, client=client)
+                db_client = DatabaseClient()
+                replicator = DatabaseReplicator(source=source, db_client=db_client)
                 replicator.create_tables_from_parquet(table_names=table_names)
 
                 tables_with_proper_names = []
                 for table in columns_proper_names_by_tables:
                     for column in table["columns"]:
-                        result = client.execute(f'SELECT DISTINCT "{column["name"]}" FROM "{table["name"]}"')
+                        result = db_client.execute(f'SELECT DISTINCT "{column["name"]}" FROM "{table["name"]}"')
                         result_df = result.fetchdf() # TODO: Use fetch_df_chunk
                         column["proper_names"] = result_df[column["name"]].tolist()
                         tables_with_proper_names.append(table)
@@ -69,7 +69,7 @@ async def main(
                     source_id=source_id,
                     tables=tables_with_proper_names,
                 )
-                client.cleanup_tmp_path() # Clean up tmp path
+                db_client.dispose()
 
     storage.cleanup_tmp_path() # Clean up tmp path
 

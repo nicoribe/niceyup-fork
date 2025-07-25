@@ -25,7 +25,7 @@ async def main(
     database = os.getenv("DATABASE_CLIENT_DATABASE")
     schema = os.getenv("DATABASE_CLIENT_SCHEMA")
 
-    storage = StorageProvider(tmp_dir="./tmp")
+    storage = StorageProvider()
 
     tmp_file_path = storage.download_tmp_file(file_path) if file_path is not None else None
 
@@ -35,7 +35,7 @@ async def main(
         storage=storage,
     )
 
-    client = DatabaseClient(
+    db_client = DatabaseClient(
         dialect=dialect,
         host=host,
         port=port,
@@ -44,14 +44,13 @@ async def main(
         database=database,
         schema=schema,
         file_path=tmp_file_path,
-        tmp_dir="./tmp",
     )
 
-    replicator = DatabaseReplicator(source=source, client=client)
+    replicator = DatabaseReplicator(source=source, db_client=db_client)
 
     replicator.export_tables_to_parquet(tables_metadata=tables_metadata)
 
-    client.cleanup_tmp_path() # Close database client
+    db_client.dispose()
     storage.cleanup_tmp_path() # Clean up tmp path
 
     logger.warning({
