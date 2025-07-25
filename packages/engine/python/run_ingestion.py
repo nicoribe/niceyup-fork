@@ -25,15 +25,9 @@ async def main(
     })
 
     embeddings = Embeddings()
-    vector_store = VectorStore(
-        embeddings=embeddings,
-        workspace_id=workspace_id,
-    )
+    vector_store = VectorStore(embeddings=embeddings, workspace_id=workspace_id)
 
-    ingestor = Ingestor(
-        embeddings=embeddings,
-        vector_store=vector_store,
-    )
+    ingestor = Ingestor(vector_store=vector_store)
 
     storage = StorageProvider()
     source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)

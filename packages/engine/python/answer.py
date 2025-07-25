@@ -53,37 +53,49 @@ class QueryWithProperNounsOutput(TypedDict):
     query: Annotated[str, ..., "Syntactically valid SQL query."]
     proper_nouns: Annotated[str, ..., "Proper nouns in the query."]
 
-async def main(question: str) -> None:
-    workspace_id = "xxxx-xxxx-xxxx-xxxx"
-
+async def main(
+    workspace_id: str,
+    source_ids: List[str],
+    question: str,
+) -> None:
     llm = LLM()
     embeddings = Embeddings()
     vector_store = VectorStore(embeddings=embeddings, workspace_id=workspace_id)
-    agent = Agent(llm=llm, embeddings=embeddings, vector_store=vector_store)
-
-    # ai_msg = llm.astream([
-    #     SystemMessage(content="You are a helpful assistant! Your name is Davy Jones."),
-    #     HumanMessage(content=question),
-    # ])
-
-    # async for chunk in ai_msg:
-    #     logger.warning(chunk.model_dump())
+    agent = Agent(vector_store=vector_store)
 
     storage = StorageProvider()
     db_client = DatabaseClient()
 
     def retrieve_document(state: State):
         """Retrieve document from the source."""
+        documents = vector_store.similarity_search_by_source_ids(
+            source_ids=source_ids,
+            query=state["question"],
+            k=1,
+        )
+        if len(documents) == 0:
+            return {"document": "No document found."}
+        document = documents[0]
         return {
-            "source_id": "xxxx-xxxx-xxxx-xxxx",
-            "source_type": "structured",
+            "source_id": document.metadata["__source_id"],
+            "source_type": document.metadata["source_type"],
+            "document": document.page_content,
         }
 
     def generate_answer(state: State):
         """Generate answer to the user question."""
-        return {
-            "answer": "Hello, world!",
-        }
+        prompt = (
+            "Given the following user question and document from the source, "
+            "answer the user question.\n"
+            f"Question: {state['question']}\n"
+            f"Document: {state['document']}"
+        )
+        response = llm.stream(prompt)
+        content = ""
+        for chunk in response:
+            content += chunk.content
+            logger.info({"message": "AIMessageChunk", **chunk.model_dump()})
+        return {"answer": content}
 
     def relevant_tables(state: State):
         """Get relevant tables from the database."""

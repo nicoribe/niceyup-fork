@@ -18,9 +18,15 @@ export const answerTask = schemaTask({
   run: async (payload) => {
     logger.info('payload', payload)
 
+    const args = {
+      workspace_id: 'xxxx-xxxx-xxxx-xxxx',
+      source_ids: ['xxxx-xxxx-xxxx-xxxx'],
+      question: payload.question,
+    }
+
     const streamingResult = python.stream.runScript(
       pyPath('answer'),
-      pyArgs(payload),
+      pyArgs(args),
       {
         env: {
           PYTHON_ENV: env.NODE_ENV,

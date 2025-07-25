@@ -1,6 +1,4 @@
 from typing import List, Optional, TypedDict
-from llm import LLM
-from embeddings import Embeddings
 from vector_store import VectorStore
 from langchain_core.documents import Document
 
@@ -25,13 +23,8 @@ class TableInfoWithColumnProperNames(TypedDict):
     columns: List[ColumnInfoWithProperNames]
 
 class Ingestor:
-    def __init__(
-        self,
-        embeddings: Optional[Embeddings] = None,
-        vector_store: Optional[VectorStore] = None,
-    ):
-        self.embeddings = embeddings or Embeddings()
-        self.vector_store = vector_store or VectorStore(embeddings=self.embeddings)
+    def __init__(self, vector_store: VectorStore):
+        self.vector_store = vector_store
 
     def ingest_text(self, source_id: str) -> None:
         pass

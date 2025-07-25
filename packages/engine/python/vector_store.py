@@ -11,13 +11,12 @@ class VectorStore(UpstashVectorStore):
 
     def __init__(
         self,
-        embeddings: Optional[Embeddings] = None,
+        embeddings: Embeddings,
         workspace_id: Optional[str] = None,
         **kwargs,
     ):
-        _embeddings = embeddings or Embeddings()
         self.workspace_id = workspace_id if workspace_id is not None and workspace_id != "" else self.DEFAULT
-        super().__init__(embedding=_embeddings, namespace=self.workspace_id, **kwargs)
+        super().__init__(embedding=embeddings, namespace=self.workspace_id, **kwargs)
 
     def similarity_search_by_source_ids(
         self,

@@ -29,11 +29,7 @@ async def main(
 
     tmp_file_path = storage.download_tmp_file(file_path) if file_path is not None else None
 
-    source = SourceStorage(
-        workspace_id=workspace_id,
-        source_id=source_id,
-        storage=storage,
-    )
+    source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
 
     db_client = DatabaseClient(
         dialect=dialect,

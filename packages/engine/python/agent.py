@@ -1,19 +1,10 @@
-from typing import List, Optional
-from llm import LLM
-from embeddings import Embeddings
+from typing import List
 from vector_store import VectorStore
 from langchain_core.documents import Document
 
 class Agent:
-    def __init__(
-        self,
-        llm: Optional[LLM] = None,
-        embeddings: Optional[Embeddings] = None,
-        vector_store: Optional[VectorStore] = None,
-    ):
-        self.llm = llm or LLM()
-        self.embeddings = embeddings or Embeddings()
-        self.vector_store = vector_store or VectorStore(embeddings=self.embeddings)
+    def __init__(self, vector_store: VectorStore):
+        self.vector_store = vector_store
 
     def get_structured_table_info(self, source_id: str, search: str) -> List[Document]:
         documents = self.vector_store.similarity_search(
