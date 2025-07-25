@@ -1,5 +1,6 @@
 import { python } from '@trigger.dev/python'
 import { logger, metadata, schemaTask } from '@trigger.dev/sdk'
+import { env } from '@workspace/env'
 import { z } from 'zod'
 import { parsePyLogger, pyArgs, pyPath } from '../python/utils'
 
@@ -20,6 +21,11 @@ export const answerTask = schemaTask({
     const streamingResult = python.stream.runScript(
       pyPath('answer'),
       pyArgs(payload),
+      {
+        env: {
+          PYTHON_ENV: env.NODE_ENV,
+        },
+      },
     )
 
     // pass the streamingResult to the metadata system
