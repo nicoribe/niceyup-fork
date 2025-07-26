@@ -11,9 +11,8 @@ class Agent:
             source_id=source_id,
             collection="structured_tables_info",
             query=search,
-            k=10,
+            k=15,
         )
-
         return documents
 
     def get_structured_column_proper_names(self, source_id: str, key: str, search: str) -> List[Document]:
@@ -24,5 +23,4 @@ class Agent:
             k=1,
             filter=f"key = '{key}'",
         )
-
         return documents

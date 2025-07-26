@@ -3,6 +3,7 @@ import json
 import sys
 from typing import List, Optional
 from py_logger import PyLogger
+from llm import LLM
 from embeddings import Embeddings
 from vector_store import VectorStore
 from ingestor import Ingestor, TableInfo, TableInfoWithColumnProperNames
@@ -21,27 +22,34 @@ async def main(
     columns_proper_names_by_tables: Optional[List[TableInfoWithColumnProperNames]] = None,
 ) -> None:
     logger.warning({
-        "message": f'Ingestion started for source "{source_id}" in workspace "{workspace_id}"',
+        "message": f'Ingestion started for source "{source_id}" of type "{source_type}" in workspace "{workspace_id}"',
     })
 
+    llm = LLM()
     embeddings = Embeddings()
     vector_store = VectorStore(embeddings=embeddings, workspace_id=workspace_id)
 
-    ingestor = Ingestor(vector_store=vector_store)
+    ingestor = Ingestor(llm=llm, vector_store=vector_store)
 
     storage = StorageProvider()
     source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
 
-    if source_type == "structured":
+    if source_type == "text":
+        ingestor.ingest_text(source_id=source_id)
+
+    elif source_type == "pdf":
+        ingestor.ingest_pdf(source_id=source_id)
+
+    elif source_type == "website":
+        ingestor.ingest_website(source_id=source_id)
+
+    elif source_type == "question_answer":
+        ingestor.ingest_question_answer(source_id=source_id)
+
+    elif source_type == "structured":
         if tables_info is not None:
-            ingestor.ingest_structured(
-                source_id=source_id,
-                tables=tables_info,
-            )
-            ingestor.ingest_structured_table_info(
-                source_id=source_id,
-                tables=tables_info,
-            )
+            ingestor.ingest_structured(source_id=source_id, tables=tables_info)
+            ingestor.ingest_structured_table_info(source_id=source_id, tables=tables_info)
 
         if columns_proper_names_by_tables is not None:
             table_names = [table["name"] for table in columns_proper_names_by_tables]
@@ -50,7 +58,6 @@ async def main(
                 db_client = DatabaseClient()
                 replicator = DatabaseReplicator(source=source, db_client=db_client)
                 replicator.create_tables_from_parquet(table_names=table_names)
-
                 tables_with_proper_names = []
                 for table in columns_proper_names_by_tables:
                     for column in table["columns"]:
@@ -58,18 +65,14 @@ async def main(
                         result_df = result.fetchdf() # TODO: Use fetch_df_chunk
                         column["proper_names"] = result_df[column["name"]].tolist()
                         tables_with_proper_names.append(table)
-
-                ingestor.ingest_structured_column_proper_names(
-                    source_id=source_id,
-                    tables=tables_with_proper_names,
-                )
+                ingestor.ingest_structured_column_proper_names(source_id=source_id, tables=tables_with_proper_names)
                 db_client.dispose()
 
     storage.cleanup_tmp_path() # Clean up tmp path
 
     logger.warning({
         "status": "success",
-        "message": f'Ingestion ended for source "{source_id}" in workspace "{workspace_id}"',
+        "message": f'Ingestion ended for source "{source_id}" of type "{source_type}" in workspace "{workspace_id}"',
     })
 
 if __name__ == "__main__":

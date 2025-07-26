@@ -4,6 +4,7 @@ import sys
 import os
 from typing import Optional
 from py_logger import PyLogger
+from storage_provider import StorageProvider
 from database_client import DatabaseClient
 
 logger = PyLogger(__name__)
@@ -19,6 +20,10 @@ async def main(
     database = os.getenv("DATABASE_CLIENT_DATABASE")
     schema = os.getenv("DATABASE_CLIENT_SCHEMA")
 
+    storage = StorageProvider()
+
+    tmp_file_path = storage.download_tmp_file(file_path) if file_path is not None else None
+
     db_client = DatabaseClient(
         dialect=dialect,
         host=host,
@@ -27,14 +32,12 @@ async def main(
         password=password,
         database=database,
         schema=schema,
-        file_path=file_path,
+        file_path=tmp_file_path,
     )
 
     db_schema = db_client.get_db_schema()
 
-    logger.warning({
-        "tables_metadata": db_schema,
-    })
+    logger.warning({"tables_metadata": db_schema})
 
 if __name__ == "__main__":
     try:

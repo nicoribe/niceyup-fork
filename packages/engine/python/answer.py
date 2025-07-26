@@ -112,12 +112,10 @@ async def main(
                 columns_info.append(f'    "{column["column_name"]}" {column["data_type"]}{references}')
             table_info += ",\n".join(columns_info) + "\n)\n"
             tables_info.append(table_info)
-        prompt = relevant_tables_prompt_template.invoke(
-            {
-                "table_info": "\n".join(tables_info),
-                "input": state["question"],
-            }
-        )
+        prompt = relevant_tables_prompt_template.invoke({
+            "table_info": "\n".join(tables_info),
+            "input": state["question"],
+        })
         structured_llm = llm.with_structured_output(RelevantTablesOutput)
         result = structured_llm.invoke(prompt)
         source = SourceStorage(workspace_id=workspace_id, source_id=state["source_id"], storage=storage)
@@ -125,27 +123,21 @@ async def main(
         replicator.create_tables_from_parquet(table_names=result["tables"])
         db = SQLDatabase.from_uri(database_uri=db_client.uri())
         return {
-            "structured": {
-                "relevant_tables": db.get_table_info(),
-            }
+            "structured": {"relevant_tables": db.get_table_info()}
         }
 
     def write_query(state: State):
         """Generate SQL query to fetch information."""
-        prompt = write_query_prompt_template.invoke(
-            {
-                "dialect": "DuckDB",
-                "top_k": 10,
-                "table_info": state["structured"]["relevant_tables"],
-                "input": state["question"],
-            }
-        )
+        prompt = write_query_prompt_template.invoke({
+            "dialect": "DuckDB",
+            "top_k": 10,
+            "table_info": state["structured"]["relevant_tables"],
+            "input": state["question"],
+        })
         structured_llm = llm.with_structured_output(QueryOutput)
         result = structured_llm.invoke(prompt)
         return {
-            "structured": {
-                "query": result["query"],
-            }
+            "structured": {"query": result["query"]}
         }
 
     def search_proper_nouns_query(state: State):
@@ -181,10 +173,7 @@ async def main(
         execute_query_tool = QuerySQLDatabaseTool(db=db)
         result = execute_query_tool.invoke(state["structured"]["query"])
         return {
-            "structured": {
-                **state["structured"],
-                "result": result,
-            }
+            "structured": {**state["structured"], "result": result}
         }
 
     def generate_query_answer(state: State):
@@ -223,10 +212,7 @@ async def main(
     graph_builder.add_node(generate_query_answer)
 
     graph_builder.add_edge(START, "retrieve_document")
-    graph_builder.add_conditional_edges(
-        "retrieve_document",
-        should_query,
-    )
+    graph_builder.add_conditional_edges("retrieve_document", should_query)
     graph_builder.add_edge("generate_answer", END)
     graph_builder.add_edge("relevant_tables", "write_query")
     graph_builder.add_edge("write_query", "search_proper_nouns_query")
@@ -236,21 +222,20 @@ async def main(
 
     graph = graph_builder.compile()
 
-    steps = graph.stream(
-        {
-            "question": question,
-            "source_id": "",
-            "source_type": "",
-            "structured": {
-                "relevant_tables": "",
-                "query": "",
-                "proper_nouns": "",
-            },
-            "result": "",
-            "answer": "",
+    input = {
+        "question": question,
+        "source_id": "",
+        "source_type": "",
+        "structured": {
+            "relevant_tables": "",
+            "query": "",
+            "proper_nouns": "",
         },
-        stream_mode="updates",
-    )
+        "result": "",
+        "answer": "",
+    }
+
+    steps = graph.stream(input, stream_mode="updates")
 
     for step in steps:
         step_name, = step

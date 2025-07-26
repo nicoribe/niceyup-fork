@@ -1,5 +1,7 @@
 from typing import List, Optional, TypedDict
+from llm import LLM
 from vector_store import VectorStore
+from prompts import structured_summary_prompt_template
 from langchain_core.documents import Document
 
 class ColumnInfo(TypedDict):
@@ -23,7 +25,8 @@ class TableInfoWithColumnProperNames(TypedDict):
     columns: List[ColumnInfoWithProperNames]
 
 class Ingestor:
-    def __init__(self, vector_store: VectorStore):
+    def __init__(self, llm: LLM, vector_store: VectorStore):
+        self.llm = llm
         self.vector_store = vector_store
 
     def ingest_text(self, source_id: str) -> None:
@@ -40,7 +43,6 @@ class Ingestor:
 
     def ingest_structured(self, source_id: str, tables: List[TableInfo]) -> None:
         tables_info = ""
-
         for table in tables:
             tables_info += "\n-\n" + self._table_description(
                 table_name=table["name"],
@@ -51,16 +53,16 @@ class Ingestor:
                     column_name=column["name"],
                     column_description=column.get("description", None),
                 )
-
-        ai_msg = tables_info # TODO: Use LLM to generate a more accurate message
-
+        prompt = structured_summary_prompt_template.invoke({
+            "tables_info": tables_info,
+        })
+        result = self.llm.invoke(prompt)
         document = Document(
-            page_content=ai_msg,
+            page_content=result.content,
             metadata={
                 "source_type": "structured",
             },
         )
-
         self.vector_store.add_documents(
             source_id=source_id,
             collection="sources",
@@ -69,7 +71,6 @@ class Ingestor:
 
     def ingest_structured_table_info(self, source_id: str, tables: List[TableInfo]) -> None:
         documents = []
-
         for table in tables:
             table_info = self._table_description(
                 table_name=table["name"],
@@ -92,14 +93,12 @@ class Ingestor:
                     "foreign_table": column.get("foreign_table", None),
                     "foreign_column": column.get("foreign_column", None),
                 })
-
             documents.append(
                 Document(
                     page_content=table_info,
                     metadata=metadata,
                 )
             )
-
         self.vector_store.add_documents(
             source_id=source_id,
             collection="structured_tables_info",
@@ -108,7 +107,6 @@ class Ingestor:
 
     def ingest_structured_column_proper_names(self, source_id: str, tables: List[TableInfoWithColumnProperNames]) -> None:
         documents = []
-
         for table in tables:
             for column in table["columns"]:
                 for proper_name in column["proper_names"]:
@@ -120,7 +118,6 @@ class Ingestor:
                             },
                         )
                     )
-
         self.vector_store.add_documents(
             source_id=source_id,
             collection="structured_columns_proper_names",
@@ -133,12 +130,9 @@ class Ingestor:
         table_description: Optional[str] = None,
     ) -> str:
         table_str = f'Table: "{table_name}"\n'
-
         if table_description is not None and table_description != "":
             table_str += f"Description: {table_description}\n"
-
         table_str += 'Columns:\n'
-
         return table_str
 
     def _column_description(
@@ -149,13 +143,9 @@ class Ingestor:
         foreign_column: Optional[str] = None,
     ) -> str:
         column_str = f'-\n"{column_name}"'
-
         if foreign_table is not None and foreign_column is not None:
             column_str += f' relations "{foreign_table}"."{foreign_column}"'
-
         if column_description is not None and column_description != "":
             column_str += f"\nDescription: {column_description}"
-
         column_str += "\n"
-
         return column_str

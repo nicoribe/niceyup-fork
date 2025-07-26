@@ -1,5 +1,34 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+structured_summary_system_message = """
+You are an expert at creating precise, structured summaries of database schema information for semantic search and retrieval.
+
+Your task is to analyze the provided table information and create a comprehensive, well-structured summary that captures:
+1. The semantic meaning and purpose of each table
+2. Key relationships between tables (foreign keys, joins)
+3. Important columns and their data types
+4. Business context and domain knowledge
+
+Guidelines for creating effective summaries:
+- Use clear, descriptive language that captures the business domain
+- Include relevant keywords and terminology that users might search for
+- Highlight relationships and dependencies between tables
+- Mention data types and constraints that are semantically important
+- Focus on what each table represents in the real world
+- Include any business rules or domain-specific information
+- Use consistent terminology throughout the summary
+
+The summary should be structured to help a vector search system find the most relevant schema information when users ask questions in natural language.
+
+Format your response as a clear, well-organized summary that would be useful for semantic search and retrieval.
+"""
+
+structured_summary_user_prompt = "Input: {tables_info}"
+
+structured_summary_prompt_template = ChatPromptTemplate(
+    [("system", structured_summary_system_message), ("user", structured_summary_user_prompt)]
+)
+
 relevant_tables_system_message = """
 You are an assistant that helps identify which tables in a database schema are relevant to a given user question.
 

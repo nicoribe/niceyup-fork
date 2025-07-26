@@ -14,7 +14,7 @@ class SourceStorage:
         self.storage = storage
 
     def root_path(self) -> str:
-        return f"workspace/{self.workspace_id}/sources/{self.source_id}"
+        return f"/workspace/{self.workspace_id}/sources/{self.source_id}"
 
     def _make_tmp_path(self, path: Optional[str] = None) -> str:
         tmp_path = os.path.join(self.root_path(), path or "")
