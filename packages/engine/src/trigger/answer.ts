@@ -20,7 +20,7 @@ export const answerTask = schemaTask({
 
     const args = {
       workspace_id: 'xxxx-xxxx-xxxx-xxxx',
-      source_ids: ['xxxx-xxxx-xxxx-xxxx'],
+      source_ids: ['yyyy-yyyy-yyyy-yyyy', 'xxxx-xxxx-xxxx-xxxx'],
       question: payload.question,
     }
 

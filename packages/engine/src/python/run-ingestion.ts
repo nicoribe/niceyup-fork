@@ -25,12 +25,18 @@ type TableInfoWithColumnProperNames = {
   columns: ColumnInfoWithProperNames[]
 }
 
+type QueryExample = {
+  input: string
+  query: string
+}
+
 type RunIngestionArgs = {
   workspace_id: string
   source_id: string
   source_type: 'text' | 'pdf' | 'website' | 'question_answer' | 'structured'
   tables_info?: TableInfo[]
   columns_proper_names_by_tables?: TableInfoWithColumnProperNames[]
+  query_examples?: QueryExample[]
 }
 
 type RunIngestionResult = {

@@ -3,6 +3,16 @@ from llm import LLM
 from vector_store import VectorStore
 from prompts import structured_summary_prompt_template
 from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import PyPDFLoader
+
+class Link(TypedDict):
+    url: List[str]
+
+class QuestionAnswer(TypedDict):
+    question: List[str]
+    answer: str
 
 class ColumnInfo(TypedDict):
     name: str
@@ -29,20 +39,47 @@ class TableInfoWithColumnProperNames(TypedDict):
     columns: List[ColumnInfoWithProperNames]
 
 class Ingestor:
+    chunk_size = 4000
+    chunk_overlap = 20
+
     def __init__(self, llm: LLM, vector_store: VectorStore):
         self.llm = llm
         self.vector_store = vector_store
 
-    def ingest_text(self, source_id: str) -> None:
+    def ingest_text(self, source_id: str, file_path: str) -> None:
+        loader = TextLoader(file_path)
+        raw_documents = loader.load()
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            add_start_index=True,
+        )
+        documents = text_splitter.split_documents(raw_documents)
+        self.vector_store.add_documents(
+            source_id=source_id,
+            collection="sources",
+            documents=documents,
+        )
+
+    def ingest_pdf(self, source_id: str, file_path: str) -> None:
+        loader = PyPDFLoader(file_path, extract_images=False)
+        pages = loader.load_and_split()
+        text_spliter = RecursiveCharacterTextSplitter(
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            add_start_index=True,
+        )
+        documents = text_spliter.split_documents(pages)
+        self.vector_store.add_documents(
+            source_id=source_id,
+            collection="sources",
+            documents=documents,
+        )
+
+    def ingest_website(self, source_id: str, link: Link) -> None:
         pass
 
-    def ingest_pdf(self, source_id: str) -> None:
-        pass
-
-    def ingest_website(self, source_id: str) -> None:
-        pass
-
-    def ingest_question_answer(self, source_id: str) -> None:
+    def ingest_question_answer(self, source_id: str, question_answer: QuestionAnswer) -> None:
         pass
 
     def ingest_structured(self, source_id: str, tables: List[TableInfo]) -> None:

@@ -6,7 +6,7 @@ from py_logger import PyLogger
 from llm import LLM
 from embeddings import Embeddings
 from vector_store import VectorStore
-from ingestor import Ingestor, TableInfo, TableInfoWithColumnProperNames
+from ingestor import Ingestor, TableInfo, TableInfoWithColumnProperNames, QueryExample
 from storage_provider import StorageProvider
 from source_storage import SourceStorage
 from database_client import DatabaseClient
@@ -18,8 +18,10 @@ async def main(
     workspace_id: str,
     source_id: str,
     source_type: str,
+    file_path: Optional[str] = None,
     tables_info: Optional[List[TableInfo]] = None,
     columns_proper_names_by_tables: Optional[List[TableInfoWithColumnProperNames]] = None,
+    query_examples: Optional[List[QueryExample]] = None,
 ) -> None:
     logger.warning({
         "message": f'Ingestion started for source "{source_id}" of type "{source_type}" in workspace "{workspace_id}"',
@@ -32,13 +34,14 @@ async def main(
     ingestor = Ingestor(llm=llm, vector_store=vector_store)
 
     storage = StorageProvider()
-    source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
+    
+    tmp_file_path = storage.download_tmp_file(file_path) if file_path is not None else None
 
     if source_type == "text":
-        ingestor.ingest_text(source_id=source_id)
+        ingestor.ingest_text(source_id=source_id, file_path=tmp_file_path)
 
     elif source_type == "pdf":
-        ingestor.ingest_pdf(source_id=source_id)
+        ingestor.ingest_pdf(source_id=source_id, file_path=tmp_file_path)
 
     elif source_type == "website":
         ingestor.ingest_website(source_id=source_id)
@@ -53,9 +56,9 @@ async def main(
 
         if columns_proper_names_by_tables is not None:
             table_names = [table["name"] for table in columns_proper_names_by_tables]
-
             if len(table_names) > 0:
                 db_client = DatabaseClient()
+                source = SourceStorage(workspace_id=workspace_id, source_id=source_id, storage=storage)
                 replicator = DatabaseReplicator(source=source, db_client=db_client)
                 replicator.create_tables_from_parquet(table_names=table_names)
                 tables_with_proper_names = []
@@ -67,6 +70,9 @@ async def main(
                         tables_with_proper_names.append(table)
                 ingestor.ingest_structured_columns_proper_names(source_id=source_id, tables=tables_with_proper_names)
                 db_client.dispose()
+
+        if query_examples is not None:
+            ingestor.ingest_structured_query_examples(source_id=source_id, query_examples=query_examples)
 
     storage.cleanup_tmp_path() # Clean up tmp path
 

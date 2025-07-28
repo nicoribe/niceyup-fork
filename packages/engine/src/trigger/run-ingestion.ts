@@ -22,6 +22,7 @@ export const runIngestionTask = schemaTask({
       source_type: sourceType,
       // tables_info: tablesInfo,
       // columns_proper_names_by_tables: columnsProperNamesByTables,
+      // query_examples: queryExamples,
     })
 
     return result
