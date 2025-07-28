@@ -49,7 +49,7 @@ async def main(
     elif source_type == "structured":
         if tables_info is not None:
             ingestor.ingest_structured(source_id=source_id, tables=tables_info)
-            ingestor.ingest_structured_table_info(source_id=source_id, tables=tables_info)
+            ingestor.ingest_structured_tables_info(source_id=source_id, tables=tables_info)
 
         if columns_proper_names_by_tables is not None:
             table_names = [table["name"] for table in columns_proper_names_by_tables]
@@ -65,7 +65,7 @@ async def main(
                         result_df = result.fetchdf() # TODO: Use fetch_df_chunk
                         column["proper_names"] = result_df[column["name"]].tolist()
                         tables_with_proper_names.append(table)
-                ingestor.ingest_structured_column_proper_names(source_id=source_id, tables=tables_with_proper_names)
+                ingestor.ingest_structured_columns_proper_names(source_id=source_id, tables=tables_with_proper_names)
                 db_client.dispose()
 
     storage.cleanup_tmp_path() # Clean up tmp path

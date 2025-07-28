@@ -1,7 +1,7 @@
 import asyncio
 import json
 import sys
-from typing import Annotated, List, Literal, TypedDict
+from typing import Annotated, List, Literal, TypedDict, Union
 from py_logger import PyLogger
 from llm import LLM
 from embeddings import Embeddings
@@ -26,7 +26,10 @@ logger = PyLogger(__name__)
 
 class StateStructured(TypedDict):
     """Structured state for structured sources."""
-    relevant_tables: Annotated[str, ..., "Relevant tables."]
+    relevant_tables: Annotated[Union[List[str], str], ..., "Relevant tables."]
+    # current_request_num: Annotated[int, ..., "Current request number."]
+    # request_tables_info: Annotated[List[str], ..., "Tables to request info for."]
+    query_examples: Annotated[str, ..., "Examples of the query."]
     query: Annotated[str, ..., "Syntactically valid SQL query."]
     proper_nouns: Annotated[str, ..., "Proper nouns in the query."]
     result: Annotated[str, ..., "Result of the query."]
@@ -42,6 +45,7 @@ class State(TypedDict):
 
 class RelevantTablesOutput(TypedDict):
     """Relevant tables."""
+    # request_tables_info: Annotated[List[str], ..., "Tables to request info for."]
     tables: Annotated[List[str], ..., "Relevant tables."]
 
 class QueryOutput(TypedDict):
@@ -99,9 +103,20 @@ async def main(
 
     def relevant_tables(state: State):
         """Get relevant tables from the database."""
-        docs = agent.get_structured_table_info(source_id=state["source_id"], search=state["question"])
-        relevant_tables = [doc.metadata for doc in docs]
-        tables_info = []
+        is_first_request = bool("structured" not in state)
+        tables_info = [] if is_first_request else state["structured"]["relevant_tables"]
+        # current_request_num = 1 if is_first_request else state["structured"]["current_request_num"]
+        if is_first_request:
+            table_docs = agent.get_structured_tables_info(
+                source_id=state["source_id"],
+                search=state["question"],
+            )
+        # else:
+        #     table_docs = agent.get_structured_tables_info_by_names(
+        #         source_id=state["source_id"],
+        #         table_names=state["structured"]["request_tables_info"],
+        #     )
+        relevant_tables = [doc.metadata for doc in table_docs]
         for table in relevant_tables:
             table_info = f'CREATE TABLE "{table["table_name"]}" (\n'
             columns_info = []
@@ -112,18 +127,48 @@ async def main(
                 columns_info.append(f'    "{column["column_name"]}" {column["data_type"]}{references}')
             table_info += ",\n".join(columns_info) + "\n)\n"
             tables_info.append(table_info)
+        if is_first_request:
+            example_docs = agent.get_structured_query_examples(source_id=state["source_id"], search=state["question"])
+            query_examples = "\n".join(doc.page_content for doc in example_docs)
+        # else:
+        #     query_examples = state["structured"]["query_examples"]
         prompt = relevant_tables_prompt_template.invoke({
-            "table_info": "\n".join(tables_info),
+            "tables_info": "\n".join(tables_info),
+            # "max_request_tables_num": 5,
+            # "current_request_num": current_request_num,
+            # "max_request_num": max_request_num,
+            "examples": query_examples,
             "input": state["question"],
         })
         structured_llm = llm.with_structured_output(RelevantTablesOutput)
         result = structured_llm.invoke(prompt)
+        # if "request_tables_info" in result and len(result["request_tables_info"]) > 0 and current_request_num < max_request_num:
+        #     return {
+        #         "structured": {
+        #             "relevant_tables": tables_info,
+        #             "current_request_num": current_request_num + 1,
+        #             "request_tables_info": result["request_tables_info"],
+        #             "query_examples": query_examples,
+        #         }
+        #     }
+        return {
+            "structured": {
+                "relevant_tables": result["tables"],
+                "query_examples": query_examples,
+            }
+        }
+
+    def retrieve_tables_info(state: State):
+        """Retrieve tables info from the database."""
         source = SourceStorage(workspace_id=workspace_id, source_id=state["source_id"], storage=storage)
         replicator = DatabaseReplicator(source=source, db_client=db_client)
-        replicator.create_tables_from_parquet(table_names=result["tables"])
+        replicator.create_tables_from_parquet(table_names=state["structured"]["relevant_tables"])
         db = SQLDatabase.from_uri(database_uri=db_client.uri())
         return {
-            "structured": {"relevant_tables": db.get_table_info()}
+            "structured": {
+                "relevant_tables": db.get_table_info(),
+                "query_examples": state["structured"]["query_examples"],
+            }
         }
 
     def write_query(state: State):
@@ -131,7 +176,8 @@ async def main(
         prompt = write_query_prompt_template.invoke({
             "dialect": "DuckDB",
             "top_k": 10,
-            "table_info": state["structured"]["relevant_tables"],
+            "tables_info": state["structured"]["relevant_tables"],
+            "examples": state["structured"]["query_examples"],
             "input": state["question"],
         })
         structured_llm = llm.with_structured_output(QueryOutput)
@@ -151,7 +197,7 @@ async def main(
             similar to the search.
             """
             key = f"{table_name}.{column_name}"
-            results = agent.get_structured_column_proper_names(source_id=state["source_id"], key=key, search=search)
+            results = agent.get_structured_columns_proper_names(source_id=state["source_id"], key=key, search=search)
             return results[0].page_content if len(results) > 0 else search
 
         agent_executor = create_react_agent(
@@ -195,17 +241,22 @@ async def main(
         return {"answer": content}
 
     def should_query(state: State) -> Literal["generate_answer", "relevant_tables"]:
-        source_type = state["source_type"]
-
-        if source_type == "structured":
+        if state["source_type"] == "structured":
             return "relevant_tables"
         else:
             return "generate_answer"
+
+    # def should_request_tables(state: State) -> Literal["relevant_tables", "retrieve_tables_info"]:
+    #     if "current_request_num" in state["structured"]:
+    #         return "relevant_tables"
+    #     else:
+    #         return "retrieve_tables_info"
 
     graph_builder = StateGraph(State)
     graph_builder.add_node(retrieve_document)
     graph_builder.add_node(generate_answer)
     graph_builder.add_node(relevant_tables)
+    graph_builder.add_node(retrieve_tables_info)
     graph_builder.add_node(write_query)
     graph_builder.add_node(search_proper_nouns_query)
     graph_builder.add_node(execute_query)
@@ -214,7 +265,9 @@ async def main(
     graph_builder.add_edge(START, "retrieve_document")
     graph_builder.add_conditional_edges("retrieve_document", should_query)
     graph_builder.add_edge("generate_answer", END)
-    graph_builder.add_edge("relevant_tables", "write_query")
+    graph_builder.add_edge("relevant_tables", "retrieve_tables_info")
+    # graph_builder.add_conditional_edges("relevant_tables", should_request_tables)
+    graph_builder.add_edge("retrieve_tables_info", "write_query")
     graph_builder.add_edge("write_query", "search_proper_nouns_query")
     graph_builder.add_edge("search_proper_nouns_query", "execute_query")
     graph_builder.add_edge("execute_query", "generate_query_answer")
@@ -224,20 +277,11 @@ async def main(
 
     input = {
         "question": question,
-        "source_id": "",
-        "source_type": "",
-        "structured": {
-            "relevant_tables": "",
-            "query": "",
-            "proper_nouns": "",
-        },
-        "result": "",
-        "answer": "",
     }
 
-    steps = graph.stream(input, stream_mode="updates")
+    steps = graph.astream(input, stream_mode="updates")
 
-    for step in steps:
+    async for step in steps:
         step_name, = step
         logger.warning({"message": step_name, "step": step})
 

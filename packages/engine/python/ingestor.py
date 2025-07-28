@@ -16,6 +16,10 @@ class TableInfo(TypedDict):
     description: Optional[str]
     columns: List[ColumnInfo]
 
+class QueryExample(TypedDict):
+    input: str
+    query: str
+
 class ColumnInfoWithProperNames(TypedDict):
     name: str
     proper_names: List[str]
@@ -69,7 +73,7 @@ class Ingestor:
             documents=[document],
         )
 
-    def ingest_structured_table_info(self, source_id: str, tables: List[TableInfo]) -> None:
+    def ingest_structured_tables_info(self, source_id: str, tables: List[TableInfo]) -> None:
         documents = []
         for table in tables:
             table_info = self._table_description(
@@ -105,7 +109,25 @@ class Ingestor:
             documents=documents,
         )
 
-    def ingest_structured_column_proper_names(self, source_id: str, tables: List[TableInfoWithColumnProperNames]) -> None:
+    def ingest_structured_query_examples(self, source_id: str, query_examples: List[QueryExample]) -> None:
+        documents = []
+        for query_example in query_examples:
+            content = self._query_example_description(
+                input=query_example["input"],
+                query=query_example["query"],
+            )
+            documents.append(
+                Document(
+                    page_content=content,
+                )
+            )
+        self.vector_store.add_documents(
+            source_id=source_id,
+            collection="structured_query_examples",
+            documents=documents,
+        )
+
+    def ingest_structured_columns_proper_names(self, source_id: str, tables: List[TableInfoWithColumnProperNames]) -> None:
         documents = []
         for table in tables:
             for column in table["columns"]:
@@ -149,3 +171,10 @@ class Ingestor:
             column_str += f"\nDescription: {column_description}"
         column_str += "\n"
         return column_str
+
+    def _query_example_description(
+        self,
+        input: str,
+        query: str,
+    ) -> str:
+        return f"Input: `{input}`\nQuery: `{query}`"

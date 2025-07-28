@@ -42,7 +42,10 @@ Rules:
 - If the question can be answered using a single table, still check for any FKs that might be needed.
 
 Schema:
-{table_info}
+{tables_info}
+
+Examples of SQL queries for reference:
+{examples}
 """
 
 relevant_tables_user_prompt = "Question: {input}"
@@ -66,7 +69,10 @@ description. Be careful to not query for columns that do not exist. Also,
 pay attention to which column is in which table.
 
 Only use the following tables:
-{table_info}
+{tables_info}
+
+Examples of SQL queries for reference:
+{examples}
 """
 
 write_query_user_prompt = "Question: {input}"
@@ -85,7 +91,7 @@ You are an assistant that helps to find the proper nouns in a query.
 3. Replace the original literal string in the query with the result returned by `search_proper_nouns`.
 
 Return "proper_nouns" with the proper nouns replaced. Example:
-Query: `SELECT * FROM "region_country" WHERE "name" = 'Brazil' OR "name" = 'United States'`
+Query: `SELECT * FROM "region_country" WHERE "name" = 'Brazil' OR "name" = 'United States';`
 Proper nouns: `Brasil → Brazil, Estados Unidos → United States`
 """
 
