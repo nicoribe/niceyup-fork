@@ -2,7 +2,8 @@ import { env } from '@workspace/env'
 import type { FastifyInstance } from 'fastify'
 import { ZodError } from 'zod'
 import { BadRequestError } from './bad-request-error'
-import { ErrorRequest, type ErrorRequestParams } from './error-request'
+import { BaseError, type BaseErrorParams } from './base-error'
+import { UnauthorizedError } from './unauthorized-error'
 
 type FastifyErrorHandler = FastifyInstance['errorHandler']
 
@@ -10,18 +11,22 @@ export const errorHandler: FastifyErrorHandler = (error, _, reply) => {
   if (error instanceof ZodError) {
     reply.status(400).send({
       code: 'validation-error',
-      message: 'Validation error.',
+      message: 'Validation error',
       errors: error.flatten(),
     })
   }
 
-  if (error instanceof ErrorRequest) {
+  if (error instanceof BaseError) {
     const { status, code, message } = JSON.parse(
       error.message,
-    ) as ErrorRequestParams
+    ) as BaseErrorParams
 
     if (error instanceof BadRequestError) {
       reply.status(status || 400).send({ code, message })
+    }
+
+    if (error instanceof UnauthorizedError) {
+      reply.status(401).send({ code, message })
     }
   }
 
@@ -33,6 +38,6 @@ export const errorHandler: FastifyErrorHandler = (error, _, reply) => {
 
   reply.status(500).send({
     code: 'internal-server-error',
-    message: 'Internal server error.',
+    message: 'Internal server error',
   })
 }

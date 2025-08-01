@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "env:load": "dotenv -e ../../.env --",
-    "auth:generate": "pnpm env:load pnpm dlx @better-auth/cli generate --output ../db/src/schemas/auth.ts --y",
+    "auth:generate": "pnpm env:load pnpm dlx @better-auth/cli generate --output ../db/src/schema/auth.ts --y",
     "lint": "biome check .",
     "format": "biome format --write ."
   },
@@ -21,6 +21,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./react": "./src/react.ts"
+    "./constants": "./src/constants.ts",
+    "./client": "./src/client.ts"
   }
 }

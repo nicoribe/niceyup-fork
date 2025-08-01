@@ -50,6 +50,8 @@ app.register(fastifySwagger, {
   transform: jsonSchemaTransform,
 })
 
+app.get('/api/docs/json', async () => app.swagger())
+
 app.register(fastifyScalar, {
   routePrefix: '/api/docs',
   configuration: {

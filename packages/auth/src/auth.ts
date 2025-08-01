@@ -5,8 +5,9 @@ import { type BetterAuthOptions, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
 import { ac, roles } from './access'
+import { COOKIE_PREFIX } from './constants'
 
-export const config = {
+const config = {
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
@@ -35,7 +36,7 @@ export const config = {
   },
   trustedOrigins: [env.WEB_URL],
   advanced: {
-    cookiePrefix: 'auth',
+    cookiePrefix: COOKIE_PREFIX,
     database: { generateId },
   },
   plugins: [

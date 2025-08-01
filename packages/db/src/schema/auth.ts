@@ -21,6 +21,7 @@ export const sessions = pgTable('sessions', {
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
+  activeOrganizationId: text('active_organization_id'),
   ...timestamps,
 })
 
@@ -49,6 +50,41 @@ export const verifications = pgTable('verifications', {
   ...id,
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
-  expiresAt: timestamp('expires_at').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   ...timestamps,
+})
+
+export const organizations = pgTable('organizations', {
+  ...id,
+  name: text('name').notNull(),
+  slug: text('slug').unique(),
+  logo: text('logo'),
+  metadata: text('metadata'),
+  createdAt: timestamps.createdAt,
+})
+
+export const members = pgTable('members', {
+  ...id,
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  role: text('role').default('member').notNull(),
+  createdAt: timestamps.createdAt,
+})
+
+export const invitations = pgTable('invitations', {
+  ...id,
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  email: text('email').notNull(),
+  role: text('role'),
+  status: text('status').default('pending').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  inviterId: text('inviter_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
 })

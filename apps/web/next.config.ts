@@ -3,12 +3,17 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@workspace/ui'],
-  async rewrites() {
+  async redirects() {
     return [
       {
         source: '/auth',
         destination: '/auth/sign-in',
+        permanent: true,
       },
+    ]
+  },
+  async rewrites() {
+    return [
       {
         source: '/api/:path*',
         destination: `${env.NEXT_PUBLIC_API_URL}/api/:path*`,

@@ -1,5 +1,6 @@
 'use client'
 
+import { authClient } from '@/lib/auth/client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@workspace/ui/components/button'
 import {
@@ -15,10 +16,8 @@ import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react'
 import { redirect, useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-
-import { authClient } from '@/lib/auth/client'
 import { toast } from 'sonner'
+import { z } from 'zod'
 
 const formSchema = z.object({
   email: z.string().trim().email(),

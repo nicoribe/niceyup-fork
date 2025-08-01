@@ -1,25 +1,22 @@
 import { auth } from '@workspace/auth'
-import { cookies, headers } from 'next/headers'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
-
-export async function getSessionToken() {
-  return (await cookies()).get('auth.session_token')?.value
-}
+import { getSessionToken } from './session-token'
 
 export async function isAuthenticated() {
   return !!(await getSessionToken())
 }
 
-export const getCurrentUser = cache(async () => {
+export const authenticatedUser = cache(async () => {
   try {
-    const data = await auth.api.getSession({ headers: await headers() })
+    const session = await auth.api.getSession({ headers: await headers() })
 
-    if (data?.user) {
-      return data.user
+    if (!session) {
+      throw new Error('Unauthorized')
     }
 
-    throw new Error('Uauthorized')
+    return session
   } catch {
     redirect('/auth/sign-out')
   }

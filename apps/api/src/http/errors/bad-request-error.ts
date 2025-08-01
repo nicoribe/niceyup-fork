@@ -1,11 +1,11 @@
-import { ErrorRequest, type ErrorRequestParams } from './error-request'
+import { BaseError, type BaseErrorParams } from './base-error'
 
-export class BadRequestError extends ErrorRequest {
-  constructor({ status, code, message }: ErrorRequestParams = {}) {
+export class BadRequestError extends BaseError {
+  constructor({ status, code, message }: BaseErrorParams = {}) {
     super({
       status: status || 400,
       code: code || 'bad-request',
-      message: message || 'Bad request.',
+      message: message || 'Bad request',
     })
   }
 }
