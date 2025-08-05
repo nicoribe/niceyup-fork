@@ -8,7 +8,7 @@ export async function health(app: FastifyTypedInstance) {
     {
       schema: {
         tags: ['Default'],
-        description: 'Check if the server is running',
+        description: 'Check if the API is working',
         operationId: 'health',
         security: [],
         response: withDefaultErrorResponses({

@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { id, timestamps } from '../utils'
 
 export const users = pgTable('users', {
@@ -9,6 +9,7 @@ export const users = pgTable('users', {
     .$defaultFn(() => false)
     .notNull(),
   image: text('image'),
+  stripeCustomerId: text('stripe_customer_id'),
   ...timestamps,
 })
 
@@ -22,6 +23,7 @@ export const sessions = pgTable('sessions', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   activeOrganizationId: text('active_organization_id'),
+  activeTeamId: text('active_team_id'),
   ...timestamps,
 })
 
@@ -82,9 +84,41 @@ export const invitations = pgTable('invitations', {
     .references(() => organizations.id, { onDelete: 'cascade' }),
   email: text('email').notNull(),
   role: text('role'),
+  teamId: text('team_id'),
   status: text('status').default('pending').notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   inviterId: text('inviter_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
+})
+
+export const teams = pgTable('teams', {
+  ...id,
+  name: text('name').notNull(),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  ...timestamps,
+})
+
+export const teamMembers = pgTable('team_members', {
+  ...id,
+  teamId: text('team_id').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamps.createdAt,
+})
+
+export const subscriptions = pgTable('subscriptions', {
+  ...id,
+  plan: text('plan').notNull(),
+  referenceId: text('reference_id').notNull(),
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  status: text('status').default('incomplete'),
+  periodStart: timestamp('period_start', { withTimezone: true }),
+  periodEnd: timestamp('period_end', { withTimezone: true }),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end'),
+  seats: integer('seats'),
 })

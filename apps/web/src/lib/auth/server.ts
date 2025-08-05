@@ -10,13 +10,15 @@ export async function isAuthenticated() {
 
 export const authenticatedUser = cache(async () => {
   try {
-    const session = await auth.api.getSession({ headers: await headers() })
+    const authSession = await auth.api.getSession({
+      headers: await headers(),
+    })
 
-    if (!session) {
+    if (!authSession) {
       throw new Error('Unauthorized')
     }
 
-    return session
+    return authSession
   } catch {
     redirect('/auth/sign-out')
   }

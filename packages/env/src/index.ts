@@ -12,10 +12,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
 
     OPENAI_API_KEY: z.string().optional(),
-    GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
-    GITHUB_CLIENT_ID: z.string().optional(),
-    GITHUB_CLIENT_SECRET: z.string().optional(),
-    BETTER_AUTH_SECRET: z.string(),
+
     TRIGGER_DEV_PROJECT_ID: z.string(),
     TRIGGER_SECRET_KEY: z.string(),
     CLOUDFLARE_BUCKET: z.string(),
@@ -24,6 +21,21 @@ export const env = createEnv({
     CLOUDFLARE_SECRET_KEY: z.string(),
     UPSTASH_VECTOR_REST_URL: z.string(),
     UPSTASH_VECTOR_REST_TOKEN: z.string(),
+
+    BETTER_AUTH_SECRET: z.string(),
+    GITHUB_CLIENT_ID: z.string().optional(),
+    GITHUB_CLIENT_SECRET: z.string().optional(),
+
+    STRIPE_SECRET_KEY: z.string(),
+    STRIPE_WEBHOOK_SECRET: z.string(),
+    STRIPE_STANDARD_PLAN_PRICE_ID: z.string().optional(),
+    STRIPE_STANDARD_PLAN_ANNUAL_DISCOUNT_PRICE_ID: z.string().optional(),
+    STRIPE_STANDARD_PLAN_FREE_TRIAL_DAYS: z.coerce
+      .number()
+      .optional()
+      .default(7),
+    STRIPE_PRO_PLAN_PRICE_ID: z.string().optional(),
+    STRIPE_PRO_PLAN_ANNUAL_DISCOUNT_PRICE_ID: z.string().optional(),
   },
   client: {},
   shared: {
@@ -38,10 +50,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
 
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
-    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
-    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+
     TRIGGER_DEV_PROJECT_ID: process.env.TRIGGER_DEV_PROJECT_ID,
     TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,
     CLOUDFLARE_BUCKET: process.env.CLOUDFLARE_BUCKET,
@@ -50,6 +59,21 @@ export const env = createEnv({
     CLOUDFLARE_SECRET_KEY: process.env.CLOUDFLARE_SECRET_KEY,
     UPSTASH_VECTOR_REST_URL: process.env.UPSTASH_VECTOR_REST_URL,
     UPSTASH_VECTOR_REST_TOKEN: process.env.UPSTASH_VECTOR_REST_TOKEN,
+
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    STRIPE_STANDARD_PLAN_PRICE_ID: process.env.STRIPE_STANDARD_PLAN_PRICE_ID,
+    STRIPE_STANDARD_PLAN_ANNUAL_DISCOUNT_PRICE_ID:
+      process.env.STRIPE_STANDARD_PLAN_ANNUAL_DISCOUNT_PRICE_ID,
+    STRIPE_STANDARD_PLAN_FREE_TRIAL_DAYS:
+      process.env.STRIPE_STANDARD_PLAN_FREE_TRIAL_DAYS,
+    STRIPE_PRO_PLAN_PRICE_ID: process.env.STRIPE_PRO_PLAN_PRICE_ID,
+    STRIPE_PRO_PLAN_ANNUAL_DISCOUNT_PRICE_ID:
+      process.env.STRIPE_PRO_PLAN_ANNUAL_DISCOUNT_PRICE_ID,
 
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_WEB_URL: process.env.NEXT_PUBLIC_WEB_URL,

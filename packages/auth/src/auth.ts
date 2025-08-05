@@ -6,8 +6,11 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
 import { ac, roles } from './access'
 import { COOKIE_PREFIX } from './constants'
+import { createWorkspace } from './data'
+import { stripe } from './stripe'
 
 const config = {
+  appName: 'Acme-Chat',
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
@@ -21,14 +24,13 @@ const config = {
     },
   },
   socialProviders: {
-    ...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
-      ? {
-          github: {
+    github:
+      env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
+        ? {
             clientId: env.GITHUB_CLIENT_ID,
             clientSecret: env.GITHUB_CLIENT_SECRET,
-          },
-        }
-      : {}),
+          }
+        : undefined,
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
@@ -39,12 +41,32 @@ const config = {
     cookiePrefix: COOKIE_PREFIX,
     database: { generateId },
   },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          console.log('user created', user)
+          await createWorkspace({ userId: user.id })
+        },
+      },
+    },
+  },
   plugins: [
     openAPI({ path: '/docs' }),
     organization({
       ac,
       roles,
+      teams: {
+        enabled: true,
+      },
+      organizationCreation: {
+        afterCreate: async ({ organization }) => {
+          console.log('organization created', organization)
+          await createWorkspace({ organizationId: organization.id })
+        },
+      },
     }),
+    stripe(),
   ],
 } satisfies BetterAuthOptions
 
