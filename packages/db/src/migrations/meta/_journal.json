@@ -15,6 +15,13 @@
       "when": 1754415496101,
       "tag": "0001_talented_paladin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754489176449,
+      "tag": "0002_secret_doctor_spectrum",
+      "breakpoints": true
     }
   ]
 }

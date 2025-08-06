@@ -24,10 +24,14 @@ export const workspaces = pgTable('workspaces', {
   ...id,
   userId: text('user_id')
     .unique()
-    .references(() => users.id),
+    .references(() => users.id, {
+      onDelete: 'set null',
+    }),
   organizationId: text('organization_id')
     .unique()
-    .references(() => organizations.id),
+    .references(() => organizations.id, {
+      onDelete: 'set null',
+    }),
   ...timestamps,
 })
 

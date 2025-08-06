@@ -10,7 +10,7 @@ export const config: UserConfig = {
   name: 'Acme-Chat API',
   root: '.',
   input: {
-    path: `${env.API_URL}/api/docs/json`,
+    path: `${env.API_URL}/api/docs/openapi.json`,
   },
   output: {
     path: './src/api/generated',

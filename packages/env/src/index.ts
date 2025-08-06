@@ -23,6 +23,7 @@ export const env = createEnv({
     UPSTASH_VECTOR_REST_TOKEN: z.string(),
 
     BETTER_AUTH_SECRET: z.string(),
+    RESEND_API_KEY: z.string().optional(),
     GITHUB_CLIENT_ID: z.string().optional(),
     GITHUB_CLIENT_SECRET: z.string().optional(),
 
@@ -61,6 +62,7 @@ export const env = createEnv({
     UPSTASH_VECTOR_REST_TOKEN: process.env.UPSTASH_VECTOR_REST_TOKEN,
 
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
 

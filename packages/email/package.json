@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/email",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@workspace/env": "workspace:*",
+    "@workspace/ui": "workspace:*",
+    "resend": "^4.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@workspace/tsconfig": "workspace:*",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./emails/*": "./src/emails/*.tsx"
+  }
+}

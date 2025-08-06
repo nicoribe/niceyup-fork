@@ -1,4 +1,4 @@
-import { isAuthenticated } from '@/lib/auth/server'
+import { getSessionToken } from '@/lib/auth/session-token'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  const authenticated = await isAuthenticated()
+  const authenticated = Boolean(await getSessionToken())
 
   const authRoute = pathname.startsWith('/auth/')
 
@@ -38,6 +38,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    '/((?!api(?:/|$)|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
   ],
 }

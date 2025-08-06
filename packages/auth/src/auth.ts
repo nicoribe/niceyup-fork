@@ -1,4 +1,6 @@
 import { db, generateId } from '@workspace/db'
+import { createWorkspace } from '@workspace/db/queries'
+import { sendEmailResetPassword, sendVerificationEmail } from '@workspace/email'
 import { env } from '@workspace/env'
 import { compare, hash } from 'bcryptjs'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
@@ -6,21 +8,33 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
 import { ac, roles } from './access'
 import { COOKIE_PREFIX } from './constants'
-import { createWorkspace } from './data'
 import { stripe } from './stripe'
 
 const config = {
   appName: 'Acme-Chat',
+  baseURL: env.WEB_URL,
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
     usePlural: true,
   }),
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail({ email: user.email, url })
+    },
+    sendOnSignUp: true,
+    sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+  },
   emailAndPassword: {
     enabled: true,
     password: {
       hash: async (password) => await hash(password, 6),
       verify: async ({ hash, password }) => await compare(password, hash),
+    },
+    requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmailResetPassword({ email: user.email, url })
     },
   },
   socialProviders: {
@@ -45,7 +59,6 @@ const config = {
     user: {
       create: {
         after: async (user) => {
-          console.log('user created', user)
           await createWorkspace({ userId: user.id })
         },
       },
@@ -61,7 +74,6 @@ const config = {
       },
       organizationCreation: {
         afterCreate: async ({ organization }) => {
-          console.log('organization created', organization)
           await createWorkspace({ organizationId: organization.id })
         },
       },

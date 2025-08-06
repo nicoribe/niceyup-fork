@@ -28,5 +28,5 @@ export async function getCookie(key: string): Promise<string | undefined> {
 export async function deleteCookie(key: string): Promise<void> {
   const cookieStore = await getCookieStore()
 
-  deleteCookieNext(key, { cookies: cookieStore })
+  await deleteCookieNext(key, { cookies: cookieStore })
 }
