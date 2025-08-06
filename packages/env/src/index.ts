@@ -7,6 +7,7 @@ export const env = createEnv({
       .enum(['development', 'test', 'production'])
       .default('development'),
 
+    ENCRYPTION_KEY: z.string(),
     API_URL: z.string().url(),
     WEB_URL: z.string().url(),
     DATABASE_URL: z.string().url(),
@@ -46,6 +47,7 @@ export const env = createEnv({
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
 
+    ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
     API_URL: process.env.API_URL,
     WEB_URL: process.env.WEB_URL,
     DATABASE_URL: process.env.DATABASE_URL,

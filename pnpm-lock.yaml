@@ -176,6 +176,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@workspace/encryption':
+        specifier: workspace:*
+        version: link:../encryption
       '@workspace/env':
         specifier: workspace:*
         version: link:../env

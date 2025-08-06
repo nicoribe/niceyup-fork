@@ -29,7 +29,7 @@ const config = {
   emailAndPassword: {
     enabled: true,
     password: {
-      hash: async (password) => await hash(password, 6),
+      hash: async (password) => await hash(password, 12),
       verify: async ({ hash, password }) => await compare(password, hash),
     },
     requireEmailVerification: true,

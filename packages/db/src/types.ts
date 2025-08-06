@@ -1,9 +1,19 @@
-export type PromptMessages = {
+export type PromptMessage = {
   role: 'user' | 'assistant'
   content: string
-}[]
+}
 
-export type TablesMetadata = {
+export type DatabaseConnection = {
+  host?: string
+  port?: string
+  user?: string
+  password?: string
+  database?: string
+  schema?: string // for PostgreSQL
+  filePath?: string // for SQLite
+}
+
+export type TableMetadata = {
   name: string
   columns: {
     name: string
@@ -11,9 +21,9 @@ export type TablesMetadata = {
     foreign_table?: string
     foreign_column?: string
   }[]
-}[]
+}
 
-export type TablesInfo = {
+export type TableInfo = {
   name: string
   description?: string
   columns: {
@@ -23,14 +33,14 @@ export type TablesInfo = {
     foreign_table?: string
     foreign_column?: string
   }[]
-}[]
+}
 
-export type ColumnsProperNamesByTables = {
+export type ColumnProperNamesByTables = {
   name: string
   columns: { name: string }[]
-}[]
+}
 
-export type QueryExamples = {
+export type QueryExample = {
   input: string
   query: string
-}[]
+}

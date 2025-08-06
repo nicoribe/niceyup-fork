@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import { text, timestamp } from 'drizzle-orm/pg-core'
+import { decrypt, encrypt } from '@workspace/encryption'
+import { customType, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const generateId = (): string => randomUUID()
 
@@ -14,4 +15,32 @@ export const timestamps = {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
+}
+
+export function encryptedJson<TData>(name: string) {
+  return customType<{ data: TData; driverData: string }>({
+    dataType() {
+      return 'text'
+    },
+    toDriver(value: TData) {
+      return encrypt(JSON.stringify(value))
+    },
+    fromDriver(driverData: string): TData {
+      return JSON.parse(decrypt(driverData)!)
+    },
+  })(name)
+}
+
+export function encryptedText(name: string) {
+  return customType<{ data: string; driverData: string }>({
+    dataType() {
+      return 'text'
+    },
+    toDriver(value: string) {
+      return encrypt(value)
+    },
+    fromDriver(driverData: string) {
+      return decrypt(driverData)
+    },
+  })(name)
 }

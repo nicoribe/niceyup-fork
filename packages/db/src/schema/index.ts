@@ -9,13 +9,14 @@ import {
   text,
 } from 'drizzle-orm/pg-core'
 import type {
-  ColumnsProperNamesByTables,
-  PromptMessages,
-  QueryExamples,
-  TablesInfo,
-  TablesMetadata,
+  ColumnProperNamesByTables,
+  DatabaseConnection,
+  PromptMessage,
+  QueryExample,
+  TableInfo,
+  TableMetadata,
 } from '../types'
-import { id, timestamps } from '../utils'
+import { encryptedJson, id, timestamps } from '../utils'
 import { organizations, users } from './auth'
 
 export * from './auth'
@@ -45,49 +46,6 @@ export const workspacesRelations = relations(workspaces, ({ one, many }) => ({
     references: [organizations.id],
   }),
   sources: many(sources),
-}))
-
-export const databaseConnections = pgTable('database_connections', {
-  ...id,
-  name: text('name').notNull().default('Unnamed'),
-  dialect: text('dialect'), // "postgresql", "mysql", "sqlite"
-  host: text('host'),
-  port: text('port'),
-  user: text('user'),
-  password: text('password'),
-  database: text('database'),
-  schema: text('schema'), // for PostgreSQL
-  filePath: text('file_path'), // for SQLite
-  ...timestamps,
-})
-
-export const databaseConnectionsRelations = relations(
-  databaseConnections,
-  ({ many }) => ({
-    sources: many(sources),
-  }),
-)
-
-export const structured = pgTable('structured', {
-  ...id,
-  tablesMetadata: jsonb('tables_metadata').$type<TablesMetadata>(),
-  tablesInfo: jsonb('tables_info').$type<TablesInfo>(),
-  columnsProperNamesByTables: jsonb(
-    'columns_proper_names_by_tables',
-  ).$type<ColumnsProperNamesByTables>(),
-  queryExamples: jsonb('query_examples').$type<QueryExamples>(),
-  sourceId: text('source_id')
-    .notNull()
-    .unique()
-    .references(() => sources.id, { onDelete: 'cascade' }),
-  ...timestamps,
-})
-
-export const structuredRelations = relations(structured, ({ one }) => ({
-  source: one(sources, {
-    fields: [structured.sourceId],
-    references: [sources.id],
-  }),
 }))
 
 export const sources = pgTable('sources', {
@@ -123,6 +81,43 @@ export const sourcesRelations = relations(sources, ({ one, many }) => ({
   agents: many(agentsToSources),
 }))
 
+export const databaseConnections = pgTable('database_connections', {
+  ...id,
+  name: text('name').notNull().default('Unnamed'),
+  dialect: text('dialect'), // "postgresql", "mysql", "sqlite"
+  payload: encryptedJson('payload').$type<DatabaseConnection>(),
+  ...timestamps,
+})
+
+export const databaseConnectionsRelations = relations(
+  databaseConnections,
+  ({ many }) => ({
+    sources: many(sources),
+  }),
+)
+
+export const structured = pgTable('structured', {
+  ...id,
+  tablesMetadata: jsonb('tables_metadata').$type<TableMetadata[]>(),
+  tablesInfo: jsonb('tables_info').$type<TableInfo[]>(),
+  columnsProperNamesByTables: jsonb('columns_proper_names_by_tables').$type<
+    ColumnProperNamesByTables[]
+  >(),
+  queryExamples: jsonb('query_examples').$type<QueryExample[]>(),
+  sourceId: text('source_id')
+    .notNull()
+    .unique()
+    .references(() => sources.id, { onDelete: 'cascade' }),
+  ...timestamps,
+})
+
+export const structuredRelations = relations(structured, ({ one }) => ({
+  source: one(sources, {
+    fields: [structured.sourceId],
+    references: [sources.id],
+  }),
+}))
+
 export const agents = pgTable('agents', {
   ...id,
   name: text('name').notNull().default('Unnamed'),
@@ -140,7 +135,7 @@ export const agents = pgTable('agents', {
   maxTokens: integer('max_tokens'), // 10000
 
   systemMessage: text('system_message'), // Describe desired model behavior (tone, tool usage, response style)
-  promptMessages: jsonb('prompt_messages').$type<PromptMessages>(), // Enter task specifics. use {{template variables}} for dynamic inputs
+  promptMessages: jsonb('prompt_messages').$type<PromptMessage[]>(), // Enter task specifics. use {{template variables}} for dynamic inputs
 
   storeLogs: boolean('store_logs').default(false), // Whether to store logs for later retrieval. Logs are visible to your organization.
   ...timestamps,
