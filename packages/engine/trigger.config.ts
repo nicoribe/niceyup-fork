@@ -7,8 +7,9 @@ export default defineConfig({
   runtime: 'node',
   logLevel: env.NODE_ENV === 'development' ? 'debug' : 'info',
   maxDuration: 3600,
+  experimental_processKeepAlive: true,
   retries: {
-    enabledInDev: true,
+    enabledInDev: false,
     default: {
       maxAttempts: 3,
       minTimeoutInMs: 1000,

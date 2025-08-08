@@ -14,6 +14,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@workspace/auth": "workspace:*",
+    "@workspace/db": "workspace:*",
     "@workspace/env": "workspace:*",
     "@workspace/sdk": "workspace:*",
     "@workspace/ui": "workspace:*",

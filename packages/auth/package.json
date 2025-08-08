@@ -13,7 +13,6 @@
     "@workspace/db": "workspace:*",
     "@workspace/email": "workspace:*",
     "@workspace/env": "workspace:*",
-    "bcryptjs": "^3.0.2",
     "better-auth": "^1.3.4",
     "stripe": "^18.4.0"
   },

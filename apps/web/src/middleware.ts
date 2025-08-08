@@ -11,14 +11,13 @@ export async function middleware(request: NextRequest) {
   }
 
   const authenticated = Boolean(await getSessionToken())
+  const authRoutes = pathname.startsWith('/auth/')
 
-  const authRoute = pathname.startsWith('/auth/')
-
-  if (authenticated && authRoute) {
+  if (authenticated && authRoutes) {
     return NextResponse.redirect(new URL('/', request.nextUrl))
   }
 
-  if (!authenticated && !authRoute) {
+  if (!authenticated && !authRoutes) {
     const redirectUrl = pathname === '/' ? '' : `redirectUrl=${pathname}`
 
     return NextResponse.redirect(

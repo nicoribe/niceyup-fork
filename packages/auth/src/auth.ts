@@ -2,7 +2,6 @@ import { db, generateId } from '@workspace/db'
 import { createWorkspace } from '@workspace/db/queries'
 import { sendEmailResetPassword, sendVerificationEmail } from '@workspace/email'
 import { env } from '@workspace/env'
-import { compare, hash } from 'bcryptjs'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
@@ -28,10 +27,6 @@ const config = {
   },
   emailAndPassword: {
     enabled: true,
-    password: {
-      hash: async (password) => await hash(password, 12),
-      verify: async ({ hash, password }) => await compare(password, hash),
-    },
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await sendEmailResetPassword({ email: user.email, url })
