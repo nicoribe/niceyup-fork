@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@bprogress/next": "^3.2.12",
     "@hookform/resolvers": "^5.0.1",
     "@workspace/auth": "workspace:*",
     "@workspace/db": "workspace:*",
