@@ -16,10 +16,10 @@ export const ThemeSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          {theme === 'system' && <Monitor className="h-[1.2rem] w-[1.2rem]" />}
-          {theme === 'light' && <Sun className="h-[1.2rem] w-[1.2rem]" />}
-          {theme === 'dark' && <Moon className="h-[1.2rem] w-[1.2rem]" />}
+        <Button variant="ghost" size="icon">
+          {theme === 'system' && <Monitor className="size-4" />}
+          {theme === 'light' && <Sun className="size-4" />}
+          {theme === 'dark' && <Moon className="size-4" />}
         </Button>
       </DropdownMenuTrigger>
 

@@ -7,7 +7,7 @@ import { pluginZod } from '@kubb/plugin-zod'
 import { env } from '@workspace/env'
 
 export const config: UserConfig = {
-  name: 'Acme-Chat API',
+  name: 'Better Chat API',
   root: '.',
   input: {
     path: `${env.API_URL}/api/docs/openapi.json`,

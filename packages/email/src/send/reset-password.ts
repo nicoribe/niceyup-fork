@@ -8,7 +8,7 @@ export async function sendEmailResetPassword({
   url: string
 }) {
   const { data, error } = await resend.emails.send({
-    from: 'Acme-Chat <onboarding@resend.dev>',
+    from: 'Davy Jones <davy@better-chat.com>',
     to: [email],
     subject: 'Reset your password',
     text: `Click the link to reset your password: ${url}`,

@@ -1,26 +1,34 @@
+import { Logo } from '@/components/logo'
 import { OrganizationSwitcher } from '@/components/organization/organization-switcher'
 import { ProfileButton } from '@/components/organization/profile-button'
 import { ThemeSwitcher } from '@/components/theme-switcher'
-import { authenticatedUser } from '@/lib/auth/server'
-import { type Organization, type Team, auth } from '@workspace/auth'
+import {
+  authenticatedUser,
+  listOrganizationTeams,
+  listOrganizations,
+} from '@/lib/auth/server'
+import type { Agent } from '@/lib/types'
+import type { Organization, Team } from '@workspace/auth'
 import { Separator } from '@workspace/ui/components/separator'
 import { Slash } from 'lucide-react'
-import { headers } from 'next/headers'
 import Link from 'next/link'
+import { AgentSwitcher } from './agent-switcher'
 
 export async function Header({
   selectedOrganizationLabel,
+  activeAgent,
+  agents,
 }: {
   selectedOrganizationLabel?: string
+  activeAgent?: Agent
+  agents?: Agent[]
 }) {
   const {
     session: { activeOrganizationId, activeTeamId },
     user: personalAccount,
-  } = await authenticatedUser()
+  } = await authenticatedUser({ disableCache: true })
 
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
-  })
+  const organizations = await listOrganizations()
 
   let activeOrganization: Organization | undefined
   if (!selectedOrganizationLabel) {
@@ -31,9 +39,7 @@ export async function Header({
 
   let teams: Team[] = []
   if (activeOrganizationId) {
-    teams = await auth.api.listOrganizationTeams({
-      headers: await headers(),
-    })
+    teams = await listOrganizationTeams()
   }
 
   const activeTeam = teams.find(({ id }) => id === activeTeamId)
@@ -44,7 +50,7 @@ export async function Header({
         <div className="flex items-center gap-1">
           <div className="px-2">
             <Link href="/">
-              <div className="size-8 rounded-full bg-border" />
+              <Logo className="size-8" />
             </Link>
           </div>
 
@@ -58,6 +64,19 @@ export async function Header({
             activeTeam={activeTeam}
             teams={teams}
           />
+
+          {!!agents?.length && (
+            <>
+              <Slash className="-rotate-[24deg] size-3 text-border" />
+
+              <AgentSwitcher
+                organizationSlug={activeOrganization?.slug}
+                teamId={activeTeam?.id}
+                activeAgent={activeAgent}
+                agents={agents}
+              />
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-1">

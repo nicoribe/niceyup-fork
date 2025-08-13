@@ -10,7 +10,7 @@ import { COOKIE_PREFIX } from './constants'
 import { stripe } from './stripe'
 
 const config = {
-  appName: 'Acme-Chat',
+  appName: 'Better Chat',
   baseURL: env.WEB_URL,
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {

@@ -15,7 +15,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
-import { ChevronDown, LogOut, User } from 'lucide-react'
+import {
+  Book,
+  ChevronDown,
+  CirclePlus,
+  LogOut,
+  MessageSquareMore,
+} from 'lucide-react'
 import Link from 'next/link'
 
 function getInitials(name: string): string {
@@ -43,7 +49,7 @@ export async function ProfileButton() {
               </AvatarFallback>
             )}
           </Avatar>
-          <ChevronDown className="ml-auto size-4 text-muted-foreground" />
+          <ChevronDown className="size-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={12} className="w-[200px]">
@@ -58,16 +64,35 @@ export async function ProfileButton() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/account/profile">
-              <User className="mr-1 size-4" />
-              Profile
+            <Link href="/">Dashboard</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/account/settings">Account settings</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/onboarding/create-organization">
+              Create organization
+              <CirclePlus className="ml-auto size-4" />
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/docs" target="_blank">
+              Documentation
+              <Book className="ml-auto size-4" />
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/support" target="_blank">
+              Support
+              <MessageSquareMore className="ml-auto size-4" />
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <SignOutLink>
-              <LogOut className="mr-1 size-4" />
-              Sign Out
+              Sign out
+              <LogOut className="ml-auto size-4" />
             </SignOutLink>
           </DropdownMenuItem>
         </DropdownMenuGroup>

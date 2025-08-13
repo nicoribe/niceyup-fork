@@ -15,8 +15,14 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Acme-Chat',
-    template: '%s | Acme-Chat',
+    default: 'Better Chat',
+    template: '%s | Better Chat',
+  },
+  icons: {
+    icon: [
+      { url: '/logo-light.svg', media: '(prefers-color-scheme: light)' },
+      { url: '/logo-dark.svg', media: '(prefers-color-scheme: dark)' },
+    ],
   },
 }
 

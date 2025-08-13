@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 export type TabItem = {
-  label: string
+  label: React.ReactNode | string
   href: string
   deep?: boolean
 }
@@ -21,9 +21,9 @@ export function TabBar({ tabs }: { tabs?: TabItem[] }) {
   return (
     <div className="-mt-1.5 sticky top-0 z-50 flex flex-col items-stretch bg-background">
       <div className="no-scrollbar flex flex-row items-center overflow-scroll px-6">
-        {tabs.map((tab) => (
+        {tabs.map((tab, index) => (
           <div
-            key={tab.label}
+            key={`${tab.href}-${index}`}
             data-state={
               (tab.deep ? pathname.includes(tab.href) : pathname === tab.href)
                 ? 'active'

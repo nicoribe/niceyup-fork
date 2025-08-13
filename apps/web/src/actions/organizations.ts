@@ -1,12 +1,13 @@
 'use server'
 
+import type { OrganizationTeamParams } from '@/lib/types'
 import { auth } from '@workspace/auth'
 import { db } from '@workspace/db'
 import { and, eq } from '@workspace/db/orm'
 import { organizations, teams } from '@workspace/db/schema'
 import { headers } from 'next/headers'
 
-export async function getOrganizationSlugById(organizationId?: string) {
+export async function getOrganizationSlugById(organizationId: string) {
   if (!organizationId) {
     return null
   }
@@ -22,7 +23,9 @@ export async function getOrganizationSlugById(organizationId?: string) {
   return organization?.slug || null
 }
 
-export async function getOrganization(organizationSlug: string) {
+export async function getOrganization(
+  organizationSlug: OrganizationTeamParams['organizationSlug'],
+) {
   if (organizationSlug === 'my-account') {
     return null
   }
@@ -38,8 +41,8 @@ export async function getOrganization(organizationSlug: string) {
 }
 
 export async function getOrganizationTeam(
-  organizationSlug: string,
-  teamId: string,
+  organizationSlug: OrganizationTeamParams['organizationSlug'],
+  teamId: OrganizationTeamParams['teamId'],
 ) {
   if (organizationSlug === 'my-account' || teamId === '~') {
     return null
@@ -66,19 +69,11 @@ export async function updateActiveOrganizationTeam(
   teamId?: string | null,
 ) {
   await auth.api.setActiveOrganization({
-    body: {
-      organizationId:
-        organizationId === 'my-account' ? null : organizationId || null,
-    },
+    body: { organizationId: organizationId || null },
     headers: await headers(),
   })
   await auth.api.setActiveTeam({
-    body: {
-      teamId:
-        organizationId === 'my-account' || teamId === '~'
-          ? null
-          : teamId || null,
-    },
+    body: { teamId: teamId || null },
     headers: await headers(),
   })
 }

@@ -1,13 +1,12 @@
 import { getOrganization } from '@/actions/organizations'
 import { authenticatedUser } from '@/lib/auth/server'
+import type { OrganizationTeamParams } from '@/lib/types'
 import { redirect } from 'next/navigation'
 
 export default async function Page({
   params,
 }: {
-  params: Promise<{
-    organizationSlug: string
-  }>
+  params: Promise<OrganizationTeamParams>
 }) {
   const {
     session: { activeOrganizationId, activeTeamId },

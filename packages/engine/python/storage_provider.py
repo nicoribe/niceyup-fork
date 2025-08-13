@@ -20,7 +20,7 @@ class StorageProvider:
 
         if os.environ["PYTHON_ENV"] == "development":
             tmp_dir = "./tmp"
-        self.tmp_dir = os.path.join(tmp_dir, "acme_chat_tmp")
+        self.tmp_dir = os.path.join(tmp_dir, "better_chat_tmp")
     
     def upload_file(self, file_path: str, file_name: str, local_file: str) -> None:
         full_path = f"{file_path.strip('/')}/{file_name}"

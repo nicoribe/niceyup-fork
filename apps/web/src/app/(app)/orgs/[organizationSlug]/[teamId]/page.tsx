@@ -1,16 +1,14 @@
+import type { OrganizationTeamParams } from '@/lib/types'
 import { redirect } from 'next/navigation'
 
 export default async function Page({
   params,
 }: {
-  params: Promise<{
-    organizationSlug: string
-    teamId: string
-  }>
+  params: Promise<OrganizationTeamParams>
 }) {
   const { organizationSlug, teamId } = await params
 
-  if (organizationSlug !== 'my-account') {
+  if (organizationSlug === 'my-account') {
     return redirect('/orgs/my-account/~/overview')
   }
 

@@ -13,8 +13,12 @@ export default async function Layout({
       <TabBar
         tabs={[
           {
-            label: 'Profile',
-            href: '/account/profile',
+            label: 'Overview',
+            href: '/account/overview',
+          },
+          {
+            label: 'Activity',
+            href: '/account/activity',
           },
           {
             label: 'Settings',

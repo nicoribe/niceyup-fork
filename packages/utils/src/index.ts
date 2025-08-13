@@ -5,3 +5,7 @@ export function stripSpecialCharacters(inputString: string) {
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .toLowerCase() // Convert to lowercase for consistency
 }
+
+export function validateSlug(inputString: string): boolean {
+  return /^[a-z0-9-]+$/.test(inputString)
+}

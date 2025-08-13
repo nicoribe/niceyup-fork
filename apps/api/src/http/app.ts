@@ -25,8 +25,8 @@ app.register(fastifyCors)
 app.register(fastifySwagger, {
   openapi: {
     info: {
-      title: 'Acme-Chat',
-      description: 'API Reference for Acme-Chat',
+      title: 'Better Chat',
+      description: 'API Reference for Better Chat',
       version,
     },
     components: {
@@ -53,7 +53,8 @@ app.register(fastifySwagger, {
 app.register(fastifyScalar, {
   routePrefix: '/api/docs',
   configuration: {
-    pageTitle: 'Acme-Chat API',
+    pageTitle: 'Better Chat API',
+    favicon: `${env.WEB_URL}/logo-light.svg`,
     theme: 'saturn',
   },
 })
