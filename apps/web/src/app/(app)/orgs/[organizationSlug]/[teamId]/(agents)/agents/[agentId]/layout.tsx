@@ -4,6 +4,7 @@ import { TabBar, type TabItem } from '@/components/organization/tab-bar'
 import { activeMember } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { ChevronLeft } from 'lucide-react'
+import { Topbar } from '../_components/topbar'
 
 export default async function Layout({
   params,
@@ -43,6 +44,7 @@ export default async function Layout({
     {
       label: 'Chats',
       href: `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats`,
+      deep: true,
     },
   ]
 
@@ -80,9 +82,11 @@ export default async function Layout({
 
   return (
     <>
-      <Header activeAgent={activeAgent} agents={agents} />
+      <Topbar>
+        <Header activeAgent={activeAgent} agents={agents} />
 
-      <TabBar tabs={tabs} />
+        <TabBar tabs={tabs} />
+      </Topbar>
 
       <main className="flex flex-1 flex-col items-center justify-center gap-4">
         {children}

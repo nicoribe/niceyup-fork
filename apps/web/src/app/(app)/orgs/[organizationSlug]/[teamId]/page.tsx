@@ -3,9 +3,9 @@ import { redirect } from 'next/navigation'
 
 export default async function Page({
   params,
-}: {
+}: Readonly<{
   params: Promise<OrganizationTeamParams>
-}) {
+}>) {
   const { organizationSlug, teamId } = await params
 
   if (organizationSlug === 'my-account') {

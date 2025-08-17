@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation'
 
 export default async function Page({
   params,
-}: {
+}: Readonly<{
   params: Promise<OrganizationTeamParams>
-}) {
+}>) {
   const {
     session: { activeOrganizationId, activeTeamId },
   } = await authenticatedUser()

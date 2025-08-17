@@ -11,15 +11,13 @@ export async function Logo({
         className="absolute flex dark:hidden"
         src="/logo-light.svg"
         alt="Better Chat"
-        width={32}
-        height={32}
+        fill
       />
       <Image
         className="absolute hidden dark:flex"
         src="/logo-dark.svg"
         alt="Better Chat"
-        width={32}
-        height={32}
+        fill
       />
     </div>
   )

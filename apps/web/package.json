@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",
+    "@headless-tree/core": "1.2.1",
+    "@headless-tree/react": "1.2.1",
     "@hookform/resolvers": "^5.0.1",
     "@workspace/auth": "workspace:*",
     "@workspace/db": "workspace:*",
@@ -27,6 +29,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.57.0",
+    "react-use-size": "^5.0.1",
     "sonner": "^2.0.3",
     "zod": "^3.24.2",
     "zustand": "^5.0.5"
