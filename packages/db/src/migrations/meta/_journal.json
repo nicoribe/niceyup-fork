@@ -29,6 +29,27 @@
       "when": 1754505808546,
       "tag": "0003_thin_wendell_rand",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1755465266941,
+      "tag": "0004_amazing_jane_foster",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1755544656352,
+      "tag": "0005_dear_jimmy_woo",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1755550132351,
+      "tag": "0006_black_doctor_strange",
+      "breakpoints": true
     }
   ]
 }

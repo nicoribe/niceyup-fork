@@ -1,15 +1,8 @@
-import { getChat } from '@/actions/chats'
+import { getConversation } from '@/actions/conversations'
 import type { ChatParams } from '@/lib/types'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@workspace/ui/components/breadcrumb'
+import { Breadcrumb, BreadcrumbList } from '@workspace/ui/components/breadcrumb'
 import { Separator } from '@workspace/ui/components/separator'
 import { cn } from '@workspace/ui/lib/utils'
-import { Slash } from 'lucide-react'
 import { Appearance } from '../_components/appearance'
 import { NewChatBreadcrumb } from './_components/new-chat-breadcrumb'
 import { OpenChats } from './_components/open-chats'
@@ -17,11 +10,11 @@ import { OpenChats } from './_components/open-chats'
 export default async function Page({
   params,
 }: Readonly<{
-  params: Promise<ChatParams>
+  params: Promise<{ agentId: string } & ChatParams>
 }>) {
-  const { chatId } = await params
+  const { agentId, chatId } = await params
 
-  const chat = await getChat(chatId)
+  const chat = await getConversation(agentId, chatId)
 
   return (
     <div className="flex h-full flex-col">
@@ -35,21 +28,21 @@ export default async function Page({
             {chat ? (
               <Breadcrumb>
                 <BreadcrumbList className="flex-nowrap text-xs sm:gap-1">
-                  {chat.path.map((item, index) => (
+                  {/* {chat.pathInExplorer.map((item, index) => (
                     <>
                       <BreadcrumbItem
                         key={`${item.id}-${index}`}
                         className="text-nowrap"
                       >
-                        <BreadcrumbPage>{item.title}</BreadcrumbPage>
+                        <BreadcrumbPage>{item.name}</BreadcrumbPage>
                       </BreadcrumbItem>
-                      {index !== chat.path.length - 1 && (
+                      {index !== chat.pathInExplorer.length - 1 && (
                         <BreadcrumbSeparator className="[&>svg]:size-3">
                           <Slash className="-rotate-[24deg] text-border" />
                         </BreadcrumbSeparator>
                       )}
                     </>
-                  ))}
+                  ))} */}
                 </BreadcrumbList>
               </Breadcrumb>
             ) : chatId === 'new' ? (

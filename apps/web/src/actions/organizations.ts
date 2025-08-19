@@ -36,6 +36,7 @@ export async function getOrganization(
     })
     .from(organizations)
     .where(eq(organizations.slug, organizationSlug))
+    .limit(1)
 
   return organization || null
 }
@@ -60,6 +61,7 @@ export async function getOrganizationTeam(
     .from(teams)
     .innerJoin(organizations, eq(teams.organizationId, organizations.id))
     .where(and(eq(teams.id, teamId), eq(organizations.slug, organizationSlug)))
+    .limit(1)
 
   return organizationTeam || null
 }

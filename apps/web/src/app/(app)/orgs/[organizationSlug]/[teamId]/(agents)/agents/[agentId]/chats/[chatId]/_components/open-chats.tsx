@@ -30,10 +30,6 @@ export function OpenChats() {
     {
       id: 'foo',
       title: '(untitled)',
-      path: [
-        { id: 'my-chats', title: 'My Chats' },
-        { id: 'untitled', title: '(untitled)' },
-      ],
     },
   ]
 

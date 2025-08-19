@@ -1,13 +1,19 @@
+'use client'
+
 import { Button } from '@workspace/ui/components/button'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
+import { cn } from '@workspace/ui/lib/utils'
 import { Files, RefreshCw, Search } from 'lucide-react'
-import { Explorer } from './explorer'
+import { ExplorerTree } from './explorer-tree'
+import { Refresh, useRefresh } from './refresh'
 
 export function LeftSidebar() {
+  const { loadingAnimation, refresh } = useRefresh()
+
   return (
     <>
       <div className="z-20 flex flex-row items-center justify-start gap-1 border-b bg-background p-1 px-2">
@@ -29,8 +35,15 @@ export function LeftSidebar() {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
-              <RefreshCw className="size-4" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={refresh}
+            >
+              <RefreshCw
+                className={cn('size-4', loadingAnimation && 'animate-spin')}
+              />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Refresh</TooltipContent>
@@ -38,7 +51,9 @@ export function LeftSidebar() {
       </div>
 
       <div className="flex-1 overflow-y-scroll p-2">
-        <Explorer />
+        <Refresh>
+          <ExplorerTree />
+        </Refresh>
       </div>
     </>
   )

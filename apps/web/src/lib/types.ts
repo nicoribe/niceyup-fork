@@ -1,12 +1,10 @@
 export type OrganizationTeamParams = {
-  organizationSlug: 'my-account' | 'any'
-  teamId: '~' | 'any'
+  organizationSlug: 'my-account' | '$id'
+  teamId: '~' | '$id'
 }
 
 export type ChatParams = {
-  chatId: 'new' | 'any'
+  chatId: 'new' | '$id'
 }
 
 export type Agent = any
-
-export type Chat = any

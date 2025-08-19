@@ -7,6 +7,7 @@ import {
   primaryKey,
   real,
   text,
+  timestamp,
 } from 'drizzle-orm/pg-core'
 import type {
   ColumnProperNamesByTables,
@@ -150,6 +151,7 @@ export const conversations = pgTable('conversations', {
   ...id,
   title: text('title').notNull().default('Untitled'),
   agentId: text('agent_id').references(() => agents.id),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
 
@@ -187,6 +189,36 @@ export const messagesRelations = relations(messages, ({ one }) => ({
     references: [users.id],
   }),
 }))
+
+export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
+  ...id,
+  name: text('name').notNull().default('(untitled)'),
+  explorerType: text('explorer_type').notNull().default('private'), // "private", "shared", "team"
+  conversationId: text('conversation_id').references(() => conversations.id, {
+    onDelete: 'cascade',
+  }),
+  parentId: text('parent_id'),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  ...timestamps,
+})
+
+export const conversationExplorerTreeRelations = relations(
+  conversationExplorerTree,
+  ({ one, many }) => ({
+    conversation: one(conversations, {
+      fields: [conversationExplorerTree.conversationId],
+      references: [conversations.id],
+    }),
+    parent: one(conversationExplorerTree, {
+      fields: [conversationExplorerTree.parentId],
+      references: [conversationExplorerTree.id],
+      relationName: 'parent',
+    }),
+    children: many(conversationExplorerTree, {
+      relationName: 'parent',
+    }),
+  }),
+)
 
 export const agentsToSources = pgTable(
   'agents_to_sources',
