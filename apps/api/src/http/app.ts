@@ -13,7 +13,17 @@ import { version } from '../../package.json'
 import { errorHandler } from './errors/error-handler'
 import { routes } from './routes'
 
-export const app = fastify().withTypeProvider<ZodTypeProvider>()
+export const app = fastify({
+  logger: {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+      },
+    },
+  },
+}).withTypeProvider<ZodTypeProvider>()
 
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)

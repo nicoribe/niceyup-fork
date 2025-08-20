@@ -1,6 +1,6 @@
 'use client'
 
-import type { ChatParams, OrganizationTeamParams } from '@/lib/types'
+import type { Chat, ChatParams, OrganizationTeamParams } from '@/lib/types'
 import { Button } from '@workspace/ui/components/button'
 import {
   DropdownMenu,
@@ -19,63 +19,115 @@ import { cn } from '@workspace/ui/lib/utils'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
+import * as React from 'react'
+import { create } from 'zustand'
+import { useExplorerTree } from '../../_components/explorer-tree'
+import type { PathInExplorer } from '../../_lib/types'
+
+interface OpenChatsStore {
+  openChats: Chat[]
+  setOpenChats: (openChats: Chat[] | ((prevChats: Chat[]) => Chat[])) => void
+}
+
+export const useOpenChats = create<OpenChatsStore>((set) => ({
+  openChats: [],
+  setOpenChats: (openChats) =>
+    set((state) => ({
+      openChats:
+        typeof openChats === 'function'
+          ? openChats(state.openChats)
+          : openChats,
+    })),
+}))
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
-export function OpenChats() {
+export function OpenChats({
+  chat,
+  pathInExplorer,
+}: {
+  chat: Chat | null
+  pathInExplorer: PathInExplorer[]
+}) {
   const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
 
-  const openChats = [
-    {
-      id: 'foo',
-      title: '(untitled)',
-    },
-  ]
+  const { openChats, setOpenChats } = useOpenChats()
+  const { revealItemInExplorer, setRevealItemInExplorer } = useExplorerTree()
+
+  const onCloseChat = (chatId: string) => {
+    setOpenChats((prevChats) => prevChats.filter((c) => c.id !== chatId))
+  }
+
+  React.useEffect(() => {
+    if (chat) {
+      setOpenChats((prevChats) => {
+        if (!prevChats.some((c) => c.id === chat.id)) {
+          return [...prevChats, chat]
+        }
+        return prevChats
+      })
+    }
+  }, [chat])
 
   return (
     <div className="flex flex-row items-center bg-background px-1">
       <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-scroll">
-        {openChats.map((chat, index) => (
-          <>
-            <Tooltip key={`${chat.id}-${index}-tooltip`}>
-              <TooltipTrigger asChild>
-                <Link
-                  href={`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${chat.id}`}
-                >
-                  <div
-                    key={`${chat.id}-${index}`}
-                    className={cn(
-                      'flex select-none flex-row items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 font-medium text-sm hover:bg-accent',
-                      chat.id === chatId
-                        ? 'max-w-40 bg-secondary'
-                        : 'max-w-36 bg-transparent',
-                    )}
+        {openChats.map((chat, index) => {
+          const Comp = chatId === chat.id ? 'div' : Link
+
+          return (
+            <>
+              <Tooltip key={`${chat.id}-${index}-tooltip`}>
+                <TooltipTrigger asChild>
+                  <Comp
+                    href={`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${chat.id}`}
                   >
-                    <p className="truncate">{chat.title}</p>
-                    {chat.id === chatId && (
-                      <XIcon className="size-3 shrink-0 text-muted-foreground hover:text-foreground" />
-                    )}
-                  </div>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>{chat.title}</TooltipContent>
-            </Tooltip>
-            {index !== openChats.length - 1 && (
-              <Separator
-                key={`${chat.id}-${index}-separator`}
-                orientation="vertical"
-                className="data-[orientation=vertical]:h-4"
-              />
-            )}
-          </>
-        ))}
+                    <div
+                      key={`${chat.id}-${index}`}
+                      className={cn(
+                        'flex select-none flex-row items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 font-medium text-sm hover:bg-accent',
+                        chat.id === chatId
+                          ? 'max-w-40 bg-secondary'
+                          : 'max-w-36 bg-transparent',
+                      )}
+                    >
+                      <p className="truncate">{chat.title}</p>
+                      {chat.id === chatId && (
+                        <div
+                          onClick={() => {
+                            onCloseChat(chat.id)
+                            redirect(
+                              `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`,
+                            )
+                          }}
+                        >
+                          <XIcon className="size-3 shrink-0 text-muted-foreground hover:text-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  </Comp>
+                </TooltipTrigger>
+                <TooltipContent>{chat.title}</TooltipContent>
+              </Tooltip>
+              {index !== openChats.length - 1 && (
+                <Separator
+                  key={`${chat.id}-${index}-separator`}
+                  orientation="vertical"
+                  className="data-[orientation=vertical]:h-4"
+                />
+              )}
+            </>
+          )
+        })}
 
         <div className="sticky right-0 flex flex-1 flex-row items-center gap-1 bg-background">
-          <Separator
-            orientation="vertical"
-            className="data-[orientation=vertical]:h-4"
-          />
+          {!!openChats.length && (
+            <Separator
+              orientation="vertical"
+              className="data-[orientation=vertical]:h-4"
+            />
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -112,6 +164,22 @@ export function OpenChats() {
             <DropdownMenuItem>Close Chat</DropdownMenuItem>
             <DropdownMenuItem>Close All Chats</DropdownMenuItem>
             <DropdownMenuItem>Close Other Chats</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              disabled={!!revealItemInExplorer}
+              onSelect={async () => {
+                const lastItem = pathInExplorer.pop()
+
+                if (lastItem) {
+                  setRevealItemInExplorer({
+                    parentIds: pathInExplorer.map((item) => item.id),
+                    id: lastItem.id,
+                  })
+                }
+              }}
+            >
+              Reveal in Explorer
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link

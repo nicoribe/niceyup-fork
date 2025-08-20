@@ -8,3 +8,9 @@ export type ChatParams = {
 }
 
 export type Agent = any
+
+export type Chat = {
+  id: string
+  title: string
+  agentId: string | null
+}

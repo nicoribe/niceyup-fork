@@ -155,7 +155,7 @@ export async function deleteItemInConversationExplorerTree({
 }) {
   if (explorerType === 'shared') {
     await db.execute(sql`
-      WITH RECURSIVE explorerTreePath AS (
+      WITH RECURSIVE explorer_tree_path AS (
         SELECT id, conversation_id
         FROM ${conversationExplorerTree}
         WHERE id = ${itemId} 
@@ -164,15 +164,15 @@ export async function deleteItemInConversationExplorerTree({
   
         UNION ALL
   
-        SELECT treeNode.id, treeNode.conversation_id
-        FROM ${conversationExplorerTree} treeNode
-        INNER JOIN explorerTreePath parentTree ON treeNode.parent_id = parentTree.id
-        WHERE treeNode.deleted_at IS NULL
+        SELECT tree_node.id, tree_node.conversation_id
+        FROM ${conversationExplorerTree} tree_node
+        INNER JOIN explorer_tree_path parent_tree ON tree_node.parent_id = parent_tree.id
+        WHERE tree_node.deleted_at IS NULL
       )
       UPDATE ${conversationExplorerTree}
       SET deleted_at = NOW()
       WHERE id IN (
-        SELECT id FROM explorerTreePath 
+        SELECT id FROM explorer_tree_path 
         WHERE conversation_id IS NULL
       )
     `)
@@ -180,7 +180,7 @@ export async function deleteItemInConversationExplorerTree({
     const deletedConversations = await db.execute<{
       conversation_id: string
     }>(sql`
-      WITH RECURSIVE explorerTreePath AS (
+      WITH RECURSIVE explorer_tree_path AS (
         SELECT id, conversation_id
         FROM ${conversationExplorerTree}
         WHERE id = ${itemId} 
@@ -189,14 +189,14 @@ export async function deleteItemInConversationExplorerTree({
   
         UNION ALL
   
-        SELECT treeNode.id, treeNode.conversation_id
-        FROM ${conversationExplorerTree} treeNode
-        INNER JOIN explorerTreePath parentTree ON treeNode.parent_id = parentTree.id
-        WHERE treeNode.deleted_at IS NULL
+        SELECT tree_node.id, tree_node.conversation_id
+        FROM ${conversationExplorerTree} tree_node
+        INNER JOIN explorer_tree_path parent_tree ON tree_node.parent_id = parent_tree.id
+        WHERE tree_node.deleted_at IS NULL
       )
       DELETE FROM ${conversationExplorerTree}
       WHERE id IN (
-        SELECT id FROM explorerTreePath 
+        SELECT id FROM explorer_tree_path 
         WHERE conversation_id IS NOT NULL
       )
       RETURNING conversation_id
@@ -209,7 +209,7 @@ export async function deleteItemInConversationExplorerTree({
     await leaveConversations(leaveConversationIds)
   } else {
     const deletedItems = await db.execute<{ conversation_id: string }>(sql`
-      WITH RECURSIVE explorerTreePath AS (
+      WITH RECURSIVE explorer_tree_path AS (
         SELECT id
         FROM ${conversationExplorerTree}
         WHERE id = ${itemId} 
@@ -218,14 +218,14 @@ export async function deleteItemInConversationExplorerTree({
   
         UNION ALL
   
-        SELECT treeNode.id
-        FROM ${conversationExplorerTree} treeNode
-        INNER JOIN explorerTreePath parentTree ON treeNode.parent_id = parentTree.id
-        WHERE treeNode.deleted_at IS NULL
+        SELECT tree_node.id
+        FROM ${conversationExplorerTree} tree_node
+        INNER JOIN explorer_tree_path parent_tree ON tree_node.parent_id = parent_tree.id
+        WHERE tree_node.deleted_at IS NULL
       )
       UPDATE ${conversationExplorerTree}
       SET deleted_at = NOW()
-      WHERE id IN (SELECT id FROM explorerTreePath)
+      WHERE id IN (SELECT id FROM explorer_tree_path)
       RETURNING conversation_id
     `)
 
@@ -258,4 +258,71 @@ export async function createFolderInConversationExplorerTree({
     })
 
   return newFolder
+}
+
+export async function getParentsInConversationExplorerTree({
+  explorerType,
+  itemId,
+  conversationId,
+}: {
+  explorerType: ConversationExplorerType
+} & (
+  | {
+      itemId: string
+      conversationId?: never
+    }
+  | {
+      itemId?: never
+      conversationId: string
+    }
+)) {
+  if (!itemId && !conversationId) {
+    throw new Error('itemId or conversationId is required')
+  }
+
+  const parents = await db.execute<{
+    id: string
+    name: string
+    explorer_type: ConversationExplorerType
+    parent_id: string | null
+    conversation_id: string | null
+    deleted_at: string | null
+    level: number
+  }>(sql`
+    WITH RECURSIVE explorer_tree_path AS (
+      SELECT tree_node.id,
+             tree_node.name,
+             tree_node.explorer_type,
+             tree_node.parent_id,
+             tree_node.conversation_id,
+             tree_node.deleted_at,
+             0 AS level
+      FROM ${conversationExplorerTree} tree_node
+      WHERE ${conversationId ? sql`tree_node.conversation_id = ${conversationId}` : sql`tree_node.id = ${itemId}`}
+        AND tree_node.explorer_type = ${explorerType}
+      
+      UNION ALL
+      
+      SELECT parent_node.id,
+             parent_node.name,
+             parent_node.explorer_type,
+             parent_node.parent_id,
+             parent_node.conversation_id,
+             parent_node.deleted_at,
+             explorer_tree_path.level + 1 AS level
+      FROM ${conversationExplorerTree} parent_node
+      INNER JOIN explorer_tree_path ON parent_node.id = explorer_tree_path.parent_id
+    )
+    SELECT id,
+           name,
+           explorer_type,
+           parent_id,
+           conversation_id,
+           deleted_at,
+           level
+    FROM explorer_tree_path
+    ORDER BY level DESC
+  `)
+
+  return parents.rows
 }

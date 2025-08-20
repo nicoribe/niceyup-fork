@@ -5,7 +5,7 @@ import {
   deleteItemInConversationExplorerTree,
 } from '@/actions/conversation-explorer-tree'
 import type { OrganizationTeamParams } from '@/lib/types'
-import type { ItemInstance } from '@headless-tree/core'
+import type { ItemInstance, TreeInstance } from '@headless-tree/core'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
 import { Input } from '@workspace/ui/components/input'
+import { Skeleton } from '@workspace/ui/components/skeleton'
 import { TreeItem, TreeItemLabel } from '@workspace/ui/components/tree'
 import { cn } from '@workspace/ui/lib/utils'
 import {
@@ -24,20 +25,41 @@ import {
   MessageCircleIcon,
   MoreHorizontalIcon,
 } from 'lucide-react'
-import Link from 'next/link'
 import { redirect, useParams } from 'next/navigation'
 import type * as React from 'react'
 import type { Item } from './explorer-tree'
 
 type Params = OrganizationTeamParams & { agentId: string }
 
-export function TreeItemData({ item }: { item: ItemInstance<Item> }) {
+export function TreeItemData({
+  item,
+  tree,
+}: { item: ItemInstance<Item>; tree: TreeInstance<Item> }) {
   const { organizationSlug, teamId, agentId } = useParams<Params>()
 
   if (item.getItemData().disabled) {
     return null
   }
 
+  if (item.getItemData().loading) {
+    return (
+      <TreeItem key={item.getId()} item={item}>
+        <TreeItemLabel>
+          <Skeleton className="size-5 shrink-0 rounded-full" />
+          <Skeleton className="h-5 w-full rounded-sm" />
+        </TreeItemLabel>
+      </TreeItem>
+    )
+  }
+
+  const onNewChat = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    tree.setSelectedItems([item.getId()])
+    item.expand()
+
+    redirect(`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`)
+  }
   const onNewFolder = async (e: React.MouseEvent) => {
     e.stopPropagation()
 
@@ -57,6 +79,7 @@ export function TreeItemData({ item }: { item: ItemInstance<Item> }) {
         .find((child) => child.getId() === newFolder.id)
 
       if (newFolderItem) {
+        tree.setSelectedItems([newFolderItem.getId()])
         newFolderItem.startRenaming()
       }
     }
@@ -142,12 +165,8 @@ export function TreeItemData({ item }: { item: ItemInstance<Item> }) {
           <DropdownMenuContent align="start">
             {item.isFolder() && (
               <>
-                <DropdownMenuItem asChild>
-                  <Link
-                    href={`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`}
-                  >
-                    New Chat
-                  </Link>
+                <DropdownMenuItem onClick={onNewChat}>
+                  New Chat
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onNewFolder}>
                   New Folder
