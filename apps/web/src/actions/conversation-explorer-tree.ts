@@ -2,7 +2,7 @@
 
 import { db } from '@workspace/db'
 import { and, eq, inArray, isNull, sql } from '@workspace/db/orm'
-import { conversationExplorerTree } from '@workspace/db/schema'
+import { conversationExplorerTree, conversations } from '@workspace/db/schema'
 import { leaveConversations, softDeleteConversations } from './conversations'
 
 export type ConversationExplorerType = 'private' | 'shared' | 'team'
@@ -17,7 +17,13 @@ export async function getItemInConversationExplorerTree({
   const [itemData] = await db
     .select({
       id: conversationExplorerTree.id,
-      name: conversationExplorerTree.name,
+      name: sql<string>`
+        CASE 
+          WHEN ${conversationExplorerTree.conversationId} IS NOT NULL 
+          THEN COALESCE(${conversations.title}, ${conversationExplorerTree.name})
+          ELSE ${conversationExplorerTree.name}
+        END
+      `.as('name'),
       conversationId: conversationExplorerTree.conversationId,
       children: sql<string[]>`
         ARRAY(
@@ -28,6 +34,10 @@ export async function getItemInConversationExplorerTree({
       `.as('children'),
     })
     .from(conversationExplorerTree)
+    .leftJoin(
+      conversations,
+      eq(conversationExplorerTree.conversationId, conversations.id),
+    )
     .where(
       and(
         eq(conversationExplorerTree.explorerType, explorerType),
@@ -53,7 +63,13 @@ export async function getChildrenWithDataInConversationExplorerTree({
         id: conversationExplorerTree.id,
         data: {
           id: conversationExplorerTree.id,
-          name: conversationExplorerTree.name,
+          name: sql<string>`
+            CASE 
+              WHEN ${conversationExplorerTree.conversationId} IS NOT NULL 
+              THEN COALESCE(${conversations.title}, ${conversationExplorerTree.name})
+              ELSE ${conversationExplorerTree.name}
+            END
+          `.as('name'),
           conversationId: conversationExplorerTree.conversationId,
           children: sql<string[]>`
             ARRAY(
@@ -65,6 +81,10 @@ export async function getChildrenWithDataInConversationExplorerTree({
         },
       })
       .from(conversationExplorerTree)
+      .leftJoin(
+        conversations,
+        eq(conversationExplorerTree.conversationId, conversations.id),
+      )
       .where(
         and(
           eq(conversationExplorerTree.explorerType, explorerType),
@@ -81,7 +101,13 @@ export async function getChildrenWithDataInConversationExplorerTree({
       id: conversationExplorerTree.id,
       data: {
         id: conversationExplorerTree.id,
-        name: conversationExplorerTree.name,
+        name: sql<string>`
+          CASE 
+            WHEN ${conversationExplorerTree.conversationId} IS NOT NULL 
+            THEN COALESCE(${conversations.title}, ${conversationExplorerTree.name})
+            ELSE ${conversationExplorerTree.name}
+          END
+        `.as('name'),
         conversationId: conversationExplorerTree.conversationId,
         children: sql<string[]>`
           ARRAY(
@@ -93,6 +119,10 @@ export async function getChildrenWithDataInConversationExplorerTree({
       },
     })
     .from(conversationExplorerTree)
+    .leftJoin(
+      conversations,
+      eq(conversationExplorerTree.conversationId, conversations.id),
+    )
     .where(
       and(
         eq(conversationExplorerTree.explorerType, explorerType),
@@ -107,22 +137,43 @@ export async function getChildrenWithDataInConversationExplorerTree({
 export async function updateNameOfItemInConversationExplorerTree({
   explorerType,
   itemId,
+  conversationId,
   name,
 }: {
   explorerType: ConversationExplorerType
-  itemId: string
   name: string
-}) {
-  await db
-    .update(conversationExplorerTree)
-    .set({ name })
-    .where(
-      and(
-        eq(conversationExplorerTree.explorerType, explorerType),
-        eq(conversationExplorerTree.id, itemId),
-        isNull(conversationExplorerTree.deletedAt),
-      ),
-    )
+} & (
+  | {
+      itemId: string
+      conversationId?: never
+    }
+  | {
+      itemId?: never
+      conversationId: string
+    }
+)) {
+  if (conversationId) {
+    await db
+      .update(conversations)
+      .set({ title: name })
+      .where(
+        and(
+          eq(conversations.id, conversationId),
+          isNull(conversations.deletedAt),
+        ),
+      )
+  } else if (itemId) {
+    await db
+      .update(conversationExplorerTree)
+      .set({ name })
+      .where(
+        and(
+          eq(conversationExplorerTree.explorerType, explorerType),
+          eq(conversationExplorerTree.id, itemId),
+          isNull(conversationExplorerTree.deletedAt),
+        ),
+      )
+  }
 }
 
 export async function updateParentIdOfItemsInConversationExplorerTree({
@@ -291,13 +342,18 @@ export async function getParentsInConversationExplorerTree({
   }>(sql`
     WITH RECURSIVE explorer_tree_path AS (
       SELECT tree_node.id,
-             tree_node.name,
+             CASE 
+               WHEN tree_node.conversation_id IS NOT NULL 
+               THEN COALESCE(conv.title, tree_node.name)
+               ELSE tree_node.name
+             END AS name,
              tree_node.explorer_type,
              tree_node.parent_id,
              tree_node.conversation_id,
              tree_node.deleted_at,
              0 AS level
       FROM ${conversationExplorerTree} tree_node
+      LEFT JOIN ${conversations} conv ON tree_node.conversation_id = conv.id
       WHERE ${conversationId ? sql`tree_node.conversation_id = ${conversationId}` : sql`tree_node.id = ${itemId}`}
         AND tree_node.explorer_type = ${explorerType}
       

@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
 
-async function authSession() {
+export const authenticatedUser = cache(async () => {
   try {
     const authSession = await auth.api.getSession({
       headers: await headers(),
@@ -17,57 +17,40 @@ async function authSession() {
   } catch {
     redirect('/auth/sign-out')
   }
-}
+})
 
-export async function authenticatedUser({
-  disableCache,
-}: { disableCache?: true } = {}) {
-  if (disableCache) {
-    // Don't cache the session, it's not needed
-    return authSession()
+export const activeMember = cache(async () => {
+  try {
+    const member = await auth.api.getActiveMember({
+      headers: await headers(),
+    })
+
+    return member
+  } catch {
+    return null
   }
+})
 
-  return cache(authSession)()
-}
+export const listOrganizations = cache(async () => {
+  try {
+    const organizations = await auth.api.listOrganizations({
+      headers: await headers(),
+    })
 
-export async function activeMember() {
-  return cache(async () => {
-    try {
-      const member = await auth.api.getActiveMember({
-        headers: await headers(),
-      })
+    return organizations
+  } catch {
+    return []
+  }
+})
 
-      return member
-    } catch {
-      return null
-    }
-  })()
-}
+export const listOrganizationTeams = cache(async () => {
+  try {
+    const teams = await auth.api.listOrganizationTeams({
+      headers: await headers(),
+    })
 
-export async function listOrganizations() {
-  return cache(async () => {
-    try {
-      const organizations = await auth.api.listOrganizations({
-        headers: await headers(),
-      })
-
-      return organizations
-    } catch {
-      return []
-    }
-  })()
-}
-
-export async function listOrganizationTeams() {
-  return cache(async () => {
-    try {
-      const teams = await auth.api.listOrganizationTeams({
-        headers: await headers(),
-      })
-
-      return teams
-    } catch {
-      return []
-    }
-  })()
-}
+    return teams
+  } catch {
+    return []
+  }
+})

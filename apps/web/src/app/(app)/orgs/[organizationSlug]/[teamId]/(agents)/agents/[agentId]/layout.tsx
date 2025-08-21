@@ -16,6 +16,7 @@ export default async function Layout({
   const { organizationSlug, teamId, agentId } = await params
 
   const agents = [
+    { id: 'fdd4445b-5633-469f-9e91-3b6a44031508', name: 'Agent 1' },
     { id: 'foo', name: 'Foo' },
     { id: 'bar', name: 'Bar' },
   ]

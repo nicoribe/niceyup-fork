@@ -13,6 +13,12 @@ export async function baseFetch<TVariables>(
     body: JSON.stringify(config.data),
     signal: config.signal,
     headers: await getHeaders(config.headers),
+    ...(config.next && {
+      next: {
+        revalidate: config.next?.revalidate,
+        tags: config.next?.tags,
+      },
+    }),
   })
 
   return response

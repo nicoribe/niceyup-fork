@@ -122,31 +122,34 @@ export function ExplorerTree() {
 
       await Promise.all([
         target.item.invalidateChildrenIds(),
-        revalidateTag('chats-explorer-tree'),
+        revalidateTag('chats-tabbar'),
       ])
     },
     onRename: async (item, value) => {
+      const chatId = item.getItemData().conversationId
+
       await updateNameOfItemInConversationExplorerTree({
         explorerType: 'private',
-        itemId: item.getId(),
         name: value,
+        ...(chatId ? { conversationId: chatId } : { itemId: item.getId() }),
       })
 
-      await Promise.all([
-        item.invalidateItemData(),
-        revalidateTag('chats-explorer-tree'),
-      ])
-
-      const chatId = item.getItemData().conversationId
       if (chatId) {
         setOpenChats((prevChats) => {
           const chat = prevChats.find(({ id }) => id === chatId)
           if (chat) {
-            chat.title = item.getItemData().name
+            chat.title = value
           }
           return prevChats
         })
       }
+
+      await Promise.all([
+        item.invalidateItemData(),
+        chatId
+          ? revalidateTag(`chat-${chatId}`)
+          : revalidateTag('chats-tabbar'),
+      ])
     },
     features: [
       asyncDataLoaderFeature,

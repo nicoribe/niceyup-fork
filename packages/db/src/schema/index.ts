@@ -192,7 +192,7 @@ export const messagesRelations = relations(messages, ({ one }) => ({
 
 export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
   ...id,
-  name: text('name').notNull().default('(untitled)'),
+  name: text('name'),
   explorerType: text('explorer_type').notNull().default('private'), // "private", "shared", "team"
   conversationId: text('conversation_id').references(() => conversations.id, {
     onDelete: 'cascade',

@@ -55,19 +55,39 @@ export function OpenChats({
   const { openChats, setOpenChats } = useOpenChats()
   const { revealItemInExplorer, setRevealItemInExplorer } = useExplorerTree()
 
-  const onCloseChat = (chatId: string) => {
-    setOpenChats((prevChats) => prevChats.filter((c) => c.id !== chatId))
+  const onCloseChat = () => {
+    setOpenChats((prevChats) => prevChats.filter(({ id }) => id !== chatId))
+    redirect(`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`)
+  }
+
+  const onCloseAllChats = () => {
+    setOpenChats([])
+    redirect(`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`)
+  }
+
+  const onCloseOtherChats = () => {
+    setOpenChats((prevChats) => prevChats.filter(({ id }) => id === chatId))
   }
 
   React.useEffect(() => {
-    if (chat) {
-      setOpenChats((prevChats) => {
-        if (!prevChats.some((c) => c.id === chat.id)) {
-          return [...prevChats, chat]
-        }
-        return prevChats
-      })
+    if (chatId === 'new') {
+      return
     }
+
+    if (!chat) {
+      setOpenChats((prevChats) => prevChats.filter(({ id }) => id !== chatId))
+      return
+    }
+
+    setOpenChats((prevChats) => {
+      const chatIndex = prevChats.findIndex(({ id }) => id === chat.id)
+      if (chatIndex !== -1) {
+        prevChats[chatIndex] = chat
+        return prevChats
+      }
+
+      return [...prevChats, chat]
+    })
   }, [chat])
 
   return (
@@ -94,14 +114,7 @@ export function OpenChats({
                     >
                       <p className="truncate">{chat.title}</p>
                       {chat.id === chatId && (
-                        <div
-                          onClick={() => {
-                            onCloseChat(chat.id)
-                            redirect(
-                              `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`,
-                            )
-                          }}
-                        >
+                        <div onClick={onCloseChat}>
                           <XIcon className="size-3 shrink-0 text-muted-foreground hover:text-foreground" />
                         </div>
                       )}
@@ -161,18 +174,24 @@ export function OpenChats({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Close Chat</DropdownMenuItem>
-            <DropdownMenuItem>Close All Chats</DropdownMenuItem>
-            <DropdownMenuItem>Close Other Chats</DropdownMenuItem>
+            <DropdownMenuItem onSelect={onCloseChat}>
+              Close Chat
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onCloseAllChats}>
+              Close All Chats
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onCloseOtherChats}>
+              Close Other Chats
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               disabled={!!revealItemInExplorer}
               onSelect={async () => {
-                const lastItem = pathInExplorer.pop()
+                const lastItem = pathInExplorer.at(-1)
 
                 if (lastItem) {
                   setRevealItemInExplorer({
-                    parentIds: pathInExplorer.map((item) => item.id),
+                    parentIds: pathInExplorer.map(({ id }) => id).slice(0, -1),
                     id: lastItem.id,
                   })
                 }

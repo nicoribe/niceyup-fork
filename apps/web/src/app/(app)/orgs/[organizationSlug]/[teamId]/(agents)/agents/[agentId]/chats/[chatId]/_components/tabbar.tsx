@@ -16,9 +16,7 @@ export async function Tabbar({
   const getCachedParentsInConversationExplorerTree = unstable_cache(
     getParentsInConversationExplorerTree,
     [chatId],
-    {
-      tags: ['chats-explorer-tree'],
-    },
+    { tags: ['chats-tabbar', `chat-${chatId}`] },
   )
 
   const pathInExplorer = chat

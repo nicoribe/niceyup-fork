@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
 import { cn } from '@workspace/ui/lib/utils'
-import { Files, RefreshCw, Search } from 'lucide-react'
+import { Files, RotateCw, Search } from 'lucide-react'
 import { ExplorerTree } from './explorer-tree'
 import { Refresh, useRefresh } from './refresh'
 
@@ -41,7 +41,7 @@ export function LeftSidebar() {
               className="size-8"
               onClick={refresh}
             >
-              <RefreshCw
+              <RotateCw
                 className={cn('size-4', loadingAnimation && 'animate-spin')}
               />
             </Button>

@@ -74,14 +74,16 @@ export function TreeItemData({
     if (newFolder) {
       await item.invalidateChildrenIds()
 
-      const newFolderItem = item
-        .getChildren()
-        .find((child) => child.getId() === newFolder.id)
+      setTimeout(() => {
+        const newFolderItem = item
+          .getChildren()
+          .find((child) => child.getId() === newFolder.id)
 
-      if (newFolderItem) {
-        tree.setSelectedItems([newFolderItem.getId()])
-        newFolderItem.startRenaming()
-      }
+        if (newFolderItem) {
+          tree.setSelectedItems([newFolderItem.getId()])
+          newFolderItem.startRenaming()
+        }
+      }, 300)
     }
   }
 

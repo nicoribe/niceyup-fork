@@ -15,6 +15,10 @@ export type RequestConfig<TData = unknown> = {
   headers?: HeadersInit
   credentials?: 'omit' | 'same-origin' | 'include'
   getSessionTokenFn?: () => Promise<string | null>
+  next?: {
+    revalidate?: number | false | undefined
+    tags?: string[] | undefined
+  }
 }
 
 export type ResponseConfig<TData = unknown> = {

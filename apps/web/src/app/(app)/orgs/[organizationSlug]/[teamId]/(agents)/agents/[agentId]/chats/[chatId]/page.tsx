@@ -2,6 +2,7 @@ import { getConversation } from '@/actions/conversations'
 import type { ChatParams } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { cn } from '@workspace/ui/lib/utils'
+import { unstable_cache } from 'next/cache'
 import { Tabbar } from './_components/tabbar'
 
 export default async function Page({
@@ -11,7 +12,11 @@ export default async function Page({
 }>) {
   const { agentId, chatId } = await params
 
-  const chat = await getConversation(agentId, chatId)
+  const getCachedConversation = unstable_cache(getConversation, [chatId], {
+    tags: [`chat-${chatId}`],
+  })
+
+  const chat = await getCachedConversation(agentId, chatId)
 
   return (
     <div className="flex h-full flex-col">

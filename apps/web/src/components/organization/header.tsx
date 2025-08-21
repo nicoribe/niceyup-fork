@@ -23,10 +23,12 @@ export async function Header({
   activeAgent?: Agent
   agents?: Agent[]
 }) {
+  // TODO: Implement suspense for the header
+
   const {
     session: { activeOrganizationId, activeTeamId },
     user: personalAccount,
-  } = await authenticatedUser({ disableCache: true })
+  } = await authenticatedUser()
 
   const organizations = await listOrganizations()
 
