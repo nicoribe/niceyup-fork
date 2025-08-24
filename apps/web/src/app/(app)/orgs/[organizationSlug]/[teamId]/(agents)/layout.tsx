@@ -3,8 +3,8 @@ import {
   getOrganizationTeam,
   updateActiveOrganizationTeam,
 } from '@/actions/organizations'
-import { Header } from '@/components/organization/header'
-import { OrganizationNotFound } from '@/components/organization/organization-not-found'
+import { Header } from '@/components/organizations/header'
+import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
 import { activeMember, authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { redirect } from 'next/navigation'

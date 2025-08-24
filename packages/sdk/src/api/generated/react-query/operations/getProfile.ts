@@ -3,11 +3,11 @@
  * Do not edit manually.
  */
 
-import fetch from '../../../client/fetch-react-query'
+import fetch from '../../../../client/fetch-react-query'
 import type {
   RequestConfig,
   ResponseErrorConfig,
-} from '../../../client/fetch-react-query'
+} from '../../../../client/fetch-react-query'
 import type {
   GetProfileQueryResponse,
   GetProfile400,
@@ -23,7 +23,7 @@ function getGetProfileUrl() {
 }
 
 /**
- * @description Get current user profile
+ * @description Get authenticated user profile
  * {@link /profile}
  */
 export async function getProfile(

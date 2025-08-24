@@ -17,7 +17,7 @@ export default async function Page() {
           </h1>
         </DialogHeader>
         <div className="mt-5">
-          <CreateOrganizationForm />
+          <CreateOrganizationForm modal />
         </div>
       </InterceptedDialogContent>
     </Dialog>

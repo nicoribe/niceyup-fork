@@ -14,15 +14,15 @@ import { errorHandler } from './errors/error-handler'
 import { routes } from './routes'
 
 export const app = fastify({
-  logger: {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname',
-      },
-    },
-  },
+  // logger: {
+  //   transport: {
+  //     target: 'pino-pretty',
+  //     options: {
+  //       translateTime: 'HH:MM:ss Z',
+  //       ignore: 'pid,hostname',
+  //     },
+  //   },
+  // },
 }).withTypeProvider<ZodTypeProvider>()
 
 app.setSerializerCompiler(serializerCompiler)
@@ -32,42 +32,44 @@ app.setErrorHandler(errorHandler)
 
 app.register(fastifyCors)
 
-app.register(fastifySwagger, {
-  openapi: {
-    info: {
-      title: 'Better Chat',
-      description: 'API Reference for Better Chat',
-      version,
-    },
-    components: {
-      securitySchemes: {
-        apiKeyCookie: {
-          type: 'apiKey',
-          in: 'cookie',
-          name: 'apiKeyCookie',
-          description: 'API Key authentication via cookie',
-        },
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          description: 'Bearer token authentication',
+if (env.NODE_ENV === 'development') {
+  app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'Better Chat',
+        description: 'API Reference for Better Chat',
+        version,
+      },
+      components: {
+        securitySchemes: {
+          apiKeyCookie: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'apiKeyCookie',
+            description: 'API Key authentication via cookie',
+          },
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            description: 'Bearer token authentication',
+          },
         },
       },
+      security: [{ apiKeyCookie: [], bearerAuth: [] }],
+      servers: [{ url: `${env.API_URL}/api` }],
     },
-    security: [{ apiKeyCookie: [], bearerAuth: [] }],
-    servers: [{ url: `${env.API_URL}/api` }],
-  },
-  transform: jsonSchemaTransform,
-})
+    transform: jsonSchemaTransform,
+  })
 
-app.register(fastifyScalar, {
-  routePrefix: '/api/docs',
-  configuration: {
-    pageTitle: 'Better Chat API',
-    favicon: `${env.WEB_URL}/logo-light.svg`,
-    theme: 'saturn',
-  },
-})
+  app.register(fastifyScalar, {
+    routePrefix: '/api/docs',
+    configuration: {
+      pageTitle: 'Better Chat API',
+      favicon: `${env.WEB_URL}/logo-light.svg`,
+      theme: 'saturn',
+    },
+  })
+}
 
 app.register(routes, { prefix: '/api' })
 

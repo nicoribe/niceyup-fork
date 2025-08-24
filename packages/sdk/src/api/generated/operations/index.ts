@@ -1,2 +1,5 @@
+export { getAgent } from './getAgent'
+export { getConversation } from './getConversation'
 export { getProfile } from './getProfile'
 export { health } from './health'
+export { listAgents } from './listAgents'

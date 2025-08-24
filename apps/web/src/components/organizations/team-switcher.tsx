@@ -1,7 +1,7 @@
 'use client'
 
 import { updateActiveOrganizationTeam } from '@/actions/organizations'
-import type { Team } from '@workspace/auth'
+import type { listOrganizationTeams } from '@/lib/auth/server'
 import { Button } from '@workspace/ui/components/button'
 import {
   DropdownMenu,
@@ -14,6 +14,8 @@ import {
 import { ChevronsUpDown, CircleDashed, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+
+type Team = Awaited<ReturnType<typeof listOrganizationTeams>>[number]
 
 export function TeamSwitcher({
   organizationSlug,

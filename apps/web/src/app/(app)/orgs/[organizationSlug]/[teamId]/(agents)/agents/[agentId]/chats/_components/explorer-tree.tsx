@@ -7,6 +7,7 @@ import {
   updateParentIdOfItemsInConversationExplorerTree,
 } from '@/actions/conversation-explorer-tree'
 import { revalidateTag } from '@/actions/revalidate'
+import type { ChatParams } from '@/lib/types'
 import {
   asyncDataLoaderFeature,
   dragAndDropFeature,
@@ -17,6 +18,7 @@ import {
 } from '@headless-tree/core'
 import { AssistiveTreeDescription, useTree } from '@headless-tree/react'
 import { Tree, TreeDragLine } from '@workspace/ui/components/tree'
+import { useParams } from 'next/navigation'
 import * as React from 'react'
 import { create } from 'zustand'
 import { useOpenChats } from '../[chatId]/_components/open-chats'
@@ -63,6 +65,8 @@ export interface Item {
 const indent = 5
 
 export function ExplorerTree() {
+  const { agentId, chatId } = useParams<{ agentId: string } & ChatParams>()
+
   const { setSelectedFolder, revealItemInExplorer, setRevealItemInExplorer } =
     useExplorerTree()
 
@@ -79,7 +83,7 @@ export function ExplorerTree() {
     createLoadingItemData: () => ({ name: '(loading)', loading: true }),
     dataLoader: {
       getItem: async (itemId) => {
-        const itemData = await getItemInConversationExplorerTree({
+        const itemData = await getItemInConversationExplorerTree(agentId, {
           explorerType: 'private',
           itemId,
         })
@@ -88,7 +92,7 @@ export function ExplorerTree() {
       },
       getChildrenWithData: async (itemId) => {
         const childrenWithData =
-          await getChildrenWithDataInConversationExplorerTree({
+          await getChildrenWithDataInConversationExplorerTree(agentId, {
             explorerType: 'private',
             itemId,
           })
@@ -98,7 +102,7 @@ export function ExplorerTree() {
     },
     canReorder: true,
     onDrop: async (items, target) => {
-      await updateParentIdOfItemsInConversationExplorerTree({
+      await updateParentIdOfItemsInConversationExplorerTree(agentId, {
         explorerType: 'private',
         itemIds: items.map((item) => item.getId()),
         parentId: target.item.getId(),
@@ -122,21 +126,23 @@ export function ExplorerTree() {
 
       await Promise.all([
         target.item.invalidateChildrenIds(),
-        revalidateTag('chats-tabbar'),
+        revalidateTag(`chat-${chatId}`),
       ])
     },
     onRename: async (item, value) => {
-      const chatId = item.getItemData().conversationId
+      const itemChatId = item.getItemData().conversationId
 
-      await updateNameOfItemInConversationExplorerTree({
+      await updateNameOfItemInConversationExplorerTree(agentId, {
         explorerType: 'private',
         name: value,
-        ...(chatId ? { conversationId: chatId } : { itemId: item.getId() }),
+        ...(itemChatId
+          ? { conversationId: itemChatId }
+          : { itemId: item.getId() }),
       })
 
-      if (chatId) {
+      if (itemChatId) {
         setOpenChats((prevChats) => {
-          const chat = prevChats.find(({ id }) => id === chatId)
+          const chat = prevChats.find(({ id }) => id === itemChatId)
           if (chat) {
             chat.title = value
           }
@@ -146,9 +152,7 @@ export function ExplorerTree() {
 
       await Promise.all([
         item.invalidateItemData(),
-        chatId
-          ? revalidateTag(`chat-${chatId}`)
-          : revalidateTag('chats-tabbar'),
+        chatId === itemChatId && revalidateTag(`chat-${chatId}`),
       ])
     },
     features: [
@@ -267,6 +271,11 @@ export function ExplorerTree() {
       {tree.getItems().map((item) => {
         return <TreeItemData key={item.getId()} item={item} tree={tree} />
       })}
+      {!tree.getItems().length && (
+        <div className="flex h-full items-center justify-center gap-2 p-2">
+          <h1 className="text-muted-foreground text-xs">Empty</h1>
+        </div>
+      )}
       <TreeDragLine />
     </Tree>
   )

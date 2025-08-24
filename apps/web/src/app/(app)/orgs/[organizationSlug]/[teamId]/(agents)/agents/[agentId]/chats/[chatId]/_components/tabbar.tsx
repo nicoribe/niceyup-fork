@@ -1,26 +1,21 @@
 import { getParentsInConversationExplorerTree } from '@/actions/conversation-explorer-tree'
 import type { Chat } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
-import { unstable_cache } from 'next/cache'
 import { Appearance } from '../../_components/appearance'
 import { ExplorerTreePath } from './explorer-tree-path'
 import { OpenChats } from './open-chats'
 
 export async function Tabbar({
+  agentId,
   chatId,
   chat,
 }: {
+  agentId: string
   chatId: string
   chat: Chat | null
 }) {
-  const getCachedParentsInConversationExplorerTree = unstable_cache(
-    getParentsInConversationExplorerTree,
-    [chatId],
-    { tags: ['chats-tabbar', `chat-${chatId}`] },
-  )
-
   const pathInExplorer = chat
-    ? await getCachedParentsInConversationExplorerTree({
+    ? await getParentsInConversationExplorerTree(agentId, {
         explorerType: 'private',
         conversationId: chat.id,
       })

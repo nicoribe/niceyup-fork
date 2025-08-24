@@ -1,4 +1,28 @@
 export type {
+  GetAgentPathParams,
+  GetAgent200,
+  GetAgent400,
+  GetAgent401,
+  GetAgent403,
+  GetAgent404,
+  GetAgent429,
+  GetAgent500,
+  GetAgentQueryResponse,
+  GetAgentQuery,
+} from './GetAgent'
+export type {
+  GetConversationPathParams,
+  GetConversation200,
+  GetConversation400,
+  GetConversation401,
+  GetConversation403,
+  GetConversation404,
+  GetConversation429,
+  GetConversation500,
+  GetConversationQueryResponse,
+  GetConversationQuery,
+} from './GetConversation'
+export type {
   GetProfile200,
   GetProfile400,
   GetProfile401,
@@ -20,3 +44,14 @@ export type {
   HealthQueryResponse,
   HealthQuery,
 } from './Health'
+export type {
+  ListAgents200,
+  ListAgents400,
+  ListAgents401,
+  ListAgents403,
+  ListAgents404,
+  ListAgents429,
+  ListAgents500,
+  ListAgentsQueryResponse,
+  ListAgentsQuery,
+} from './ListAgents'

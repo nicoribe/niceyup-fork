@@ -47,7 +47,7 @@ export const getProfile400Schema = z
         formErrors: z.array(z.string()),
         fieldErrors: z.object({}).catchall(z.array(z.string())),
       })
-      .describe('Validation errors.')
+      .describe('Validation errors')
       .optional(),
   })
   .describe(

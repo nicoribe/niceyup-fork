@@ -50,6 +50,13 @@
       "when": 1755550132351,
       "tag": "0006_black_doctor_strange",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1755888935296,
+      "tag": "0007_simple_titania",
+      "breakpoints": true
     }
   ]
 }

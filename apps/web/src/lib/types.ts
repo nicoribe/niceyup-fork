@@ -7,7 +7,10 @@ export type ChatParams = {
   chatId: 'new' | '$id'
 }
 
-export type Agent = any
+export type Agent = {
+  id: string
+  name: string
+}
 
 export type Chat = {
   id: string

@@ -18,36 +18,9 @@ import type {
   TableMetadata,
 } from '../types'
 import { encryptedJson, id, timestamps } from '../utils'
-import { organizations, users } from './auth'
+import { organizations, teams, users } from './auth'
 
 export * from './auth'
-
-export const workspaces = pgTable('workspaces', {
-  ...id,
-  userId: text('user_id')
-    .unique()
-    .references(() => users.id, {
-      onDelete: 'set null',
-    }),
-  organizationId: text('organization_id')
-    .unique()
-    .references(() => organizations.id, {
-      onDelete: 'set null',
-    }),
-  ...timestamps,
-})
-
-export const workspacesRelations = relations(workspaces, ({ one, many }) => ({
-  user: one(users, {
-    fields: [workspaces.userId],
-    references: [users.id],
-  }),
-  organization: one(organizations, {
-    fields: [workspaces.organizationId],
-    references: [organizations.id],
-  }),
-  sources: many(sources),
-}))
 
 export const sources = pgTable('sources', {
   ...id,
@@ -60,9 +33,8 @@ export const sources = pgTable('sources', {
   chuckSize: integer('chuck_size'), // 4000
   chunkOverlap: integer('chunk_overlap'), // 100
 
-  workspaceId: text('workspace_id')
-    .notNull()
-    .references(() => workspaces.id, { onDelete: 'cascade' }),
+  userId: text('user_id').references(() => users.id),
+  organizationId: text('organization_id').references(() => organizations.id),
   databaseConnectionId: text('database_connection_id').references(
     () => databaseConnections.id,
   ),
@@ -70,9 +42,13 @@ export const sources = pgTable('sources', {
 })
 
 export const sourcesRelations = relations(sources, ({ one, many }) => ({
-  workspace: one(workspaces, {
-    fields: [sources.workspaceId],
-    references: [workspaces.id],
+  user: one(users, {
+    fields: [sources.userId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [sources.organizationId],
+    references: [organizations.id],
   }),
   databaseConnection: one(databaseConnections, {
     fields: [sources.databaseConnectionId],
@@ -139,10 +115,22 @@ export const agents = pgTable('agents', {
   promptMessages: jsonb('prompt_messages').$type<PromptMessage[]>(), // Enter task specifics. use {{template variables}} for dynamic inputs
 
   storeLogs: boolean('store_logs').default(false), // Whether to store logs for later retrieval. Logs are visible to your organization.
+
+  userId: text('user_id').references(() => users.id),
+  organizationId: text('organization_id').references(() => organizations.id),
   ...timestamps,
 })
 
-export const agentsRelations = relations(agents, ({ many }) => ({
+export const agentsRelations = relations(agents, ({ one, many }) => ({
+  user: one(users, {
+    fields: [agents.userId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [agents.organizationId],
+    references: [organizations.id],
+  }),
+  teams: many(teamsToAgents),
   sources: many(agentsToSources),
   conversations: many(conversations),
 }))
@@ -150,6 +138,10 @@ export const agentsRelations = relations(agents, ({ many }) => ({
 export const conversations = pgTable('conversations', {
   ...id,
   title: text('title').notNull().default('Untitled'),
+
+  teamId: text('team_id').references(() => teams.id),
+  ownerId: text('owner_id').references(() => users.id),
+
   agentId: text('agent_id').references(() => agents.id),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
@@ -194,6 +186,10 @@ export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
   ...id,
   name: text('name'),
   explorerType: text('explorer_type').notNull().default('private'), // "private", "shared", "team"
+  shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
+  agentId: text('agent_id').references(() => agents.id),
+  ownerId: text('owner_id').references(() => users.id),
+  teamId: text('team_id').references(() => teams.id),
   conversationId: text('conversation_id').references(() => conversations.id, {
     onDelete: 'cascade',
   }),
@@ -205,6 +201,10 @@ export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
 export const conversationExplorerTreeRelations = relations(
   conversationExplorerTree,
   ({ one, many }) => ({
+    agent: one(agents, {
+      fields: [conversationExplorerTree.agentId],
+      references: [agents.id],
+    }),
     conversation: one(conversations, {
       fields: [conversationExplorerTree.conversationId],
       references: [conversations.id],
@@ -219,6 +219,33 @@ export const conversationExplorerTreeRelations = relations(
     }),
   }),
 )
+
+export const teamsToAgents = pgTable(
+  'teams_to_agents',
+  {
+    teamId: text('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    agentId: text('agent_id')
+      .notNull()
+      .references(() => agents.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+  },
+  (t) => [primaryKey({ columns: [t.teamId, t.agentId] })],
+)
+
+export const teamsToAgentsRelations = relations(teamsToAgents, ({ one }) => ({
+  team: one(teams, {
+    fields: [teamsToAgents.teamId],
+    references: [teams.id],
+  }),
+  agent: one(agents, {
+    fields: [teamsToAgents.agentId],
+    references: [agents.id],
+  }),
+}))
 
 export const agentsToSources = pgTable(
   'agents_to_sources',

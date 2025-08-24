@@ -1,5 +1,5 @@
-import { Header } from '@/components/organization/header'
-import { TabBar } from '@/components/organization/tab-bar'
+import { Header } from '@/components/organizations/header'
+import { TabBar } from '@/components/organizations/tab-bar'
 
 export default async function Layout({
   children,

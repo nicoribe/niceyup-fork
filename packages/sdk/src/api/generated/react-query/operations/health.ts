@@ -3,11 +3,11 @@
  * Do not edit manually.
  */
 
-import fetch from '../../../client/fetch-react-query'
+import fetch from '../../../../client/fetch-react-query'
 import type {
   RequestConfig,
   ResponseErrorConfig,
-} from '../../../client/fetch-react-query'
+} from '../../../../client/fetch-react-query'
 import type {
   HealthQueryResponse,
   Health400,
@@ -23,7 +23,7 @@ function getHealthUrl() {
 }
 
 /**
- * @description Check if the server is running
+ * @description Check if the API is working
  * {@link /health}
  */
 export async function health(

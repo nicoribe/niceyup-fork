@@ -3,8 +3,8 @@
  * Do not edit manually.
  */
 
-import fetch from '../../client/fetch'
-import type { RequestConfig, ResponseErrorConfig } from '../../client/fetch'
+import fetch from '../../../client/fetch'
+import type { RequestConfig, ResponseErrorConfig } from '../../../client/fetch'
 import type {
   GetProfileQueryResponse,
   GetProfile400,
@@ -20,7 +20,7 @@ function getGetProfileUrl() {
 }
 
 /**
- * @description Get current user profile
+ * @description Get authenticated user profile
  * {@link /profile}
  */
 export async function getProfile(

@@ -15,7 +15,7 @@ import {
 import { Input } from '@workspace/ui/components/input'
 import { stripSpecialCharacters, validateSlug } from '@workspace/utils'
 import { Loader2 } from 'lucide-react'
-import { redirect } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -34,7 +34,13 @@ const formSchema = z.object({
     ),
 })
 
-export function CreateOrganizationForm() {
+type CreateOrganizationFormProps = {
+  modal?: boolean
+}
+
+export function CreateOrganizationForm({ modal }: CreateOrganizationFormProps) {
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +57,11 @@ export function CreateOrganizationForm() {
     })
 
     if (data) {
+      if (modal) {
+        // Dismiss the modal
+        router.back()
+      }
+
       redirect(`/orgs/${data.slug}`)
     }
 

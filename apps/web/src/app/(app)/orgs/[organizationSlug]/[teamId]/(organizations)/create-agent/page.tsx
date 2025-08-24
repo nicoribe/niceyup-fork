@@ -1,4 +1,4 @@
-import { PermissionDenied } from '@/components/organization/permission-denied'
+import { PermissionDenied } from '@/components/organizations/permission-denied'
 import { activeMember } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 

@@ -7,13 +7,13 @@ import * as types from './api/generated/types'
 
 type ClientOptions = {
   baseURL?: string
-  getSessionTokenFn?: () => Promise<string | null>
+  headers?: HeadersInit | (() => Promise<HeadersInit | undefined>)
 }
 
 export function createClient(options: ClientOptions) {
   setConfig({
     baseURL: options.baseURL,
-    getSessionTokenFn: options.getSessionTokenFn,
+    headers: options.headers,
   })
 
   return {

@@ -1,4 +1,4 @@
-import { type RequestConfig, getConfig } from './config'
+import type { RequestConfig } from './config'
 
 export function targetUrl<TVariables>(
   config: RequestConfig<TVariables>,
@@ -18,14 +18,4 @@ export function targetUrl<TVariables>(
   }
 
   return targetUrl
-}
-
-export async function getHeaders(headers?: HeadersInit) {
-  const sessionToken = await getConfig().getSessionTokenFn?.()
-  return {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-    ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
-    ...(headers || {}),
-  }
 }

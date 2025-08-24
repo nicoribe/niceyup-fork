@@ -8,7 +8,7 @@ export async function sendEmailResetPassword({
   url: string
 }) {
   const { data, error } = await resend.emails.send({
-    from: 'Davy Jones <davy@better-chat.com>',
+    from: 'Davy Jones <davy@resend.dev>',
     to: [email],
     subject: 'Reset your password',
     text: `Click the link to reset your password: ${url}`,

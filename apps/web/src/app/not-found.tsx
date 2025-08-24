@@ -1,4 +1,4 @@
-import { Header } from '@/components/organization/header'
+import { Header } from '@/components/organizations/header'
 import { getSessionToken } from '@/lib/auth/session-token'
 import { Button } from '@workspace/ui/components/button'
 import Link from 'next/link'

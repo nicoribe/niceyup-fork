@@ -1,8 +1,7 @@
-import { getConversation } from '@/actions/conversations'
+import { sdk } from '@/lib/sdk'
 import type { ChatParams } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { cn } from '@workspace/ui/lib/utils'
-import { unstable_cache } from 'next/cache'
 import { Tabbar } from './_components/tabbar'
 
 export default async function Page({
@@ -12,26 +11,29 @@ export default async function Page({
 }>) {
   const { agentId, chatId } = await params
 
-  const getCachedConversation = unstable_cache(getConversation, [chatId], {
-    tags: [`chat-${chatId}`],
-  })
-
-  const chat = await getCachedConversation(agentId, chatId)
+  const { data } = await sdk.getConversation(
+    { conversationId: chatId },
+    { next: { tags: [`chat-${chatId}`] } },
+  )
 
   return (
     <div className="flex h-full flex-col">
-      <Tabbar chatId={chatId} chat={chat} />
+      <Tabbar
+        agentId={agentId}
+        chatId={chatId}
+        chat={data?.conversation ?? null}
+      />
 
       <Separator />
 
       <div
         className={cn(
           'flex h-full flex-col items-center overflow-auto p-2',
-          chat ? 'justify-start' : 'justify-center',
+          data?.conversation ? 'justify-start' : 'justify-center',
         )}
       >
-        {chat ? (
-          <h1 className="text-sm">Chat: {chat.title}</h1>
+        {data?.conversation ? (
+          <h1 className="text-sm">Chat: {data?.conversation.title}</h1>
         ) : chatId === 'new' ? (
           <h1 className="text-sm">New Chat</h1>
         ) : (

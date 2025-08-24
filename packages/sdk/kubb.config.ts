@@ -40,7 +40,7 @@ export const config: UserConfig = {
       inferred: true,
     }),
     pluginClient({
-      importPath: '../../../client/fetch-react-query',
+      importPath: '../../../../client/fetch-react-query',
       dataReturnType: 'data',
       // parser: 'zod',
       paramsType: 'object',
@@ -52,7 +52,7 @@ export const config: UserConfig = {
     }),
     pluginReactQuery({
       client: {
-        importPath: '../../../client/fetch-react-query',
+        importPath: '../../../../client/fetch-react-query',
         dataReturnType: 'data',
       },
       // parser: 'zod',
@@ -64,7 +64,7 @@ export const config: UserConfig = {
       },
     }),
     pluginClient({
-      importPath: '../../client/fetch',
+      importPath: '../../../client/fetch',
       dataReturnType: 'full',
       // parser: 'zod',
       paramsType: 'object',

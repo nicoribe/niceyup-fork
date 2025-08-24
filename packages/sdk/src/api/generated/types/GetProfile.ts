@@ -55,7 +55,7 @@ export type GetProfile400 = {
    */
   message: string
   /**
-   * @description Validation errors.
+   * @description Validation errors
    * @type object | undefined
    */
   errors?: {

@@ -25,9 +25,13 @@ export const activeMember = cache(async () => {
       headers: await headers(),
     })
 
+    if (!member) {
+      throw new Error('No active member')
+    }
+
     return member
   } catch {
-    return null
+    // redirect('/orgs/my-account/~/overview')
   }
 })
 

@@ -1,7 +1,8 @@
-import { AgentNotFound } from '@/components/organization/agent-not-found'
-import { Header } from '@/components/organization/header'
-import { TabBar, type TabItem } from '@/components/organization/tab-bar'
+import { AgentNotFound } from '@/components/organizations/agent-not-found'
+import { Header } from '@/components/organizations/header'
+import { TabBar, type TabItem } from '@/components/organizations/tab-bar'
 import { activeMember } from '@/lib/auth/server'
+import { sdk } from '@/lib/sdk'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { ChevronLeft } from 'lucide-react'
 import { Topbar } from '../_components/topbar'
@@ -15,15 +16,9 @@ export default async function Layout({
 }>) {
   const { organizationSlug, teamId, agentId } = await params
 
-  const agents = [
-    { id: 'fdd4445b-5633-469f-9e91-3b6a44031508', name: 'Agent 1' },
-    { id: 'foo', name: 'Foo' },
-    { id: 'bar', name: 'Bar' },
-  ]
+  const { data, error } = await sdk.getAgent({ agentId })
 
-  const activeAgent = agents.find(({ id }) => id === agentId)
-
-  if (!activeAgent) {
+  if (error) {
     return (
       <>
         <Header />
@@ -84,7 +79,7 @@ export default async function Layout({
   return (
     <>
       <Topbar>
-        <Header activeAgent={activeAgent} agents={agents} />
+        <Header activeAgent={data.agent} />
 
         <TabBar tabs={tabs} />
       </Topbar>

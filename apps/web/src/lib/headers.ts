@@ -5,6 +5,14 @@ import {
   setCookie as setCookieNext,
 } from 'cookies-next'
 
+export async function serverHeaders() {
+  if (typeof window === 'undefined') {
+    const { headers } = await import('next/headers')
+
+    return headers()
+  }
+}
+
 async function getCookieStore(): Promise<CookiesFn | undefined> {
   if (typeof window === 'undefined') {
     const { cookies: serverCookies } = await import('next/headers')

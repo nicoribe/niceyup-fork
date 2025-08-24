@@ -1,11 +1,12 @@
 'use server'
 
+import { authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { auth } from '@workspace/auth'
 import { db } from '@workspace/db'
 import { and, eq } from '@workspace/db/orm'
-import { organizations, teams } from '@workspace/db/schema'
-import { headers } from 'next/headers'
+import { members, organizations, teams } from '@workspace/db/schema'
+import { headers as headersNext } from 'next/headers'
 
 export async function getOrganizationSlugById(organizationId: string) {
   if (!organizationId) {
@@ -26,6 +27,8 @@ export async function getOrganizationSlugById(organizationId: string) {
 export async function getOrganization(
   organizationSlug: OrganizationTeamParams['organizationSlug'],
 ) {
+  const { user } = await authenticatedUser()
+
   if (organizationSlug === 'my-account') {
     return null
   }
@@ -35,7 +38,13 @@ export async function getOrganization(
       id: organizations.id,
     })
     .from(organizations)
-    .where(eq(organizations.slug, organizationSlug))
+    .innerJoin(members, eq(organizations.id, members.organizationId))
+    .where(
+      and(
+        eq(organizations.slug, organizationSlug),
+        eq(members.userId, user.id),
+      ),
+    )
     .limit(1)
 
   return organization || null
@@ -45,6 +54,8 @@ export async function getOrganizationTeam(
   organizationSlug: OrganizationTeamParams['organizationSlug'],
   teamId: OrganizationTeamParams['teamId'],
 ) {
+  const { user } = await authenticatedUser()
+
   if (organizationSlug === 'my-account' || teamId === '~') {
     return null
   }
@@ -60,7 +71,14 @@ export async function getOrganizationTeam(
     })
     .from(teams)
     .innerJoin(organizations, eq(teams.organizationId, organizations.id))
-    .where(and(eq(teams.id, teamId), eq(organizations.slug, organizationSlug)))
+    .innerJoin(members, eq(organizations.id, members.organizationId))
+    .where(
+      and(
+        eq(teams.id, teamId),
+        eq(organizations.slug, organizationSlug),
+        eq(members.userId, user.id),
+      ),
+    )
     .limit(1)
 
   return organizationTeam || null
@@ -70,12 +88,14 @@ export async function updateActiveOrganizationTeam(
   organizationId?: string | null,
   teamId?: string | null,
 ) {
+  const headers = await headersNext()
+
   await auth.api.setActiveOrganization({
     body: { organizationId: organizationId || null },
-    headers: await headers(),
+    headers,
   })
   await auth.api.setActiveTeam({
     body: { teamId: teamId || null },
-    headers: await headers(),
+    headers,
   })
 }

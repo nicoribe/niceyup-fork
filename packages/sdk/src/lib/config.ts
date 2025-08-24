@@ -12,9 +12,8 @@ export type RequestConfig<TData = unknown> = {
     | 'text'
     | 'stream'
   signal?: AbortSignal
-  headers?: HeadersInit
+  headers?: HeadersInit | (() => Promise<HeadersInit | undefined>)
   credentials?: 'omit' | 'same-origin' | 'include'
-  getSessionTokenFn?: () => Promise<string | null>
   next?: {
     revalidate?: number | false | undefined
     tags?: string[] | undefined

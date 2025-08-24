@@ -2,9 +2,9 @@ import {
   getOrganization,
   updateActiveOrganizationTeam,
 } from '@/actions/organizations'
-import { Header } from '@/components/organization/header'
-import { OrganizationNotFound } from '@/components/organization/organization-not-found'
-import { TabBar, type TabItem } from '@/components/organization/tab-bar'
+import { Header } from '@/components/organizations/header'
+import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
+import { TabBar, type TabItem } from '@/components/organizations/tab-bar'
 import { activeMember, authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 
@@ -56,7 +56,7 @@ export default async function Layout({
     })
   }
 
-  const member = await activeMember()
+  const member = organizationSlug !== 'my-account' ? await activeMember() : null
 
   if (
     organizationSlug === 'my-account' ||

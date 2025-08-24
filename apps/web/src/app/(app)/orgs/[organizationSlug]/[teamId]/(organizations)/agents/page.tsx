@@ -1,5 +1,5 @@
 import { getOrganizationTeam } from '@/actions/organizations'
-import { OrganizationNotFound } from '@/components/organization/organization-not-found'
+import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
 import { activeMember } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { redirect } from 'next/navigation'

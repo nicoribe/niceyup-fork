@@ -1,8 +1,12 @@
 'use client'
 
 import { updateActiveOrganizationTeam } from '@/actions/organizations'
-import { TeamSwitcher } from '@/components/organization/team-switcher'
-import type { Organization, Team, User } from '@workspace/auth'
+import { TeamSwitcher } from '@/components/organizations/team-switcher'
+import type {
+  listOrganizationTeams,
+  listOrganizations,
+} from '@/lib/auth/server'
+import type { User } from '@workspace/auth'
 import {
   Avatar,
   AvatarFallback,
@@ -21,6 +25,9 @@ import {
 import { ChevronsUpDown, CircleDashed, PlusCircle, Slash } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+
+type Organization = Awaited<ReturnType<typeof listOrganizations>>[number]
+type Team = Awaited<ReturnType<typeof listOrganizationTeams>>[number]
 
 export function OrganizationSwitcher({
   selectedOrganizationLabel,

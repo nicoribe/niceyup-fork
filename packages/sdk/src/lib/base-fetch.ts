@@ -1,5 +1,5 @@
 import { type RequestConfig, getConfig } from './config'
-import { getHeaders, targetUrl } from './utils'
+import { targetUrl } from './utils'
 
 export async function baseFetch<TVariables>(
   paramsConfig: RequestConfig<TVariables>,
@@ -12,7 +12,10 @@ export async function baseFetch<TVariables>(
     method: config.method?.toUpperCase(),
     body: JSON.stringify(config.data),
     signal: config.signal,
-    headers: await getHeaders(config.headers),
+    headers:
+      typeof config.headers === 'function'
+        ? await config.headers()
+        : config.headers,
     ...(config.next && {
       next: {
         revalidate: config.next?.revalidate,

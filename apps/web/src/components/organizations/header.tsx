@@ -1,27 +1,28 @@
 import { Logo } from '@/components/logo'
-import { OrganizationSwitcher } from '@/components/organization/organization-switcher'
-import { ProfileButton } from '@/components/organization/profile-button'
+import { OrganizationSwitcher } from '@/components/organizations/organization-switcher'
+import { ProfileButton } from '@/components/organizations/profile-button'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import {
   authenticatedUser,
   listOrganizationTeams,
   listOrganizations,
 } from '@/lib/auth/server'
+import { sdk } from '@/lib/sdk'
 import type { Agent } from '@/lib/types'
-import type { Organization, Team } from '@workspace/auth'
 import { Separator } from '@workspace/ui/components/separator'
 import { Slash } from 'lucide-react'
 import Link from 'next/link'
 import { AgentSwitcher } from './agent-switcher'
 
+type Organization = Awaited<ReturnType<typeof listOrganizations>>[number]
+type Team = Awaited<ReturnType<typeof listOrganizationTeams>>[number]
+
 export async function Header({
   selectedOrganizationLabel,
   activeAgent,
-  agents,
 }: {
   selectedOrganizationLabel?: string
   activeAgent?: Agent
-  agents?: Agent[]
 }) {
   // TODO: Implement suspense for the header
 
@@ -46,6 +47,11 @@ export async function Header({
 
   const activeTeam = teams.find(({ id }) => id === activeTeamId)
 
+  let agents: Agent[] = []
+  if (activeTeamId) {
+    agents = (await sdk.listAgents()).data?.agents || []
+  }
+
   return (
     <header className="z-50 flex flex-col items-center justify-center bg-background">
       <div className="no-scrollbar flex w-full items-center justify-between gap-4 overflow-scroll px-4 py-2">
@@ -67,7 +73,7 @@ export async function Header({
             teams={teams}
           />
 
-          {!!agents?.length && (
+          {!!activeAgent && (
             <>
               <Slash className="-rotate-[24deg] size-3 text-border" />
 

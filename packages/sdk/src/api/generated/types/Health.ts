@@ -51,7 +51,7 @@ export type Health400 = {
    */
   message: string
   /**
-   * @description Validation errors.
+   * @description Validation errors
    * @type object | undefined
    */
   errors?: {

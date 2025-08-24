@@ -21,7 +21,7 @@ export function RightSidebar() {
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center overflow-y-scroll p-2">
-        <h1 className="text-sm">Right Sidebar</h1>
+        <h1 className="text-muted-foreground text-xs">Empty</h1>
       </div>
     </>
   )

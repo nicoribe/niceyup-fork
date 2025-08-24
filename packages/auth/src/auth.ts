@@ -1,5 +1,4 @@
 import { db, generateId } from '@workspace/db'
-import { createWorkspace } from '@workspace/db/queries'
 import { sendEmailResetPassword, sendVerificationEmail } from '@workspace/email'
 import { env } from '@workspace/env'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
@@ -11,7 +10,6 @@ import { stripe } from './stripe'
 
 const config = {
   appName: 'Better Chat',
-  baseURL: env.WEB_URL,
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
@@ -50,30 +48,18 @@ const config = {
     cookiePrefix: COOKIE_PREFIX,
     database: { generateId },
   },
-  databaseHooks: {
-    user: {
-      create: {
-        after: async (user) => {
-          await createWorkspace({ userId: user.id })
-        },
-      },
-    },
-  },
   plugins: [
-    openAPI({ path: '/docs' }),
     organization({
       ac,
       roles,
       teams: {
         enabled: true,
       },
-      organizationCreation: {
-        afterCreate: async ({ organization }) => {
-          await createWorkspace({ organizationId: organization.id })
-        },
-      },
     }),
     stripe(),
+
+    // API Reference for Better Auth
+    ...(env.NODE_ENV === 'development' ? [openAPI({ path: '/docs' })] : []),
   ],
 } satisfies BetterAuthOptions
 

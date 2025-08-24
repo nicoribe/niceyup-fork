@@ -65,7 +65,7 @@ export function TreeItemData({
 
     item.expand()
 
-    const newFolder = await createFolderInConversationExplorerTree({
+    const newFolder = await createFolderInConversationExplorerTree(agentId, {
       explorerType: 'private',
       parentId: item.getId(),
       name: '(new folder)',
@@ -97,7 +97,7 @@ export function TreeItemData({
   const onDelete = async (e: React.MouseEvent) => {
     e.stopPropagation()
 
-    await deleteItemInConversationExplorerTree({
+    await deleteItemInConversationExplorerTree(agentId, {
       explorerType: 'private',
       itemId: item.getId(),
     })
@@ -109,14 +109,15 @@ export function TreeItemData({
     <TreeItem key={item.getId()} item={item}>
       <TreeItemLabel
         onClick={(e) => {
-          if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
-            if (item.getItemData().conversationId) {
-              redirect(
-                `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${item.getItemData().conversationId}`,
-              )
-            }
-
-            // TODO: Implement a global state of the selected folder path
+          if (
+            !e.shiftKey &&
+            !e.ctrlKey &&
+            !e.metaKey &&
+            item.getItemData().conversationId
+          ) {
+            redirect(
+              `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${item.getItemData().conversationId}`,
+            )
           }
         }}
       >
