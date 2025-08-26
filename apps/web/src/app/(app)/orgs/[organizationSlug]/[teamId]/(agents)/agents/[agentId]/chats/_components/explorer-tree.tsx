@@ -155,7 +155,7 @@ export function ExplorerTree() {
       )
 
       if (itemChatId) {
-        setOpenChats((prevChats) => {
+        setOpenChats(agentId, (prevChats) => {
           const chat = prevChats.find(({ id }) => id === itemChatId)
           if (chat) {
             chat.title = value

@@ -22,24 +22,38 @@ import Link from 'next/link'
 import { redirect, useParams } from 'next/navigation'
 import * as React from 'react'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { useExplorerTree } from '../../_components/explorer-tree'
 import type { PathInExplorer } from '../../_lib/types'
 
 interface OpenChatsStore {
-  openChats: Chat[]
-  setOpenChats: (openChats: Chat[] | ((prevChats: Chat[]) => Chat[])) => void
+  openChats: { [agentId: string]: Chat[] }
+  setOpenChats: (
+    agentId: string,
+    openChats: Chat[] | ((prevChats: Chat[]) => Chat[]),
+  ) => void
 }
 
-export const useOpenChats = create<OpenChatsStore>((set) => ({
-  openChats: [],
-  setOpenChats: (openChats) =>
-    set((state) => ({
-      openChats:
-        typeof openChats === 'function'
-          ? openChats(state.openChats)
-          : openChats,
-    })),
-}))
+export const useOpenChats = create<OpenChatsStore>()(
+  persist(
+    (set) => ({
+      openChats: {},
+      setOpenChats: (agentId, openChats) =>
+        set((state) => ({
+          openChats: {
+            ...state.openChats,
+            [agentId]:
+              typeof openChats === 'function'
+                ? openChats(state.openChats[agentId] || [])
+                : openChats,
+          },
+        })),
+    }),
+    {
+      name: 'open-chats-storage',
+    },
+  ),
+)
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
@@ -56,17 +70,21 @@ export function OpenChats({
   const { revealItemInExplorer, setRevealItemInExplorer } = useExplorerTree()
 
   const onCloseChat = () => {
-    setOpenChats((prevChats) => prevChats.filter(({ id }) => id !== chatId))
+    setOpenChats(agentId, (prevChats) =>
+      prevChats.filter(({ id }) => id !== chatId),
+    )
     redirect(`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`)
   }
 
   const onCloseAllChats = () => {
-    setOpenChats([])
+    setOpenChats(agentId, [])
     redirect(`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`)
   }
 
   const onCloseOtherChats = () => {
-    setOpenChats((prevChats) => prevChats.filter(({ id }) => id === chatId))
+    setOpenChats(agentId, (prevChats) =>
+      prevChats.filter(({ id }) => id === chatId),
+    )
   }
 
   React.useEffect(() => {
@@ -75,11 +93,13 @@ export function OpenChats({
     }
 
     if (!chat) {
-      setOpenChats((prevChats) => prevChats.filter(({ id }) => id !== chatId))
+      setOpenChats(agentId, (prevChats) =>
+        prevChats.filter(({ id }) => id !== chatId),
+      )
       return
     }
 
-    setOpenChats((prevChats) => {
+    setOpenChats(agentId, (prevChats) => {
       const chatIndex = prevChats.findIndex(({ id }) => id === chat.id)
       if (chatIndex !== -1) {
         prevChats[chatIndex] = chat
@@ -93,7 +113,7 @@ export function OpenChats({
   return (
     <div className="flex flex-row items-center bg-background px-1">
       <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-scroll">
-        {openChats.map((chat, index) => {
+        {openChats[agentId]?.map((chat, index) => {
           const Comp = chatId === chat.id ? 'div' : Link
 
           return (
@@ -123,7 +143,7 @@ export function OpenChats({
                 </TooltipTrigger>
                 <TooltipContent>{chat.title}</TooltipContent>
               </Tooltip>
-              {index !== openChats.length - 1 && (
+              {index !== (openChats[agentId] || []).length - 1 && (
                 <Separator
                   key={`${chat.id}-${index}-separator`}
                   orientation="vertical"
@@ -135,7 +155,7 @@ export function OpenChats({
         })}
 
         <div className="sticky right-0 flex flex-1 flex-row items-center gap-1 bg-background">
-          {!!openChats.length && (
+          {!!openChats[agentId]?.length && (
             <Separator
               orientation="vertical"
               className="data-[orientation=vertical]:h-4"
