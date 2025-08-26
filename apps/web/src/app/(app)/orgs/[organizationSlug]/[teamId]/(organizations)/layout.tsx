@@ -1,11 +1,8 @@
-import {
-  getOrganization,
-  updateActiveOrganizationTeam,
-} from '@/actions/organizations'
+import { getMembership, getOrganization } from '@/actions/organizations'
 import { Header } from '@/components/organizations/header'
 import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
 import { TabBar, type TabItem } from '@/components/organizations/tab-bar'
-import { activeMember, authenticatedUser } from '@/lib/auth/server'
+import { authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 
 export default async function Layout({
@@ -17,12 +14,12 @@ export default async function Layout({
 }>) {
   const { organizationSlug } = await params
 
-  const organization = await getOrganization(organizationSlug)
+  const organization = await getOrganization({ organizationSlug })
 
   if (organizationSlug !== 'my-account' && !organization) {
     return (
       <>
-        <Header />
+        <Header selectedOrganizationLabel="Not found" />
 
         <main className="flex flex-1 flex-col items-center justify-center gap-4">
           <OrganizationNotFound />
@@ -34,10 +31,6 @@ export default async function Layout({
   const {
     session: { activeOrganizationId, activeTeamId },
   } = await authenticatedUser()
-
-  if (activeOrganizationId !== organization?.id) {
-    await updateActiveOrganizationTeam(organization?.id)
-  }
 
   const currentTeamId =
     activeOrganizationId === organization?.id ? activeTeamId : null
@@ -56,13 +49,9 @@ export default async function Layout({
     })
   }
 
-  const member = organizationSlug !== 'my-account' ? await activeMember() : null
+  const member = await getMembership({ organizationSlug })
 
-  if (
-    organizationSlug === 'my-account' ||
-    member?.role === 'owner' ||
-    member?.role === 'admin'
-  ) {
+  if (organizationSlug === 'my-account' || member?.isAdmin) {
     tabs.push(
       ...[
         {
@@ -111,7 +100,7 @@ export default async function Layout({
 
   return (
     <>
-      <Header />
+      <Header organizationSlug={organizationSlug} />
 
       <TabBar tabs={tabs} />
 

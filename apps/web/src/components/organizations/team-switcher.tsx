@@ -1,7 +1,7 @@
 'use client'
 
-import { updateActiveOrganizationTeam } from '@/actions/organizations'
-import type { listOrganizationTeams } from '@/lib/auth/server'
+import { setActiveOrganizationTeam } from '@/actions/organizations'
+import type { OrganizationTeamParams, Team } from '@/lib/types'
 import { Button } from '@workspace/ui/components/button'
 import {
   DropdownMenu,
@@ -13,19 +13,17 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { ChevronsUpDown, CircleDashed, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
-
-type Team = Awaited<ReturnType<typeof listOrganizationTeams>>[number]
+import { redirect, useParams } from 'next/navigation'
 
 export function TeamSwitcher({
-  organizationSlug,
   activeTeam,
   teams,
 }: {
-  organizationSlug: string
   activeTeam?: Team
   teams: Team[]
 }) {
+  const { organizationSlug } = useParams<OrganizationTeamParams>()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -44,15 +42,15 @@ export function TeamSwitcher({
       <DropdownMenuContent align="start" sideOffset={12} className="w-[200px]">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Teams</DropdownMenuLabel>
-          {teams?.map((team) => {
+          {teams.map((team) => {
             return (
               <DropdownMenuItem
                 key={team.id}
                 onClick={async () => {
-                  await updateActiveOrganizationTeam(
-                    team.organizationId,
-                    team.id,
-                  )
+                  await setActiveOrganizationTeam({
+                    organizationId: team.organizationId,
+                    teamId: team.id,
+                  })
                   redirect(`/orgs/${organizationSlug}/${team.id}/overview`)
                 }}
               >

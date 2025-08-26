@@ -5,6 +5,7 @@
 
 import type {
   GetAgentPathParams,
+  GetAgentQueryParams,
   GetAgent200,
   GetAgent400,
   GetAgent401,
@@ -22,6 +23,16 @@ export const getAgentPathParamsSchema = z.object({
 }) as unknown as ToZod<GetAgentPathParams>
 
 export type GetAgentPathParamsSchema = GetAgentPathParams
+
+export const getAgentQueryParamsSchema = z
+  .object({
+    organizationId: z.string().optional(),
+    organizationSlug: z.string().optional(),
+    teamId: z.string().optional(),
+  })
+  .optional() as unknown as ToZod<GetAgentQueryParams>
+
+export type GetAgentQueryParamsSchema = GetAgentQueryParams
 
 /**
  * @description Success

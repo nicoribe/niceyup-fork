@@ -1,6 +1,6 @@
 'use client'
 
-import type { Agent } from '@/lib/types'
+import type { Agent, OrganizationTeamParams } from '@/lib/types'
 import { Button } from '@workspace/ui/components/button'
 import {
   DropdownMenu,
@@ -12,19 +12,17 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { ChevronsUpDown, CircleDashed, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 
 export function AgentSwitcher({
-  organizationSlug,
-  teamId,
   activeAgent,
   agents,
 }: {
-  organizationSlug?: string
-  teamId?: string
-  activeAgent?: Agent
-  agents?: Agent[]
+  activeAgent: Agent
+  agents: Agent[]
 }) {
+  const { organizationSlug, teamId } = useParams<OrganizationTeamParams>()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -43,15 +41,13 @@ export function AgentSwitcher({
       <DropdownMenuContent align="start" sideOffset={12} className="w-[200px]">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Agents</DropdownMenuLabel>
-          {agents?.map((agent) => {
+          {agents.map((agent) => {
             return (
               <DropdownMenuItem
                 key={agent.id}
                 onClick={async () => {
                   redirect(
-                    `/orgs/${organizationSlug || 'my-account'}/${
-                      teamId || '~'
-                    }/agents/${agent.id}/chats`,
+                    `/orgs/${organizationSlug}/${teamId}/agents/${agent.id}/chats`,
                   )
                 }}
               >
@@ -62,11 +58,7 @@ export function AgentSwitcher({
           })}
         </DropdownMenuGroup>
         <DropdownMenuItem asChild>
-          <Link
-            href={`/orgs/${organizationSlug || 'my-account'}/${
-              teamId || '~'
-            }/create-agent`}
-          >
+          <Link href={`/orgs/${organizationSlug}/${teamId}/create-agent`}>
             <PlusCircle className="mr-1 size-4" />
             Create agent
           </Link>

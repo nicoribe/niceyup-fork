@@ -2,7 +2,7 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import type * as React from 'react'
 
 import { DialogOverlay, DialogPortal } from '@workspace/ui/components/dialog'
@@ -11,15 +11,21 @@ import { cn } from '@workspace/ui/lib/utils'
 export function InterceptedDialogContent({
   className,
   children,
+  callbackUrl,
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  callbackUrl?: string
   showCloseButton?: boolean
 }) {
   const router = useRouter()
 
   function onDismiss() {
-    router.back()
+    if (callbackUrl) {
+      redirect(callbackUrl)
+    } else {
+      router.back()
+    }
   }
 
   return (

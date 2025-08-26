@@ -1,31 +1,30 @@
+import {
+  listOrganizationTeams,
+  listOrganizations,
+} from '@/actions/organizations'
 import { Logo } from '@/components/logo'
 import { OrganizationSwitcher } from '@/components/organizations/organization-switcher'
 import { ProfileButton } from '@/components/organizations/profile-button'
 import { ThemeSwitcher } from '@/components/theme-switcher'
-import {
-  authenticatedUser,
-  listOrganizationTeams,
-  listOrganizations,
-} from '@/lib/auth/server'
+import { authenticatedUser } from '@/lib/auth/server'
 import { sdk } from '@/lib/sdk'
-import type { Agent } from '@/lib/types'
+import type { Agent, Team } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { Slash } from 'lucide-react'
 import Link from 'next/link'
 import { AgentSwitcher } from './agent-switcher'
 
-type Organization = Awaited<ReturnType<typeof listOrganizations>>[number]
-type Team = Awaited<ReturnType<typeof listOrganizationTeams>>[number]
-
 export async function Header({
   selectedOrganizationLabel,
+  organizationSlug,
+  teamId,
   activeAgent,
 }: {
   selectedOrganizationLabel?: string
+  organizationSlug?: string
+  teamId?: string
   activeAgent?: Agent
 }) {
-  // TODO: Implement suspense for the header
-
   const {
     session: { activeOrganizationId, activeTeamId },
     user: personalAccount,
@@ -33,23 +32,40 @@ export async function Header({
 
   const organizations = await listOrganizations()
 
-  let activeOrganization: Organization | undefined
-  if (!selectedOrganizationLabel) {
-    activeOrganization = organizations.find(
-      ({ id }) => id === activeOrganizationId,
-    )
-  }
+  const activeOrganization = organizations.find(
+    ({ slug }) => slug === organizationSlug,
+  )
 
   let teams: Team[] = []
-  if (activeOrganizationId) {
-    teams = await listOrganizationTeams()
+  let activeTeam: Team | undefined
+
+  if (activeOrganization) {
+    teams = await listOrganizationTeams({
+      organizationId: activeOrganization.id,
+    })
+
+    const currentTeamId =
+      (!teamId || teamId === '~') &&
+      activeOrganizationId === activeOrganization.id
+        ? activeTeamId
+        : teamId
+
+    activeTeam = teams.find(({ id }) => id === currentTeamId)
   }
 
-  const activeTeam = teams.find(({ id }) => id === activeTeamId)
-
   let agents: Agent[] = []
-  if (activeTeamId) {
-    agents = (await sdk.listAgents()).data?.agents || []
+
+  if (activeAgent) {
+    const { data } = await sdk.listAgents({
+      params: {
+        organizationId: activeOrganization?.id,
+        teamId: activeTeam?.id,
+      },
+    })
+
+    if (data?.agents) {
+      agents = data.agents
+    }
   }
 
   return (
@@ -73,16 +89,11 @@ export async function Header({
             teams={teams}
           />
 
-          {!!activeAgent && (
+          {activeAgent && (
             <>
               <Slash className="-rotate-[24deg] size-3 text-border" />
 
-              <AgentSwitcher
-                organizationSlug={activeOrganization?.slug}
-                teamId={activeTeam?.id}
-                activeAgent={activeAgent}
-                agents={agents}
-              />
+              <AgentSwitcher activeAgent={activeAgent} agents={agents} />
             </>
           )}
         </div>

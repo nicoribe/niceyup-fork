@@ -7,6 +7,7 @@ import fetch from '../../../client/fetch'
 import type { RequestConfig, ResponseErrorConfig } from '../../../client/fetch'
 import type {
   ListAgentsQueryResponse,
+  ListAgentsQueryParams,
   ListAgents400,
   ListAgents401,
   ListAgents403,
@@ -24,6 +25,7 @@ function getListAgentsUrl() {
  * {@link /agents}
  */
 export async function listAgents(
+  { params }: { params?: ListAgentsQueryParams },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
   const { client: request = fetch, ...requestConfig } = config
@@ -39,6 +41,11 @@ export async function listAgents(
       | ListAgents500
     >,
     unknown
-  >({ method: 'GET', url: getListAgentsUrl().toString(), ...requestConfig })
+  >({
+    method: 'GET',
+    url: getListAgentsUrl().toString(),
+    params,
+    ...requestConfig,
+  })
   return res
 }

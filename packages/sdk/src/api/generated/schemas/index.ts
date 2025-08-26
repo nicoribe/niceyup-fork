@@ -1,5 +1,6 @@
 export type {
   GetAgentPathParamsSchema,
+  GetAgentQueryParamsSchema,
   GetAgent200Schema,
   GetAgent400Schema,
   GetAgent401Schema,
@@ -11,6 +12,7 @@ export type {
 } from './getAgentSchema'
 export type {
   GetConversationPathParamsSchema,
+  GetConversationQueryParamsSchema,
   GetConversation200Schema,
   GetConversation400Schema,
   GetConversation401Schema,
@@ -41,6 +43,7 @@ export type {
   HealthQueryResponseSchema,
 } from './healthSchema'
 export type {
+  ListAgentsQueryParamsSchema,
   ListAgents200Schema,
   ListAgents400Schema,
   ListAgents401Schema,
@@ -52,6 +55,7 @@ export type {
 } from './listAgentsSchema'
 export {
   getAgentPathParamsSchema,
+  getAgentQueryParamsSchema,
   getAgent200Schema,
   getAgent400Schema,
   getAgent401Schema,
@@ -63,6 +67,7 @@ export {
 } from './getAgentSchema'
 export {
   getConversationPathParamsSchema,
+  getConversationQueryParamsSchema,
   getConversation200Schema,
   getConversation400Schema,
   getConversation401Schema,
@@ -93,6 +98,7 @@ export {
   healthQueryResponseSchema,
 } from './healthSchema'
 export {
+  listAgentsQueryParamsSchema,
   listAgents200Schema,
   listAgents400Schema,
   listAgents401Schema,

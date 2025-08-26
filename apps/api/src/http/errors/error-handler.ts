@@ -10,7 +10,7 @@ type FastifyErrorHandler = FastifyInstance['errorHandler']
 export const errorHandler: FastifyErrorHandler = (error, _, reply) => {
   if (error instanceof ZodError) {
     reply.status(400).send({
-      code: 'validation-error',
+      code: 'VALIDATION_ERROR',
       message: 'Validation error',
       errors: error.flatten(),
     })
@@ -37,7 +37,7 @@ export const errorHandler: FastifyErrorHandler = (error, _, reply) => {
   }
 
   reply.status(500).send({
-    code: 'internal-server-error',
+    code: 'INTERNAL_SERVER_ERROR',
     message: 'Internal server error',
   })
 }

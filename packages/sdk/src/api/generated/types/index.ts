@@ -1,5 +1,6 @@
 export type {
   GetAgentPathParams,
+  GetAgentQueryParams,
   GetAgent200,
   GetAgent400,
   GetAgent401,
@@ -12,6 +13,7 @@ export type {
 } from './GetAgent'
 export type {
   GetConversationPathParams,
+  GetConversationQueryParams,
   GetConversation200,
   GetConversation400,
   GetConversation401,
@@ -45,6 +47,7 @@ export type {
   HealthQuery,
 } from './Health'
 export type {
+  ListAgentsQueryParams,
   ListAgents200,
   ListAgents400,
   ListAgents401,

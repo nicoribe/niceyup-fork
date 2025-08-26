@@ -8,7 +8,9 @@ export default async function Page() {
   } = await authenticatedUser()
 
   if (activeOrganizationId) {
-    const organizationSlug = await getOrganizationSlugById(activeOrganizationId)
+    const organizationSlug = await getOrganizationSlugById({
+      organizationId: activeOrganizationId,
+    })
 
     if (organizationSlug) {
       if (activeTeamId) {

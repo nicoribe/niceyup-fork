@@ -10,6 +10,21 @@ export type GetAgentPathParams = {
   agentId: string
 }
 
+export type GetAgentQueryParams = {
+  /**
+   * @type string | undefined
+   */
+  organizationId?: string
+  /**
+   * @type string | undefined
+   */
+  organizationSlug?: string
+  /**
+   * @type string | undefined
+   */
+  teamId?: string
+}
+
 /**
  * @description Success
  */
@@ -122,6 +137,7 @@ export type GetAgentQueryResponse = GetAgent200
 export type GetAgentQuery = {
   Response: GetAgent200
   PathParams: GetAgentPathParams
+  QueryParams: GetAgentQueryParams
   Errors:
     | GetAgent400
     | GetAgent401

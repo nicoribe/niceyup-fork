@@ -1,11 +1,8 @@
 'use client'
 
-import { updateActiveOrganizationTeam } from '@/actions/organizations'
+import { setActiveOrganizationTeam } from '@/actions/organizations'
 import { TeamSwitcher } from '@/components/organizations/team-switcher'
-import type {
-  listOrganizationTeams,
-  listOrganizations,
-} from '@/lib/auth/server'
+import type { Organization, Team } from '@/lib/types'
 import type { User } from '@workspace/auth'
 import {
   Avatar,
@@ -24,10 +21,7 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { ChevronsUpDown, CircleDashed, PlusCircle, Slash } from 'lucide-react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
-
-type Organization = Awaited<ReturnType<typeof listOrganizations>>[number]
-type Team = Awaited<ReturnType<typeof listOrganizationTeams>>[number]
+import { redirect, usePathname } from 'next/navigation'
 
 export function OrganizationSwitcher({
   selectedOrganizationLabel,
@@ -44,6 +38,8 @@ export function OrganizationSwitcher({
   activeTeam?: Team
   teams: Team[]
 }) {
+  const pathname = usePathname()
+
   return (
     <>
       <DropdownMenu>
@@ -69,6 +65,7 @@ export function OrganizationSwitcher({
                 </span>
                 <div className="rounded-sm border px-2 py-0.5">
                   <span className="text-xs">Standard</span>
+                  {/* <span className="text-xs">Pro</span> */}
                 </div>
               </>
             ) : (
@@ -83,7 +80,7 @@ export function OrganizationSwitcher({
                   {personalAccount.name}
                 </span>
                 <div className="rounded-sm border px-2 py-0.5">
-                  <span className="text-xs">Free</span>
+                  <span className="text-xs">Hobby</span>
                 </div>
               </>
             )}
@@ -99,7 +96,7 @@ export function OrganizationSwitcher({
             <DropdownMenuLabel>Personal account</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={async () => {
-                await updateActiveOrganizationTeam()
+                await setActiveOrganizationTeam()
                 redirect('/orgs/my-account/~/overview')
               }}
             >
@@ -122,7 +119,9 @@ export function OrganizationSwitcher({
                 <DropdownMenuItem
                   key={organization.id}
                   onClick={async () => {
-                    await updateActiveOrganizationTeam(organization.id)
+                    await setActiveOrganizationTeam({
+                      organizationId: organization.id,
+                    })
                     redirect(`/orgs/${organization.slug}/~/select-team`)
                   }}
                 >
@@ -137,12 +136,14 @@ export function OrganizationSwitcher({
               )
             })}
           </DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/onboarding/create-organization">
-              <PlusCircle className="mr-1 size-4" />
-              Create organization
-            </Link>
-          </DropdownMenuItem>
+          {pathname !== '/onboarding/create-organization' && (
+            <DropdownMenuItem asChild>
+              <Link href="/onboarding/create-organization">
+                <PlusCircle className="mr-1 size-4" />
+                Create organization
+              </Link>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -150,11 +151,7 @@ export function OrganizationSwitcher({
         <>
           <Slash className="-rotate-[24deg] size-3 text-border" />
 
-          <TeamSwitcher
-            organizationSlug={activeOrganization.slug}
-            activeTeam={activeTeam}
-            teams={teams}
-          />
+          <TeamSwitcher activeTeam={activeTeam} teams={teams} />
         </>
       )}
     </>

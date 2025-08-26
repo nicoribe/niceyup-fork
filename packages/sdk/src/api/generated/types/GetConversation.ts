@@ -10,6 +10,21 @@ export type GetConversationPathParams = {
   conversationId: string
 }
 
+export type GetConversationQueryParams = {
+  /**
+   * @type string | undefined
+   */
+  organizationId?: string
+  /**
+   * @type string | undefined
+   */
+  organizationSlug?: string
+  /**
+   * @type string | undefined
+   */
+  teamId?: string
+}
+
 /**
  * @description Success
  */
@@ -126,6 +141,7 @@ export type GetConversationQueryResponse = GetConversation200
 export type GetConversationQuery = {
   Response: GetConversation200
   PathParams: GetConversationPathParams
+  QueryParams: GetConversationQueryParams
   Errors:
     | GetConversation400
     | GetConversation401

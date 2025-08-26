@@ -11,6 +11,7 @@ import type {
 import type {
   GetAgentQueryResponse,
   GetAgentPathParams,
+  GetAgentQueryParams,
   GetAgent400,
   GetAgent401,
   GetAgent403,
@@ -27,18 +28,25 @@ import type {
 import { getAgent } from '../operations/getAgent'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-export const getAgentQueryKey = ({
-  agentId,
-}: { agentId: GetAgentPathParams['agentId'] }) =>
-  [{ url: '/agents/:agentId', params: { agentId: agentId } }] as const
+export const getAgentQueryKey = (
+  { agentId }: { agentId: GetAgentPathParams['agentId'] },
+  params?: GetAgentQueryParams,
+) =>
+  [
+    { url: '/agents/:agentId', params: { agentId: agentId } },
+    ...(params ? [params] : []),
+  ] as const
 
 export type GetAgentQueryKey = ReturnType<typeof getAgentQueryKey>
 
 export function getAgentQueryOptions(
-  { agentId }: { agentId: GetAgentPathParams['agentId'] },
+  {
+    agentId,
+    params,
+  }: { agentId: GetAgentPathParams['agentId']; params?: GetAgentQueryParams },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
-  const queryKey = getAgentQueryKey({ agentId })
+  const queryKey = getAgentQueryKey({ agentId }, params)
   return queryOptions<
     GetAgentQueryResponse,
     ResponseErrorConfig<
@@ -56,7 +64,7 @@ export function getAgentQueryOptions(
     queryKey,
     queryFn: async ({ signal }) => {
       config.signal = signal
-      return getAgent({ agentId }, config)
+      return getAgent({ agentId, params }, config)
     },
   })
 }
@@ -70,7 +78,10 @@ export function useGetAgent<
   TQueryData = GetAgentQueryResponse,
   TQueryKey extends QueryKey = GetAgentQueryKey,
 >(
-  { agentId }: { agentId: GetAgentPathParams['agentId'] },
+  {
+    agentId,
+    params,
+  }: { agentId: GetAgentPathParams['agentId']; params?: GetAgentQueryParams },
   options: {
     query?: Partial<
       QueryObserverOptions<
@@ -95,11 +106,12 @@ export function useGetAgent<
     query: { client: queryClient, ...queryOptions } = {},
     client: config = {},
   } = options ?? {}
-  const queryKey = queryOptions?.queryKey ?? getAgentQueryKey({ agentId })
+  const queryKey =
+    queryOptions?.queryKey ?? getAgentQueryKey({ agentId }, params)
 
   const query = useQuery(
     {
-      ...getAgentQueryOptions({ agentId }, config),
+      ...getAgentQueryOptions({ agentId, params }, config),
       queryKey,
       ...queryOptions,
     } as unknown as QueryObserverOptions,

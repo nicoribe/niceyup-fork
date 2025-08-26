@@ -1,11 +1,7 @@
-import {
-  getOrganizationTeam,
-  updateActiveOrganizationTeam,
-} from '@/actions/organizations'
+import { getMembership, getOrganizationTeam } from '@/actions/organizations'
 import { Header } from '@/components/organizations/header'
 import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
 import { TabBar, type TabItem } from '@/components/organizations/tab-bar'
-import { activeMember, authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { redirect } from 'next/navigation'
 
@@ -22,12 +18,15 @@ export default async function Layout({
     return redirect(`/orgs/${organizationSlug}/~/select-team`)
   }
 
-  const organizationTeam = await getOrganizationTeam(organizationSlug, teamId)
+  const organizationTeam = await getOrganizationTeam({
+    organizationSlug,
+    teamId,
+  })
 
   if (organizationSlug !== 'my-account' && !organizationTeam) {
     return (
       <>
-        <Header />
+        <Header selectedOrganizationLabel="Not found" />
 
         <main className="flex flex-1 flex-col items-center justify-center gap-4">
           <OrganizationNotFound />
@@ -36,21 +35,7 @@ export default async function Layout({
     )
   }
 
-  const {
-    session: { activeOrganizationId, activeTeamId },
-  } = await authenticatedUser()
-
-  if (
-    activeOrganizationId !== organizationTeam?.organization.id ||
-    activeTeamId !== organizationTeam?.team.id
-  ) {
-    await updateActiveOrganizationTeam(
-      organizationTeam?.organization.id,
-      organizationTeam?.team.id,
-    )
-  }
-
-  const member = organizationSlug !== 'my-account' ? await activeMember() : null
+  const member = await getMembership({ organizationSlug })
 
   const tabs: TabItem[] = [
     {
@@ -63,11 +48,7 @@ export default async function Layout({
     },
   ]
 
-  if (
-    organizationSlug === 'my-account' ||
-    member?.role === 'owner' ||
-    member?.role === 'admin'
-  ) {
+  if (organizationSlug === 'my-account' || member?.isAdmin) {
     tabs.push(
       ...[
         {
@@ -105,7 +86,7 @@ export default async function Layout({
 
   return (
     <>
-      <Header />
+      <Header organizationSlug={organizationSlug} teamId={teamId} />
 
       <TabBar tabs={tabs} />
 

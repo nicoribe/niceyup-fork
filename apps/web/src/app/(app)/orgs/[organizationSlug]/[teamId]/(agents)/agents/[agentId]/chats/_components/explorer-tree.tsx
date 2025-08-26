@@ -7,7 +7,7 @@ import {
   updateParentIdOfItemsInConversationExplorerTree,
 } from '@/actions/conversation-explorer-tree'
 import { revalidateTag } from '@/actions/revalidate'
-import type { ChatParams } from '@/lib/types'
+import type { ChatParams, OrganizationTeamParams } from '@/lib/types'
 import {
   asyncDataLoaderFeature,
   dragAndDropFeature,
@@ -64,8 +64,10 @@ export interface Item {
 
 const indent = 5
 
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
+
 export function ExplorerTree() {
-  const { agentId, chatId } = useParams<{ agentId: string } & ChatParams>()
+  const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
 
   const { setSelectedFolder, revealItemInExplorer, setRevealItemInExplorer } =
     useExplorerTree()
@@ -83,30 +85,39 @@ export function ExplorerTree() {
     createLoadingItemData: () => ({ name: '(loading)', loading: true }),
     dataLoader: {
       getItem: async (itemId) => {
-        const itemData = await getItemInConversationExplorerTree(agentId, {
-          explorerType: 'private',
-          itemId,
-        })
+        const itemData = await getItemInConversationExplorerTree(
+          { organizationSlug, teamId, agentId },
+          {
+            explorerType: 'private',
+            itemId,
+          },
+        )
 
         return itemData || { name: '(unknown)', disabled: true }
       },
       getChildrenWithData: async (itemId) => {
         const childrenWithData =
-          await getChildrenWithDataInConversationExplorerTree(agentId, {
-            explorerType: 'private',
-            itemId,
-          })
+          await getChildrenWithDataInConversationExplorerTree(
+            { organizationSlug, teamId, agentId },
+            {
+              explorerType: 'private',
+              itemId,
+            },
+          )
 
         return childrenWithData
       },
     },
     canReorder: true,
     onDrop: async (items, target) => {
-      await updateParentIdOfItemsInConversationExplorerTree(agentId, {
-        explorerType: 'private',
-        itemIds: items.map((item) => item.getId()),
-        parentId: target.item.getId(),
-      })
+      await updateParentIdOfItemsInConversationExplorerTree(
+        { organizationSlug, teamId, agentId },
+        {
+          explorerType: 'private',
+          itemIds: items.map((item) => item.getId()),
+          parentId: target.item.getId(),
+        },
+      )
 
       const invalidatedParentIds = new Set<string>()
 
@@ -132,13 +143,16 @@ export function ExplorerTree() {
     onRename: async (item, value) => {
       const itemChatId = item.getItemData().conversationId
 
-      await updateNameOfItemInConversationExplorerTree(agentId, {
-        explorerType: 'private',
-        name: value,
-        ...(itemChatId
-          ? { conversationId: itemChatId }
-          : { itemId: item.getId() }),
-      })
+      await updateNameOfItemInConversationExplorerTree(
+        { organizationSlug, teamId, agentId },
+        {
+          explorerType: 'private',
+          name: value,
+          ...(itemChatId
+            ? { conversationId: itemChatId }
+            : { itemId: item.getId() }),
+        },
+      )
 
       if (itemChatId) {
         setOpenChats((prevChats) => {

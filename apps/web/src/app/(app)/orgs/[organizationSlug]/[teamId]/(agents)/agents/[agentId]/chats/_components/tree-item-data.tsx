@@ -65,11 +65,14 @@ export function TreeItemData({
 
     item.expand()
 
-    const newFolder = await createFolderInConversationExplorerTree(agentId, {
-      explorerType: 'private',
-      parentId: item.getId(),
-      name: '(new folder)',
-    })
+    const newFolder = await createFolderInConversationExplorerTree(
+      { organizationSlug, teamId, agentId },
+      {
+        explorerType: 'private',
+        parentId: item.getId(),
+        name: '(new folder)',
+      },
+    )
 
     if (newFolder) {
       await item.invalidateChildrenIds()
@@ -97,10 +100,13 @@ export function TreeItemData({
   const onDelete = async (e: React.MouseEvent) => {
     e.stopPropagation()
 
-    await deleteItemInConversationExplorerTree(agentId, {
-      explorerType: 'private',
-      itemId: item.getId(),
-    })
+    await deleteItemInConversationExplorerTree(
+      { organizationSlug, teamId, agentId },
+      {
+        explorerType: 'private',
+        itemId: item.getId(),
+      },
+    )
 
     await item.invalidateItemData()
   }

@@ -5,6 +5,7 @@
 
 import type {
   GetConversationPathParams,
+  GetConversationQueryParams,
   GetConversation200,
   GetConversation400,
   GetConversation401,
@@ -22,6 +23,16 @@ export const getConversationPathParamsSchema = z.object({
 }) as unknown as ToZod<GetConversationPathParams>
 
 export type GetConversationPathParamsSchema = GetConversationPathParams
+
+export const getConversationQueryParamsSchema = z
+  .object({
+    organizationId: z.string().optional(),
+    organizationSlug: z.string().optional(),
+    teamId: z.string().optional(),
+  })
+  .optional() as unknown as ToZod<GetConversationQueryParams>
+
+export type GetConversationQueryParamsSchema = GetConversationQueryParams
 
 /**
  * @description Success

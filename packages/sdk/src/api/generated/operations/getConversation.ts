@@ -8,6 +8,7 @@ import type { RequestConfig, ResponseErrorConfig } from '../../../client/fetch'
 import type {
   GetConversationQueryResponse,
   GetConversationPathParams,
+  GetConversationQueryParams,
   GetConversation400,
   GetConversation401,
   GetConversation403,
@@ -29,7 +30,11 @@ function getGetConversationUrl({
 export async function getConversation(
   {
     conversationId,
-  }: { conversationId: GetConversationPathParams['conversationId'] },
+    params,
+  }: {
+    conversationId: GetConversationPathParams['conversationId']
+    params?: GetConversationQueryParams
+  },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
   const { client: request = fetch, ...requestConfig } = config
@@ -48,6 +53,7 @@ export async function getConversation(
   >({
     method: 'GET',
     url: getGetConversationUrl({ conversationId }).toString(),
+    params,
     ...requestConfig,
   })
   return res

@@ -1,5 +1,5 @@
+import { getMembership } from '@/actions/organizations'
 import { PermissionDenied } from '@/components/organizations/permission-denied'
-import { activeMember } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { redirect } from 'next/navigation'
 
@@ -14,9 +14,9 @@ export default async function Page({
     return redirect('/orgs/my-account/~/overview')
   }
 
-  const member = await activeMember()
+  const member = await getMembership({ organizationSlug })
 
-  if (member?.role !== 'owner' && member?.role !== 'admin') {
+  if (!member?.isAdmin) {
     return <PermissionDenied />
   }
 

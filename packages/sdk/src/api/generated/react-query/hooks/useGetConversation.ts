@@ -11,6 +11,7 @@ import type {
 import type {
   GetConversationQueryResponse,
   GetConversationPathParams,
+  GetConversationQueryParams,
   GetConversation400,
   GetConversation401,
   GetConversation403,
@@ -27,14 +28,18 @@ import type {
 import { getConversation } from '../operations/getConversation'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-export const getConversationQueryKey = ({
-  conversationId,
-}: { conversationId: GetConversationPathParams['conversationId'] }) =>
+export const getConversationQueryKey = (
+  {
+    conversationId,
+  }: { conversationId: GetConversationPathParams['conversationId'] },
+  params?: GetConversationQueryParams,
+) =>
   [
     {
       url: '/conversations/:conversationId',
       params: { conversationId: conversationId },
     },
+    ...(params ? [params] : []),
   ] as const
 
 export type GetConversationQueryKey = ReturnType<typeof getConversationQueryKey>
@@ -42,10 +47,14 @@ export type GetConversationQueryKey = ReturnType<typeof getConversationQueryKey>
 export function getConversationQueryOptions(
   {
     conversationId,
-  }: { conversationId: GetConversationPathParams['conversationId'] },
+    params,
+  }: {
+    conversationId: GetConversationPathParams['conversationId']
+    params?: GetConversationQueryParams
+  },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
-  const queryKey = getConversationQueryKey({ conversationId })
+  const queryKey = getConversationQueryKey({ conversationId }, params)
   return queryOptions<
     GetConversationQueryResponse,
     ResponseErrorConfig<
@@ -63,7 +72,7 @@ export function getConversationQueryOptions(
     queryKey,
     queryFn: async ({ signal }) => {
       config.signal = signal
-      return getConversation({ conversationId }, config)
+      return getConversation({ conversationId, params }, config)
     },
   })
 }
@@ -79,7 +88,11 @@ export function useGetConversation<
 >(
   {
     conversationId,
-  }: { conversationId: GetConversationPathParams['conversationId'] },
+    params,
+  }: {
+    conversationId: GetConversationPathParams['conversationId']
+    params?: GetConversationQueryParams
+  },
   options: {
     query?: Partial<
       QueryObserverOptions<
@@ -105,11 +118,12 @@ export function useGetConversation<
     client: config = {},
   } = options ?? {}
   const queryKey =
-    queryOptions?.queryKey ?? getConversationQueryKey({ conversationId })
+    queryOptions?.queryKey ??
+    getConversationQueryKey({ conversationId }, params)
 
   const query = useQuery(
     {
-      ...getConversationQueryOptions({ conversationId }, config),
+      ...getConversationQueryOptions({ conversationId, params }, config),
       queryKey,
       ...queryOptions,
     } as unknown as QueryObserverOptions,

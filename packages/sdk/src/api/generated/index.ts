@@ -5,6 +5,7 @@ export type { HealthQueryKey } from './react-query/hooks/useHealth'
 export type { ListAgentsQueryKey } from './react-query/hooks/useListAgents'
 export type {
   GetAgentPathParamsSchema,
+  GetAgentQueryParamsSchema,
   GetAgent200Schema,
   GetAgent400Schema,
   GetAgent401Schema,
@@ -16,6 +17,7 @@ export type {
 } from './schemas/getAgentSchema'
 export type {
   GetConversationPathParamsSchema,
+  GetConversationQueryParamsSchema,
   GetConversation200Schema,
   GetConversation400Schema,
   GetConversation401Schema,
@@ -46,6 +48,7 @@ export type {
   HealthQueryResponseSchema,
 } from './schemas/healthSchema'
 export type {
+  ListAgentsQueryParamsSchema,
   ListAgents200Schema,
   ListAgents400Schema,
   ListAgents401Schema,
@@ -57,6 +60,7 @@ export type {
 } from './schemas/listAgentsSchema'
 export type {
   GetAgentPathParams,
+  GetAgentQueryParams,
   GetAgent200,
   GetAgent400,
   GetAgent401,
@@ -69,6 +73,7 @@ export type {
 } from './types/GetAgent'
 export type {
   GetConversationPathParams,
+  GetConversationQueryParams,
   GetConversation200,
   GetConversation400,
   GetConversation401,
@@ -102,6 +107,7 @@ export type {
   HealthQuery,
 } from './types/Health'
 export type {
+  ListAgentsQueryParams,
   ListAgents200,
   ListAgents400,
   ListAgents401,
@@ -144,6 +150,7 @@ export {
 } from './react-query/hooks/useListAgents'
 export {
   getAgentPathParamsSchema,
+  getAgentQueryParamsSchema,
   getAgent200Schema,
   getAgent400Schema,
   getAgent401Schema,
@@ -155,6 +162,7 @@ export {
 } from './schemas/getAgentSchema'
 export {
   getConversationPathParamsSchema,
+  getConversationQueryParamsSchema,
   getConversation200Schema,
   getConversation400Schema,
   getConversation401Schema,
@@ -185,6 +193,7 @@ export {
   healthQueryResponseSchema,
 } from './schemas/healthSchema'
 export {
+  listAgentsQueryParamsSchema,
   listAgents200Schema,
   listAgents400Schema,
   listAgents401Schema,

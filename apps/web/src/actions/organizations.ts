@@ -3,99 +3,154 @@
 import { authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { auth } from '@workspace/auth'
-import { db } from '@workspace/db'
-import { and, eq } from '@workspace/db/orm'
-import { members, organizations, teams } from '@workspace/db/schema'
-import { headers as headersNext } from 'next/headers'
+import { queries } from '@workspace/db/queries'
+import { headers } from 'next/headers'
 
-export async function getOrganizationSlugById(organizationId: string) {
-  if (!organizationId) {
-    return null
-  }
-
-  const [organization] = await db
-    .select({
-      slug: organizations.slug,
-    })
-    .from(organizations)
-    .where(eq(organizations.id, organizationId))
-    .limit(1)
-
-  return organization?.slug || null
+type GetOrganizationSlugByIdParams = {
+  organizationId: string | null | undefined
 }
 
-export async function getOrganization(
-  organizationSlug: OrganizationTeamParams['organizationSlug'],
-) {
-  const { user } = await authenticatedUser()
+export async function getOrganizationSlugById({
+  organizationId,
+}: GetOrganizationSlugByIdParams) {
+  return await queries.getOrganizationSlugById({ organizationId })
+}
 
+type GetOrganizationIdBySlugParams = {
+  organizationSlug: string | null | undefined
+}
+
+export async function getOrganizationIdBySlug({
+  organizationSlug,
+}: GetOrganizationIdBySlugParams) {
   if (organizationSlug === 'my-account') {
     return null
   }
 
-  const [organization] = await db
-    .select({
-      id: organizations.id,
-    })
-    .from(organizations)
-    .innerJoin(members, eq(organizations.id, members.organizationId))
-    .where(
-      and(
-        eq(organizations.slug, organizationSlug),
-        eq(members.userId, user.id),
-      ),
-    )
-    .limit(1)
-
-  return organization || null
+  return await queries.getOrganizationIdBySlug({ organizationSlug })
 }
 
-export async function getOrganizationTeam(
-  organizationSlug: OrganizationTeamParams['organizationSlug'],
-  teamId: OrganizationTeamParams['teamId'],
-) {
-  const { user } = await authenticatedUser()
+type GetOrganizationParams = {
+  organizationSlug: OrganizationTeamParams['organizationSlug']
+}
 
+export async function getOrganization({
+  organizationSlug,
+}: GetOrganizationParams) {
+  if (organizationSlug === 'my-account') {
+    return null
+  }
+
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
+
+  const organization = await queries.getOrganization({
+    userId,
+    organizationSlug,
+  })
+
+  return organization
+}
+
+type GetOrganizationTeamParams = {
+  organizationSlug: OrganizationTeamParams['organizationSlug']
+  teamId: OrganizationTeamParams['teamId']
+}
+
+export async function getOrganizationTeam({
+  organizationSlug,
+  teamId,
+}: GetOrganizationTeamParams) {
   if (organizationSlug === 'my-account' || teamId === '~') {
     return null
   }
 
-  const [organizationTeam] = await db
-    .select({
-      organization: {
-        id: organizations.id,
-      },
-      team: {
-        id: teams.id,
-      },
-    })
-    .from(teams)
-    .innerJoin(organizations, eq(teams.organizationId, organizations.id))
-    .innerJoin(members, eq(organizations.id, members.organizationId))
-    .where(
-      and(
-        eq(teams.id, teamId),
-        eq(organizations.slug, organizationSlug),
-        eq(members.userId, user.id),
-      ),
-    )
-    .limit(1)
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
 
-  return organizationTeam || null
+  const organizationTeam = await queries.getOrganizationTeam({
+    userId,
+    organizationSlug,
+    teamId,
+  })
+
+  return organizationTeam
 }
 
-export async function updateActiveOrganizationTeam(
-  organizationId?: string | null,
-  teamId?: string | null,
-) {
-  const headers = await headersNext()
+type GetMembershipParams = {
+  organizationSlug: OrganizationTeamParams['organizationSlug']
+}
 
-  await auth.api.setActiveOrganization({
-    body: { organizationId: organizationId || null },
-    headers,
+export async function getMembership({ organizationSlug }: GetMembershipParams) {
+  if (organizationSlug === 'my-account') {
+    return null
+  }
+
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
+
+  const membership = await queries.getMembership({
+    userId,
+    organizationSlug,
   })
-  await auth.api.setActiveTeam({
-    body: { teamId: teamId || null },
-    headers,
+
+  return membership
+}
+
+export async function listOrganizations() {
+  const organizations = await auth.api.listOrganizations({
+    headers: await headers(),
   })
+
+  return organizations
+}
+
+type ListOrganizationTeamsParams = {
+  organizationId?: string | null
+}
+
+export async function listOrganizationTeams({
+  organizationId,
+}: ListOrganizationTeamsParams) {
+  if (!organizationId) {
+    return []
+  }
+
+  const organizationTeams = await auth.api.listOrganizationTeams({
+    query: {
+      organizationId,
+    },
+    headers: await headers(),
+  })
+
+  return organizationTeams
+}
+
+type SetActiveOrganizationTeamParams = {
+  organizationId?: string | null
+  teamId?: string | null
+}
+
+export async function setActiveOrganizationTeam({
+  organizationId,
+  teamId,
+}: SetActiveOrganizationTeamParams = {}) {
+  const activeOrganization = await auth.api.setActiveOrganization({
+    body: {
+      organizationId: organizationId || null,
+    },
+    headers: await headers(),
+  })
+
+  const activeTeam = await auth.api.setActiveTeam({
+    body: {
+      teamId: teamId || null,
+    },
+    headers: await headers(),
+  })
+
+  return { activeOrganization, activeTeam }
 }

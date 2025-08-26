@@ -1,5 +1,5 @@
 import { sdk } from '@/lib/sdk'
-import type { ChatParams } from '@/lib/types'
+import type { ChatParams, OrganizationTeamParams } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { cn } from '@workspace/ui/lib/utils'
 import { Tabbar } from './_components/tabbar'
@@ -7,18 +7,23 @@ import { Tabbar } from './_components/tabbar'
 export default async function Page({
   params,
 }: Readonly<{
-  params: Promise<{ agentId: string } & ChatParams>
+  params: Promise<OrganizationTeamParams & { agentId: string } & ChatParams>
 }>) {
-  const { agentId, chatId } = await params
+  const { organizationSlug, teamId, agentId, chatId } = await params
 
   const { data } = await sdk.getConversation(
-    { conversationId: chatId },
+    {
+      conversationId: chatId,
+      params: { organizationSlug, teamId },
+    },
     { next: { tags: [`chat-${chatId}`] } },
   )
 
   return (
     <div className="flex h-full flex-col">
       <Tabbar
+        organizationSlug={organizationSlug}
+        teamId={teamId}
         agentId={agentId}
         chatId={chatId}
         chat={data?.conversation ?? null}

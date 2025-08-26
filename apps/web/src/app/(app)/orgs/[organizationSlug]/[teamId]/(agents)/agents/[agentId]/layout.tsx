@@ -1,7 +1,7 @@
+import { getMembership } from '@/actions/organizations'
 import { AgentNotFound } from '@/components/organizations/agent-not-found'
 import { Header } from '@/components/organizations/header'
 import { TabBar, type TabItem } from '@/components/organizations/tab-bar'
-import { activeMember } from '@/lib/auth/server'
 import { sdk } from '@/lib/sdk'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { ChevronLeft } from 'lucide-react'
@@ -16,12 +16,15 @@ export default async function Layout({
 }>) {
   const { organizationSlug, teamId, agentId } = await params
 
-  const { data, error } = await sdk.getAgent({ agentId })
+  const { data, error } = await sdk.getAgent({
+    agentId,
+    params: { organizationSlug, teamId },
+  })
 
   if (error) {
     return (
       <>
-        <Header />
+        <Header organizationSlug={organizationSlug} teamId={teamId} />
 
         <main className="flex flex-1 flex-col items-center justify-center gap-4">
           <AgentNotFound organizationSlug={organizationSlug} teamId={teamId} />
@@ -30,7 +33,7 @@ export default async function Layout({
     )
   }
 
-  const member = organizationSlug !== 'my-account' ? await activeMember() : null
+  const member = await getMembership({ organizationSlug })
 
   const tabs: TabItem[] = [
     {
@@ -44,11 +47,7 @@ export default async function Layout({
     },
   ]
 
-  if (
-    organizationSlug === 'my-account' ||
-    member?.role === 'owner' ||
-    member?.role === 'admin'
-  ) {
+  if (organizationSlug === 'my-account' || member?.isAdmin) {
     tabs.push(
       ...[
         // {
@@ -79,7 +78,11 @@ export default async function Layout({
   return (
     <>
       <Topbar>
-        <Header activeAgent={data.agent} />
+        <Header
+          organizationSlug={organizationSlug}
+          teamId={teamId}
+          activeAgent={data.agent}
+        />
 
         <TabBar tabs={tabs} />
       </Topbar>

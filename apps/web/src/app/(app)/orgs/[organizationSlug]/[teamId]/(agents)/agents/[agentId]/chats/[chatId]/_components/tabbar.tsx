@@ -1,24 +1,31 @@
 import { getParentsInConversationExplorerTree } from '@/actions/conversation-explorer-tree'
-import type { Chat } from '@/lib/types'
+import type { Chat, ChatParams, OrganizationTeamParams } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { Appearance } from '../../_components/appearance'
 import { ExplorerTreePath } from './explorer-tree-path'
 import { OpenChats } from './open-chats'
 
 export async function Tabbar({
+  organizationSlug,
+  teamId,
   agentId,
   chatId,
   chat,
 }: {
+  organizationSlug: OrganizationTeamParams['organizationSlug']
+  teamId: OrganizationTeamParams['teamId']
   agentId: string
-  chatId: string
+  chatId: ChatParams['chatId']
   chat: Chat | null
 }) {
   const pathInExplorer = chat
-    ? await getParentsInConversationExplorerTree(agentId, {
-        explorerType: 'private',
-        conversationId: chat.id,
-      })
+    ? await getParentsInConversationExplorerTree(
+        { organizationSlug, teamId, agentId },
+        {
+          explorerType: 'private',
+          conversationId: chat.id,
+        },
+      )
     : []
 
   return (

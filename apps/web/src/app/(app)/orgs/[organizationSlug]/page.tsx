@@ -1,4 +1,4 @@
-import { getOrganization } from '@/actions/organizations'
+import { getOrganizationIdBySlug } from '@/actions/organizations'
 import { authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { redirect } from 'next/navigation'
@@ -18,9 +18,9 @@ export default async function Page({
     return redirect('/orgs/my-account/~/overview')
   }
 
-  const organization = await getOrganization(organizationSlug)
+  const organizationId = await getOrganizationIdBySlug({ organizationSlug })
 
-  if (activeOrganizationId === organization?.id && activeTeamId) {
+  if (activeOrganizationId === organizationId && activeTeamId) {
     return redirect(`/orgs/${organizationSlug}/${activeTeamId}/overview`)
   }
 

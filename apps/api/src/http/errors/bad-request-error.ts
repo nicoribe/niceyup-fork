@@ -4,7 +4,7 @@ export class BadRequestError extends BaseError {
   constructor({ status, code, message }: BaseErrorParams = {}) {
     super({
       status: status || 400,
-      code: code || 'bad-request',
+      code: code || 'BAD_REQUEST',
       message: message || 'Bad request',
     })
   }

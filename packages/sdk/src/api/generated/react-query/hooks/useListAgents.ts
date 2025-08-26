@@ -10,6 +10,7 @@ import type {
 } from '../../../../client/fetch-react-query'
 import type {
   ListAgentsQueryResponse,
+  ListAgentsQueryParams,
   ListAgents400,
   ListAgents401,
   ListAgents403,
@@ -26,14 +27,16 @@ import type {
 import { listAgents } from '../operations/listAgents'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-export const listAgentsQueryKey = () => [{ url: '/agents' }] as const
+export const listAgentsQueryKey = (params?: ListAgentsQueryParams) =>
+  [{ url: '/agents' }, ...(params ? [params] : [])] as const
 
 export type ListAgentsQueryKey = ReturnType<typeof listAgentsQueryKey>
 
 export function listAgentsQueryOptions(
+  { params }: { params?: ListAgentsQueryParams },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
-  const queryKey = listAgentsQueryKey()
+  const queryKey = listAgentsQueryKey(params)
   return queryOptions<
     ListAgentsQueryResponse,
     ResponseErrorConfig<
@@ -50,7 +53,7 @@ export function listAgentsQueryOptions(
     queryKey,
     queryFn: async ({ signal }) => {
       config.signal = signal
-      return listAgents(config)
+      return listAgents({ params }, config)
     },
   })
 }
@@ -64,6 +67,7 @@ export function useListAgents<
   TQueryData = ListAgentsQueryResponse,
   TQueryKey extends QueryKey = ListAgentsQueryKey,
 >(
+  { params }: { params?: ListAgentsQueryParams },
   options: {
     query?: Partial<
       QueryObserverOptions<
@@ -88,11 +92,11 @@ export function useListAgents<
     query: { client: queryClient, ...queryOptions } = {},
     client: config = {},
   } = options ?? {}
-  const queryKey = queryOptions?.queryKey ?? listAgentsQueryKey()
+  const queryKey = queryOptions?.queryKey ?? listAgentsQueryKey(params)
 
   const query = useQuery(
     {
-      ...listAgentsQueryOptions(config),
+      ...listAgentsQueryOptions({ params }, config),
       queryKey,
       ...queryOptions,
     } as unknown as QueryObserverOptions,

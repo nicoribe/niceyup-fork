@@ -3,6 +3,21 @@
  * Do not edit manually.
  */
 
+export type ListAgentsQueryParams = {
+  /**
+   * @type string | undefined
+   */
+  organizationId?: string
+  /**
+   * @type string | undefined
+   */
+  organizationSlug?: string
+  /**
+   * @type string | undefined
+   */
+  teamId?: string
+}
+
 /**
  * @description Success
  */
@@ -114,6 +129,7 @@ export type ListAgentsQueryResponse = ListAgents200
 
 export type ListAgentsQuery = {
   Response: ListAgents200
+  QueryParams: ListAgentsQueryParams
   Errors:
     | ListAgents400
     | ListAgents401

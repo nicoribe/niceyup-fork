@@ -4,6 +4,7 @@
  */
 
 import type {
+  ListAgentsQueryParams,
   ListAgents200,
   ListAgents400,
   ListAgents401,
@@ -15,6 +16,16 @@ import type {
 } from '../types/ListAgents'
 import type { ToZod } from '@kubb/plugin-zod/utils'
 import { z } from 'zod'
+
+export const listAgentsQueryParamsSchema = z
+  .object({
+    organizationId: z.string().optional(),
+    organizationSlug: z.string().optional(),
+    teamId: z.string().optional(),
+  })
+  .optional() as unknown as ToZod<ListAgentsQueryParams>
+
+export type ListAgentsQueryParamsSchema = ListAgentsQueryParams
 
 /**
  * @description Success

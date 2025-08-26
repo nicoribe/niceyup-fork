@@ -1,5 +1,5 @@
+import { getMembership } from '@/actions/organizations'
 import { PermissionDenied } from '@/components/organizations/permission-denied'
-import { activeMember } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
 
 export default async function Page({
@@ -9,13 +9,9 @@ export default async function Page({
 }>) {
   const { organizationSlug } = await params
 
-  const member = organizationSlug !== 'my-account' ? await activeMember() : null
+  const member = await getMembership({ organizationSlug })
 
-  if (
-    organizationSlug !== 'my-account' &&
-    member?.role !== 'owner' &&
-    member?.role !== 'admin'
-  ) {
+  if (organizationSlug !== 'my-account' && !member?.isAdmin) {
     return <PermissionDenied />
   }
 

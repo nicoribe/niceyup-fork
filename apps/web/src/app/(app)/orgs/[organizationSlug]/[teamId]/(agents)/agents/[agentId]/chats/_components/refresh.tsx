@@ -18,16 +18,17 @@ export const useRefresh = create<RefreshStore>((set, get) => ({
 
 export const Refresh = ({ children }: { children: React.ReactNode }) => {
   const { loadingAnimation } = useRefresh()
-  const [refresh, setRefresh] = React.useState(true)
+
+  const [rebuild, setRebuild] = React.useState(true)
 
   React.useEffect(() => {
     if (loadingAnimation) {
-      setRefresh(false)
-      setTimeout(() => setRefresh(true), 150)
+      setRebuild(false)
+      setTimeout(() => setRebuild(true), 150)
     }
   }, [loadingAnimation])
 
-  if (refresh) {
+  if (rebuild) {
     return children
   }
 }

@@ -10,6 +10,7 @@ import type {
 } from '../../../../client/fetch-react-query'
 import type {
   ListAgentsQueryResponse,
+  ListAgentsQueryParams,
   ListAgents400,
   ListAgents401,
   ListAgents403,
@@ -27,6 +28,7 @@ function getListAgentsUrl() {
  * {@link /agents}
  */
 export async function listAgents(
+  { params }: { params?: ListAgentsQueryParams },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
   const { client: request = fetch, ...requestConfig } = config
@@ -42,6 +44,11 @@ export async function listAgents(
       | ListAgents500
     >,
     unknown
-  >({ method: 'GET', url: getListAgentsUrl().toString(), ...requestConfig })
+  >({
+    method: 'GET',
+    url: getListAgentsUrl().toString(),
+    params,
+    ...requestConfig,
+  })
   return res.data
 }

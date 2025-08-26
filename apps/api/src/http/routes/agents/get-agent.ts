@@ -1,6 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
+import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
@@ -16,6 +17,11 @@ export async function getAgent(app: FastifyTypedInstance) {
         params: z.object({
           agentId: z.string(),
         }),
+        querystring: z.object({
+          organizationId: z.string().optional(),
+          organizationSlug: z.string().optional(),
+          teamId: z.string().optional(),
+        }),
         response: withDefaultErrorResponses({
           200: z
             .object({
@@ -30,16 +36,21 @@ export async function getAgent(app: FastifyTypedInstance) {
     },
     async (request) => {
       const {
-        session: { activeOrganizationId: organizationId, activeTeamId: teamId },
         user: { id: userId },
       } = request.authSession
 
       const { agentId } = request.params
+      const { organizationId, organizationSlug, teamId } = request.query
 
-      const agent = await queries.getAgent(
-        { userId, organizationId, teamId },
-        { agentId },
-      )
+      const agent = await queries.getAgent({
+        userId,
+        ...getOrganizationIdentifier({
+          organizationId,
+          organizationSlug,
+          teamId,
+        }),
+        agentId,
+      })
 
       if (!agent) {
         throw new BadRequestError({

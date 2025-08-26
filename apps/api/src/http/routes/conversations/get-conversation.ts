@@ -1,6 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
+import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
@@ -15,6 +16,11 @@ export async function getConversation(app: FastifyTypedInstance) {
         operationId: 'getConversation',
         params: z.object({
           conversationId: z.string(),
+        }),
+        querystring: z.object({
+          organizationId: z.string().optional(),
+          organizationSlug: z.string().optional(),
+          teamId: z.string().optional(),
         }),
         response: withDefaultErrorResponses({
           200: z
@@ -31,26 +37,37 @@ export async function getConversation(app: FastifyTypedInstance) {
     },
     async (request) => {
       const {
-        session: { activeOrganizationId: organizationId, activeTeamId: teamId },
         user: { id: userId },
       } = request.authSession
 
       const { conversationId } = request.params
+      const { organizationId, organizationSlug, teamId } = request.query
 
       const conversation = await queries.getConversation({ conversationId })
 
-      let agent = undefined
       if (conversation?.agentId) {
-        agent = await queries.getAgent(
-          { userId, organizationId, teamId },
-          { agentId: conversation.agentId },
-        )
+        const agent = await queries.getAgent({
+          userId,
+          ...getOrganizationIdentifier({
+            organizationId,
+            organizationSlug,
+            teamId,
+          }),
+          agentId: conversation.agentId,
+        })
+
+        if (!agent) {
+          throw new BadRequestError({
+            code: 'CONVERSATION_UNAVAILABLE',
+            message: 'Conversation not found or you don’t have access',
+          })
+        }
       }
 
-      if (!conversation || !agent) {
+      if (!conversation) {
         throw new BadRequestError({
           code: 'CONVERSATION_NOT_FOUND',
-          message: 'Conversation not found or you don’t have access',
+          message: 'Conversation not found',
         })
       }
 

@@ -15,13 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
-import {
-  Book,
-  ChevronDown,
-  CirclePlus,
-  LogOut,
-  MessageSquareMore,
-} from 'lucide-react'
+import { Book, ChevronDown, LogOut, MessageSquareMore } from 'lucide-react'
 import Link from 'next/link'
 
 function getInitials(name: string): string {
@@ -68,12 +62,6 @@ export async function ProfileButton() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/account/settings">Account settings</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/onboarding/create-organization">
-              Create organization
-              <CirclePlus className="ml-auto size-4" />
-            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
