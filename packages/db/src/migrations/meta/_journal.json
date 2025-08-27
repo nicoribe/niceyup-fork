@@ -57,6 +57,13 @@
       "when": 1755888935296,
       "tag": "0007_simple_titania",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1756258406586,
+      "tag": "0008_natural_magdalene",
+      "breakpoints": true
     }
   ]
 }

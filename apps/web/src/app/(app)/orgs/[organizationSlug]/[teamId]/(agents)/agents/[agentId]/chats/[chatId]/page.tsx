@@ -1,7 +1,9 @@
 import { sdk } from '@/lib/sdk'
 import type { ChatParams, OrganizationTeamParams } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
-import { cn } from '@workspace/ui/lib/utils'
+import { ChatNotFound } from './_components/chat-not-found'
+import { ChatView } from './_components/chat-view'
+import { NewChat } from './_components/new-chat'
 import { Tabbar } from './_components/tabbar'
 
 export default async function Page({
@@ -31,20 +33,13 @@ export default async function Page({
 
       <Separator />
 
-      <div
-        className={cn(
-          'flex h-full flex-col items-center overflow-auto p-2',
-          data?.conversation ? 'justify-start' : 'justify-center',
-        )}
-      >
-        {data?.conversation ? (
-          <h1 className="text-sm">Chat: {data?.conversation.title}</h1>
-        ) : chatId === 'new' ? (
-          <h1 className="text-sm">New Chat</h1>
-        ) : (
-          <h1 className="text-sm">Chat Not Found</h1>
-        )}
-      </div>
+      {data?.conversation ? (
+        <ChatView chat={data.conversation} />
+      ) : chatId === 'new' ? (
+        <NewChat />
+      ) : (
+        <ChatNotFound />
+      )}
     </div>
   )
 }

@@ -58,7 +58,7 @@ export function AgentSwitcher({
           })}
         </DropdownMenuGroup>
         <DropdownMenuItem asChild>
-          <Link href={`/orgs/${organizationSlug}/${teamId}/create-agent`}>
+          <Link href={`/orgs/${organizationSlug}/${teamId}/agents/create`}>
             <PlusCircle className="mr-1 size-4" />
             Create agent
           </Link>

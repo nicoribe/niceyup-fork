@@ -57,18 +57,22 @@ export default async function Layout({
         {
           label: 'Agents',
           href: `/orgs/${organizationSlug}/${currentTeamId || '~'}/agents`,
+          deep: true,
         },
         {
           label: 'Sources',
           href: `/orgs/${organizationSlug}/~/sources`,
+          deep: true,
         },
         {
           label: 'Connections',
           href: `/orgs/${organizationSlug}/~/connections`,
+          deep: true,
         },
         {
           label: 'Integrations',
           href: `/orgs/${organizationSlug}/~/integrations`,
+          deep: true,
         },
       ],
     )
@@ -77,6 +81,7 @@ export default async function Layout({
       tabs.push({
         label: 'Teams',
         href: `/orgs/${organizationSlug}/~/teams`,
+        deep: true,
       })
     }
   } else {
@@ -84,6 +89,7 @@ export default async function Layout({
       tabs.push({
         label: 'Agents',
         href: `/orgs/${organizationSlug}/${currentTeamId}/agents`,
+        deep: true,
       })
     }
   }
@@ -91,6 +97,7 @@ export default async function Layout({
   // {
   //   label: 'Deploy',
   //   href: `/orgs/${organizationSlug}/~/deploy`,
+  //   deep: true,
   // },
 
   tabs.push({

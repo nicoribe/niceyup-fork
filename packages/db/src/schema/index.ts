@@ -168,10 +168,12 @@ export const messages = pgTable('messages', {
     .notNull()
     .references(() => conversations.id, { onDelete: 'cascade' }),
   authorId: text('author_id').references(() => users.id),
+  parentId: text('parent_id'),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
 
-export const messagesRelations = relations(messages, ({ one }) => ({
+export const messagesRelations = relations(messages, ({ one, many }) => ({
   conversation: one(conversations, {
     fields: [messages.conversationId],
     references: [conversations.id],
@@ -180,45 +182,15 @@ export const messagesRelations = relations(messages, ({ one }) => ({
     fields: [messages.authorId],
     references: [users.id],
   }),
+  parent: one(messages, {
+    fields: [messages.parentId],
+    references: [messages.id],
+    relationName: 'parent',
+  }),
+  children: many(messages, {
+    relationName: 'parent',
+  }),
 }))
-
-export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
-  ...id,
-  name: text('name'),
-  explorerType: text('explorer_type').notNull().default('private'), // "private", "shared", "team"
-  shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
-  agentId: text('agent_id').references(() => agents.id),
-  ownerId: text('owner_id').references(() => users.id),
-  teamId: text('team_id').references(() => teams.id),
-  conversationId: text('conversation_id').references(() => conversations.id, {
-    onDelete: 'cascade',
-  }),
-  parentId: text('parent_id'),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
-  ...timestamps,
-})
-
-export const conversationExplorerTreeRelations = relations(
-  conversationExplorerTree,
-  ({ one, many }) => ({
-    agent: one(agents, {
-      fields: [conversationExplorerTree.agentId],
-      references: [agents.id],
-    }),
-    conversation: one(conversations, {
-      fields: [conversationExplorerTree.conversationId],
-      references: [conversations.id],
-    }),
-    parent: one(conversationExplorerTree, {
-      fields: [conversationExplorerTree.parentId],
-      references: [conversationExplorerTree.id],
-      relationName: 'parent',
-    }),
-    children: many(conversationExplorerTree, {
-      relationName: 'parent',
-    }),
-  }),
-)
 
 export const teamsToAgents = pgTable(
   'teams_to_agents',
@@ -309,6 +281,44 @@ export const conversationsToUsersRelations = relations(
     user: one(users, {
       fields: [conversationsToUsers.userId],
       references: [users.id],
+    }),
+  }),
+)
+
+export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
+  ...id,
+  name: text('name'),
+  explorerType: text('explorer_type').notNull().default('private'), // "private", "shared", "team"
+  shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
+  agentId: text('agent_id').references(() => agents.id),
+  ownerId: text('owner_id').references(() => users.id),
+  teamId: text('team_id').references(() => teams.id),
+  conversationId: text('conversation_id').references(() => conversations.id, {
+    onDelete: 'cascade',
+  }),
+  parentId: text('parent_id'),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  ...timestamps,
+})
+
+export const conversationExplorerTreeRelations = relations(
+  conversationExplorerTree,
+  ({ one, many }) => ({
+    agent: one(agents, {
+      fields: [conversationExplorerTree.agentId],
+      references: [agents.id],
+    }),
+    conversation: one(conversations, {
+      fields: [conversationExplorerTree.conversationId],
+      references: [conversations.id],
+    }),
+    parent: one(conversationExplorerTree, {
+      fields: [conversationExplorerTree.parentId],
+      references: [conversationExplorerTree.id],
+      relationName: 'parent',
+    }),
+    children: many(conversationExplorerTree, {
+      relationName: 'parent',
     }),
   }),
 )

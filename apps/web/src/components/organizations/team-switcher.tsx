@@ -61,7 +61,7 @@ export function TeamSwitcher({
           })}
         </DropdownMenuGroup>
         <DropdownMenuItem asChild>
-          <Link href={`/orgs/${organizationSlug}/~/create-team`}>
+          <Link href={`/orgs/${organizationSlug}/~/teams/create`}>
             <PlusCircle className="mr-1 size-4" />
             Create team
           </Link>
