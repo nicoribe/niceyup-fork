@@ -14,10 +14,7 @@ export function Topbar({ children }: { children: React.ReactNode }) {
     <div
       className={cn(
         'flex transform flex-col items-stretch justify-center',
-        params.chatId && {
-          '-translate-y-full max-h-0 opacity-0': !topbar,
-          'max-h-96 translate-y-0 opacity-100': topbar,
-        },
+        params.chatId && { hidden: !topbar },
       )}
     >
       {children}

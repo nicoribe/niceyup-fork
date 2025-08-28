@@ -34,7 +34,7 @@ export async function Tabbar({
 
       <Separator />
 
-      <div className="flex flex-row items-center bg-background px-1">
+      <div className="flex flex-row items-center bg-background">
         <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-scroll py-1">
           {(chatId === 'new' || chat) && (
             <ExplorerTreePath pathInExplorer={pathInExplorer} />

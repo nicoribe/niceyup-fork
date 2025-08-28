@@ -16,7 +16,7 @@ export function LeftSidebar() {
 
   return (
     <>
-      <div className="z-20 flex flex-row items-center justify-start gap-1 border-b bg-background p-1 px-2">
+      <div className="z-20 flex flex-row items-center justify-start gap-1 border-b bg-background p-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="secondary" size="icon" className="size-8">

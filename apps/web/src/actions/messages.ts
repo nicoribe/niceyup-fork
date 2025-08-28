@@ -4,6 +4,17 @@ import { db } from '@workspace/db'
 import { and, desc, eq, isNull, sql } from '@workspace/db/orm'
 import { messages } from '@workspace/db/schema'
 
+export type MessageRole = 'data' | 'system' | 'user' | 'assistant'
+
+export type Message = {
+  id: string
+  role: MessageRole
+  content: string
+  parent_id: string | null
+  children: string[]
+  created_at: Date
+}
+
 export async function listMessages({
   conversationId,
   targetMessageId,
@@ -35,14 +46,7 @@ export async function listMessages({
 
   const listParents = !parents
     ? { rows: [] }
-    : await db.execute<{
-        id: string
-        role: string
-        content: string
-        parent_id: string | null
-        children: string[]
-        created_at: Date
-      }>(sql`
+    : await db.execute<Message>(sql`
     WITH RECURSIVE message_parents AS (
       -- Base case: start with target message
       SELECT id, role, content, parent_id, created_at,
@@ -73,14 +77,7 @@ export async function listMessages({
     ORDER BY created_at ASC
   `)
 
-  const listChildren = await db.execute<{
-    id: string
-    role: string
-    content: string
-    parent_id: string | null
-    children: string[]
-    created_at: Date
-  }>(sql`
+  const listChildren = await db.execute<Message>(sql`
     WITH RECURSIVE message_children AS (
       -- Base case: start with target message
       SELECT id, role, content, parent_id, created_at,

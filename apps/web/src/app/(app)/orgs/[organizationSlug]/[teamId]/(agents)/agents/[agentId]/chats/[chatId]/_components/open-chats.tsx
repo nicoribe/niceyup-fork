@@ -111,8 +111,8 @@ export function OpenChats({
   }, [chat])
 
   return (
-    <div className="flex flex-row items-center bg-background px-1">
-      <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-scroll">
+    <div className="flex flex-row items-center bg-background">
+      <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-scroll pl-1">
         {openChats[agentId]?.map((chat, index) => {
           const Comp = chatId === chat.id ? 'div' : Link
 
