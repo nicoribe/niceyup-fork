@@ -105,6 +105,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@workspace/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
       '@workspace/env':
         specifier: workspace:*
         version: link:../../packages/env
@@ -284,6 +287,9 @@ importers:
       '@trigger.dev/python':
         specifier: 4.0.0-v4-beta.22
         version: 4.0.0-v4-beta.22(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.0-v4-beta.22(ai@4.3.19(react@19.1.1)(zod@3.24.2))(zod@3.24.2))
+      '@trigger.dev/react-hooks':
+        specifier: 4.0.0-v4-beta.22
+        version: 4.0.0-v4-beta.22(react-dom@19.0.0(react@19.1.1))(react@19.1.1)
       '@trigger.dev/sdk':
         specifier: 4.0.0-v4-beta.22
         version: 4.0.0-v4-beta.22(ai@4.3.19(react@19.1.1)(zod@3.24.2))(zod@3.24.2)
@@ -291,7 +297,7 @@ importers:
         specifier: workspace:*
         version: link:../env
       ai:
-        specifier: ^4.1.46
+        specifier: ^4.3.19
         version: 4.3.19(react@19.1.1)(zod@3.24.2)
       zod:
         specifier: ^3.24.2
@@ -407,6 +413,9 @@ importers:
       '@radix-ui/react-label':
         specifier: ^2.1.7
         version: 2.1.7(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-scroll-area':
+        specifier: ^1.2.10
+        version: 1.2.10(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@radix-ui/react-select':
         specifier: ^2.2.6
         version: 2.2.6(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2780,6 +2789,13 @@ packages:
     peerDependencies:
       '@trigger.dev/build': ^4.0.0-v4-beta.22
       '@trigger.dev/sdk': ^4.0.0-v4-beta.22
+
+  '@trigger.dev/react-hooks@4.0.0-v4-beta.22':
+    resolution: {integrity: sha512-hWBoxEkNSM+IcFsUlFEJBcMZGmpaYGPy5k/o+iK9QNLURiQsKEYGYoBzKlA7iP0cVPwhIV1eNlsPediNRQyTsA==}
+    engines: {node: '>=18.20.0'}
+    peerDependencies:
+      react: ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^18.0 || ^19.0 || ^19.0.0-rc
 
   '@trigger.dev/sdk@4.0.0-v4-beta.22':
     resolution: {integrity: sha512-yRv9G/KODpItU16Iv6gCfLQ2SjhGq443zTlYKY3XZf4HHIuByOhkOKYPRpl82FmJprL8DxnT7V0pma4kfHBzPQ==}
@@ -8927,6 +8943,17 @@ snapshots:
       '@trigger.dev/core': 4.0.0-v4-beta.22
       '@trigger.dev/sdk': 4.0.0-v4-beta.22(ai@4.3.19(react@19.1.1)(zod@3.24.2))(zod@3.24.2)
       tinyexec: 0.3.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@trigger.dev/react-hooks@4.0.0-v4-beta.22(react-dom@19.0.0(react@19.1.1))(react@19.1.1)':
+    dependencies:
+      '@trigger.dev/core': 4.0.0-v4-beta.22
+      react: 19.1.1
+      react-dom: 19.0.0(react@19.1.1)
+      swr: 2.3.4(react@19.1.1)
     transitivePeerDependencies:
       - bufferutil
       - supports-color

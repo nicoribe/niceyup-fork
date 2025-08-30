@@ -11,10 +11,10 @@ export const id = {
 export const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
-    .defaultNow(),
+    .$defaultFn(() => new Date()),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
-    .defaultNow(),
+    .$onUpdateFn(() => new Date()),
 }
 
 export function encryptedJson<TData>(name: string) {

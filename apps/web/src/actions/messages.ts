@@ -1,18 +1,28 @@
 'use server'
 
+import type { Message } from '@/lib/types'
 import { db } from '@workspace/db'
 import { and, desc, eq, isNull, sql } from '@workspace/db/orm'
 import { messages } from '@workspace/db/schema'
+import { answerTask } from '@workspace/engine/trigger/answer'
 
-export type MessageRole = 'data' | 'system' | 'user' | 'assistant'
+export type UserMessage = {
+  content: string // | (MessageTextPart | MessageFilePart)[]
+  parentId?: string
+}
 
-export type Message = {
-  id: string
-  role: MessageRole
-  content: string
-  parent_id: string | null
-  children: string[]
-  created_at: Date
+export async function sendQuestionMessage({
+  conversationId,
+  message,
+}: {
+  conversationId: string
+  message: UserMessage
+}) {
+  const question = message.content
+
+  const handle = await answerTask.trigger({ question })
+
+  return { conversationId, question, handle }
 }
 
 export async function listMessages({
@@ -49,7 +59,7 @@ export async function listMessages({
     : await db.execute<Message>(sql`
     WITH RECURSIVE message_parents AS (
       -- Base case: start with target message
-      SELECT id, role, content, parent_id, created_at,
+      SELECT id, status,role, content, metadata, parent_id, created_at,
              (SELECT COALESCE(ARRAY_AGG(child.id), '{}'::text[]) 
               FROM ${messages} child 
               WHERE child.parent_id = ${messages}.id 
@@ -62,7 +72,7 @@ export async function listMessages({
       UNION ALL
       
       -- Recursive case: get parents of each message in the previous level
-      SELECT parent.id, parent.role, parent.content, parent.parent_id, parent.created_at,
+      SELECT parent.id, parent.status, parent.role, parent.content, parent.metadata, parent.parent_id, parent.created_at,
              (SELECT COALESCE(ARRAY_AGG(child.id), '{}'::text[]) 
               FROM ${messages} child 
               WHERE child.parent_id = parent.id 
@@ -71,7 +81,7 @@ export async function listMessages({
       INNER JOIN message_parents mp ON parent.id = mp.parent_id
       WHERE parent.deleted_at IS NULL
     )
-    SELECT id, role, content, parent_id, children, created_at
+    SELECT id, status, role, content, metadata, parent_id, children, created_at
     FROM message_parents
     WHERE id != ${targetMessage.id}  -- Exclude the target message itself
     ORDER BY created_at ASC
@@ -80,7 +90,7 @@ export async function listMessages({
   const listChildren = await db.execute<Message>(sql`
     WITH RECURSIVE message_children AS (
       -- Base case: start with target message
-      SELECT id, role, content, parent_id, created_at,
+      SELECT id, status, role, content, metadata, parent_id, created_at,
              (SELECT COALESCE(ARRAY_AGG(child.id ORDER BY child.created_at ASC), '{}'::text[]) 
               FROM ${messages} child 
               WHERE child.parent_id = ${messages}.id 
@@ -93,7 +103,7 @@ export async function listMessages({
       UNION ALL
       
       -- Recursive case: get only the first (oldest) child of each message, but keep all children in the array
-      SELECT child.id, child.role, child.content, child.parent_id, child.created_at,
+      SELECT child.id, child.status, child.role, child.content, child.metadata, child.parent_id, child.created_at,
              (SELECT COALESCE(ARRAY_AGG(grandchild.id ORDER BY grandchild.created_at ASC), '{}'::text[]) 
               FROM ${messages} grandchild 
               WHERE grandchild.parent_id = child.id 
@@ -109,7 +119,7 @@ export async function listMessages({
       )
       WHERE child.deleted_at IS NULL
     )
-    SELECT id, role, content, parent_id, children, created_at
+    SELECT id, status, role, content, metadata, parent_id, children, created_at
     FROM message_children
     ORDER BY created_at ASC
   `)

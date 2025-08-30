@@ -1,3 +1,4 @@
+import type { AsyncIterableStream } from '@trigger.dev/core/v3'
 import { python } from '@trigger.dev/python'
 import { logger, metadata, schemaTask } from '@trigger.dev/sdk'
 import { env } from '@workspace/env'
@@ -8,6 +9,22 @@ type AIMessageChunk = {
   id: string
   type: 'AIMessageChunk'
   content: string
+}
+
+export type STREAMS = {
+  content: AsyncIterableStream<string>
+}
+
+async function* handleStreamingResult(
+  streamingResult: AsyncIterableStream<string>,
+): AsyncGenerator<string> {
+  for await (const chunk of streamingResult) {
+    const result = parsePyLogger<AIMessageChunk>(chunk)?.message
+
+    if (result?.type === 'AIMessageChunk') {
+      yield result.content
+    }
+  }
 }
 
 export const answerTask = schemaTask({
@@ -34,17 +51,15 @@ export const answerTask = schemaTask({
       },
     )
 
-    // pass the streamingResult to the metadata system
-    const stream = await metadata.stream('streamingResult', streamingResult)
+    const stream = await metadata.stream(
+      'content',
+      handleStreamingResult(streamingResult),
+    )
 
     let text = ''
 
     for await (const chunk of stream) {
-      const result = parsePyLogger<AIMessageChunk>(chunk)?.message
-
-      if (result?.type === 'AIMessageChunk') {
-        text += result.content
-      }
+      text += chunk
     }
 
     return { response: text }

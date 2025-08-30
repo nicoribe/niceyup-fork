@@ -44,3 +44,7 @@ export type QueryExample = {
   input: string
   query: string
 }
+
+export type MessageContent = string | { type: string; [key: string]: any }[]
+
+export type Metadata = { [key: string]: any }

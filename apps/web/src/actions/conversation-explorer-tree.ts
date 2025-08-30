@@ -1,7 +1,10 @@
 'use server'
 
 import { authenticatedUser } from '@/lib/auth/server'
-import type { OrganizationTeamParams } from '@/lib/types'
+import type {
+  ConversationExplorerType,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import { db } from '@workspace/db'
 import { and, eq, inArray, isNull, sql } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
@@ -10,8 +13,6 @@ import {
   conversations,
   conversationsToUsers,
 } from '@workspace/db/schema'
-
-export type ConversationExplorerType = 'private' | 'shared' | 'team'
 
 type ConversationExplorerTreeParams = OrganizationTeamParams & {
   agentId: string

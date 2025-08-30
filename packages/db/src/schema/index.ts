@@ -12,6 +12,8 @@ import {
 import type {
   ColumnProperNamesByTables,
   DatabaseConnection,
+  MessageContent,
+  Metadata,
   PromptMessage,
   QueryExample,
   TableInfo,
@@ -161,9 +163,10 @@ export const conversationsRelations = relations(
 
 export const messages = pgTable('messages', {
   ...id,
-  role: text('role').notNull().default('user'), // "user", "assistant", "system"
-  content: text('content').notNull(),
-  contentType: text('content_type').notNull().default('text'), // "text", "image", "file"
+  status: text('status').notNull().default('queued'), // "queued", "in_progress", "finished", "stopped", "failed"
+  role: text('role').notNull().default('user'), // "system", "user", "assistant"
+  content: jsonb('content').$type<MessageContent>(),
+  metadata: jsonb('metadata').$type<Metadata>(),
   conversationId: text('conversation_id')
     .notNull()
     .references(() => conversations.id, { onDelete: 'cascade' }),

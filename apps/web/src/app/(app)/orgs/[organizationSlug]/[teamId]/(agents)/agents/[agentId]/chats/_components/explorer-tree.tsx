@@ -285,11 +285,11 @@ export function ExplorerTree() {
       {tree.getItems().map((item) => {
         return <TreeItemData key={item.getId()} item={item} tree={tree} />
       })}
-      {!tree.getItems().length && (
+      {/* {!tree.getItems().length && (
         <div className="flex h-full items-center justify-center gap-2 p-2">
           <h1 className="text-muted-foreground text-xs">Empty</h1>
         </div>
-      )}
+      )} */}
       <TreeDragLine />
     </Tree>
   )
