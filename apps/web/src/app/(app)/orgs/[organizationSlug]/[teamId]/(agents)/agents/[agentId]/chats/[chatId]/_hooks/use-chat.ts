@@ -1,5 +1,13 @@
 import { listMessages, sendQuestionMessage } from '@/actions/messages'
-import type { Message, MessageRole } from '@/lib/types'
+import type {
+  ChatParams,
+  Message,
+  MessageRole,
+  OrganizationTeamParams,
+  PromptInputStatus,
+} from '@/lib/types'
+import type { ScrollToBottom } from '@workspace/ui/components/conversation'
+import { useParams } from 'next/navigation'
 import * as React from 'react'
 
 // Memoized message index for O(1) lookups
@@ -10,10 +18,10 @@ const createMessageIndex = (messages: Message[]) => {
   for (const message of messages) {
     index.set(message.id, message)
 
-    if (message.parent_id) {
-      const existing = childrenIndex.get(message.parent_id) || []
+    if (message.parentId) {
+      const existing = childrenIndex.get(message.parentId) || []
       existing.push(message.id)
-      childrenIndex.set(message.parent_id, existing)
+      childrenIndex.set(message.parentId, existing)
     }
   }
 
@@ -63,8 +71,8 @@ const buildAncestors = (
   const ancestors: Message[] = []
   let current = message
 
-  while (current.parent_id) {
-    const parent = messageIndex.get(current.parent_id)
+  while (current.parentId) {
+    const parent = messageIndex.get(current.parentId)
     if (!parent) {
       break
     }
@@ -177,12 +185,17 @@ type LoadingMessage = {
   role: MessageRole
 }
 
-type PromptInputStatus = 'submitted' | 'streaming' | 'ready' | 'error'
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
 export function useChat({
-  chatId,
   initialMessages,
-}: { chatId: string; initialMessages?: Message[] }) {
+  refConversationScroll,
+}: {
+  initialMessages?: Message[]
+  refConversationScroll?: React.RefObject<ScrollToBottom | null>
+} = {}) {
+  const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
+
   const [allMessages, setAllMessages] = React.useState<Message[]>(
     initialMessages || [],
   )
@@ -233,28 +246,58 @@ export function useChat({
 
   const [status, setStatus] = React.useState<PromptInputStatus>('ready')
 
-  const [handle, setHandle] = React.useState<{
-    id: string
-    publicAccessToken: string
-    taskIdentifier: string
-  }>()
-
   const sendMessage = async (text: string) => {
     try {
       setStatus('submitted')
 
-      const { handle } = await sendQuestionMessage({
-        conversationId: chatId,
-        message: {
-          content: text,
+      const parentMessageId = messagesFiltered.at(-1)?.id
+      const fakeMessageId = Math.random().toString(36).substring(2, 15)
+
+      setAllMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: fakeMessageId,
+          status: 'queued',
+          role: 'user',
+          parts: [{ type: 'text', text }],
+          parentId: parentMessageId,
         },
+      ])
+
+      if (refConversationScroll?.current) {
+        refConversationScroll.current.scrollToBottom()
+      }
+
+      const data = await sendQuestionMessage(
+        { organizationSlug, teamId, agentId },
+        {
+          conversationId: chatId,
+          parentMessageId,
+          message: {
+            parts: [{ type: 'text', text }],
+          },
+          // explorerType,
+          // folderIdExplorerTree,
+        },
+      )
+
+      if (!data) {
+        throw new Error('Failed to send message')
+      }
+
+      // if (chatId === 'new') {
+      //   redirect(
+      //     `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${data.conversationId}`,
+      //   )
+      // }
+
+      setAllMessages((prevMessages) => {
+        const updatedMessages = prevMessages.map((message) =>
+          message.id === fakeMessageId ? data.questionMessage : message,
+        )
+        updatedMessages.push(data.answerMessage)
+        return updatedMessages
       })
-
-      setHandle(handle)
-
-      setStatus('streaming')
-
-      setStatus('ready')
     } catch {
       setStatus('error')
     }
@@ -268,9 +311,5 @@ export function useChat({
     sendMessage,
     status,
     setStatus,
-
-    // In Dev
-    handle,
-    setHandle,
   }
 }

@@ -12,23 +12,33 @@ import {
 import { GlobeIcon, MicIcon, PlusIcon } from 'lucide-react'
 import * as React from 'react'
 
-export function SendMessage({
+export function ChatPromptInput({
+  suggestion,
   status,
   sendMessage,
 }: {
+  suggestion?: string
   status: PromptInputStatus
   sendMessage: (message: string) => Promise<void>
 }) {
   const [text, setText] = React.useState<string>('')
+
+  React.useEffect(() => {
+    if (suggestion) {
+      setText(suggestion)
+    }
+  }, [suggestion])
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (
     event,
   ) => {
     event.preventDefault()
 
-    if (!text.trim()) {
+    if (!text.trim() || status === 'submitted' || status === 'streaming') {
       return
     }
+
+    setText('')
 
     await sendMessage(text)
   }
@@ -56,7 +66,10 @@ export function SendMessage({
           </PromptInputButton>
         </PromptInputTools>
 
-        <PromptInputSubmit disabled={!text.trim()} status={status} />
+        <PromptInputSubmit
+          disabled={!text.trim() && (status === 'ready' || status === 'error')}
+          status={status}
+        />
       </PromptInputToolbar>
     </PromptInput>
   )

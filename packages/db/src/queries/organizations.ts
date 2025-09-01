@@ -174,6 +174,7 @@ export async function getMembership({
     .limit(1)
 
   if (!membership) {
+    console.log('getMembership', 'Membership not found')
     return null
   }
 

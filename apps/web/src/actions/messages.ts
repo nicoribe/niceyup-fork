@@ -1,28 +1,222 @@
 'use server'
 
-import type { Message } from '@/lib/types'
+import { authenticatedUser } from '@/lib/auth/server'
+import type {
+  ConversationExplorerType,
+  MessageMetadata,
+  MessagePart,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import { db } from '@workspace/db'
-import { and, desc, eq, isNull, sql } from '@workspace/db/orm'
-import { messages } from '@workspace/db/schema'
-import { answerTask } from '@workspace/engine/trigger/answer'
+import { and, desc, eq, isNull, or, sql } from '@workspace/db/orm'
+import { queries } from '@workspace/db/queries'
+import {
+  conversationExplorerTree,
+  conversations,
+  messages,
+} from '@workspace/db/schema'
+import { answerMessageTask } from '@workspace/engine/trigger/answer-message'
 
-export type UserMessage = {
-  content: string // | (MessageTextPart | MessageFilePart)[]
-  parentId?: string
+type MessagesParams = OrganizationTeamParams & {
+  agentId: string
 }
 
-export async function sendQuestionMessage({
-  conversationId,
-  message,
-}: {
-  conversationId: string
-  message: UserMessage
-}) {
-  const question = message.content
+type SendQuestionMessageParams = {
+  conversationId: string | null
+  parentMessageId?: string | null
+  message: {
+    parts: MessagePart[]
+    metadata?: MessageMetadata | null
+  }
+  explorerType?: ConversationExplorerType
+  folderIdExplorerTree?: string
+}
 
-  const handle = await answerTask.trigger({ question })
+export async function sendQuestionMessage(
+  params: MessagesParams,
+  {
+    conversationId,
+    parentMessageId,
+    message,
+    explorerType = 'private',
+    folderIdExplorerTree,
+  }: SendQuestionMessageParams,
+) {
+  if (explorerType === 'team' && params.teamId === '~') {
+    console.log('sendQuestionMessage', 'Team not found')
+    return
+  }
 
-  return { conversationId, question, handle }
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
+
+  const agent = await queries.getAgent({
+    userId,
+    organizationSlug:
+      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
+    teamId: params.teamId !== '~' ? params.teamId : null,
+    agentId: params.agentId,
+  })
+
+  if (!agent) {
+    console.log('sendQuestionMessage', 'Agent not found')
+    return
+  }
+
+  const ownerTypeCondition =
+    explorerType === 'team' ? { teamId: params.teamId } : { ownerId: userId }
+
+  if (!conversationId || conversationId === 'new') {
+    const [conversation] = await db
+      .insert(conversations)
+      .values({
+        agentId: params.agentId,
+        ...ownerTypeCondition,
+      })
+      .returning({
+        id: conversations.id,
+      })
+
+    if (!conversation) {
+      console.log('sendQuestionMessage', 'Conversation not created')
+      return
+    }
+
+    conversationId = conversation.id
+
+    const [systemMessage] = await db
+      .insert(messages)
+      .values({
+        conversationId,
+        status: 'finished',
+        role: 'system',
+        parts: [{ type: 'text', text: 'You are a helpful assistant.' }],
+      })
+      .returning({
+        id: messages.id,
+      })
+
+    if (!systemMessage) {
+      console.log('sendQuestionMessage', 'System message not created')
+      return
+    }
+
+    parentMessageId = systemMessage.id
+
+    await db
+      .insert(conversationExplorerTree)
+      .values({
+        explorerType,
+        agentId: params.agentId,
+        ...ownerTypeCondition,
+        conversationId,
+        parentId: folderIdExplorerTree,
+      })
+      .returning({
+        id: conversationExplorerTree.id,
+      })
+  }
+
+  if (!parentMessageId) {
+    const [parentMessage] = await db
+      .select({
+        id: messages.id,
+      })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.conversationId, conversationId),
+          or(eq(messages.role, 'system'), eq(messages.role, 'assistant')),
+          isNull(messages.deletedAt),
+        ),
+      )
+      .orderBy(desc(messages.createdAt))
+      .limit(1)
+
+    if (!parentMessage) {
+      console.log('sendQuestionMessage', 'Parent message not found')
+      return
+    }
+
+    parentMessageId = parentMessage?.id
+  }
+
+  const [questionMessage] = await db
+    .insert(messages)
+    .values({
+      conversationId,
+      status: 'finished',
+      role: 'user',
+      parts: message.parts,
+      metadata: message.metadata,
+      parentId: parentMessageId,
+    })
+    .returning({
+      id: messages.id,
+      status: messages.status,
+      role: messages.role,
+      parts: messages.parts,
+      metadata: messages.metadata,
+      parentId: messages.parentId,
+    })
+
+  if (!questionMessage) {
+    console.log('sendQuestionMessage', 'Question message not created')
+    return
+  }
+
+  const [answerMessage] = await db
+    .insert(messages)
+    .values({
+      conversationId,
+      status: 'queued',
+      role: 'assistant',
+      parts: [],
+      parentId: questionMessage.id,
+    })
+    .returning({
+      id: messages.id,
+    })
+
+  if (!answerMessage) {
+    console.log('sendQuestionMessage', 'Answer message not created')
+    return
+  }
+
+  const handle = await answerMessageTask.trigger({
+    conversationId,
+    questionMessageId: questionMessage.id,
+    answerMessageId: answerMessage.id,
+  })
+
+  const metadata = { messageId: answerMessage.id, ...handle }
+
+  const [answerMessageUpdated] = await db
+    .update(messages)
+    .set({
+      metadata: sql`COALESCE(${messages.metadata}, '{}'::jsonb) || jsonb_build_object('realtimeRun', ${JSON.stringify(metadata)}::jsonb)`,
+    })
+    .where(eq(messages.id, answerMessage.id))
+    .returning({
+      id: messages.id,
+      status: messages.status,
+      role: messages.role,
+      parts: messages.parts,
+      metadata: messages.metadata,
+      parentId: messages.parentId,
+    })
+
+  if (!answerMessageUpdated) {
+    console.log('sendQuestionMessage', 'Answer message not updated')
+    return
+  }
+
+  return {
+    conversationId,
+    questionMessage: questionMessage,
+    answerMessage: answerMessageUpdated,
+  }
 }
 
 export async function listMessages({
@@ -30,99 +224,5 @@ export async function listMessages({
   targetMessageId,
   parents,
 }: { conversationId: string; targetMessageId?: string; parents?: boolean }) {
-  const [targetMessage] = await db
-    .select({
-      id: messages.id,
-    })
-    .from(messages)
-    .where(
-      targetMessageId
-        ? and(
-            eq(messages.id, targetMessageId),
-            eq(messages.conversationId, conversationId),
-            isNull(messages.deletedAt),
-          )
-        : and(
-            eq(messages.conversationId, conversationId),
-            isNull(messages.deletedAt),
-          ),
-    )
-    .orderBy(desc(messages.createdAt))
-    .limit(1)
-
-  if (!targetMessage) {
-    return []
-  }
-
-  const listParents = !parents
-    ? { rows: [] }
-    : await db.execute<Message>(sql`
-    WITH RECURSIVE message_parents AS (
-      -- Base case: start with target message
-      SELECT id, status,role, content, metadata, parent_id, created_at,
-             (SELECT COALESCE(ARRAY_AGG(child.id), '{}'::text[]) 
-              FROM ${messages} child 
-              WHERE child.parent_id = ${messages}.id 
-              AND child.deleted_at IS NULL) as children
-      FROM ${messages}
-      WHERE id = ${targetMessage.id}
-        AND conversation_id = ${conversationId}
-        AND deleted_at IS NULL
-      
-      UNION ALL
-      
-      -- Recursive case: get parents of each message in the previous level
-      SELECT parent.id, parent.status, parent.role, parent.content, parent.metadata, parent.parent_id, parent.created_at,
-             (SELECT COALESCE(ARRAY_AGG(child.id), '{}'::text[]) 
-              FROM ${messages} child 
-              WHERE child.parent_id = parent.id 
-              AND child.deleted_at IS NULL) as children
-      FROM ${messages} parent
-      INNER JOIN message_parents mp ON parent.id = mp.parent_id
-      WHERE parent.deleted_at IS NULL
-    )
-    SELECT id, status, role, content, metadata, parent_id, children, created_at
-    FROM message_parents
-    WHERE id != ${targetMessage.id}  -- Exclude the target message itself
-    ORDER BY created_at ASC
-  `)
-
-  const listChildren = await db.execute<Message>(sql`
-    WITH RECURSIVE message_children AS (
-      -- Base case: start with target message
-      SELECT id, status, role, content, metadata, parent_id, created_at,
-             (SELECT COALESCE(ARRAY_AGG(child.id ORDER BY child.created_at ASC), '{}'::text[]) 
-              FROM ${messages} child 
-              WHERE child.parent_id = ${messages}.id 
-              AND child.deleted_at IS NULL) as children
-      FROM ${messages}
-      WHERE id = ${targetMessage.id}
-        AND conversation_id = ${conversationId}
-        AND deleted_at IS NULL
-      
-      UNION ALL
-      
-      -- Recursive case: get only the first (oldest) child of each message, but keep all children in the array
-      SELECT child.id, child.status, child.role, child.content, child.metadata, child.parent_id, child.created_at,
-             (SELECT COALESCE(ARRAY_AGG(grandchild.id ORDER BY grandchild.created_at ASC), '{}'::text[]) 
-              FROM ${messages} grandchild 
-              WHERE grandchild.parent_id = child.id 
-              AND grandchild.deleted_at IS NULL) as children
-      FROM ${messages} child
-      INNER JOIN message_children mc ON child.id = (
-        SELECT first_child.id
-        FROM ${messages} first_child
-        WHERE first_child.parent_id = mc.id
-        AND first_child.deleted_at IS NULL
-        ORDER BY first_child.created_at ASC
-        LIMIT 1
-      )
-      WHERE child.deleted_at IS NULL
-    )
-    SELECT id, status, role, content, metadata, parent_id, children, created_at
-    FROM message_children
-    ORDER BY created_at ASC
-  `)
-
-  return [...listParents.rows, ...listChildren.rows]
+  return queries.listMessages({ conversationId, targetMessageId, parents })
 }

@@ -13,6 +13,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
 
     OPENAI_API_KEY: z.string().optional(),
+    AI_GATEWAY_API_KEY: z.string().optional(),
 
     TRIGGER_DEV_PROJECT_ID: z.string(),
     TRIGGER_SECRET_KEY: z.string(),
@@ -52,6 +53,7 @@ export const env = createEnv({
     WEB_URL: process.env.WEB_URL,
     DATABASE_URL: process.env.DATABASE_URL,
 
+    AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 
     TRIGGER_DEV_PROJECT_ID: process.env.TRIGGER_DEV_PROJECT_ID,

@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/ai",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@ai-sdk/gateway": "^1.0.15",
+    "@workspace/env": "workspace:*",
+    "ai": "^5.0.28"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@workspace/tsconfig": "workspace:*",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./gateway": "./src/gateway.ts",
+    "./types": "./src/lib/types.ts",
+    "./utils": "./src/lib/utils.ts"
+  }
+}

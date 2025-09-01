@@ -1,3 +1,5 @@
+import type { AIMessage, AIMessageMetadata } from '@workspace/ai/types'
+
 export type OrganizationTeamParams = {
   organizationSlug: 'my-account' | '$id'
   teamId: '~' | '$id'
@@ -34,39 +36,24 @@ export type Chat = {
   agentId: string | null
 }
 
-export type MessageStatus =
-  | 'queued'
-  | 'in_progress'
-  | 'finished'
-  | 'stopped'
-  | 'failed'
-
 export type PromptInputStatus = 'submitted' | 'streaming' | 'ready' | 'error'
 
-export type MessageRole = 'system' | 'user' | 'assistant'
+export type MessageStatus = AIMessage['status']
 
-export type MessageTextPart = { type: 'text'; text: string }
+export type MessageRole = AIMessage['role']
 
-export type MessageFilePart = {
-  type: 'file'
-  mediaType: string
-  filename?: string
-  url: string
-}
+export type MessagePart = AIMessage['parts'][number]
 
-export type MessagePart = MessageTextPart | MessageFilePart
-
-export type MessageContent = string | MessagePart[]
-
-export type MessageMetadata = { [key: string]: any }
+export type MessageMetadata = AIMessage['metadata']
 
 export type Message = {
   id: string
   status: MessageStatus
   role: MessageRole
-  content: MessageContent
-  metadata?: MessageMetadata
-  parent_id?: string | null
+  parts: MessagePart[] | null
+  metadata?: MessageMetadata | null
+  parentId?: string | null
   children?: string[]
-  created_at?: Date
 }
+
+export type MessageRealtimeRun = NonNullable<AIMessageMetadata['realtimeRun']>

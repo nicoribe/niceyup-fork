@@ -1,7 +1,8 @@
-export type PromptMessage = {
-  role: 'user' | 'assistant'
-  content: string
-}
+import type { AIMessage } from '@workspace/ai/types'
+
+export type SourceType = 'text' | 'structured'
+
+export type DatabaseDialect = 'postgresql' | 'mysql' | 'sqlite'
 
 export type DatabaseConnection = {
   host?: string
@@ -45,6 +46,17 @@ export type QueryExample = {
   query: string
 }
 
-export type MessageContent = string | { type: string; [key: string]: any }[]
+export type PromptMessage = {
+  role: 'user' | 'assistant'
+  content: string
+}
 
-export type Metadata = { [key: string]: any }
+export type MessageStatus = AIMessage['status']
+
+export type MessageRole = AIMessage['role']
+
+export type MessagePart = AIMessage['parts'][number]
+
+export type MessageMetadata = AIMessage['metadata']
+
+export type ConversationExplorerType = 'private' | 'shared' | 'team'

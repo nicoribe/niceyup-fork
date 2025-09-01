@@ -21,6 +21,17 @@ export default async function Page({
     { next: { tags: [`chat-${chatId}`] } },
   )
 
+  const suggestions = [
+    'What are the latest trends in AI?',
+    'How does machine learning work?',
+    'Explain quantum computing',
+    'Best practices for React development',
+    'Tell me about TypeScript benefits',
+    'How to optimize database queries?',
+    'What is the difference between SQL and NoSQL?',
+    'Explain cloud computing basics',
+  ]
+
   return (
     <div className="flex h-full flex-col">
       <Tabbar
@@ -36,7 +47,7 @@ export default async function Page({
       {data?.conversation ? (
         <ChatView chat={data.conversation} />
       ) : chatId === 'new' ? (
-        <NewChat />
+        <NewChat suggestions={suggestions} />
       ) : (
         <ChatNotFound />
       )}

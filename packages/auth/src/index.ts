@@ -1,3 +1,3 @@
 export * from './types'
 export * from './auth'
-export * from 'better-auth/node'
+export { fromNodeHeaders, toNodeHandler } from 'better-auth/node'

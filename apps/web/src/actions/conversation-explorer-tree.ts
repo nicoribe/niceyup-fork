@@ -28,6 +28,7 @@ export async function getItemInConversationExplorerTree(
   { explorerType, itemId }: GetItemInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log('getItemInConversationExplorerTree', 'Team not found')
     return null
   }
 
@@ -100,6 +101,10 @@ export async function getChildrenWithDataInConversationExplorerTree(
   { explorerType, itemId }: GetChildrenWithDataInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log(
+      'getChildrenWithDataInConversationExplorerTree',
+      'Team not found',
+    )
     return []
   }
 
@@ -229,6 +234,7 @@ export async function getParentsInConversationExplorerTree(
   }: GetParentsInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log('getParentsInConversationExplorerTree', 'Team not found')
     return []
   }
 
@@ -331,6 +337,7 @@ export async function updateNameOfItemInConversationExplorerTree(
   }: UpdateNameOfItemInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log('updateNameOfItemInConversationExplorerTree', 'Team not found')
     return
   }
 
@@ -406,6 +413,10 @@ export async function updateParentIdOfItemsInConversationExplorerTree(
   }: UpdateParentIdOfItemsInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log(
+      'updateParentIdOfItemsInConversationExplorerTree',
+      'Team not found',
+    )
     return
   }
 
@@ -463,6 +474,7 @@ export async function createFolderInConversationExplorerTree(
   }: CreateFolderInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log('createFolderInConversationExplorerTree', 'Team not found')
     return null
   }
 
@@ -512,6 +524,7 @@ export async function deleteItemInConversationExplorerTree(
   { explorerType, itemId }: DeleteItemInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log('deleteItemInConversationExplorerTree', 'Team not found')
     return
   }
 
@@ -646,6 +659,7 @@ export async function getItemsDeletedInConversationExplorerTree(
   { explorerType }: GetItemsDeletedInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log('getItemsDeletedInConversationExplorerTree', 'Team not found')
     return []
   }
 
@@ -716,6 +730,7 @@ export async function restoreItemInConversationExplorerTree(
   { explorerType, itemId }: RestoreItemInConversationExplorerTreeParams,
 ) {
   if (explorerType === 'team' && params.teamId === '~') {
+    console.log('restoreItemInConversationExplorerTree', 'Team not found')
     return
   }
 
@@ -791,6 +806,7 @@ export async function restoreItemInConversationExplorerTree(
 //   { explorerType, itemId }: DestroyItemInConversationExplorerTreeParams,
 // ) {
 //   if (explorerType === 'team' && params.teamId === '~') {
+//     console.log('destroyItemInConversationExplorerTree', 'Team not found')
 //     return
 //   }
 
@@ -828,6 +844,7 @@ export async function restoreItemInConversationExplorerTree(
 //   { explorerType }: DestroyAllItemsInConversationExplorerTreeParams,
 // ) {
 //   if (explorerType === 'team' && params.teamId === '~') {
+//     console.log('destroyAllItemsInConversationExplorerTree', 'Team not found')
 //     return
 //   }
 

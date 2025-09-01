@@ -1,21 +1,23 @@
 import { relations } from 'drizzle-orm'
 import {
   boolean,
-  integer,
   jsonb,
   pgTable,
   primaryKey,
-  real,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core'
 import type {
   ColumnProperNamesByTables,
+  ConversationExplorerType,
   DatabaseConnection,
-  MessageContent,
-  Metadata,
-  PromptMessage,
+  DatabaseDialect,
+  MessageMetadata,
+  MessagePart,
+  MessageRole,
+  MessageStatus,
   QueryExample,
+  SourceType,
   TableInfo,
   TableMetadata,
 } from '../types'
@@ -27,13 +29,13 @@ export * from './auth'
 export const sources = pgTable('sources', {
   ...id,
   name: text('name').notNull().default('Unnamed'),
-  type: text('type').notNull(), // "structured"
+  type: text('type').notNull().$type<SourceType>(),
 
-  embaddingModel: text('embadding_model'), // "text-embedding-3-small"
-  llmModel: text('llm_model'), // "gpt-4o-mini"
+  // embaddingModel: text('embadding_model'), // "text-embedding-3-small"
+  // llmModel: text('llm_model'), // "gpt-4o-mini"
 
-  chuckSize: integer('chuck_size'), // 4000
-  chunkOverlap: integer('chunk_overlap'), // 100
+  // chuckSize: integer('chuck_size'), // 4000
+  // chunkOverlap: integer('chunk_overlap'), // 100
 
   userId: text('user_id').references(() => users.id),
   organizationId: text('organization_id').references(() => organizations.id),
@@ -63,7 +65,7 @@ export const sourcesRelations = relations(sources, ({ one, many }) => ({
 export const databaseConnections = pgTable('database_connections', {
   ...id,
   name: text('name').notNull().default('Unnamed'),
-  dialect: text('dialect'), // "postgresql", "mysql", "sqlite"
+  dialect: text('dialect').$type<DatabaseDialect>(),
   payload: encryptedJson('payload').$type<DatabaseConnection>(),
   ...timestamps,
 })
@@ -102,21 +104,21 @@ export const agents = pgTable('agents', {
   name: text('name').notNull().default('Unnamed'),
   published: boolean('published').notNull().default(false),
 
-  embaddingModel: text('embadding_model'), // "text-embedding-3-small"
-  llmModel: text('llm_model'), // "gpt-4o-mini"
+  // embaddingModel: text('embadding_model'), // "text-embedding-3-small"
+  // llmModel: text('llm_model'), // "gpt-4o-mini"
 
-  variables: jsonb('variables').$type<string[]>(), // Create variables to dynamically insert values into your prompt
-  tools: jsonb('tools').$type<any[]>(), // Define tools to use in your prompt
+  // variables: jsonb('variables').$type<string[]>(), // Create variables to dynamically insert values into your prompt
+  // tools: jsonb('tools').$type<any[]>(), // Define tools to use in your prompt
 
-  reasoningEffort: text('reasoning_effort'), // "low", "medium", "high"
-  temperature: real('temperature'), // 1.00
-  topP: real('top_p'), // 1.00
-  maxTokens: integer('max_tokens'), // 10000
+  // reasoningEffort: text('reasoning_effort'), // "low", "medium", "high"
+  // temperature: real('temperature'), // 1.00
+  // topP: real('top_p'), // 1.00
+  // maxTokens: integer('max_tokens'), // 10000
 
-  systemMessage: text('system_message'), // Describe desired model behavior (tone, tool usage, response style)
-  promptMessages: jsonb('prompt_messages').$type<PromptMessage[]>(), // Enter task specifics. use {{template variables}} for dynamic inputs
+  // systemMessage: text('system_message'), // Describe desired model behavior (tone, tool usage, response style)
+  // promptMessages: jsonb('prompt_messages').$type<PromptMessage[]>(), // Enter task specifics. use {{template variables}} for dynamic inputs
 
-  storeLogs: boolean('store_logs').default(false), // Whether to store logs for later retrieval. Logs are visible to your organization.
+  // storeLogs: boolean('store_logs').default(false), // Whether to store logs for later retrieval. Logs are visible to your organization.
 
   userId: text('user_id').references(() => users.id),
   organizationId: text('organization_id').references(() => organizations.id),
@@ -163,10 +165,12 @@ export const conversationsRelations = relations(
 
 export const messages = pgTable('messages', {
   ...id,
-  status: text('status').notNull().default('queued'), // "queued", "in_progress", "finished", "stopped", "failed"
-  role: text('role').notNull().default('user'), // "system", "user", "assistant"
-  content: jsonb('content').$type<MessageContent>(),
-  metadata: jsonb('metadata').$type<Metadata>(),
+
+  status: text('status').notNull().default('queued').$type<MessageStatus>(),
+  role: text('role').notNull().default('user').$type<MessageRole>(),
+  parts: jsonb('parts').$type<MessagePart[]>(),
+  metadata: jsonb('metadata').$type<MessageMetadata>(),
+
   conversationId: text('conversation_id')
     .notNull()
     .references(() => conversations.id, { onDelete: 'cascade' }),
@@ -291,7 +295,10 @@ export const conversationsToUsersRelations = relations(
 export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
   ...id,
   name: text('name'),
-  explorerType: text('explorer_type').notNull().default('private'), // "private", "shared", "team"
+  explorerType: text('explorer_type')
+    .notNull()
+    .default('private')
+    .$type<ConversationExplorerType>(),
   shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
   agentId: text('agent_id').references(() => agents.id),
   ownerId: text('owner_id').references(() => users.id),

@@ -1,1 +1,1 @@
-export * from '@trigger.dev/sdk'
+export { runs, tasks } from '@trigger.dev/sdk'

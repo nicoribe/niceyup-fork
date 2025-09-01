@@ -2,7 +2,7 @@ import { env } from '@workspace/env'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@workspace/ui'],
+  transpilePackages: ['@workspace/ui', 'shiki'],
   async redirects() {
     return [
       {

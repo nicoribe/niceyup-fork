@@ -4,7 +4,7 @@ import { Button } from '@workspace/ui/components/button'
 import { cn } from '@workspace/ui/lib/utils'
 import { ArrowDownIcon } from 'lucide-react'
 import type { ComponentProps } from 'react'
-import { useCallback } from 'react'
+import * as React from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>
@@ -32,13 +32,24 @@ export const ConversationContent = ({
 
 export type ConversationScrollButtonProps = ComponentProps<typeof Button>
 
+export type ScrollToBottom = {
+  scrollToBottom: ReturnType<typeof useStickToBottomContext>['scrollToBottom']
+}
+
 export const ConversationScrollButton = ({
+  refConversationScroll,
   className,
   ...props
-}: ConversationScrollButtonProps) => {
+}: ConversationScrollButtonProps & {
+  refConversationScroll?: React.RefObject<ScrollToBottom | null>
+}) => {
   const { isAtBottom, scrollToBottom } = useStickToBottomContext()
 
-  const handleScrollToBottom = useCallback(() => {
+  React.useImperativeHandle(refConversationScroll, () => ({
+    scrollToBottom: () => scrollToBottom(),
+  }))
+
+  const handleScrollToBottom = React.useCallback(() => {
     scrollToBottom()
   }, [scrollToBottom])
 

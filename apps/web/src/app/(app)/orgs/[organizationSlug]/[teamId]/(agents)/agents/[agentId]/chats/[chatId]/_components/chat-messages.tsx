@@ -1,9 +1,15 @@
 'use client'
 
-import type { MessagePart, Message as MessageType } from '@/lib/types'
-import type { ChatParams } from '@/lib/types'
+import type {
+  MessageStatus as MessageStatusType,
+  Message as MessageType,
+  PromptInputStatus,
+} from '@/lib/types'
 import { useRealtimeRunWithStreams } from '@workspace/engine/client'
-import type { STREAMS, answerTask } from '@workspace/engine/trigger/answer'
+import type {
+  STREAMS,
+  answerMessageTask,
+} from '@workspace/engine/trigger/answer-message'
 import {
   Branch,
   BranchMessages,
@@ -18,42 +24,51 @@ import {
   ConversationScrollButton,
 } from '@workspace/ui/components/conversation'
 import { Loader } from '@workspace/ui/components/loader'
-import { Message, MessageContent } from '@workspace/ui/components/message'
+import {
+  Message as UIMessage,
+  MessageContent as UIMessageContent,
+} from '@workspace/ui/components/message'
 import { Response } from '@workspace/ui/components/response'
-import { useParams } from 'next/navigation'
+import { LoaderCircle, XCircle } from 'lucide-react'
+import * as React from 'react'
+import { useStickToBottomContext } from 'use-stick-to-bottom'
 import { useChat } from '../_hooks/use-chat'
+import { ChatPromptInput } from './chat-prompt-input'
 import { LoadingMessage, LoadingMessages } from './loading-message'
-import { SendMessage } from './send-message'
 
 export function ChatMessages({
   initialMessages,
 }: {
   initialMessages: MessageType[]
 }) {
-  const { chatId } = useParams<ChatParams>()
+  const refConversationScroll = React.useRef(null)
 
   const {
     messages,
     loadingMessage,
     getMessageById,
     handleBranchChange,
-    status,
     sendMessage,
-    handle,
-  } = useChat({ chatId, initialMessages })
+    status,
+    setStatus,
+  } = useChat({
+    initialMessages,
+    refConversationScroll,
+  })
 
   return (
     <div className="relative flex size-full flex-col items-center divide-y overflow-hidden">
       <Conversation className="w-full">
         <ConversationContent className="mx-auto h-20 max-w-3xl">
           {messages.map((message) => {
-            const parentMessage = getMessageById(message.parent_id)
+            const parentMessage = getMessageById(message.parentId)
             const isBranch =
               parentMessage?.children && parentMessage.children.length > 1
 
             if (isBranch) {
               return (
                 <Branch
+                  key={message.id}
                   defaultBranch={parentMessage.children?.indexOf(message.id)}
                   onBranchChange={async (branchIndex) => {
                     const targetMessageId =
@@ -69,21 +84,32 @@ export function ChatMessages({
                       role: message.role,
                     })
                   }}
-                  key={message.id}
                 >
                   <BranchMessages>
                     {parentMessage.children?.map((id) => {
                       if (id === message.id) {
-                        return <ChatMessage message={message} key={id} />
+                        return (
+                          <Message
+                            key={id}
+                            message={message}
+                            setStatus={setStatus}
+                          />
+                        )
                       }
 
                       // Message is already loaded
                       const branchMessage = getMessageById(id)
                       if (branchMessage) {
-                        return <ChatMessage message={branchMessage} key={id} />
+                        return (
+                          <Message
+                            key={id}
+                            message={branchMessage}
+                            setStatus={setStatus}
+                          />
+                        )
                       }
 
-                      return <LoadingMessage role={message.role} key={id} />
+                      return <LoadingMessage key={id} role={message.role} />
                     })}
                   </BranchMessages>
 
@@ -96,96 +122,213 @@ export function ChatMessages({
               )
             }
 
-            return <ChatMessage message={message} key={message.id} />
+            return (
+              <Message
+                key={message.id}
+                message={message}
+                setStatus={setStatus}
+              />
+            )
           })}
 
           {loadingMessage && <LoadingMessages role={loadingMessage.role} />}
-
-          <StreamAnswer handle={handle} />
-
-          {status === 'submitted' && <Loader />}
         </ConversationContent>
-        <ConversationScrollButton />
+        <ConversationScrollButton
+          refConversationScroll={refConversationScroll}
+        />
       </Conversation>
 
       <div className="grid w-full max-w-3xl shrink-0 gap-4 p-4">
-        <SendMessage status={status} sendMessage={sendMessage} />
+        <ChatPromptInput status={status} sendMessage={sendMessage} />
       </div>
     </div>
   )
 }
 
-function ChatMessage({ message }: { message: MessageType }) {
+function Message({
+  message,
+  setStatus,
+}: { message: MessageType; setStatus: (status: PromptInputStatus) => void }) {
+  if (
+    (message.status === 'queued' || message.status === 'in_progress') &&
+    message.metadata?.realtimeRun
+  ) {
+    return <MessageContentStream message={message} setStatus={setStatus} />
+  }
+
+  return <MessageContent message={message} />
+}
+
+function MessageContentStream({
+  message,
+  setStatus,
+}: {
+  message: MessageType
+  setStatus: (status: PromptInputStatus) => void
+}) {
+  const { streams, run, error } = useRealtimeRunWithStreams<
+    typeof answerMessageTask,
+    STREAMS
+  >(message.metadata?.realtimeRun?.id, {
+    accessToken: message.metadata?.realtimeRun?.publicAccessToken,
+  })
+
+  const { scrollToBottom } = useStickToBottomContext()
+
+  React.useEffect(() => {
+    scrollToBottom({ preserveScrollPosition: true })
+  }, [streams])
+
+  React.useEffect(() => {
+    if (run) {
+      if (run.isQueued) {
+        setStatus('submitted')
+      } else if (run.isExecuting) {
+        setStatus('streaming')
+      } else if (run.isFailed) {
+        setStatus('error')
+      } else if (run.isCompleted) {
+        setStatus('ready')
+      }
+    }
+  }, [run])
+
+  if (error) {
+    return (
+      <UIMessage from={message.role}>
+        <UIMessageContent>
+          <div className="flex flex-row items-center gap-2">
+            <XCircle className="size-4 text-destructive" />
+            {message.role === 'assistant'
+              ? 'An error occurred while generating the response.'
+              : 'An error occurred while loading the message.'}
+          </div>
+        </UIMessageContent>
+      </UIMessage>
+    )
+  }
+
+  const messageStream = streams.messageStream?.at(-1)
+
+  if (run?.isQueued || !messageStream) {
+    return <Loader />
+  }
+
+  function messageStatus(): MessageStatusType {
+    if (run?.isCancelled) {
+      return 'stopped'
+    }
+
+    if (run?.isFailed) {
+      return 'failed'
+    }
+
+    if (run?.isSuccess) {
+      return 'finished'
+    }
+
+    return 'in_progress'
+  }
+
+  return (
+    <MessageContent
+      stream
+      message={{
+        id: messageStream.id,
+        status: messageStatus(),
+        role: messageStream.role,
+        parts: messageStream.parts,
+      }}
+    />
+  )
+}
+
+function MessageContent({
+  stream,
+  message,
+}: { stream?: boolean; message: MessageType }) {
   // Messages from the system are not displayed
   if (message.role !== 'user' && message.role !== 'assistant') {
     return null
   }
 
-  let content: MessagePart[] = []
-
-  if (!Array.isArray(message.content)) {
-    content =
-      typeof message.content === 'string'
-        ? [{ type: 'text', text: message.content }]
-        : [message.content]
-  } else {
-    content = message.content
-  }
-
   return (
-    <Message from={message.role}>
-      <MessageContent>
-        {content.map((part, i) => {
-          switch (part.type) {
-            case 'text': // we don't use any reasoning or tool calls in this example
-              return (
-                <Response
-                  className="[&_[data-streamdown='code-block']]:bg-background"
-                  key={`${part.type}-${i}`}
-                >
-                  {part.text}
-                </Response>
-              )
-            default:
-              return null
-          }
-        })}
-      </MessageContent>
-    </Message>
+    <UIMessage from={message.role}>
+      <UIMessageContent>
+        {/* If the message failed and there is no text, display an error message */}
+        {message.status === 'failed' && !message.parts?.length && (
+          <div className="flex flex-row items-center gap-2">
+            <XCircle className="size-4 text-destructive" />
+            {message.role === 'assistant'
+              ? 'An error occurred while generating the response.'
+              : 'An error occurred while loading the message.'}
+          </div>
+        )}
+
+        {/* If the message is streaming and there is no text, display a loading message */}
+        {stream && !message.parts?.length && (
+          <div className="flex flex-row items-center gap-2">
+            <LoaderCircle className="size-4 animate-spin" />
+            <AnimatedDots
+              text={message.role === 'assistant' ? 'Generating' : 'Loading'}
+            />
+          </div>
+        )}
+
+        {!!message.parts?.length &&
+          message.parts.map((part, i) => {
+            switch (part.type) {
+              case 'text':
+                // If the message is streaming and there is no text, display a loading message
+                if (stream && !part.text) {
+                  return (
+                    <div className="flex flex-row items-center gap-2">
+                      <LoaderCircle className="size-4 animate-spin" />
+                      <AnimatedDots
+                        text={
+                          message.role === 'assistant'
+                            ? 'Generating response'
+                            : 'Loading message'
+                        }
+                      />
+                    </div>
+                  )
+                }
+
+                return (
+                  <Response
+                    key={`${part.type}-${i}`}
+                    className="[&_[data-streamdown='code-block']]:bg-background"
+                  >
+                    {part.text}
+                  </Response>
+                )
+              default:
+                return null
+            }
+          })}
+      </UIMessageContent>
+    </UIMessage>
   )
 }
 
-function StreamAnswer({
-  handle,
-}: {
-  handle:
-    | { id: string; publicAccessToken: string; taskIdentifier: string }
-    | undefined
-}) {
-  if (!handle) {
-    return null
-  }
+function AnimatedDots({ text }: { text: string }) {
+  const [step, setStep] = React.useState(0)
 
-  // Stream the response from the streamingResult task
-  const { streams, run } = useRealtimeRunWithStreams<
-    typeof answerTask,
-    STREAMS
-  >(handle.id, {
-    accessToken: handle.publicAccessToken,
-  })
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setStep((prev) => (prev + 1) % 4)
+    }, 500)
 
-  console.log('streams', streams)
+    return () => clearInterval(interval)
+  }, [])
 
-  if (streams.content) {
-    return (
-      <ChatMessage
-        message={{
-          id: '1',
-          role: 'assistant',
-          content: streams.content.join(''),
-          status: run?.status === 'COMPLETED' ? 'finished' : 'in_progress',
-        }}
-      />
-    )
-  }
+  const dots = ['...', '..', '.', '..'][step]
+
+  return (
+    <span className="flex flex-row items-center gap-1">
+      {text}
+      <span className="w-4 select-none">{dots}</span>
+    </span>
+  )
 }

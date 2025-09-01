@@ -1,25 +1,17 @@
 'use client'
 
 import { Suggestion, Suggestions } from '@workspace/ui/components/suggestion'
+import * as React from 'react'
 import { useChat } from '../_hooks/use-chat'
-import { SendMessage } from './send-message'
+import { ChatPromptInput } from './chat-prompt-input'
 
-const suggestions = [
-  'What are the latest trends in AI?',
-  'How does machine learning work?',
-  'Explain quantum computing',
-  'Best practices for React development',
-  'Tell me about TypeScript benefits',
-  'How to optimize database queries?',
-  'What is the difference between SQL and NoSQL?',
-  'Explain cloud computing basics',
-]
+export function NewChat({ suggestions }: { suggestions: string[] }) {
+  const { status, sendMessage } = useChat()
 
-export function NewChat() {
-  const { status, sendMessage } = useChat({ chatId: 'new' })
+  const [suggestion, setSuggestion] = React.useState<string>('')
 
-  const handleSuggestionClick = async (suggestion: string) => {
-    await sendMessage(suggestion)
+  const handleSuggestionClick = (suggestion: string) => {
+    setSuggestion(suggestion)
   }
 
   return (
@@ -29,13 +21,17 @@ export function NewChat() {
           {suggestions.map((suggestion) => (
             <Suggestion
               key={suggestion}
-              onClick={handleSuggestionClick}
               suggestion={suggestion}
+              onClick={handleSuggestionClick}
             />
           ))}
         </Suggestions>
 
-        <SendMessage status={status} sendMessage={sendMessage} />
+        <ChatPromptInput
+          suggestion={suggestion}
+          status={status}
+          sendMessage={sendMessage}
+        />
       </div>
     </div>
   )
