@@ -45,7 +45,11 @@ export default async function Page({
       <Separator />
 
       {data?.conversation ? (
-        <ChatView chat={data.conversation} />
+        <ChatView
+          organizationSlug={organizationSlug}
+          teamId={teamId}
+          chat={data.conversation}
+        />
       ) : chatId === 'new' ? (
         <NewChat suggestions={suggestions} />
       ) : (

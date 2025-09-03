@@ -8,6 +8,7 @@ export function readAIMessageStream<AI_MESSAGE extends AIMessage>({
   const messageStream = readUIMessageStream({
     message: message,
     stream: stream.toUIMessageStream({
+      sendReasoning: true,
       sendSources: true,
     }),
   })

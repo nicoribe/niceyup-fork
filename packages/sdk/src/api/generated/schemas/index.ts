@@ -53,6 +53,30 @@ export type {
   ListAgents500Schema,
   ListAgentsQueryResponseSchema,
 } from './listAgentsSchema'
+export type {
+  ListMessagesPathParamsSchema,
+  ListMessagesQueryParamsSchema,
+  ListMessages200Schema,
+  ListMessages400Schema,
+  ListMessages401Schema,
+  ListMessages403Schema,
+  ListMessages404Schema,
+  ListMessages429Schema,
+  ListMessages500Schema,
+  ListMessagesQueryResponseSchema,
+} from './listMessagesSchema'
+export type {
+  SendQuestionMessagePathParamsSchema,
+  SendQuestionMessage200Schema,
+  SendQuestionMessage400Schema,
+  SendQuestionMessage401Schema,
+  SendQuestionMessage403Schema,
+  SendQuestionMessage404Schema,
+  SendQuestionMessage429Schema,
+  SendQuestionMessage500Schema,
+  SendQuestionMessageMutationRequestSchema,
+  SendQuestionMessageMutationResponseSchema,
+} from './sendQuestionMessageSchema'
 export {
   getAgentPathParamsSchema,
   getAgentQueryParamsSchema,
@@ -108,3 +132,27 @@ export {
   listAgents500Schema,
   listAgentsQueryResponseSchema,
 } from './listAgentsSchema'
+export {
+  listMessagesPathParamsSchema,
+  listMessagesQueryParamsSchema,
+  listMessages200Schema,
+  listMessages400Schema,
+  listMessages401Schema,
+  listMessages403Schema,
+  listMessages404Schema,
+  listMessages429Schema,
+  listMessages500Schema,
+  listMessagesQueryResponseSchema,
+} from './listMessagesSchema'
+export {
+  sendQuestionMessagePathParamsSchema,
+  sendQuestionMessage200Schema,
+  sendQuestionMessage400Schema,
+  sendQuestionMessage401Schema,
+  sendQuestionMessage403Schema,
+  sendQuestionMessage404Schema,
+  sendQuestionMessage429Schema,
+  sendQuestionMessage500Schema,
+  sendQuestionMessageMutationRequestSchema,
+  sendQuestionMessageMutationResponseSchema,
+} from './sendQuestionMessageSchema'

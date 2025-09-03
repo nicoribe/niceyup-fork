@@ -41,6 +41,7 @@ export async function getConversation(app: FastifyTypedInstance) {
       } = request.authSession
 
       const { conversationId } = request.params
+
       const { organizationId, organizationSlug, teamId } = request.query
 
       const conversation = await queries.getConversation({ conversationId })

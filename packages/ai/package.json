@@ -9,7 +9,8 @@
   "dependencies": {
     "@ai-sdk/gateway": "^1.0.15",
     "@workspace/env": "workspace:*",
-    "ai": "^5.0.28"
+    "ai": "^5.0.28",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -19,6 +20,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./gateway": "./src/gateway.ts",
+    "./schemas": "./src/lib/schemas.ts",
     "./types": "./src/lib/types.ts",
     "./utils": "./src/lib/utils.ts"
   }

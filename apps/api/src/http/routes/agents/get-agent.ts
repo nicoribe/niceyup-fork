@@ -40,6 +40,7 @@ export async function getAgent(app: FastifyTypedInstance) {
       } = request.authSession
 
       const { agentId } = request.params
+
       const { organizationId, organizationSlug, teamId } = request.query
 
       const agent = await queries.getAgent({

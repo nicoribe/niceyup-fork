@@ -3,9 +3,9 @@ export function getOrganizationIdentifier({
   organizationSlug,
   teamId,
 }: {
-  organizationId?: string
-  organizationSlug?: string
-  teamId?: string
+  organizationId?: string | null
+  organizationSlug?: string | null
+  teamId?: string | null
 }) {
   const organizationIdentifier =
     organizationSlug && organizationSlug !== 'my-account'

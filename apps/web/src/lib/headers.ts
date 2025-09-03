@@ -5,11 +5,16 @@ import {
   setCookie as setCookieNext,
 } from 'cookies-next'
 
-export async function serverHeaders() {
+export async function getHeaders() {
   if (typeof window === 'undefined') {
-    const { headers } = await import('next/headers')
+    const { headers: serverHeaders } = await import('next/headers')
 
-    return headers()
+    return serverHeaders()
+  }
+
+  return {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
   }
 }
 

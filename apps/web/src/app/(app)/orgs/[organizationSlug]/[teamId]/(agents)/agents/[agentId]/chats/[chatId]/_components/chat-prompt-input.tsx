@@ -1,6 +1,6 @@
 'use client'
 
-import type { PromptInputStatus } from '@/lib/types'
+import type { PromptInputStatus, PromptMessagePart } from '@/lib/types'
 import {
   PromptInput,
   PromptInputButton,
@@ -19,7 +19,7 @@ export function ChatPromptInput({
 }: {
   suggestion?: string
   status: PromptInputStatus
-  sendMessage: (message: string) => Promise<void>
+  sendMessage: ({ parts }: { parts: PromptMessagePart[] }) => Promise<void>
 }) {
   const [text, setText] = React.useState<string>('')
 
@@ -40,7 +40,21 @@ export function ChatPromptInput({
 
     setText('')
 
-    await sendMessage(text)
+    await sendMessage({
+      parts: [
+        {
+          type: 'text',
+          text: 'Descreva detalhadamente o conteúdo da imagem!',
+        },
+        {
+          type: 'file',
+          mediaType: 'image/jpeg',
+          filename: 'two-puppies.jpeg',
+          url: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
+        },
+      ],
+      // parts: [{ type: 'text', text }],
+    })
   }
 
   return (
@@ -67,8 +81,8 @@ export function ChatPromptInput({
         </PromptInputTools>
 
         <PromptInputSubmit
-          disabled={!text.trim() && (status === 'ready' || status === 'error')}
           status={status}
+          disabled={!text.trim() && (status === 'ready' || status === 'error')}
         />
       </PromptInputToolbar>
     </PromptInput>

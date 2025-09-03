@@ -1,18 +1,21 @@
-import { listMessages, sendQuestionMessage } from '@/actions/messages'
+'use client'
+
+import { sdk } from '@/lib/sdk'
 import type {
   ChatParams,
   Message,
   MessageRole,
   OrganizationTeamParams,
   PromptInputStatus,
+  PromptMessagePart,
 } from '@/lib/types'
 import type { ScrollToBottom } from '@workspace/ui/components/conversation'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import * as React from 'react'
 
 // Memoized message index for O(1) lookups
 const createMessageIndex = (messages: Message[]) => {
-  const index = new Map<string, Message>()
+  const index = new Map<string, MessagePersisted>()
   const childrenIndex = new Map<string, string[]>()
 
   for (const message of messages) {
@@ -115,9 +118,11 @@ const buildDescendants = (
   return descendants
 }
 
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
+
 // Memoized branch change handler
 const createBranchChangeHandler = (
-  chatId: string,
+  params: OrganizationTeamParams & ChatParams,
   messages: Message[],
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   setTargetMessageId: React.Dispatch<React.SetStateAction<string | undefined>>,
@@ -147,10 +152,16 @@ const createBranchChangeHandler = (
       try {
         setLoadingMessage({ id: previousMessageId, role })
 
-        const newMessages = await listMessages({
-          conversationId: chatId,
-          targetMessageId,
+        const { data } = await sdk.listMessages({
+          conversationId: params.chatId,
+          params: {
+            organizationSlug: params.organizationSlug,
+            teamId: params.teamId,
+            targetMessageId,
+          },
         })
+
+        const newMessages = (data?.messages || []) as Message[]
 
         setMessages((prevMessages) => {
           const updatedMessages = [...prevMessages]
@@ -176,16 +187,11 @@ const createBranchChangeHandler = (
         setLoadingMessage(false)
       }
     },
-    [chatId, messages, setMessages, setTargetMessageId, setLoadingMessage],
+    [params, messages, setMessages, setTargetMessageId, setLoadingMessage],
   )
 }
 
-type LoadingMessage = {
-  id: string
-  role: MessageRole
-}
-
-type Params = OrganizationTeamParams & { agentId: string } & ChatParams
+type MessagePersisted = Message & { persisted?: false }
 
 export function useChat({
   initialMessages,
@@ -196,7 +202,9 @@ export function useChat({
 } = {}) {
   const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
 
-  const [allMessages, setAllMessages] = React.useState<Message[]>(
+  const router = useRouter()
+
+  const [allMessages, setAllMessages] = React.useState<MessagePersisted[]>(
     initialMessages || [],
   )
   const [targetMessageId, setTargetMessageId] = React.useState<
@@ -204,7 +212,7 @@ export function useChat({
   >(initialMessages?.at(-1)?.id)
 
   const [loadingMessage, setLoadingMessage] = React.useState<
-    LoadingMessage | false
+    { id: string; role: MessageRole } | false
   >(false)
 
   // Memoized message index
@@ -225,9 +233,34 @@ export function useChat({
     [messageIndexData.index],
   )
 
+  const getPersistentParentMessage = React.useCallback(
+    (parentMessageId: string | undefined): MessagePersisted | undefined => {
+      if (!parentMessageId) {
+        return undefined
+      }
+
+      let currentMessage = messageIndexData.index.get(parentMessageId)
+
+      while (currentMessage) {
+        if (currentMessage.persisted !== false) {
+          return currentMessage
+        }
+
+        if (!currentMessage.parentId) {
+          break
+        }
+
+        currentMessage = messageIndexData.index.get(currentMessage.parentId)
+      }
+
+      return undefined
+    },
+    [messageIndexData.index],
+  )
+
   // Memoized branch change handler
   const handleBranchChange = createBranchChangeHandler(
-    chatId,
+    { organizationSlug, teamId, chatId },
     allMessages,
     setAllMessages,
     setTargetMessageId,
@@ -235,7 +268,7 @@ export function useChat({
   )
 
   // Memoized message filtered by targetMessageId
-  const messagesFiltered = React.useMemo(() => {
+  const messagesFiltered = React.useMemo<MessagePersisted[]>(() => {
     return buildMessageTree(
       targetMessageId,
       loadingMessage,
@@ -246,57 +279,177 @@ export function useChat({
 
   const [status, setStatus] = React.useState<PromptInputStatus>('ready')
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async ({ parts }: { parts: PromptMessagePart[] }) => {
+    if (status === 'submitted' || status === 'streaming') {
+      return
+    }
+
+    setStatus('submitted')
+
+    const parentMessageId = messagesFiltered.at(-1)?.id
+    const fakeMessageId = Math.random().toString(36).substring(2, 15)
+
+    setAllMessages((prevMessages) => {
+      const updatedMessages = prevMessages.map((message) => {
+        if (message.id === parentMessageId) {
+          return {
+            ...message,
+            children: [...(message.children || []), fakeMessageId],
+          }
+        }
+
+        return message
+      })
+
+      updatedMessages.push({
+        id: fakeMessageId,
+        status: 'queued',
+        role: 'user',
+        parts,
+        parentId: parentMessageId,
+        persisted: false,
+      })
+
+      return updatedMessages
+    })
+
+    if (refConversationScroll?.current) {
+      refConversationScroll.current.scrollToBottom()
+    }
+
     try {
-      setStatus('submitted')
+      const persistentParentMessageId =
+        getPersistentParentMessage(parentMessageId)?.id
 
-      const parentMessageId = messagesFiltered.at(-1)?.id
-      const fakeMessageId = Math.random().toString(36).substring(2, 15)
-
-      setAllMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: fakeMessageId,
-          status: 'queued',
-          role: 'user',
-          parts: [{ type: 'text', text }],
-          parentId: parentMessageId,
-        },
-      ])
-
-      if (refConversationScroll?.current) {
-        refConversationScroll.current.scrollToBottom()
-      }
-
-      const data = await sendQuestionMessage(
-        { organizationSlug, teamId, agentId },
-        {
-          conversationId: chatId,
-          parentMessageId,
-          message: {
-            parts: [{ type: 'text', text }],
-          },
+      const { data, error } = await sdk.sendQuestionMessage({
+        conversationId: chatId,
+        data: {
+          organizationSlug: 'error',
+          teamId: 'error',
+          agentId: 'error',
+          parentMessageId: persistentParentMessageId,
+          message: { parts },
           // explorerType,
           // folderIdExplorerTree,
         },
-      )
+      })
 
-      if (!data) {
-        throw new Error('Failed to send message')
+      if (error) {
+        throw new Error(error.message)
       }
 
-      // if (chatId === 'new') {
-      //   redirect(
-      //     `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${data.conversationId}`,
-      //   )
-      // }
+      if (chatId === 'new') {
+        router.push(
+          `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${data.conversationId}`,
+        )
+      }
 
       setAllMessages((prevMessages) => {
-        const updatedMessages = prevMessages.map((message) =>
-          message.id === fakeMessageId ? data.questionMessage : message,
-        )
-        updatedMessages.push(data.answerMessage)
+        const updatedMessages = prevMessages.map((message) => {
+          if (message.id === parentMessageId) {
+            return {
+              ...message,
+              children: message.children?.map((id) =>
+                id === fakeMessageId ? data.questionMessage.id : id,
+              ),
+            }
+          }
+
+          if (message.id === fakeMessageId) {
+            return {
+              ...data.questionMessage,
+              parentId: message.parentId, // Non-persistent parent message, kept to remain visually hierarchical
+            } as Message
+          }
+
+          return message
+        })
+
+        updatedMessages.push(data.answerMessage as Message)
+
         return updatedMessages
+      })
+    } catch {
+      setStatus('error')
+
+      setAllMessages((prevMessages) => {
+        const updatedMessages = prevMessages.map((message) => {
+          if (message.id === fakeMessageId) {
+            return {
+              ...message,
+              status: 'failed',
+              metadata: { error: 'Failed to send message' },
+            } as Message
+          }
+
+          return message
+        })
+
+        return updatedMessages
+      })
+    }
+  }
+
+  const resendMessage = async ({
+    messageId,
+    parts,
+  }: { messageId: string; parts: PromptMessagePart[] }) => {
+    if (status === 'submitted' || status === 'streaming') {
+      return
+    }
+
+    setStatus('submitted')
+
+    const message = getMessageById(messageId)
+
+    const parentMessageId = message?.parentId
+
+    if (!parentMessageId) {
+      return
+    }
+
+    try {
+      // TODO: Implement resend message
+      console.log('sdk.resendMessage', {
+        conversationId: chatId,
+        data: {
+          organizationSlug,
+          teamId,
+          agentId,
+          parentMessageId,
+          message: { parts },
+        },
+      })
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  const regenerate = async ({ messageId }: { messageId: string }) => {
+    if (status === 'submitted' || status === 'streaming') {
+      return
+    }
+
+    setStatus('submitted')
+
+    const message = getMessageById(messageId)
+
+    const parentMessageId = message?.parentId
+
+    if (!parentMessageId) {
+      return
+    }
+
+    try {
+      // TODO: Implement regenerate
+      console.log('sdk.regenerateMessage', {
+        conversationId: chatId,
+        data: {
+          organizationSlug,
+          teamId,
+          agentId,
+          parentMessageId,
+        },
       })
     } catch {
       setStatus('error')
@@ -309,6 +462,8 @@ export function useChat({
     getMessageById,
     handleBranchChange,
     sendMessage,
+    resendMessage,
+    regenerate,
     status,
     setStatus,
   }

@@ -56,10 +56,15 @@ export const getAgent400Schema = z
     code: z.string(),
     message: z.string(),
     errors: z
-      .object({
-        formErrors: z.array(z.string()),
-        fieldErrors: z.object({}).catchall(z.array(z.string())),
-      })
+      .array(
+        z
+          .object({
+            code: z.string(),
+            message: z.string(),
+            path: z.array(z.union([z.string(), z.number()])),
+          })
+          .catchall(z.any()),
+      )
       .describe('Validation errors')
       .optional(),
   })

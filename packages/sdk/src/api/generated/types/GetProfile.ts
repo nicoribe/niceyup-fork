@@ -56,20 +56,23 @@ export type GetProfile400 = {
   message: string
   /**
    * @description Validation errors
-   * @type object | undefined
+   * @type array | undefined
    */
   errors?: {
     /**
+     * @type string
+     */
+    code: string
+    /**
+     * @type string
+     */
+    message: string
+    /**
      * @type array
      */
-    formErrors: string[]
-    /**
-     * @type object
-     */
-    fieldErrors: {
-      [key: string]: string[]
-    }
-  }
+    path: (string | number)[]
+    [key: string]: any
+  }[]
 }
 
 /**

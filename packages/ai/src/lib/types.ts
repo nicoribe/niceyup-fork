@@ -4,10 +4,14 @@ export type AIMessageMetadata = {
   realtimeRun?: {
     messageId: string
     id: string
+    taskIdentifier: string
     publicAccessToken: string
   }
+  authorId?: string
   error?: any
 }
+
+export type AIMessageRole = 'system' | 'user' | 'assistant'
 
 export type AIMessageStatus =
   | 'queued'
@@ -25,6 +29,6 @@ export type AIMessage<
 }
 
 export type AIMessagePart<
-  DATA_TYPES extends UIDataTypes,
-  TOOLS extends UITools,
+  DATA_TYPES extends UIDataTypes = UIDataTypes,
+  TOOLS extends UITools = UITools,
 > = UIMessagePart<DATA_TYPES, TOOLS>

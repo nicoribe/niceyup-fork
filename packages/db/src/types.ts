@@ -1,4 +1,9 @@
-import type { AIMessage } from '@workspace/ai/types'
+import type {
+  AIMessageMetadata,
+  AIMessagePart,
+  AIMessageRole,
+  AIMessageStatus,
+} from '@workspace/ai/types'
 
 export type SourceType = 'text' | 'structured'
 
@@ -51,12 +56,12 @@ export type PromptMessage = {
   content: string
 }
 
-export type MessageStatus = AIMessage['status']
+export type MessageStatus = AIMessageStatus
 
-export type MessageRole = AIMessage['role']
+export type MessageRole = AIMessageRole
 
-export type MessagePart = AIMessage['parts'][number]
+export type MessagePart = AIMessagePart
 
-export type MessageMetadata = AIMessage['metadata']
+export type MessageMetadata = AIMessageMetadata
 
 export type ConversationExplorerType = 'private' | 'shared' | 'team'

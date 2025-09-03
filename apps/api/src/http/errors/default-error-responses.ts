@@ -6,10 +6,15 @@ export const BadRequestResponse = {
       code: z.string(),
       message: z.string(),
       errors: z
-        .object({
-          formErrors: z.array(z.string()),
-          fieldErrors: z.record(z.array(z.string())),
-        })
+        .array(
+          z
+            .object({
+              code: z.string(),
+              message: z.string(),
+              path: z.array(z.string().or(z.number())),
+            })
+            .and(z.record(z.string(), z.unknown())),
+        )
         .optional()
         .describe('Validation errors'),
     })

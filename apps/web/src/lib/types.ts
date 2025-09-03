@@ -1,4 +1,9 @@
-import type { AIMessage, AIMessageMetadata } from '@workspace/ai/types'
+import type {
+  AIMessageMetadata,
+  AIMessagePart,
+  AIMessageRole,
+  AIMessageStatus,
+} from '@workspace/ai/types'
 
 export type OrganizationTeamParams = {
   organizationSlug: 'my-account' | '$id'
@@ -38,13 +43,13 @@ export type Chat = {
 
 export type PromptInputStatus = 'submitted' | 'streaming' | 'ready' | 'error'
 
-export type MessageStatus = AIMessage['status']
+export type MessageStatus = AIMessageStatus
 
-export type MessageRole = AIMessage['role']
+export type MessageRole = AIMessageRole
 
-export type MessagePart = AIMessage['parts'][number]
+export type MessagePart = AIMessagePart
 
-export type MessageMetadata = AIMessage['metadata']
+export type MessageMetadata = AIMessageMetadata
 
 export type Message = {
   id: string
@@ -57,3 +62,15 @@ export type Message = {
 }
 
 export type MessageRealtimeRun = NonNullable<AIMessageMetadata['realtimeRun']>
+
+export type PromptMessagePart =
+  | {
+      type: 'text'
+      text: string
+    }
+  | {
+      type: 'file'
+      mediaType: string
+      filename?: string
+      url: string
+    }

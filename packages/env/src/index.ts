@@ -24,6 +24,8 @@ export const env = createEnv({
     UPSTASH_VECTOR_REST_URL: z.string(),
     UPSTASH_VECTOR_REST_TOKEN: z.string(),
 
+    NOVU_SECRET_KEY: z.string().optional(),
+
     BETTER_AUTH_SECRET: z.string(),
     RESEND_API_KEY: z.string().optional(),
     GITHUB_CLIENT_ID: z.string().optional(),
@@ -64,6 +66,8 @@ export const env = createEnv({
     CLOUDFLARE_SECRET_KEY: process.env.CLOUDFLARE_SECRET_KEY,
     UPSTASH_VECTOR_REST_URL: process.env.UPSTASH_VECTOR_REST_URL,
     UPSTASH_VECTOR_REST_TOKEN: process.env.UPSTASH_VECTOR_REST_TOKEN,
+
+    NOVU_SECRET_KEY: process.env.NOVU_SECRET_KEY,
 
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,

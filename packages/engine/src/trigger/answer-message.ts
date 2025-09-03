@@ -1,4 +1,4 @@
-import { metadata, schemaTask } from '@trigger.dev/sdk'
+import { AbortTaskRunError, metadata, schemaTask } from '@trigger.dev/sdk'
 import {
   convertToModelMessages,
   streamText,
@@ -25,12 +25,20 @@ export const answerMessageTask = schemaTask({
     answerMessageId: z.string(),
   }),
   init: async ({ payload }) => {
+    const conversation = await queries.getConversation({
+      conversationId: payload.conversationId,
+    })
+
+    if (!conversation) {
+      throw new AbortTaskRunError('Conversation not found')
+    }
+
     const questionMessage = await queries.getMessage({
       messageId: payload.questionMessageId,
     })
 
     if (!questionMessage) {
-      throw new Error('Question message not found')
+      throw new AbortTaskRunError('Question message not found')
     }
 
     const answerMessage = await queries.getMessage({
@@ -38,7 +46,7 @@ export const answerMessageTask = schemaTask({
     })
 
     if (!answerMessage) {
-      throw new Error('Answer message not found')
+      throw new AbortTaskRunError('Answer message not found')
     }
 
     return { questionMessage, answerMessage }
@@ -51,13 +59,15 @@ export const answerMessageTask = schemaTask({
       status: 'in_progress',
     })
 
-    const messageHistory = payload.conversationId
-      ? await queries.listMessages({
-          conversationId: payload.conversationId,
-          targetMessageId: questionMessage.id,
-          parents: true,
-        })
-      : []
+    const parentsLimit = 10 // TODO: Make this configurable
+
+    const messageHistory = await queries.listMessages({
+      conversationId: payload.conversationId,
+      targetMessageId: questionMessage.id,
+      parents: true, // Get the parents of the question message
+      children: false, // Only get the parents, not the children
+      parentsLimit, // Limit the number of parents to 10
+    })
 
     const validatedMessages = await validateUIMessages({
       messages: [...messageHistory, questionMessage],
@@ -65,10 +75,15 @@ export const answerMessageTask = schemaTask({
 
     const messages = convertToModelMessages(validatedMessages)
 
+    let error: unknown
+
     const streamingResult = streamText({
-      model: gateway.languageModel('openai/gpt-3.5-turbo'),
+      model: gateway.languageModel('openai/gpt-5'),
       messages,
       abortSignal: signal,
+      onError: (event) => {
+        error = event.error
+      },
     })
 
     let message = {
@@ -85,6 +100,10 @@ export const answerMessageTask = schemaTask({
 
     for await (const chunk of stream) {
       message = chunk
+    }
+
+    if (error) {
+      throw error
     }
 
     message.status = signal.aborted ? 'stopped' : 'finished'
