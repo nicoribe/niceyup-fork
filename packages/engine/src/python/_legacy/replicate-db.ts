@@ -1,14 +1,21 @@
 import { python } from '@trigger.dev/python'
 import { env } from '@workspace/env'
-import type { TableMetadata } from '../lib/types'
-import { pyArgs, pyPath, pyStreamingResult } from './utils'
+import { pyArgs, pyPath, pyStreamingResult } from '../utils'
 
-type GetDbSchemaArgs = {
+type ReplicateDbArgs = {
+  workspace_id: string
+  source_id: string
   dialect?: string
   file_path?: string
+  tables_metadata?: {
+    name: string
+    columns: {
+      name: string
+    }[]
+  }[]
 }
 
-type GetDbSchemaEnvVars = {
+type ReplicateDbEnvVars = {
   host?: string
   port?: string
   user?: string
@@ -17,16 +24,17 @@ type GetDbSchemaEnvVars = {
   schema?: string
 }
 
-type GetDbSchemaResult = {
-  tables_metadata: TableMetadata[]
+type ReplicateDbResult = {
+  status: 'success' | 'error'
+  message: string
 }
 
-export async function getDbSchema(
-  args: GetDbSchemaArgs,
-  { envVars }: { envVars?: GetDbSchemaEnvVars } = {},
-): Promise<GetDbSchemaResult> {
+export async function replicateDb(
+  args: ReplicateDbArgs,
+  { envVars }: { envVars?: ReplicateDbEnvVars } = {},
+): Promise<ReplicateDbResult> {
   const streamingResult = python.stream.runScript(
-    pyPath('get_db_schema'),
+    pyPath('replicate_db'),
     pyArgs(args),
     {
       env: {
@@ -41,7 +49,7 @@ export async function getDbSchema(
     },
   )
 
-  const result = await pyStreamingResult<GetDbSchemaResult>(streamingResult)
+  const result = await pyStreamingResult<ReplicateDbResult>(streamingResult)
 
   return result
 }

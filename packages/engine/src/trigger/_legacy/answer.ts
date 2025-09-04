@@ -3,7 +3,7 @@ import { python } from '@trigger.dev/python'
 import { logger, metadata, schemaTask } from '@trigger.dev/sdk'
 import { env } from '@workspace/env'
 import { z } from 'zod'
-import { parsePyLogger, pyArgs, pyPath } from '../python/utils'
+import { parsePyLogger, pyArgs, pyPath } from '../../python/utils'
 
 type AIMessageChunk = {
   id: string

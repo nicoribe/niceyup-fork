@@ -114,19 +114,19 @@ export function ChatPromptInput({
     setText('')
 
     await sendMessage({
-      parts: [
-        {
-          type: 'text',
-          text: 'Descreva detalhadamente o conteúdo da imagem!',
-        },
-        {
-          type: 'file',
-          mediaType: 'image/jpeg',
-          filename: 'two-puppies.jpeg',
-          url: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-        },
-      ],
-      // parts: [{ type: 'text', text }],
+      // parts: [
+      //   {
+      //     type: 'text',
+      //     text: 'Describe the content of the image in detail!',
+      //   },
+      //   {
+      //     type: 'file',
+      //     mediaType: 'image/jpeg',
+      //     filename: 'two-puppies.jpeg',
+      //     url: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
+      //   },
+      // ],
+      parts: [{ type: 'text', text }],
     })
   }
 

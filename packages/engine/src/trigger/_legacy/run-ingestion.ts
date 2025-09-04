@@ -1,6 +1,6 @@
 import { logger, schemaTask } from '@trigger.dev/sdk'
 import { z } from 'zod'
-import { python } from '../python'
+import { python } from '../../python'
 
 const { workspaceId, sourceId, sourceType } = {
   workspaceId: 'xxxx-xxxx-xxxx-xxxx',

@@ -1,11 +1,6 @@
 import { logger, schemaTask } from '@trigger.dev/sdk'
 import { z } from 'zod'
-import { python } from '../python'
-
-const { workspaceId, sourceId } = {
-  workspaceId: 'xxxx-xxxx-xxxx-xxxx',
-  sourceId: 'xxxx-xxxx-xxxx-xxxx',
-}
+import { python } from '../../python'
 
 const { dialect, host, port, user, password, database } = {
   dialect: 'mysql',
@@ -16,28 +11,16 @@ const { dialect, host, port, user, password, database } = {
   database: 'default',
 }
 
-const tablesMetadata = [
-  {
-    name: 'users',
-    columns: [{ name: 'id' }, { name: 'username' }],
-  },
-]
-
-export const replicateDbTask = schemaTask({
-  id: 'replicate-db',
+export const getDbSchemaTask = schemaTask({
+  id: 'get-db-schema',
   schema: z.object({
     sourceId: z.string(),
   }),
   run: async (payload) => {
     logger.info('payload', payload)
 
-    const result = await python.replicateDb(
-      {
-        workspace_id: workspaceId,
-        source_id: sourceId,
-        dialect,
-        tables_metadata: tablesMetadata,
-      },
+    const result = await python.getDbSchema(
+      { dialect },
       {
         envVars: {
           host,
