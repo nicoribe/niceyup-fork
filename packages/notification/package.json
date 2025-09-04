@@ -17,6 +17,7 @@
     "typescript": "^5.7.3"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
   }
 }
