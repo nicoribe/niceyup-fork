@@ -43,6 +43,7 @@ export async function listMessages(app: FastifyTypedInstance) {
                   role: aiMessageRoleSchema,
                   parts: z.array(aiMessagePartSchema).nullable(),
                   metadata: aiMessageMetadataSchema.nullable(),
+                  authorId: z.string().nullish(),
                   parentId: z.string().nullish(),
                   children: z.array(z.string()).optional(),
                 }),

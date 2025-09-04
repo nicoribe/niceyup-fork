@@ -1,13 +1,10 @@
 'use client'
 
+import { ChatPromptInput, ChatProvider } from '@/components/chat'
 import { Suggestion, Suggestions } from '@workspace/ui/components/suggestion'
 import * as React from 'react'
-import { useChat } from '../_hooks/use-chat'
-import { ChatPromptInput } from './chat-prompt-input'
 
 export function NewChat({ suggestions }: { suggestions: string[] }) {
-  const { status, sendMessage } = useChat()
-
   const [suggestion, setSuggestion] = React.useState<string>('')
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -27,11 +24,9 @@ export function NewChat({ suggestions }: { suggestions: string[] }) {
           ))}
         </Suggestions>
 
-        <ChatPromptInput
-          suggestion={suggestion}
-          status={status}
-          sendMessage={sendMessage}
-        />
+        <ChatProvider>
+          <ChatPromptInput suggestion={suggestion} />
+        </ChatProvider>
       </div>
     </div>
   )

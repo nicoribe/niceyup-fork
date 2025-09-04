@@ -13,19 +13,37 @@ import type { ScrollToBottom } from '@workspace/ui/components/conversation'
 import { useParams, useRouter } from 'next/navigation'
 import * as React from 'react'
 
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
+
+export type MessageProps = Message & {
+  isBranch?: boolean
+  isStream?: boolean
+  isPersisted?: boolean
+}
+
+function isStream(message: Message) {
+  return Boolean(
+    (message.status === 'queued' || message.status === 'in_progress') &&
+      message.metadata?.realtimeRun?.id,
+  )
+}
+
 // Memoized message index for O(1) lookups
 const createMessageIndex = (messages: Message[]) => {
-  const index = new Map<string, MessagePersisted>()
+  const index = new Map<string, MessageProps>()
   const childrenIndex = new Map<string, string[]>()
 
   for (const message of messages) {
-    index.set(message.id, message)
+    let isBranch = false
 
     if (message.parentId) {
       const existing = childrenIndex.get(message.parentId) || []
       existing.push(message.id)
       childrenIndex.set(message.parentId, existing)
+      isBranch = Boolean(existing.length > 1)
     }
+
+    index.set(message.id, { ...message, isBranch, isStream: isStream(message) })
   }
 
   return { index, childrenIndex }
@@ -96,12 +114,7 @@ const buildDescendants = (
   let current = message
 
   while (true) {
-    const children = childrenIndex.get(current.id) || []
-    if (children.length === 0) {
-      break
-    }
-
-    const firstChildId = children[0]
+    const [firstChildId] = childrenIndex.get(current.id) || []
     if (!firstChildId) {
       break
     }
@@ -117,8 +130,6 @@ const buildDescendants = (
 
   return descendants
 }
-
-type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
 // Memoized branch change handler
 const createBranchChangeHandler = (
@@ -191,20 +202,31 @@ const createBranchChangeHandler = (
   )
 }
 
-type MessagePersisted = Message & { persisted?: false }
+export type SendMessageParams = {
+  parts: PromptMessagePart[]
+}
+
+export type ResendMessageParams = {
+  messageId: string
+  parts: PromptMessagePart[]
+}
+
+export type RegenerateMessageParams = {
+  messageId: string
+}
 
 export function useChat({
   initialMessages,
-  refConversationScroll,
 }: {
   initialMessages?: Message[]
-  refConversationScroll?: React.RefObject<ScrollToBottom | null>
 } = {}) {
   const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
 
+  const refConversationScroll = React.useRef<ScrollToBottom | null>(null)
+
   const router = useRouter()
 
-  const [allMessages, setAllMessages] = React.useState<MessagePersisted[]>(
+  const [allMessages, setAllMessages] = React.useState<MessageProps[]>(
     initialMessages || [],
   )
   const [targetMessageId, setTargetMessageId] = React.useState<
@@ -234,7 +256,7 @@ export function useChat({
   )
 
   const getPersistentParentMessage = React.useCallback(
-    (parentMessageId: string | undefined): MessagePersisted | undefined => {
+    (parentMessageId: string | undefined): MessageProps | undefined => {
       if (!parentMessageId) {
         return undefined
       }
@@ -242,7 +264,7 @@ export function useChat({
       let currentMessage = messageIndexData.index.get(parentMessageId)
 
       while (currentMessage) {
-        if (currentMessage.persisted !== false) {
+        if (currentMessage.isPersisted !== false) {
           return currentMessage
         }
 
@@ -268,7 +290,7 @@ export function useChat({
   )
 
   // Memoized message filtered by targetMessageId
-  const messagesFiltered = React.useMemo<MessagePersisted[]>(() => {
+  const messagesFiltered = React.useMemo<MessageProps[]>(() => {
     return buildMessageTree(
       targetMessageId,
       loadingMessage,
@@ -279,16 +301,28 @@ export function useChat({
 
   const [status, setStatus] = React.useState<PromptInputStatus>('ready')
 
-  const sendMessage = async ({ parts }: { parts: PromptMessagePart[] }) => {
-    if (status === 'submitted' || status === 'streaming') {
-      return
-    }
+  const generateFakeMessageId = () => {
+    return Math.random().toString(36).substring(2, 15)
+  }
 
-    setStatus('submitted')
-
-    const parentMessageId = messagesFiltered.at(-1)?.id
-    const fakeMessageId = Math.random().toString(36).substring(2, 15)
-
+  const addFakeMessage = ({
+    type,
+    parentMessageId,
+    fakeMessageId,
+    parts,
+  }:
+    | {
+        type: 'question'
+        parentMessageId?: string
+        fakeMessageId: string
+        parts: PromptMessagePart[]
+      }
+    | {
+        type: 'answer'
+        parentMessageId: string
+        fakeMessageId: string
+        parts?: never
+      }) => {
     setAllMessages((prevMessages) => {
       const updatedMessages = prevMessages.map((message) => {
         if (message.id === parentMessageId) {
@@ -304,18 +338,112 @@ export function useChat({
       updatedMessages.push({
         id: fakeMessageId,
         status: 'queued',
-        role: 'user',
-        parts,
+        role: type === 'question' ? 'user' : 'assistant',
+        parts: type === 'question' ? parts : [],
         parentId: parentMessageId,
-        persisted: false,
+        isPersisted: false,
       })
 
       return updatedMessages
     })
+  }
 
-    if (refConversationScroll?.current) {
-      refConversationScroll.current.scrollToBottom()
+  const replaceFakeMessage = ({
+    type,
+    parentMessageId,
+    fakeMessageId,
+    questionMessage,
+    answerMessage,
+  }:
+    | {
+        type: 'question'
+        parentMessageId?: string
+        fakeMessageId: string
+        questionMessage: Message
+        answerMessage: Message
+      }
+    | {
+        type: 'answer'
+        parentMessageId: string
+        fakeMessageId: string
+        questionMessage?: never
+        answerMessage: Message
+      }) => {
+    setAllMessages((prevMessages) => {
+      const updatedMessages = prevMessages.map((message) => {
+        if (message.id === parentMessageId) {
+          return {
+            ...message,
+            children: message.children?.map((id) =>
+              id === fakeMessageId
+                ? type === 'question'
+                  ? questionMessage.id
+                  : answerMessage.id
+                : id,
+            ),
+          }
+        }
+
+        if (message.id === fakeMessageId) {
+          return {
+            ...(type === 'question' ? questionMessage : answerMessage),
+            parentId: message.parentId, // Non-persistent parent message, kept to remain visually hierarchical
+          }
+        }
+
+        return message
+      })
+
+      if (type === 'question') {
+        updatedMessages.push(answerMessage)
+      }
+
+      return updatedMessages
+    })
+  }
+
+  const setErrorFakeMessage = ({
+    type,
+    fakeMessageId,
+  }: {
+    type: 'question' | 'answer'
+    fakeMessageId: string
+  }) => {
+    setAllMessages((prevMessages) => {
+      const updatedMessages = prevMessages.map((message) => {
+        if (message.id === fakeMessageId) {
+          return {
+            ...message,
+            status: 'failed',
+            metadata: {
+              error:
+                type === 'question'
+                  ? 'Failed to send message'
+                  : 'Failed to generate answer',
+            },
+          } as Message
+        }
+
+        return message
+      })
+
+      return updatedMessages
+    })
+  }
+
+  const sendMessage = async ({ parts }: SendMessageParams) => {
+    if (status === 'submitted' || status === 'streaming') {
+      return
     }
+
+    setStatus('submitted')
+
+    const parentMessageId = messagesFiltered.at(-1)?.id
+    const fakeMessageId = generateFakeMessageId()
+
+    addFakeMessage({ type: 'question', parentMessageId, fakeMessageId, parts })
+
+    refConversationScroll.current?.scrollToBottom()
 
     try {
       const persistentParentMessageId =
@@ -324,9 +452,9 @@ export function useChat({
       const { data, error } = await sdk.sendQuestionMessage({
         conversationId: chatId,
         data: {
-          organizationSlug: 'error',
-          teamId: 'error',
-          agentId: 'error',
+          organizationSlug,
+          teamId,
+          agentId,
           parentMessageId: persistentParentMessageId,
           message: { parts },
           // explorerType,
@@ -344,56 +472,21 @@ export function useChat({
         )
       }
 
-      setAllMessages((prevMessages) => {
-        const updatedMessages = prevMessages.map((message) => {
-          if (message.id === parentMessageId) {
-            return {
-              ...message,
-              children: message.children?.map((id) =>
-                id === fakeMessageId ? data.questionMessage.id : id,
-              ),
-            }
-          }
-
-          if (message.id === fakeMessageId) {
-            return {
-              ...data.questionMessage,
-              parentId: message.parentId, // Non-persistent parent message, kept to remain visually hierarchical
-            } as Message
-          }
-
-          return message
-        })
-
-        updatedMessages.push(data.answerMessage as Message)
-
-        return updatedMessages
+      replaceFakeMessage({
+        type: 'question',
+        parentMessageId,
+        fakeMessageId,
+        questionMessage: data.questionMessage as Message,
+        answerMessage: data.answerMessage as Message,
       })
     } catch {
       setStatus('error')
 
-      setAllMessages((prevMessages) => {
-        const updatedMessages = prevMessages.map((message) => {
-          if (message.id === fakeMessageId) {
-            return {
-              ...message,
-              status: 'failed',
-              metadata: { error: 'Failed to send message' },
-            } as Message
-          }
-
-          return message
-        })
-
-        return updatedMessages
-      })
+      setErrorFakeMessage({ type: 'question', fakeMessageId })
     }
   }
 
-  const resendMessage = async ({
-    messageId,
-    parts,
-  }: { messageId: string; parts: PromptMessagePart[] }) => {
+  const resendMessage = async ({ messageId, parts }: ResendMessageParams) => {
     if (status === 'submitted' || status === 'streaming') {
       return
     }
@@ -408,24 +501,65 @@ export function useChat({
       return
     }
 
+    const fakeMessageId = generateFakeMessageId()
+
+    addFakeMessage({ type: 'question', parentMessageId, fakeMessageId, parts })
+
+    setTargetMessageId(fakeMessageId)
+
+    refConversationScroll.current?.scrollToBottom()
+
     try {
-      // TODO: Implement resend message
+      const persistentParentMessageId =
+        getPersistentParentMessage(parentMessageId)?.id
+
+      if (!persistentParentMessageId) {
+        return
+      }
+
       console.log('sdk.resendMessage', {
         conversationId: chatId,
         data: {
           organizationSlug,
           teamId,
           agentId,
-          parentMessageId,
+          parentMessageId: persistentParentMessageId,
           message: { parts },
         },
       })
+
+      throw new Error('Implement resend message')
+
+      // const { data, error } = await sdk.resendMessage({
+      //   conversationId: chatId,
+      //   data: {
+      //     organizationSlug,
+      //     teamId,
+      //     agentId,
+      //     parentMessageId: persistentParentMessageId,
+      //     message: { parts },
+      //   },
+      // })
+
+      // if (error) {
+      //   throw new Error(error.message)
+      // }
+
+      // replaceFakeMessage({
+      //   type: 'question',
+      //   parentMessageId,
+      //   fakeMessageId,
+      //   questionMessage: data.questionMessage as Message,
+      //   answerMessage: data.answerMessage as Message,
+      // })
     } catch {
       setStatus('error')
+
+      setErrorFakeMessage({ type: 'question', fakeMessageId })
     }
   }
 
-  const regenerate = async ({ messageId }: { messageId: string }) => {
+  const regenerate = async ({ messageId }: RegenerateMessageParams) => {
     if (status === 'submitted' || status === 'streaming') {
       return
     }
@@ -440,19 +574,58 @@ export function useChat({
       return
     }
 
+    const fakeMessageId = generateFakeMessageId()
+
+    addFakeMessage({ type: 'answer', parentMessageId, fakeMessageId })
+
+    setTargetMessageId(fakeMessageId)
+
+    refConversationScroll.current?.scrollToBottom()
+
     try {
-      // TODO: Implement regenerate
+      const persistentParentMessageId =
+        getPersistentParentMessage(parentMessageId)?.id
+
+      if (!persistentParentMessageId) {
+        return
+      }
+
       console.log('sdk.regenerateMessage', {
         conversationId: chatId,
         data: {
           organizationSlug,
           teamId,
           agentId,
-          parentMessageId,
+          parentMessageId: persistentParentMessageId,
         },
       })
+
+      throw new Error('Implement regenerate message')
+
+      // const { data, error } = await sdk.regenerateMessage({
+      //   conversationId: chatId,
+      //   data: {
+      //     organizationSlug,
+      //     teamId,
+      //     agentId,
+      //     parentMessageId: persistentParentMessageId,
+      //   },
+      // })
+
+      // if (error) {
+      //   throw new Error(error.message)
+      // }
+
+      // replaceFakeMessage({
+      //   type: 'answer',
+      //   parentMessageId,
+      //   fakeMessageId,
+      //   answerMessage: data.answerMessage as Message,
+      // })
     } catch {
       setStatus('error')
+
+      setErrorFakeMessage({ type: 'answer', fakeMessageId })
     }
   }
 
@@ -466,5 +639,6 @@ export function useChat({
     regenerate,
     status,
     setStatus,
+    refConversationScroll,
   }
 }

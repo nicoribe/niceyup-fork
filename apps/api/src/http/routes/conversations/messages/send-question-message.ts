@@ -41,6 +41,7 @@ const messageSchema = z.object({
   role: aiMessageRoleSchema,
   parts: z.array(aiMessagePartSchema).nullable(),
   metadata: aiMessageMetadataSchema.nullable(),
+  authorId: z.string().nullish(),
   parentId: z.string().nullish(),
   children: z.array(z.string()).optional(),
 })
@@ -294,6 +295,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
               role: 'user',
               parts: message.parts,
               metadata: message.metadata as AIMessageMetadata,
+              authorId: userId,
               parentId: _parentMessageId,
             })
             .returning({
@@ -302,6 +304,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
               role: messages.role,
               parts: messages.parts,
               metadata: messages.metadata,
+              authorId: messages.authorId,
               parentId: messages.parentId,
             })
 
@@ -355,6 +358,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
               role: messages.role,
               parts: messages.parts,
               metadata: messages.metadata,
+              authorId: messages.authorId,
               parentId: messages.parentId,
             })
 

@@ -57,6 +57,7 @@ export type Message = {
   role: MessageRole
   parts: MessagePart[] | null
   metadata?: MessageMetadata | null
+  authorId?: string | null
   parentId?: string | null
   children?: string[]
 }

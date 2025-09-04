@@ -1,4 +1,9 @@
-import { AbortTaskRunError, metadata, schemaTask } from '@trigger.dev/sdk'
+import {
+  AbortTaskRunError,
+  logger,
+  metadata,
+  schemaTask,
+} from '@trigger.dev/sdk'
 import {
   convertToModelMessages,
   streamText,
@@ -59,14 +64,15 @@ export const answerMessageTask = schemaTask({
       status: 'in_progress',
     })
 
-    const parentsLimit = 10 // TODO: Make this configurable
+    const contextMessages = true // TODO: Make this configurable
+    const maxContextMessages = 10 // TODO: Make this configurable
 
     const messageHistory = await queries.listMessages({
       conversationId: payload.conversationId,
       targetMessageId: questionMessage.id,
-      parents: true, // Get the parents of the question message
-      children: false, // Only get the parents, not the children
-      parentsLimit, // Limit the number of parents to 10
+      parents: contextMessages, // Get the context messages
+      children: false, // Not needed, only parents are used
+      parentsLimit: maxContextMessages, // Limit the number of context messages
     })
 
     const validatedMessages = await validateUIMessages({
@@ -78,7 +84,7 @@ export const answerMessageTask = schemaTask({
     let error: unknown
 
     const streamingResult = streamText({
-      model: gateway.languageModel('openai/gpt-5'),
+      model: gateway.languageModel('openai/gpt-3.5-turbo'),
       messages,
       abortSignal: signal,
       onError: (event) => {
@@ -103,7 +109,15 @@ export const answerMessageTask = schemaTask({
     }
 
     if (error) {
-      throw error
+      logger.error('Error streaming result', {
+        error,
+        message,
+        streamingResult,
+      })
+
+      throw new AbortTaskRunError(
+        error instanceof Error ? error.message : String(error),
+      )
     }
 
     message.status = signal.aborted ? 'stopped' : 'finished'
@@ -113,6 +127,11 @@ export const answerMessageTask = schemaTask({
       status: message.status,
       parts: message.parts,
       metadata: message.metadata,
+    })
+
+    logger.warn('Streaming result', {
+      message,
+      streamingResult,
     })
 
     return { message }

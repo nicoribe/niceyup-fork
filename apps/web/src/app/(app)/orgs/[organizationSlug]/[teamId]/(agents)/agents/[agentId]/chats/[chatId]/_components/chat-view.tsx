@@ -1,7 +1,11 @@
+import {
+  ChatConversation,
+  ChatPromptInput,
+  ChatProvider,
+} from '@/components/chat'
 import { authenticatedUser } from '@/lib/auth/server'
 import { sdk } from '@/lib/sdk'
 import type { Chat, Message } from '@/lib/types'
-import { ChatMessages } from './chat-messages'
 
 export async function ChatView({
   organizationSlug,
@@ -27,10 +31,18 @@ export async function ChatView({
 
   return (
     <div className="flex h-full flex-col items-center justify-center bg-background">
-      <ChatMessages
-        userId={user.id}
-        initialMessages={data.messages as Message[]}
-      />
+      <div className="relative flex size-full flex-col items-center divide-y overflow-hidden">
+        <ChatProvider
+          authorId={user.id}
+          initialMessages={data.messages as Message[]}
+        >
+          <ChatConversation />
+
+          <div className="grid w-full max-w-3xl shrink-0 gap-4 p-4">
+            <ChatPromptInput />
+          </div>
+        </ChatProvider>
+      </div>
     </div>
   )
 }
