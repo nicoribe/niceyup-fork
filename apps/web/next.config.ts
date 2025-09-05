@@ -2,13 +2,23 @@ import { env } from '@workspace/env'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@workspace/ui', 'shiki'],
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
+  transpilePackages: [
+    '@workspace/ai',
+    '@workspace/auth',
+    '@workspace/db',
+    '@workspace/engine',
+    '@workspace/env',
+    '@workspace/sdk',
+    '@workspace/ui',
+    '@workspace/utils',
+    'shiki',
+  ],
   async redirects() {
     return [
       {

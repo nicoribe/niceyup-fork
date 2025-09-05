@@ -53,6 +53,9 @@ importers:
       '@workspace/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@workspace/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       fastify:
         specifier: 5.3.3
         version: 5.3.3

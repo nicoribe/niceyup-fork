@@ -1,9 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
-  "globalDependencies": [
-    ".env"
-  ],
   "tasks": {
     "build": {
       "dependsOn": [
@@ -32,5 +29,44 @@
       "cache": false,
       "persistent": true
     }
-  }
+  },
+  "globalEnv": [
+    "APP_ENV",
+    "ENCRYPTION_KEY",
+    "API_URL",
+    "WEB_URL",
+    "DATABASE_URL",
+    "AI_GATEWAY_API_KEY",
+    "OPENAI_API_KEY",
+    "TRIGGER_DEV_PROJECT_ID",
+    "TRIGGER_SECRET_KEY",
+    "CLOUDFLARE_BUCKET",
+    "CLOUDFLARE_ACCOUNT_ID",
+    "CLOUDFLARE_ACCESS_KEY",
+    "CLOUDFLARE_SECRET_KEY",
+    "UPSTASH_VECTOR_REST_URL",
+    "UPSTASH_VECTOR_REST_TOKEN",
+    "NOVU_SECRET_KEY",
+    "BETTER_AUTH_SECRET",
+    "RESEND_API_KEY",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_STANDARD_PLAN_PRICE_ID",
+    "STRIPE_STANDARD_PLAN_ANNUAL_DISCOUNT_PRICE_ID",
+    "STRIPE_STANDARD_PLAN_FREE_TRIAL_DAYS",
+    "STRIPE_PRO_PLAN_PRICE_ID",
+    "STRIPE_PRO_PLAN_ANNUAL_DISCOUNT_PRICE_ID",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_WEB_URL"
+  ],
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "VERCEL_ENV",
+    "VERCEL_URL",
+    "npm_lifecycle_event"
+  ]
 }

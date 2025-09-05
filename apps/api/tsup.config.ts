@@ -5,4 +5,12 @@ export default defineConfig({
   clean: true,
   format: 'esm',
   outDir: 'dist',
+  noExternal: [
+    '@workspace/ai',
+    '@workspace/auth',
+    '@workspace/db',
+    '@workspace/engine',
+    '@workspace/env',
+    '@workspace/utils',
+  ],
 })
