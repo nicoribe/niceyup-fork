@@ -1,6 +1,9 @@
 import { env } from '@workspace/env'
 import { app } from './app'
 
-app.listen({ port: env.PORT || 3333 }).then(() => {
-  console.log('HTTP server running on port', env.PORT || 3333)
+const host = '0.0.0.0'
+const port = env.PORT || 3333
+
+app.listen({ host, port }).then(() => {
+  console.log(`HTTP server running on '${host}:${port}'`)
 })
