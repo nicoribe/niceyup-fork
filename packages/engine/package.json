@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "env:load": "dotenv -e ../../.env --",
-    "trigger:dev": "pnpm env:load pnpm dlx trigger.dev dev",
+    "trigger:dev": "pnpm with-env pnpm dlx trigger.dev dev",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@trigger.dev/core": "4.0.2",

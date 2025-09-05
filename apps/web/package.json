@@ -3,13 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "env:load": "dotenv -e ../../.env --",
-    "dev": "pnpm env:load next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "dev": "pnpm with-env next dev --turbopack",
+    "build": "pnpm with-env next build",
+    "start": "pnpm with-env next start",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",

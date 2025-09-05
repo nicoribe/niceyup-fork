@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "env:load": "dotenv -e ../../.env --",
-    "db:generate": "pnpm env:load drizzle-kit generate",
-    "db:push": "pnpm env:load drizzle-kit push",
-    "db:studio": "pnpm env:load drizzle-kit studio",
+    "db:generate": "pnpm with-env drizzle-kit generate",
+    "db:push": "pnpm with-env drizzle-kit push",
+    "db:studio": "pnpm with-env drizzle-kit studio",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@workspace/ai": "workspace:*",

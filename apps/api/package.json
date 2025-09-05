@@ -3,13 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "env:load": "dotenv -e ../../.env --",
-    "dev": "pnpm env:load tsx watch src/http/server.ts",
-    "build": "tsup-node",
-    "start": "node dist/http/server.mjs",
+    "dev": "pnpm with-env tsx watch src/http/server.ts",
+    "build": "pnpm with-env tsup-node",
+    "start": "pnpm with-env node dist/http/server.mjs",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@fastify/cors": "11.0.1",
