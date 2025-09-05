@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "pnpm with-env tsx watch src/http/server.ts",
-    "build": "pnpm with-env tsup-node",
-    "start": "pnpm with-env node dist/http/server.mjs",
+    "build": "pnpm with-env tsup",
+    "start": "pnpm with-env node dist/http/server.js",
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
