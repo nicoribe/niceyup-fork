@@ -59,7 +59,7 @@ const config = {
     stripe(),
 
     // API Reference for Better Auth
-    ...(env.NODE_ENV === 'development' ? [openAPI({ path: '/docs' })] : []),
+    ...(env.APP_ENV === 'development' ? [openAPI({ path: '/docs' })] : []),
   ],
 } satisfies BetterAuthOptions
 

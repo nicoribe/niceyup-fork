@@ -30,7 +30,7 @@ export const errorHandler: FastifyErrorHandler = (error, _, reply) => {
     }
   }
 
-  if (env.NODE_ENV !== 'production') {
+  if (env.APP_ENV !== 'production') {
     console.error(error)
   } else {
     // TODO: Here we should log to a external tool like DataDog/NewRelic/Sentry

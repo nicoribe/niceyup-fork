@@ -32,7 +32,7 @@ app.setErrorHandler(errorHandler)
 
 app.register(fastifyCors)
 
-if (env.NODE_ENV === 'development') {
+if (env.APP_ENV === 'development') {
   app.register(fastifySwagger, {
     openapi: {
       info: {

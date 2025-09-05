@@ -5,7 +5,7 @@ import { env } from '@workspace/env'
 export default defineConfig({
   project: env.TRIGGER_DEV_PROJECT_ID,
   runtime: 'node',
-  logLevel: env.NODE_ENV === 'development' ? 'debug' : 'info',
+  logLevel: env.APP_ENV === 'development' ? 'debug' : 'info',
   maxDuration: 3600,
   experimental_processKeepAlive: true,
   retries: {
