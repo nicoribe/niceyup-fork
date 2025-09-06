@@ -84,7 +84,7 @@ export const answerMessageTask = schemaTask({
     let error: unknown
 
     const streamingResult = streamText({
-      model: gateway.languageModel('openai/gpt-3.5-turbo'),
+      model: gateway.languageModel('openai/gpt-5'),
       messages,
       abortSignal: signal,
       onError: (event) => {

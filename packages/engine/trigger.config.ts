@@ -7,7 +7,7 @@ export default defineConfig({
   runtime: 'node',
   logLevel: env.APP_ENV === 'development' ? 'debug' : 'info',
   maxDuration: 3600,
-  experimental_processKeepAlive: true,
+  processKeepAlive: true,
   retries: {
     enabledInDev: false,
     default: {
@@ -22,9 +22,8 @@ export default defineConfig({
   build: {
     extensions: [
       pythonExtension({
-        requirementsFile: 'python/requirements.txt',
-        devPythonBinaryPath: 'python/.venv/bin/python',
-        scripts: ['python/**/*.py'],
+        devPythonBinaryPath: './python/.venv/bin/python',
+        scripts: ['./python/**/*.py'],
       }),
     ],
   },

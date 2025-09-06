@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "trigger:dev": "pnpm with-env pnpm dlx trigger.dev dev",
+    "trigger:deploy": "pnpm with-env pnpm dlx trigger.dev deploy",
     "lint": "biome check .",
     "format": "biome format --write .",
     "with-env": "dotenv -e ../../.env --"
