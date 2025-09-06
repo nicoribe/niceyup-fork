@@ -10,6 +10,7 @@ import {
 } from '@workspace/ui/components/breadcrumb'
 import { Slash } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import * as React from 'react'
 import type { PathInExplorer } from '../../_lib/types'
 import { NewChatBreadcrumb } from './new-chat-breadcrumb'
 
@@ -32,11 +33,8 @@ export function ExplorerTreePath({
             </BreadcrumbSeparator>
 
             {pathInExplorer.map((item, index) => (
-              <>
-                <BreadcrumbItem
-                  key={`${item.id}-${index}`}
-                  className="text-nowrap"
-                >
+              <React.Fragment key={`${item.id}-${index}`}>
+                <BreadcrumbItem className="text-nowrap">
                   <BreadcrumbPage>{item.name}</BreadcrumbPage>
                 </BreadcrumbItem>
                 {index !== pathInExplorer.length - 1 && (
@@ -44,7 +42,7 @@ export function ExplorerTreePath({
                     <Slash className="-rotate-[24deg] text-border" />
                   </BreadcrumbSeparator>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>

@@ -141,6 +141,9 @@ importers:
       next-themes:
         specifier: ^0.4.4
         version: 0.4.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      pg:
+        specifier: ^8.16.3
+        version: 8.16.3
       react:
         specifier: ^19.0.0
         version: 19.0.0
@@ -181,6 +184,9 @@ importers:
       '@workspace/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       typescript:
         specifier: ^5.7.3
         version: 5.7.3

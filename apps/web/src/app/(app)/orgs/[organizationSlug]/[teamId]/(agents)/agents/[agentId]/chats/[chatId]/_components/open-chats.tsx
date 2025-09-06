@@ -117,8 +117,8 @@ export function OpenChats({
           const Comp = chatId === chat.id ? 'div' : Link
 
           return (
-            <>
-              <Tooltip key={`${chat.id}-${index}-tooltip`}>
+            <React.Fragment key={`${chat.id}-${index}`}>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <Comp
                     href={`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${chat.id}`}
@@ -143,14 +143,14 @@ export function OpenChats({
                 </TooltipTrigger>
                 <TooltipContent>{chat.title}</TooltipContent>
               </Tooltip>
+
               {index !== (openChats[agentId] || []).length - 1 && (
                 <Separator
-                  key={`${chat.id}-${index}-separator`}
                   orientation="vertical"
                   className="data-[orientation=vertical]:h-4"
                 />
               )}
-            </>
+            </React.Fragment>
           )
         })}
 
@@ -188,7 +188,7 @@ export function OpenChats({
 
       <div className="flex flex-row items-center gap-1 p-1">
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="size-8">
               <MoreHorizontal className="size-4" />
             </Button>

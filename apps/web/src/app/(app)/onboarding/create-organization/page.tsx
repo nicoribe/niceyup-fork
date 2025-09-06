@@ -11,7 +11,7 @@ export default async function Page() {
             <Building2 className="size-6 text-muted-foreground" />
           </div>
 
-          <h1 className="text-center font-semibold text-xl">
+          <h1 className="text-center font-semibold text-xl leading-none">
             Create an organization
           </h1>
         </CardHeader>

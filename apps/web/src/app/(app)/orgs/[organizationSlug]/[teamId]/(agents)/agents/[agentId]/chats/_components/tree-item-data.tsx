@@ -162,13 +162,13 @@ export function TreeItemData({
         ) : (
           item.isFolder() && (
             <span className="text-muted-foreground">
-              {`(${item.getChildren().length})`}
+              {`(${item.getItemData().children?.length || 0})`}
             </span>
           )
         )}
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="ml-auto">
+          <DropdownMenuTrigger className="ml-auto" asChild>
             <MoreHorizontalIcon
               className={cn(
                 'size-4 text-muted-foreground group-hover:text-foreground',

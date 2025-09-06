@@ -528,11 +528,13 @@ function ChatMessageContent({
           <Action
             key={action.label}
             className={cn(
-              message.role === 'user' && 'opacity-0 group-hover:opacity-100',
+              message.role === 'user' &&
+                'opacity-0 disabled:opacity-0 group-hover:opacity-100 disabled:group-hover:opacity-50',
             )}
             label={action.label}
             tooltip={action.label}
             disabled={action.disabled}
+            onClick={action.onClick}
           >
             <action.icon className="size-3" />
           </Action>

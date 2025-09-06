@@ -21,6 +21,10 @@ export type MessageProps = Message & {
   isPersisted?: boolean
 }
 
+function isBranch(message: Message) {
+  return Boolean(message.children?.length && message.children.length > 1)
+}
+
 function isStream(message: Message) {
   return Boolean(
     (message.status === 'queued' || message.status === 'in_progress') &&
@@ -34,16 +38,12 @@ const createMessageIndex = (messages: Message[]) => {
   const childrenIndex = new Map<string, string[]>()
 
   for (const message of messages) {
-    let isBranch = false
-
     if (message.parentId) {
       const existing = childrenIndex.get(message.parentId) || []
       existing.push(message.id)
       childrenIndex.set(message.parentId, existing)
-      isBranch = Boolean(existing.length > 1)
     }
-
-    index.set(message.id, { ...message, isBranch, isStream: isStream(message) })
+    index.set(message.id, message)
   }
 
   return { index, childrenIndex }
@@ -89,7 +89,7 @@ const buildAncestors = (
   message: Message,
   messageIndex: Map<string, Message>,
 ) => {
-  const ancestors: Message[] = []
+  const ancestors: MessageProps[] = []
   let current = message
 
   while (current.parentId) {
@@ -97,6 +97,12 @@ const buildAncestors = (
     if (!parent) {
       break
     }
+
+    if (ancestors[0]) {
+      ancestors[0].isBranch = isBranch(parent)
+      ancestors[0].isStream = isStream(current)
+    }
+
     ancestors.unshift(parent)
     current = parent
   }
@@ -110,7 +116,7 @@ const buildDescendants = (
   messageIndex: Map<string, Message>,
   childrenIndex: Map<string, string[]>,
 ) => {
-  const descendants: Message[] = []
+  const descendants: MessageProps[] = []
   let current = message
 
   while (true) {
@@ -124,7 +130,11 @@ const buildDescendants = (
       break
     }
 
-    descendants.push(firstChild)
+    descendants.push({
+      ...firstChild,
+      isBranch: isBranch(message),
+      isStream: isStream(firstChild),
+    })
     current = firstChild
   }
 

@@ -9,6 +9,7 @@ import {
 } from '@workspace/ui/components/breadcrumb'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { Slash } from 'lucide-react'
+import * as React from 'react'
 import { useExplorerTree } from '../../_components/explorer-tree'
 
 export function NewChatBreadcrumb() {
@@ -27,11 +28,8 @@ export function NewChatBreadcrumb() {
           }
 
           return (
-            <>
-              <BreadcrumbItem
-                key={`${item.id}-${index}`}
-                className="text-nowrap"
-              >
+            <React.Fragment key={`${item.id}-${index}`}>
+              <BreadcrumbItem className="text-nowrap">
                 {item.loading ? (
                   <Skeleton className="h-4 w-15 rounded-sm" />
                 ) : (
@@ -44,7 +42,7 @@ export function NewChatBreadcrumb() {
               >
                 <Slash className="-rotate-[24deg] text-border" />
               </BreadcrumbSeparator>
-            </>
+            </React.Fragment>
           )
         })}
       </BreadcrumbList>

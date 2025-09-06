@@ -9,9 +9,20 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import * as React from 'react'
 
 export const ThemeSwitcher = () => {
-  const { setTheme, theme } = useTheme()
+  const [theme, setTheme] = React.useState<string>()
+
+  const { setTheme: nextSetTheme, theme: nextTheme } = useTheme()
+
+  React.useEffect(() => {
+    setTheme(nextTheme)
+  }, [nextTheme])
+
+  if (!theme) {
+    return null
+  }
 
   return (
     <DropdownMenu>
@@ -24,15 +35,15 @@ export const ThemeSwitcher = () => {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
+        <DropdownMenuItem onClick={() => nextSetTheme('light')}>
           <Sun className="mr-1 size-4" />
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
+        <DropdownMenuItem onClick={() => nextSetTheme('dark')}>
           <Moon className="mr-1 size-4" />
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
+        <DropdownMenuItem onClick={() => nextSetTheme('system')}>
           <Monitor className="mr-1 size-4" />
           System
         </DropdownMenuItem>
