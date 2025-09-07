@@ -70,7 +70,16 @@ const buildMessageTree = (
     const loadingMsg = messageIndex.get(loadingMessage.id)
     if (loadingMsg) {
       const ancestors = buildAncestors(loadingMsg, messageIndex)
-      return [...ancestors, loadingMsg]
+
+      const lastAncestor = ancestors.at(-1)
+
+      const message = {
+        ...targetMessage,
+        isBranch: lastAncestor ? isBranch(lastAncestor) : false,
+        isStream: isStream(targetMessage),
+      }
+
+      return [...ancestors, message]
     }
   }
 
@@ -81,7 +90,15 @@ const buildMessageTree = (
     childrenIndex,
   )
 
-  return [...ancestors, targetMessage, ...descendants]
+  const lastAncestor = ancestors.at(-1)
+
+  const message = {
+    ...targetMessage,
+    isBranch: lastAncestor ? isBranch(lastAncestor) : false,
+    isStream: isStream(targetMessage),
+  }
+
+  return [...ancestors, message, ...descendants]
 }
 
 // Build ancestors chain efficiently
@@ -467,7 +484,7 @@ export function useChat({
           agentId,
           parentMessageId: persistentParentMessageId,
           message: { parts },
-          // explorerType,
+          explorerType: 'private',
           // folderIdExplorerTree,
         },
       })

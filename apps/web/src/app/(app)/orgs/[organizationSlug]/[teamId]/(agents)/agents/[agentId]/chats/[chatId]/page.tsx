@@ -33,7 +33,7 @@ export default async function Page({
   ]
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background">
       <Tabbar
         organizationSlug={organizationSlug}
         teamId={teamId}

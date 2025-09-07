@@ -12,7 +12,7 @@ export function NewChat({ suggestions }: { suggestions: string[] }) {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-background">
+    <div className="flex size-full flex-col items-center justify-center">
       <div className="flex w-full max-w-2xl flex-col gap-4 p-2">
         <Suggestions>
           {suggestions.map((suggestion) => (

@@ -166,8 +166,8 @@ export function ChatConversation() {
   const { messages, getMessageById } = useChatContext()
 
   return (
-    <Conversation className="w-full">
-      <ConversationContent className="mx-auto h-20 max-w-3xl">
+    <Conversation>
+      <ConversationContent className="mx-auto max-w-3xl">
         {messages.map((message) => {
           const parentMessage = message?.isBranch
             ? getMessageById(message.parentId)
@@ -352,7 +352,7 @@ function ChatMessageContentStream({
 
   return (
     <ChatMessageContent
-      message={{ ...messageStream, status: messageStatus() }}
+      message={{ ...message, ...messageStream, status: messageStatus() }}
     />
   )
 }
@@ -378,11 +378,10 @@ function ChatMessageContent({
 
   // Check if the message is not empty
   const messageNotEmpty = React.useMemo(() => {
-    if (
-      (message.status === 'queued' || message.status === 'in_progress') &&
-      message.parts?.every((part) => part.type !== 'text')
-    ) {
-      return false
+    if (message.status === 'queued' || message.status === 'in_progress') {
+      const textPart = message.parts?.find((part) => part.type === 'text')
+
+      return !!textPart?.text
     }
 
     return !!message.parts?.length
@@ -394,7 +393,6 @@ function ChatMessageContent({
         icon: HeartIcon,
         label: 'Favorite',
         onClick: () => console.log('Favoriting...'),
-        disabled: true,
       },
       {
         icon: CopyIcon,
@@ -413,7 +411,6 @@ function ChatMessageContent({
         icon: ShareIcon,
         label: 'Share',
         onClick: () => console.log('Sharing...'),
-        disabled: true,
       },
     ]
 
@@ -424,13 +421,11 @@ function ChatMessageContent({
             icon: ThumbsUpIcon,
             label: 'Like',
             onClick: () => console.log('Liking...'),
-            disabled: true,
           },
           {
             icon: ThumbsDownIcon,
             label: 'Dislike',
             onClick: () => console.log('Disliking...'),
-            disabled: true,
           },
           {
             icon: RefreshCcwIcon,
@@ -448,7 +443,6 @@ function ChatMessageContent({
         icon: PencilIcon,
         label: 'Edit message',
         onClick: () => console.log('Editing...'),
-        disabled: true,
       })
     }
 

@@ -13,7 +13,7 @@ export function Topbar({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        'flex transform flex-col items-stretch justify-center',
+        'flex flex-col items-stretch justify-center',
         params.chatId && { hidden: !topbar },
       )}
     >

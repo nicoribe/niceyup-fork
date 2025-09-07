@@ -49,7 +49,7 @@ export function Resizable({
     <div
       ref={ref}
       className={cn(
-        'flex w-full flex-row',
+        'flex w-full',
         topbar ? 'h-[calc(100vh-90px)]' : 'h-screen',
         props.className,
       )}

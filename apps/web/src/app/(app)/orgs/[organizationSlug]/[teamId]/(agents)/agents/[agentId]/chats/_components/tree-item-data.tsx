@@ -169,14 +169,16 @@ export function TreeItemData({
 
         <DropdownMenu>
           <DropdownMenuTrigger className="ml-auto" asChild>
-            <MoreHorizontalIcon
-              className={cn(
-                'size-4 text-muted-foreground group-hover:text-foreground',
-                {
-                  'hidden group-hover:block': !item.isSelected(),
-                },
-              )}
-            />
+            <div>
+              <MoreHorizontalIcon
+                className={cn(
+                  'size-4 text-muted-foreground group-hover:text-foreground',
+                  {
+                    'hidden group-hover:block': !item.isSelected(),
+                  },
+                )}
+              />
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             {item.isFolder() && (
