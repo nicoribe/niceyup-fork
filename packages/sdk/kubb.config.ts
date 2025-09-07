@@ -4,7 +4,7 @@ import { pluginOas } from '@kubb/plugin-oas'
 import { pluginReactQuery } from '@kubb/plugin-react-query'
 import { pluginTs } from '@kubb/plugin-ts'
 import { pluginZod } from '@kubb/plugin-zod'
-import { env } from '@workspace/env'
+import { env } from './src/lib/env'
 
 export const config: UserConfig = {
   name: 'Better Chat API',

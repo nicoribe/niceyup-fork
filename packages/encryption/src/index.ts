@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { env } from '@workspace/env'
+import { env } from './lib/env'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 16

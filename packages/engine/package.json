@@ -27,6 +27,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./trigger/*": "./src/trigger/*.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./env": "./src/lib/env.ts"
   }
 }

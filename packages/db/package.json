@@ -29,6 +29,7 @@
     "./orm": "./src/orm.ts",
     "./schema": "./src/schema/index.ts",
     "./types": "./src/types.ts",
-    "./queries": "./src/queries/index.ts"
+    "./queries": "./src/queries/index.ts",
+    "./env": "./src/lib/env.ts"
   }
 }

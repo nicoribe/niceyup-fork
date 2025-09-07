@@ -1,6 +1,6 @@
 import { pythonExtension } from '@trigger.dev/python/extension'
 import { defineConfig } from '@trigger.dev/sdk'
-import { env } from '@workspace/env'
+import { env } from './src/lib/env'
 
 export default defineConfig({
   project: env.TRIGGER_DEV_PROJECT_ID,
@@ -23,7 +23,7 @@ export default defineConfig({
     extensions: [
       pythonExtension({
         devPythonBinaryPath: './python/.venv/bin/python',
-        scripts: ['./python/**/*.py'],
+        scripts: ['./python/**/*.py', './python/_legacy/**/*.py'],
       }),
     ],
   },

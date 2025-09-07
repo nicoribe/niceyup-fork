@@ -31,7 +31,7 @@ export const replicateDbTask = schemaTask({
   run: async (payload) => {
     logger.info('payload', payload)
 
-    const result = await python.replicateDb(
+    const result = await python.legacy.replicateDb(
       {
         workspace_id: workspaceId,
         source_id: sourceId,

@@ -16,7 +16,7 @@ export const runIngestionTask = schemaTask({
   run: async (payload) => {
     logger.info('payload', payload)
 
-    const result = await python.runIngestion({
+    const result = await python.legacy.runIngestion({
       workspace_id: workspaceId,
       source_id: sourceId,
       source_type: sourceType,

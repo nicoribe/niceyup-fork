@@ -1,11 +1,11 @@
 'use client'
 
+import { env } from '@/lib/env'
 import {
   createAuthClient,
   organizationClient,
   stripeClient,
 } from '@workspace/auth/client'
-import { env } from '@workspace/env'
 
 export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_WEB_URL,

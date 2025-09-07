@@ -1,5 +1,5 @@
 import { python } from '@trigger.dev/python'
-import { env } from '@workspace/env'
+import { env } from '../../lib/env'
 import { pyArgs, pyPath, pyStreamingResult } from '../utils'
 
 type ColumnInfo = {
@@ -48,11 +48,11 @@ export async function runIngestion(
   args: RunIngestionArgs,
 ): Promise<RunIngestionResult> {
   const streamingResult = python.stream.runScript(
-    pyPath('run_ingestion'),
+    pyPath('_legacy/run_ingestion'),
     pyArgs(args),
     {
       env: {
-        PYTHON_ENV: env.NODE_ENV,
+        PYTHON_ENV: env.APP_ENV,
       },
     },
   )

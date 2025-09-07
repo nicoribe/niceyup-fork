@@ -1,8 +1,8 @@
 import type { AsyncIterableStream } from '@trigger.dev/core/v3'
 import { python } from '@trigger.dev/python'
 import { logger, metadata, schemaTask } from '@trigger.dev/sdk'
-import { env } from '@workspace/env'
 import { z } from 'zod'
+import { env } from '../../lib/env'
 import { parsePyLogger, pyArgs, pyPath } from '../../python/utils'
 
 type AIMessageChunk = {
@@ -46,7 +46,7 @@ export const answerTask = schemaTask({
       pyArgs(args),
       {
         env: {
-          PYTHON_ENV: env.NODE_ENV,
+          PYTHON_ENV: env.APP_ENV,
         },
       },
     )

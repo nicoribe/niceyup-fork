@@ -1,4 +1,4 @@
-import { env } from '@workspace/env'
+import { env } from '@/lib/env'
 import type { FastifyInstance } from 'fastify'
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod'
 import { BadRequestError } from './bad-request-error'

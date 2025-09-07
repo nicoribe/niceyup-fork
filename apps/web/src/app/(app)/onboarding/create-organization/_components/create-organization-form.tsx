@@ -1,8 +1,8 @@
 'use client'
 
 import { authClient } from '@/lib/auth/client'
+import { env } from '@/lib/env'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { env } from '@workspace/env'
 import { Button } from '@workspace/ui/components/button'
 import {
   Form,

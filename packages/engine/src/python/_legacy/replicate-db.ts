@@ -1,5 +1,5 @@
 import { python } from '@trigger.dev/python'
-import { env } from '@workspace/env'
+import { env } from '../../lib/env'
 import { pyArgs, pyPath, pyStreamingResult } from '../utils'
 
 type ReplicateDbArgs = {
@@ -34,11 +34,11 @@ export async function replicateDb(
   { envVars }: { envVars?: ReplicateDbEnvVars } = {},
 ): Promise<ReplicateDbResult> {
   const streamingResult = python.stream.runScript(
-    pyPath('replicate_db'),
+    pyPath('_legacy/replicate_db'),
     pyArgs(args),
     {
       env: {
-        PYTHON_ENV: env.NODE_ENV,
+        PYTHON_ENV: env.APP_ENV,
         DATABASE_CLIENT_HOST: envVars?.host,
         DATABASE_CLIENT_PORT: envVars?.port,
         DATABASE_CLIENT_USER: envVars?.user,

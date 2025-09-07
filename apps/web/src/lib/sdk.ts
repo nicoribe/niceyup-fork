@@ -1,5 +1,5 @@
+import { env } from '@/lib/env'
 import { getHeaders } from '@/lib/headers'
-import { env } from '@workspace/env'
 import { createClient } from '@workspace/sdk'
 
 export const sdk = createClient({

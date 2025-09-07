@@ -1,11 +1,11 @@
 import { db, generateId } from '@workspace/db'
 import { sendEmailResetPassword, sendVerificationEmail } from '@workspace/email'
-import { env } from '@workspace/env'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
 import { ac, roles } from './access'
 import { COOKIE_PREFIX } from './constants'
+import { env } from './lib/env'
 import { stripe } from './stripe'
 
 const config = {

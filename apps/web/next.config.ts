@@ -1,4 +1,4 @@
-import { env } from '@workspace/env'
+import { env } from '@/lib/env'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {

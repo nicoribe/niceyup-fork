@@ -20,6 +20,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./emails/*": "./src/emails/*.tsx"
+    "./emails/*": "./src/emails/*.tsx",
+    "./env": "./src/lib/env.ts"
   }
 }

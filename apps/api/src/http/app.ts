@@ -1,7 +1,7 @@
+import { env } from '@/lib/env'
 import { fastifyCors } from '@fastify/cors'
 import { fastifySwagger } from '@fastify/swagger'
 import fastifyScalar from '@scalar/fastify-api-reference'
-import { env } from '@workspace/env'
 import { fastify } from 'fastify'
 import {
   type ZodTypeProvider,
@@ -72,7 +72,3 @@ if (env.APP_ENV === 'development') {
 }
 
 app.register(routes, { prefix: '/api' })
-
-app.listen({ port: 3333 }).then(() => {
-  console.log('HTTP server running!')
-})

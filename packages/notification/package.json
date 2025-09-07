@@ -18,6 +18,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./env": "./src/lib/env.ts"
   }
 }

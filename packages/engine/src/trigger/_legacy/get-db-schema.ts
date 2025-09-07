@@ -19,7 +19,7 @@ export const getDbSchemaTask = schemaTask({
   run: async (payload) => {
     logger.info('payload', payload)
 
-    const result = await python.getDbSchema(
+    const result = await python.legacy.getDbSchema(
       { dialect },
       {
         envVars: {

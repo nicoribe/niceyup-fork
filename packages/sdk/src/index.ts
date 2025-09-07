@@ -16,10 +16,5 @@ export function createClient(options: ClientOptions) {
     headers: options.headers,
   })
 
-  return {
-    ...operations,
-    $reactQuery: hooks,
-    $schemas: schemas,
-    $types: types,
-  }
+  return { ...operations, $reactQuery: hooks, $schemas: schemas, $types: types }
 }
