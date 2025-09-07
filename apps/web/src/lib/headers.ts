@@ -9,7 +9,9 @@ export async function getHeaders() {
   if (typeof window === 'undefined') {
     const { headers: serverHeaders } = await import('next/headers')
 
-    return serverHeaders()
+    const headersEntries = (await serverHeaders()).entries()
+
+    return Object.fromEntries(headersEntries)
   }
 
   return {
