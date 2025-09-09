@@ -4,7 +4,10 @@ import {
   createFolderInConversationExplorerTree,
   deleteItemInConversationExplorerTree,
 } from '@/actions/conversation-explorer-tree'
-import type { OrganizationTeamParams } from '@/lib/types'
+import type {
+  ConversationExplorerType,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import type { ItemInstance, TreeInstance } from '@headless-tree/core'
 import {
   DropdownMenu,
@@ -32,9 +35,14 @@ import type { Item } from './explorer-tree'
 type Params = OrganizationTeamParams & { agentId: string }
 
 export function TreeItemData({
-  item,
+  explorerType,
   tree,
-}: { item: ItemInstance<Item>; tree: TreeInstance<Item> }) {
+  item,
+}: {
+  explorerType: ConversationExplorerType
+  tree: TreeInstance<Item>
+  item: ItemInstance<Item>
+}) {
   const { organizationSlug, teamId, agentId } = useParams<Params>()
 
   if (item.getItemData().disabled) {
@@ -60,6 +68,7 @@ export function TreeItemData({
 
     redirect(`/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/new`)
   }
+
   const onNewFolder = async (e: React.MouseEvent) => {
     e.stopPropagation()
 
@@ -68,7 +77,7 @@ export function TreeItemData({
     const newFolder = await createFolderInConversationExplorerTree(
       { organizationSlug, teamId, agentId },
       {
-        explorerType: 'private',
+        explorerType,
         parentId: item.getId(),
         name: '(new folder)',
       },
@@ -103,7 +112,7 @@ export function TreeItemData({
     await deleteItemInConversationExplorerTree(
       { organizationSlug, teamId, agentId },
       {
-        explorerType: 'private',
+        explorerType,
         itemId: item.getId(),
       },
     )
@@ -162,7 +171,7 @@ export function TreeItemData({
         ) : (
           item.isFolder() && (
             <span className="text-muted-foreground">
-              {`(${item.getItemData().children?.length || 0})`}
+              {`(${item.getChildren().length || 0})`}
             </span>
           )
         )}
@@ -171,21 +180,20 @@ export function TreeItemData({
           <DropdownMenuTrigger className="ml-auto" asChild>
             <div>
               <MoreHorizontalIcon
-                className={cn(
-                  'size-4 text-muted-foreground group-hover:text-foreground',
-                  {
-                    'hidden group-hover:block': !item.isSelected(),
-                  },
-                )}
+                className={cn('size-4', {
+                  'hidden group-hover:block': !item.isSelected(),
+                })}
               />
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             {item.isFolder() && (
               <>
-                <DropdownMenuItem onClick={onNewChat}>
-                  New Chat
-                </DropdownMenuItem>
+                {explorerType !== 'shared' && (
+                  <DropdownMenuItem onClick={onNewChat}>
+                    New Chat
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={onNewFolder}>
                   New Folder
                 </DropdownMenuItem>
@@ -199,7 +207,9 @@ export function TreeItemData({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={onDelete}>
-              Delete
+              {explorerType === 'shared' && !item.isFolder()
+                ? 'Leave'
+                : 'Delete'}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

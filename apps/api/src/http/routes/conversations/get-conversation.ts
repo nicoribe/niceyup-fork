@@ -28,6 +28,8 @@ export async function getConversation(app: FastifyTypedInstance) {
               conversation: z.object({
                 id: z.string(),
                 title: z.string(),
+                teamId: z.string().nullable(),
+                ownerId: z.string().nullable(),
                 agentId: z.string().nullable(),
               }),
             })

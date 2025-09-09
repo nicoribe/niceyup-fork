@@ -42,6 +42,8 @@ export const getConversation200Schema = z
     conversation: z.object({
       id: z.string(),
       title: z.string(),
+      teamId: z.string().nullable(),
+      ownerId: z.string().nullable(),
       agentId: z.string().nullable(),
     }),
   })

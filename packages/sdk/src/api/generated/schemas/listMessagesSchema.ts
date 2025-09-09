@@ -177,6 +177,7 @@ export const listMessages200Schema = z
           )
           .nullable(),
         metadata: z.any().nullish(),
+        authorId: z.string().nullable().nullish(),
         parentId: z.string().nullable().nullish(),
         children: z.array(z.string()).optional(),
       }),

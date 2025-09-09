@@ -12,6 +12,7 @@ import type {
 import type { ScrollToBottom } from '@workspace/ui/components/conversation'
 import { useParams, useRouter } from 'next/navigation'
 import * as React from 'react'
+import { useExplorerTree } from '../../_components/explorer-tree'
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
@@ -248,10 +249,12 @@ export function useChat({
   initialMessages?: Message[]
 } = {}) {
   const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
+  const router = useRouter()
+
+  const { selectedExplorerType, selectedFolder, setRevealItemInExplorer } =
+    useExplorerTree()
 
   const refConversationScroll = React.useRef<ScrollToBottom | null>(null)
-
-  const router = useRouter()
 
   const [allMessages, setAllMessages] = React.useState<MessageProps[]>(
     initialMessages || [],
@@ -281,6 +284,19 @@ export function useChat({
     },
     [messageIndexData.index],
   )
+
+  const updateMessageById = (
+    messageId: string,
+    message: Partial<Omit<Message, 'id'>>,
+  ) => {
+    setAllMessages((prevMessages) => {
+      return prevMessages.map((prevMessage) =>
+        prevMessage.id === messageId
+          ? { ...prevMessage, ...message }
+          : prevMessage,
+      )
+    })
+  }
 
   const getPersistentParentMessage = React.useCallback(
     (parentMessageId: string | undefined): MessageProps | undefined => {
@@ -472,6 +488,11 @@ export function useChat({
 
     refConversationScroll.current?.scrollToBottom()
 
+    // If chat is new, we need to reveal the item in the explorer tree
+    const explorerType =
+      selectedExplorerType === 'shared' ? 'private' : selectedExplorerType
+    const pathFolderIdExplorerTree = selectedFolder.map(({ id }) => id)
+
     try {
       const persistentParentMessageId =
         getPersistentParentMessage(parentMessageId)?.id
@@ -484,8 +505,14 @@ export function useChat({
           agentId,
           parentMessageId: persistentParentMessageId,
           message: { parts },
-          explorerType: 'private',
-          // folderIdExplorerTree,
+          ...(chatId === 'new'
+            ? {
+                explorerTree: {
+                  explorerType,
+                  folderId: pathFolderIdExplorerTree.at(-1),
+                },
+              }
+            : {}),
         },
       })
 
@@ -494,6 +521,16 @@ export function useChat({
       }
 
       if (chatId === 'new') {
+        if (data.explorerTree) {
+          setRevealItemInExplorer({
+            explorerType,
+            revealItemInExplorer: {
+              parentIds: pathFolderIdExplorerTree,
+              id: data.explorerTree.itemId,
+            },
+          })
+        }
+
         router.push(
           `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${data.conversationId}`,
         )
@@ -660,6 +697,7 @@ export function useChat({
     messages: messagesFiltered,
     loadingMessage,
     getMessageById,
+    updateMessageById,
     handleBranchChange,
     sendMessage,
     resendMessage,

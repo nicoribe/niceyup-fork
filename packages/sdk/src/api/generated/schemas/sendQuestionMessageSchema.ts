@@ -165,6 +165,7 @@ export const sendQuestionMessage200Schema = z
         )
         .nullable(),
       metadata: z.any().nullish(),
+      authorId: z.string().nullable().nullish(),
       parentId: z.string().nullable().nullish(),
       children: z.array(z.string()).optional(),
     }),
@@ -303,9 +304,18 @@ export const sendQuestionMessage200Schema = z
         )
         .nullable(),
       metadata: z.any().nullish(),
+      authorId: z.string().nullable().nullish(),
       parentId: z.string().nullable().nullish(),
       children: z.array(z.string()).optional(),
     }),
+    explorerTree: z
+      .object({
+        itemId: z.string(),
+      })
+      .describe(
+        'Return only when the conversation is created in the explorerTree',
+      )
+      .optional(),
   })
   .describe('Success') as unknown as ToZod<SendQuestionMessage200>
 
@@ -427,8 +437,13 @@ export const sendQuestionMessageMutationRequestSchema = z.object({
     ),
     metadata: z.any().nullish(),
   }),
-  explorerType: z.enum(['private', 'shared', 'team']).nullable().nullish(),
-  folderIdExplorerTree: z.string().nullable().nullish(),
+  explorerTree: z
+    .object({
+      explorerType: z.enum(['private', 'team']),
+      folderId: z.string().nullable().nullish(),
+    })
+    .describe('Used only when conversation is new')
+    .optional(),
 }) as unknown as ToZod<SendQuestionMessageMutationRequest>
 
 export type SendQuestionMessageMutationRequestSchema =

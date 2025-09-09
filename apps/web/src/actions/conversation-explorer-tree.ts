@@ -504,7 +504,7 @@ export async function createFolderInConversationExplorerTree(
       explorerType,
       agentId: params.agentId,
       ...ownerTypeCondition,
-      parentId,
+      parentId: parentId === 'root' ? null : parentId,
       name,
     })
     .returning({

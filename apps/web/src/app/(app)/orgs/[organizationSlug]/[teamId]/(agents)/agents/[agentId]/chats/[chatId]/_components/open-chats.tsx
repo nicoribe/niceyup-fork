@@ -1,6 +1,11 @@
 'use client'
 
-import type { Chat, ChatParams, OrganizationTeamParams } from '@/lib/types'
+import type {
+  Chat,
+  ChatParams,
+  ConversationExplorerType,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import { Button } from '@workspace/ui/components/button'
 import {
   DropdownMenu,
@@ -21,6 +26,7 @@ import { MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { redirect, useParams } from 'next/navigation'
 import * as React from 'react'
+import { toast } from 'sonner'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useExplorerTree } from '../../_components/explorer-tree'
@@ -59,9 +65,11 @@ type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
 export function OpenChats({
   chat,
+  explorerType,
   pathInExplorer,
 }: {
   chat: Chat | null
+  explorerType: ConversationExplorerType
   pathInExplorer: PathInExplorer[]
 }) {
   const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
@@ -112,7 +120,7 @@ export function OpenChats({
 
   return (
     <div className="flex flex-row items-center bg-background">
-      <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-scroll pl-1">
+      <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-auto pl-1">
         {openChats[agentId]?.map((chat, index) => {
           const Comp = chatId === chat.id ? 'div' : Link
 
@@ -205,14 +213,25 @@ export function OpenChats({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              disabled={!!revealItemInExplorer}
+              disabled={!chat || !!revealItemInExplorer}
               onSelect={async () => {
-                const lastItem = pathInExplorer.at(-1)
+                if (chat?.teamId !== teamId) {
+                  toast.error(
+                    'Select the conversation team to reveal the chat in the explorer. Go to Conversation settings to learn more.',
+                  )
+                  return
+                }
 
+                const lastItem = pathInExplorer.at(-1)
                 if (lastItem) {
                   setRevealItemInExplorer({
-                    parentIds: pathInExplorer.map(({ id }) => id).slice(0, -1),
-                    id: lastItem.id,
+                    explorerType,
+                    revealItemInExplorer: {
+                      parentIds: pathInExplorer
+                        .map(({ id }) => id)
+                        .slice(0, -1),
+                      id: lastItem.id,
+                    },
                   })
                 }
               }}

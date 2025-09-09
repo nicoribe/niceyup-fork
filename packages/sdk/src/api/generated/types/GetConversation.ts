@@ -44,6 +44,14 @@ export type GetConversation200 = {
     /**
      * @type string
      */
+    teamId: string | null
+    /**
+     * @type string
+     */
+    ownerId: string | null
+    /**
+     * @type string
+     */
     agentId: string | null
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ChatParams } from '@/lib/types'
+import type { ChatParams, ConversationExplorerType } from '@/lib/types'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,8 +15,10 @@ import type { PathInExplorer } from '../../_lib/types'
 import { NewChatBreadcrumb } from './new-chat-breadcrumb'
 
 export function ExplorerTreePath({
+  explorerType,
   pathInExplorer,
 }: {
+  explorerType: ConversationExplorerType
   pathInExplorer: PathInExplorer[]
 }) {
   const { chatId } = useParams<ChatParams>()
@@ -28,6 +30,12 @@ export function ExplorerTreePath({
       ) : (
         <Breadcrumb>
           <BreadcrumbList className="flex-nowrap text-xs sm:gap-1">
+            <BreadcrumbItem className="text-nowrap">
+              <BreadcrumbPage className="font-semibold text-muted-foreground uppercase tracking-wide">
+                {explorerType}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+
             <BreadcrumbSeparator className="[&>svg]:size-3">
               <Slash className="-rotate-[24deg] text-border" />
             </BreadcrumbSeparator>

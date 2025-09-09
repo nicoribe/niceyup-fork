@@ -20,7 +20,7 @@ export function TabBar({ tabs }: { tabs?: TabItem[] }) {
 
   return (
     <div className="-mt-1.5 sticky top-0 z-50 flex flex-col items-stretch bg-background">
-      <div className="no-scrollbar flex flex-row items-center overflow-scroll px-6">
+      <div className="no-scrollbar flex flex-row items-center overflow-auto px-6">
         {tabs.map((tab, index) => (
           <div
             key={`${tab.href}-${index}`}

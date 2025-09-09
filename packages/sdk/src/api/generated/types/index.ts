@@ -148,7 +148,7 @@ export type {
   SendQuestionMessage500,
   PartsTypeEnum31,
   PartsTypeEnum32,
-  SendQuestionMessageMutationRequestExplorerTypeEnum,
+  ExplorerTreeExplorerTypeEnum,
   SendQuestionMessageMutationRequest,
   SendQuestionMessageMutationResponse,
   SendQuestionMessageMutation,
@@ -224,5 +224,5 @@ export {
   partsStateEnum30,
   partsTypeEnum31,
   partsTypeEnum32,
-  sendQuestionMessageMutationRequestExplorerTypeEnum,
+  explorerTreeExplorerTypeEnum,
 } from './SendQuestionMessage'

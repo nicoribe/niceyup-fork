@@ -20,7 +20,7 @@ export const config: UserConfig = {
     },
   },
   hooks: {
-    done: ['pnpm run generate:format'],
+    done: ['pnpm run sdk:generate:format'],
   },
   plugins: [
     pluginOas({

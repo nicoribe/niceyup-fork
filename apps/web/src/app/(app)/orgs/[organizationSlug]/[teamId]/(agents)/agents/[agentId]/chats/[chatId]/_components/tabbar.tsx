@@ -1,4 +1,5 @@
 import { getParentsInConversationExplorerTree } from '@/actions/conversation-explorer-tree'
+import { authenticatedUser } from '@/lib/auth/server'
 import type { Chat, ChatParams, OrganizationTeamParams } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { Appearance } from '../../_components/appearance'
@@ -18,26 +19,48 @@ export async function Tabbar({
   chatId: ChatParams['chatId']
   chat: Chat | null
 }) {
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
+
+  const explorerType = (() => {
+    if (chat) {
+      if (chat.teamId) {
+        return 'team'
+      }
+
+      if (chat.ownerId !== userId) {
+        return 'shared'
+      }
+    }
+
+    return 'private'
+  })()
+
   const pathInExplorer = chat
     ? await getParentsInConversationExplorerTree(
         { organizationSlug, teamId, agentId },
-        {
-          explorerType: 'private',
-          conversationId: chat.id,
-        },
+        { explorerType, conversationId: chat.id },
       )
     : []
 
   return (
     <>
-      <OpenChats chat={chat} pathInExplorer={pathInExplorer} />
+      <OpenChats
+        chat={chat}
+        explorerType={explorerType}
+        pathInExplorer={pathInExplorer}
+      />
 
       <Separator />
 
       <div className="flex flex-row items-center bg-background">
-        <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-scroll py-1">
+        <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-auto py-1">
           {(chatId === 'new' || chat) && (
-            <ExplorerTreePath pathInExplorer={pathInExplorer} />
+            <ExplorerTreePath
+              explorerType={explorerType}
+              pathInExplorer={pathInExplorer}
+            />
           )}
         </div>
 

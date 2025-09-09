@@ -19,7 +19,7 @@ export type Organization = {
   slug: string
   name: string
   logo?: string | null | undefined
-  metadata?: any
+  metadata?: unknown
 }
 
 export type Team = {
@@ -38,6 +38,8 @@ export type ConversationExplorerType = 'private' | 'shared' | 'team'
 export type Chat = {
   id: string
   title: string
+  teamId: string | null
+  ownerId: string | null
   agentId: string | null
 }
 

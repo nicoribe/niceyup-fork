@@ -13,11 +13,19 @@ import * as React from 'react'
 import { useExplorerTree } from '../../_components/explorer-tree'
 
 export function NewChatBreadcrumb() {
-  const { selectedFolder } = useExplorerTree()
+  const { selectedExplorerType, selectedFolder } = useExplorerTree()
 
   return (
     <Breadcrumb>
       <BreadcrumbList className="flex-nowrap text-xs sm:gap-1">
+        <BreadcrumbItem className="text-nowrap">
+          <BreadcrumbPage className="font-semibold text-muted-foreground uppercase tracking-wide">
+            {selectedExplorerType === 'shared'
+              ? 'private'
+              : selectedExplorerType}
+          </BreadcrumbPage>
+        </BreadcrumbItem>
+
         <BreadcrumbSeparator className="[&>svg]:size-3">
           <Slash className="-rotate-[24deg] text-border" />
         </BreadcrumbSeparator>

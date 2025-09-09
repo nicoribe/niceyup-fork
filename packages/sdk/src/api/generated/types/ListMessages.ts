@@ -565,6 +565,10 @@ export type ListMessages200 = {
     /**
      * @type string
      */
+    authorId?: string | null
+    /**
+     * @type string
+     */
     parentId?: string | null
     /**
      * @type array | undefined

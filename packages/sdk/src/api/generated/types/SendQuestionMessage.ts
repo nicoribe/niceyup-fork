@@ -709,6 +709,10 @@ export type SendQuestionMessage200 = {
     /**
      * @type string
      */
+    authorId?: string | null
+    /**
+     * @type string
+     */
     parentId?: string | null
     /**
      * @type array | undefined
@@ -1082,11 +1086,25 @@ export type SendQuestionMessage200 = {
     /**
      * @type string
      */
+    authorId?: string | null
+    /**
+     * @type string
+     */
     parentId?: string | null
     /**
      * @type array | undefined
      */
     children?: string[]
+  }
+  /**
+   * @description Return only when the conversation is created in the explorerTree
+   * @type object | undefined
+   */
+  explorerTree?: {
+    /**
+     * @type string
+     */
+    itemId: string
   }
 }
 
@@ -1195,14 +1213,13 @@ export const partsTypeEnum32 = {
 export type PartsTypeEnum32 =
   (typeof partsTypeEnum32)[keyof typeof partsTypeEnum32]
 
-export const sendQuestionMessageMutationRequestExplorerTypeEnum = {
+export const explorerTreeExplorerTypeEnum = {
   private: 'private',
-  shared: 'shared',
   team: 'team',
 } as const
 
-export type SendQuestionMessageMutationRequestExplorerTypeEnum =
-  (typeof sendQuestionMessageMutationRequestExplorerTypeEnum)[keyof typeof sendQuestionMessageMutationRequestExplorerTypeEnum]
+export type ExplorerTreeExplorerTypeEnum =
+  (typeof explorerTreeExplorerTypeEnum)[keyof typeof explorerTreeExplorerTypeEnum]
 
 export type SendQuestionMessageMutationRequest = {
   /**
@@ -1265,13 +1282,19 @@ export type SendQuestionMessageMutationRequest = {
     metadata?: any
   }
   /**
-   * @type string
+   * @description Used only when conversation is new
+   * @type object | undefined
    */
-  explorerType?: SendQuestionMessageMutationRequestExplorerTypeEnum | null
-  /**
-   * @type string
-   */
-  folderIdExplorerTree?: string | null
+  explorerTree?: {
+    /**
+     * @type string
+     */
+    explorerType: ExplorerTreeExplorerTypeEnum
+    /**
+     * @type string
+     */
+    folderId?: string | null
+  }
 }
 
 export type SendQuestionMessageMutationResponse = SendQuestionMessage200

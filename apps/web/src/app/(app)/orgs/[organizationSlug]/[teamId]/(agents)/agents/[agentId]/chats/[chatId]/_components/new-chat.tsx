@@ -1,8 +1,8 @@
 'use client'
 
-import { ChatPromptInput, ChatProvider } from '@/components/chat'
 import { Suggestion, Suggestions } from '@workspace/ui/components/suggestion'
 import * as React from 'react'
+import { ChatPromptInput, ChatProvider } from './chat'
 
 export function NewChat({ suggestions }: { suggestions: string[] }) {
   const [suggestion, setSuggestion] = React.useState<string>('')

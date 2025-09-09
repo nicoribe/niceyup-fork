@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "generate": "pnpm with-env kubb generate",
-    "generate:format": "biome format --write ./src/api/generated",
+    "sdk:generate": "pnpm with-env kubb generate",
+    "sdk:generate:format": "biome format --write ./src/api/generated",
     "lint": "biome check .",
     "format": "biome format --write .",
     "with-env": "dotenv -e ../../.env --"

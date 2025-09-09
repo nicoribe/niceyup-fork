@@ -86,6 +86,11 @@ export const answerMessageTask = schemaTask({
     const streamingResult = streamText({
       model: gateway.languageModel('openai/gpt-5'),
       messages,
+      providerOptions: {
+        gateway: {
+          order: ['openai'], // Force routing to OpenAI
+        },
+      },
       abortSignal: signal,
       onError: (event) => {
         error = event.error

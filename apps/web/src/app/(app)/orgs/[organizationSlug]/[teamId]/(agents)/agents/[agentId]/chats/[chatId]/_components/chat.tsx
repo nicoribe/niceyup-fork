@@ -1,7 +1,6 @@
 'use client'
 
-import { type MessageProps, useChat } from '@/hooks/use-chat'
-import type { Message } from '@/lib/types'
+import type { Message, PromptInputStatus } from '@/lib/types'
 import type { MessageRole, MessageStatus } from '@/lib/types'
 import { useRealtimeRunWithStreams } from '@workspace/engine/client'
 import type {
@@ -50,10 +49,11 @@ import {
   ThumbsUpIcon,
   XCircle,
 } from 'lucide-react'
-import { GlobeIcon, MicIcon, PlusIcon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import * as React from 'react'
 import { toast } from 'sonner'
 import { useStickToBottomContext } from 'use-stick-to-bottom'
+import { type MessageProps, useChat } from '../_hooks/use-chat'
 
 type ChatContextType = { authorId?: string } & ReturnType<typeof useChat>
 
@@ -141,15 +141,6 @@ export function ChatPromptInput({
         <PromptInputTools>
           <PromptInputButton>
             <PlusIcon size={16} />
-          </PromptInputButton>
-
-          <PromptInputButton>
-            <MicIcon size={16} />
-          </PromptInputButton>
-
-          <PromptInputButton>
-            <GlobeIcon size={16} />
-            <span>Search</span>
           </PromptInputButton>
         </PromptInputTools>
 
@@ -259,12 +250,46 @@ function ChatMessage({
   return <ChatMessageContent message={message} />
 }
 
+type RealtimeRun = ReturnType<typeof useRealtimeRunWithStreams>['run']
+
+function promptInputStatus(realtimeRun: RealtimeRun): PromptInputStatus {
+  if (realtimeRun?.isQueued) {
+    return 'submitted'
+  }
+
+  if (realtimeRun?.isExecuting) {
+    return 'streaming'
+  }
+
+  if (realtimeRun?.isFailed) {
+    return 'error'
+  }
+
+  return 'ready'
+}
+
+function messageStatus(realtimeRun: RealtimeRun): MessageStatus {
+  if (realtimeRun?.isCancelled) {
+    return 'stopped'
+  }
+
+  if (realtimeRun?.isFailed) {
+    return 'failed'
+  }
+
+  if (realtimeRun?.isSuccess) {
+    return 'finished'
+  }
+
+  return 'in_progress'
+}
+
 function ChatMessageContentStream({
   message,
 }: {
   message: MessageProps
 }) {
-  const { authorId, setStatus } = useChatContext()
+  const { authorId, updateMessageById, setStatus } = useChatContext()
 
   const { streams, run, error } = useRealtimeRunWithStreams<
     typeof answerMessageTask,
@@ -273,6 +298,8 @@ function ChatMessageContentStream({
     accessToken: message.metadata?.realtimeRun?.publicAccessToken,
   })
 
+  const messageStream = streams.messageStream?.at(-1)
+
   const { scrollToBottom } = useStickToBottomContext()
 
   React.useEffect(() => {
@@ -280,15 +307,18 @@ function ChatMessageContentStream({
   }, [streams, run])
 
   React.useEffect(() => {
-    if (run && authorId && authorId === message.metadata?.authorId) {
-      if (run.isQueued) {
-        setStatus('submitted')
-      } else if (run.isExecuting) {
-        setStatus('streaming')
-      } else if (run.isFailed) {
-        setStatus('error')
-      } else if (run.isCompleted) {
-        setStatus('ready')
+    if (run) {
+      // Update the prompt input status
+      if (authorId && authorId === message.metadata?.authorId) {
+        setStatus(promptInputStatus(run))
+      }
+
+      // Update the message status when the run is completed or failed
+      if (run.isCompleted || run.isFailed) {
+        updateMessageById(message.id, {
+          ...messageStream,
+          status: messageStatus(run),
+        })
       }
     }
   }, [run])
@@ -322,9 +352,7 @@ function ChatMessageContentStream({
     )
   }
 
-  const messageStream = streams.messageStream?.at(-1)
-
-  if (run?.isQueued || !messageStream) {
+  if (!messageStream || run?.isQueued) {
     return (
       <UIMessage from={message.role}>
         <UIMessageContent>
@@ -334,25 +362,9 @@ function ChatMessageContentStream({
     )
   }
 
-  function messageStatus(): MessageStatus {
-    if (run?.isCancelled) {
-      return 'stopped'
-    }
-
-    if (run?.isFailed) {
-      return 'failed'
-    }
-
-    if (run?.isSuccess) {
-      return 'finished'
-    }
-
-    return 'in_progress'
-  }
-
   return (
     <ChatMessageContent
-      message={{ ...message, ...messageStream, status: messageStatus() }}
+      message={{ ...message, ...messageStream, status: messageStatus(run) }}
     />
   )
 }
@@ -486,7 +498,10 @@ function ChatMessageContent({
                 // If the message is streaming and there is no text, display a loading message
                 if (message.isStream && !part.text) {
                   return (
-                    <div className="flex flex-row items-center gap-2">
+                    <div
+                      key={`${part.type}-${i}`}
+                      className="flex flex-row items-center gap-2"
+                    >
                       <Sparkles className="size-4 shrink-0 animate-pulse" />
                       <AnimatedDots
                         text={
@@ -523,7 +538,7 @@ function ChatMessageContent({
             key={action.label}
             className={cn(
               message.role === 'user' &&
-                'opacity-0 disabled:opacity-0 group-hover:opacity-100 disabled:group-hover:opacity-50',
+                'opacity-0 transition-opacity disabled:opacity-0 group-hover:opacity-100 disabled:group-hover:opacity-50',
             )}
             label={action.label}
             tooltip={action.label}
@@ -535,7 +550,13 @@ function ChatMessageContent({
         ))}
 
         {message.isBranch && (
-          <BranchSelector className="self-center px-0" from={message.role}>
+          <BranchSelector
+            className={cn(
+              'self-center px-0',
+              message.role !== 'user' && '-order-1',
+            )}
+            from={message.role}
+          >
             <BranchPrevious />
             <BranchPage />
             <BranchNext />

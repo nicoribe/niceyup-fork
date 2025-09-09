@@ -1,22 +1,23 @@
 'use client'
 
+import type { OrganizationTeamParams } from '@/lib/types'
 import { Button } from '@workspace/ui/components/button'
+import { Separator } from '@workspace/ui/components/separator'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
-import { cn } from '@workspace/ui/lib/utils'
-import { Files, RotateCw, Search } from 'lucide-react'
+import { Files, Search } from 'lucide-react'
+import { useParams } from 'next/navigation'
 import { ExplorerTree } from './explorer-tree'
-import { Refresh, useRefresh } from './refresh'
 
 export function LeftSidebar() {
-  const { loadingAnimation, refresh } = useRefresh()
+  // const { loadingAnimation, refresh } = useRefresh()
 
   return (
-    <>
-      <div className="z-20 flex flex-row items-center justify-start gap-1 border-b bg-background p-1">
+    <div className="flex h-full flex-col bg-background">
+      <div className="z-20 flex flex-row items-center justify-start gap-1 p-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="secondary" size="icon" className="size-8">
@@ -33,7 +34,7 @@ export function LeftSidebar() {
           </TooltipTrigger>
           <TooltipContent>Search</TooltipContent>
         </Tooltip>
-        <Tooltip>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
@@ -47,14 +48,34 @@ export function LeftSidebar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent>Refresh</TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
       </div>
 
-      <div className="flex-1 overflow-y-scroll p-2">
-        <Refresh>
-          <ExplorerTree />
-        </Refresh>
-      </div>
-    </>
+      <Separator />
+
+      <Explorer />
+    </div>
+  )
+}
+
+function Explorer() {
+  const { organizationSlug } = useParams<OrganizationTeamParams>()
+
+  return (
+    <div className="flex flex-1 flex-col items-stretch overflow-hidden py-2">
+      {organizationSlug !== 'my-account' && (
+        <>
+          <ExplorerTree explorerType="team" expanded />
+
+          <Separator />
+        </>
+      )}
+
+      <ExplorerTree explorerType="private" expanded />
+
+      <Separator />
+
+      <ExplorerTree explorerType="shared" />
+    </div>
   )
 }

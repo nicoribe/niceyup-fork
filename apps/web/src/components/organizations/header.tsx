@@ -70,7 +70,7 @@ export async function Header({
 
   return (
     <header className="z-50 flex flex-col items-center justify-center bg-background">
-      <div className="no-scrollbar flex w-full items-center justify-between gap-4 overflow-scroll px-4 py-2">
+      <div className="no-scrollbar flex w-full items-center justify-between gap-4 overflow-auto px-4 py-2">
         <div className="flex items-center gap-1">
           <div className="px-2">
             <Link href="/">

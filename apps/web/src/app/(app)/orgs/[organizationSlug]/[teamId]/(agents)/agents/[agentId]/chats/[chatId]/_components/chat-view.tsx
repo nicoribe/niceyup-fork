@@ -1,19 +1,17 @@
-import {
-  ChatConversation,
-  ChatPromptInput,
-  ChatProvider,
-} from '@/components/chat'
 import { authenticatedUser } from '@/lib/auth/server'
 import { sdk } from '@/lib/sdk'
 import type { Chat, Message } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
+import { ChatConversation, ChatPromptInput, ChatProvider } from './chat'
 
 export async function ChatView({
   organizationSlug,
   teamId,
   chat,
 }: { organizationSlug: string; teamId: string; chat: Chat }) {
-  const { user } = await authenticatedUser()
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
 
   const { data, error } = await sdk.listMessages({
     conversationId: chat.id,
@@ -32,7 +30,7 @@ export async function ChatView({
 
   return (
     <ChatProvider
-      authorId={user.id}
+      authorId={userId}
       initialMessages={data.messages as Message[]}
     >
       <ChatConversation />

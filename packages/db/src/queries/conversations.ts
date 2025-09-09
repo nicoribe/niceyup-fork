@@ -9,6 +9,8 @@ export async function getConversation({
     .select({
       id: conversations.id,
       title: conversations.title,
+      teamId: conversations.teamId,
+      ownerId: conversations.ownerId,
       agentId: conversations.agentId,
     })
     .from(conversations)

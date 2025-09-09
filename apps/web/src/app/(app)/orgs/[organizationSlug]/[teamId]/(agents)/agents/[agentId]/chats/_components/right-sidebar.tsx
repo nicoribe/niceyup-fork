@@ -1,4 +1,5 @@
 import { Button } from '@workspace/ui/components/button'
+import { Separator } from '@workspace/ui/components/separator'
 import {
   Tooltip,
   TooltipContent,
@@ -8,8 +9,8 @@ import { Settings } from 'lucide-react'
 
 export function RightSidebar() {
   return (
-    <>
-      <div className="z-20 flex flex-row items-center justify-end gap-1 border-b bg-background p-1">
+    <div className="flex h-full flex-col bg-background">
+      <div className="z-20 flex flex-row items-center justify-end gap-1 p-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="secondary" size="icon" className="size-8">
@@ -20,9 +21,11 @@ export function RightSidebar() {
         </Tooltip>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center overflow-y-scroll p-2">
-        <h1 className="text-muted-foreground text-xs">Empty</h1>
+      <Separator />
+
+      <div className="flex-1 overflow-y-auto p-2">
+        <h1 className="text-center text-muted-foreground text-xs">Empty</h1>
       </div>
-    </>
+    </div>
   )
 }
