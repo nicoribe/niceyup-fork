@@ -66,6 +66,30 @@ export type {
   ListMessagesQueryResponseSchema,
 } from './listMessagesSchema'
 export type {
+  RegenerateAnswerMessagePathParamsSchema,
+  RegenerateAnswerMessage200Schema,
+  RegenerateAnswerMessage400Schema,
+  RegenerateAnswerMessage401Schema,
+  RegenerateAnswerMessage403Schema,
+  RegenerateAnswerMessage404Schema,
+  RegenerateAnswerMessage429Schema,
+  RegenerateAnswerMessage500Schema,
+  RegenerateAnswerMessageMutationRequestSchema,
+  RegenerateAnswerMessageMutationResponseSchema,
+} from './regenerateAnswerMessageSchema'
+export type {
+  ResendQuestionMessagePathParamsSchema,
+  ResendQuestionMessage200Schema,
+  ResendQuestionMessage400Schema,
+  ResendQuestionMessage401Schema,
+  ResendQuestionMessage403Schema,
+  ResendQuestionMessage404Schema,
+  ResendQuestionMessage429Schema,
+  ResendQuestionMessage500Schema,
+  ResendQuestionMessageMutationRequestSchema,
+  ResendQuestionMessageMutationResponseSchema,
+} from './resendQuestionMessageSchema'
+export type {
   SendQuestionMessagePathParamsSchema,
   SendQuestionMessage200Schema,
   SendQuestionMessage400Schema,
@@ -144,6 +168,30 @@ export {
   listMessages500Schema,
   listMessagesQueryResponseSchema,
 } from './listMessagesSchema'
+export {
+  regenerateAnswerMessagePathParamsSchema,
+  regenerateAnswerMessage200Schema,
+  regenerateAnswerMessage400Schema,
+  regenerateAnswerMessage401Schema,
+  regenerateAnswerMessage403Schema,
+  regenerateAnswerMessage404Schema,
+  regenerateAnswerMessage429Schema,
+  regenerateAnswerMessage500Schema,
+  regenerateAnswerMessageMutationRequestSchema,
+  regenerateAnswerMessageMutationResponseSchema,
+} from './regenerateAnswerMessageSchema'
+export {
+  resendQuestionMessagePathParamsSchema,
+  resendQuestionMessage200Schema,
+  resendQuestionMessage400Schema,
+  resendQuestionMessage401Schema,
+  resendQuestionMessage403Schema,
+  resendQuestionMessage404Schema,
+  resendQuestionMessage429Schema,
+  resendQuestionMessage500Schema,
+  resendQuestionMessageMutationRequestSchema,
+  resendQuestionMessageMutationResponseSchema,
+} from './resendQuestionMessageSchema'
 export {
   sendQuestionMessagePathParamsSchema,
   sendQuestionMessage200Schema,

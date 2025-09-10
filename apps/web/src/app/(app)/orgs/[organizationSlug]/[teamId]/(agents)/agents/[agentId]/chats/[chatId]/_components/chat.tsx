@@ -39,6 +39,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import {
   CopyIcon,
   HeartIcon,
+  Loader,
   LoaderCircle,
   type LucideIcon,
   PencilIcon,
@@ -592,31 +593,37 @@ function ChatLoadingMessages() {
     return null
   }
 
-  const isUser = loadingMessage.role === 'user'
+  // const isUser = loadingMessage.role === 'user'
+
+  // return (
+  //   <>
+  //     <UIMessage from={isUser ? 'assistant' : 'user'}>
+  //       <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
+  //         <Skeleton className="w-40" />
+  //         <Skeleton className="w-70" />
+  //         <Skeleton className="w-50" />
+  //       </UIMessageContent>
+  //     </UIMessage>
+  //     <UIMessage from={isUser ? 'user' : 'assistant'}>
+  //       <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
+  //         <Skeleton className="w-25" />
+  //         <Skeleton className="w-40" />
+  //       </UIMessageContent>
+  //     </UIMessage>
+  //     <UIMessage from={isUser ? 'assistant' : 'user'}>
+  //       <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
+  //         <Skeleton className="w-40" />
+  //         <Skeleton className="w-30" />
+  //         <Skeleton className="w-60" />
+  //       </UIMessageContent>
+  //     </UIMessage>
+  //   </>
+  // )
 
   return (
-    <>
-      <UIMessage from={isUser ? 'assistant' : 'user'}>
-        <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
-          <Skeleton className="w-40" />
-          <Skeleton className="w-70" />
-          <Skeleton className="w-50" />
-        </UIMessageContent>
-      </UIMessage>
-      <UIMessage from={isUser ? 'user' : 'assistant'}>
-        <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
-          <Skeleton className="w-25" />
-          <Skeleton className="w-40" />
-        </UIMessageContent>
-      </UIMessage>
-      <UIMessage from={isUser ? 'assistant' : 'user'}>
-        <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
-          <Skeleton className="w-40" />
-          <Skeleton className="w-30" />
-          <Skeleton className="w-60" />
-        </UIMessageContent>
-      </UIMessage>
-    </>
+    <div className="flex flex-col items-center justify-center px-2 py-10">
+      <Loader className="size-4 animate-spin" />
+    </div>
   )
 }
 

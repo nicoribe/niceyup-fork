@@ -4,32 +4,32 @@
  */
 
 import type {
-  SendQuestionMessagePathParams,
-  SendQuestionMessage200,
-  SendQuestionMessage400,
-  SendQuestionMessage401,
-  SendQuestionMessage403,
-  SendQuestionMessage404,
-  SendQuestionMessage429,
-  SendQuestionMessage500,
-  SendQuestionMessageMutationRequest,
-  SendQuestionMessageMutationResponse,
-} from '../types/SendQuestionMessage'
+  ResendQuestionMessagePathParams,
+  ResendQuestionMessage200,
+  ResendQuestionMessage400,
+  ResendQuestionMessage401,
+  ResendQuestionMessage403,
+  ResendQuestionMessage404,
+  ResendQuestionMessage429,
+  ResendQuestionMessage500,
+  ResendQuestionMessageMutationRequest,
+  ResendQuestionMessageMutationResponse,
+} from '../types/ResendQuestionMessage'
 import type { ToZod } from '@kubb/plugin-zod/utils'
 import { z } from 'zod'
 
-export const sendQuestionMessagePathParamsSchema = z.object({
+export const resendQuestionMessagePathParamsSchema = z.object({
   conversationId: z.string(),
-}) as unknown as ToZod<SendQuestionMessagePathParams>
+}) as unknown as ToZod<ResendQuestionMessagePathParams>
 
-export type SendQuestionMessagePathParamsSchema = SendQuestionMessagePathParams
+export type ResendQuestionMessagePathParamsSchema =
+  ResendQuestionMessagePathParams
 
 /**
  * @description Success
  */
-export const sendQuestionMessage200Schema = z
+export const resendQuestionMessage200Schema = z
   .object({
-    conversationId: z.string(),
     questionMessage: z.object({
       id: z.string(),
       status: z.enum([
@@ -308,23 +308,15 @@ export const sendQuestionMessage200Schema = z
       parentId: z.string().nullable().nullish(),
       children: z.array(z.string()).optional(),
     }),
-    explorerTree: z
-      .object({
-        itemId: z.string(),
-      })
-      .describe(
-        'Return only when the conversation is created in the explorerTree',
-      )
-      .optional(),
   })
-  .describe('Success') as unknown as ToZod<SendQuestionMessage200>
+  .describe('Success') as unknown as ToZod<ResendQuestionMessage200>
 
-export type SendQuestionMessage200Schema = SendQuestionMessage200
+export type ResendQuestionMessage200Schema = ResendQuestionMessage200
 
 /**
  * @description Bad Request. Usually due to missing parameters, or invalid parameters.
  */
-export const sendQuestionMessage400Schema = z
+export const resendQuestionMessage400Schema = z
   .object({
     code: z.string(),
     message: z.string(),
@@ -343,83 +335,82 @@ export const sendQuestionMessage400Schema = z
   })
   .describe(
     'Bad Request. Usually due to missing parameters, or invalid parameters.',
-  ) as unknown as ToZod<SendQuestionMessage400>
+  ) as unknown as ToZod<ResendQuestionMessage400>
 
-export type SendQuestionMessage400Schema = SendQuestionMessage400
+export type ResendQuestionMessage400Schema = ResendQuestionMessage400
 
 /**
  * @description Unauthorized. Due to missing or invalid authentication.
  */
-export const sendQuestionMessage401Schema = z
+export const resendQuestionMessage401Schema = z
   .object({
     code: z.string(),
     message: z.string(),
   })
   .describe(
     'Unauthorized. Due to missing or invalid authentication.',
-  ) as unknown as ToZod<SendQuestionMessage401>
+  ) as unknown as ToZod<ResendQuestionMessage401>
 
-export type SendQuestionMessage401Schema = SendQuestionMessage401
+export type ResendQuestionMessage401Schema = ResendQuestionMessage401
 
 /**
  * @description Forbidden. You do not have permission to access this resource or to perform this action.
  */
-export const sendQuestionMessage403Schema = z
+export const resendQuestionMessage403Schema = z
   .object({
     message: z.string(),
   })
   .describe(
     'Forbidden. You do not have permission to access this resource or to perform this action.',
-  ) as unknown as ToZod<SendQuestionMessage403>
+  ) as unknown as ToZod<ResendQuestionMessage403>
 
-export type SendQuestionMessage403Schema = SendQuestionMessage403
+export type ResendQuestionMessage403Schema = ResendQuestionMessage403
 
 /**
  * @description Not Found. The requested resource was not found.
  */
-export const sendQuestionMessage404Schema = z
+export const resendQuestionMessage404Schema = z
   .object({
     message: z.string(),
   })
   .describe(
     'Not Found. The requested resource was not found.',
-  ) as unknown as ToZod<SendQuestionMessage404>
+  ) as unknown as ToZod<ResendQuestionMessage404>
 
-export type SendQuestionMessage404Schema = SendQuestionMessage404
+export type ResendQuestionMessage404Schema = ResendQuestionMessage404
 
 /**
  * @description Too Many Requests. You have exceeded the rate limit. Try again later.
  */
-export const sendQuestionMessage429Schema = z
+export const resendQuestionMessage429Schema = z
   .object({
     message: z.string(),
   })
   .describe(
     'Too Many Requests. You have exceeded the rate limit. Try again later.',
-  ) as unknown as ToZod<SendQuestionMessage429>
+  ) as unknown as ToZod<ResendQuestionMessage429>
 
-export type SendQuestionMessage429Schema = SendQuestionMessage429
+export type ResendQuestionMessage429Schema = ResendQuestionMessage429
 
 /**
  * @description Internal Server Error. This is a problem with the server that you cannot fix.
  */
-export const sendQuestionMessage500Schema = z
+export const resendQuestionMessage500Schema = z
   .object({
     code: z.string(),
     message: z.string(),
   })
   .describe(
     'Internal Server Error. This is a problem with the server that you cannot fix.',
-  ) as unknown as ToZod<SendQuestionMessage500>
+  ) as unknown as ToZod<ResendQuestionMessage500>
 
-export type SendQuestionMessage500Schema = SendQuestionMessage500
+export type ResendQuestionMessage500Schema = ResendQuestionMessage500
 
-export const sendQuestionMessageMutationRequestSchema = z.object({
+export const resendQuestionMessageMutationRequestSchema = z.object({
   organizationId: z.string().nullable().nullish(),
   organizationSlug: z.string().nullable().nullish(),
   teamId: z.string().nullable().nullish(),
-  agentId: z.string().nullable().nullish(),
-  parentMessageId: z.string().nullable().nullish(),
+  parentMessageId: z.string(),
   message: z.object({
     parts: z
       .array(
@@ -439,21 +430,14 @@ export const sendQuestionMessageMutationRequestSchema = z.object({
       .min(1),
     metadata: z.any().nullish(),
   }),
-  explorerTree: z
-    .object({
-      explorerType: z.enum(['private', 'team']),
-      folderId: z.string().nullable().nullish(),
-    })
-    .describe('Used only when conversation is new')
-    .optional(),
-}) as unknown as ToZod<SendQuestionMessageMutationRequest>
+}) as unknown as ToZod<ResendQuestionMessageMutationRequest>
 
-export type SendQuestionMessageMutationRequestSchema =
-  SendQuestionMessageMutationRequest
+export type ResendQuestionMessageMutationRequestSchema =
+  ResendQuestionMessageMutationRequest
 
-export const sendQuestionMessageMutationResponseSchema = z.lazy(
-  () => sendQuestionMessage200Schema,
-) as unknown as ToZod<SendQuestionMessageMutationResponse>
+export const resendQuestionMessageMutationResponseSchema = z.lazy(
+  () => resendQuestionMessage200Schema,
+) as unknown as ToZod<ResendQuestionMessageMutationResponse>
 
-export type SendQuestionMessageMutationResponseSchema =
-  SendQuestionMessageMutationResponse
+export type ResendQuestionMessageMutationResponseSchema =
+  ResendQuestionMessageMutationResponse

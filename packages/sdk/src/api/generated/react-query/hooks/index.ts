@@ -4,6 +4,8 @@ export type { GetProfileQueryKey } from './useGetProfile'
 export type { HealthQueryKey } from './useHealth'
 export type { ListAgentsQueryKey } from './useListAgents'
 export type { ListMessagesQueryKey } from './useListMessages'
+export type { RegenerateAnswerMessageMutationKey } from './useRegenerateAnswerMessage'
+export type { ResendQuestionMessageMutationKey } from './useResendQuestionMessage'
 export type { SendQuestionMessageMutationKey } from './useSendQuestionMessage'
 export {
   getAgentQueryKey,
@@ -31,6 +33,14 @@ export {
   listMessagesQueryOptions,
   useListMessages,
 } from './useListMessages'
+export {
+  regenerateAnswerMessageMutationKey,
+  useRegenerateAnswerMessage,
+} from './useRegenerateAnswerMessage'
+export {
+  resendQuestionMessageMutationKey,
+  useResendQuestionMessage,
+} from './useResendQuestionMessage'
 export {
   sendQuestionMessageMutationKey,
   useSendQuestionMessage,

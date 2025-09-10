@@ -1,0 +1,240 @@
+import { BadRequestError } from '@/http/errors/bad-request-error'
+import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { authenticate } from '@/http/middlewares/authenticate'
+import { getOrganizationIdentifier } from '@/lib/utils'
+import type { FastifyTypedInstance } from '@/types/fastify'
+import {
+  aiMessageMetadataSchema,
+  aiMessagePartSchema,
+  aiMessageRoleSchema,
+  aiMessageStatusSchema,
+} from '@workspace/ai/schemas'
+import type { AIMessageMetadata } from '@workspace/ai/types'
+import { db } from '@workspace/db'
+import { and, eq, isNull, sql } from '@workspace/db/orm'
+import { queries } from '@workspace/db/queries'
+import { messages } from '@workspace/db/schema'
+import { answerMessageTask } from '@workspace/engine/trigger/answer-message'
+import { z } from 'zod'
+
+const textPartSchema = z.object({
+  type: z.literal('text'),
+  text: z.string(),
+})
+
+const filePartSchema = z.object({
+  type: z.literal('file'),
+  mediaType: z.string(),
+  filename: z.string().optional(),
+  url: z.string(),
+})
+
+const promptMessagePartSchema = z.union([textPartSchema, filePartSchema])
+
+const messageSchema = z.object({
+  id: z.string(),
+  status: aiMessageStatusSchema,
+  role: aiMessageRoleSchema,
+  parts: z.array(aiMessagePartSchema).nullable(),
+  metadata: aiMessageMetadataSchema.nullable(),
+  authorId: z.string().nullish(),
+  parentId: z.string().nullish(),
+  children: z.array(z.string()).optional(),
+})
+
+export async function resendQuestionMessage(app: FastifyTypedInstance) {
+  app.register(authenticate).post(
+    '/conversations/:conversationId/messages/resend-question',
+    {
+      schema: {
+        tags: ['Conversations'],
+        description: 'Resend a question message to a conversation',
+        operationId: 'resendQuestionMessage',
+        params: z.object({
+          conversationId: z.string(),
+        }),
+        body: z.object({
+          organizationId: z.string().nullish(),
+          organizationSlug: z.string().nullish(),
+          teamId: z.string().nullish(),
+          parentMessageId: z.string(),
+          message: z.object({
+            parts: z.array(promptMessagePartSchema).min(1),
+            metadata: aiMessageMetadataSchema.nullish(),
+          }),
+        }),
+        response: withDefaultErrorResponses({
+          200: z
+            .object({
+              questionMessage: messageSchema,
+              answerMessage: messageSchema,
+            })
+            .describe('Success'),
+        }),
+      },
+    },
+    async (request) => {
+      const {
+        user: { id: userId },
+      } = request.authSession
+
+      const { conversationId } = request.params
+
+      const {
+        organizationId,
+        organizationSlug,
+        teamId,
+        parentMessageId,
+        message,
+      } = request.body
+
+      const conversation = await queries.getConversation({ conversationId })
+
+      if (conversation?.agentId) {
+        const agent = await queries.getAgent({
+          userId,
+          ...getOrganizationIdentifier({
+            organizationId,
+            organizationSlug,
+            teamId,
+          }),
+          agentId: conversation.agentId,
+        })
+
+        if (!agent) {
+          throw new BadRequestError({
+            code: 'CONVERSATION_UNAVAILABLE',
+            message: 'Conversation not found or you don’t have access',
+          })
+        }
+      }
+
+      if (!conversation) {
+        throw new BadRequestError({
+          code: 'CONVERSATION_NOT_FOUND',
+          message: 'Conversation not found',
+        })
+      }
+
+      const [parentMessage] = await db
+        .select({
+          id: messages.id,
+        })
+        .from(messages)
+        .where(
+          and(
+            eq(messages.conversationId, conversationId),
+            eq(messages.id, parentMessageId),
+            isNull(messages.deletedAt),
+          ),
+        )
+        .limit(1)
+
+      if (!parentMessage) {
+        throw new BadRequestError({
+          code: 'PARENT_MESSAGE_NOT_FOUND',
+          message: 'Parent message not found',
+        })
+      }
+
+      const { questionMessage, answerMessage } = await db.transaction(
+        async (tx) => {
+          const [questionMessage] = await tx
+            .insert(messages)
+            .values({
+              conversationId: conversationId,
+              status: 'finished',
+              role: 'user',
+              parts: message.parts,
+              metadata: message.metadata as AIMessageMetadata,
+              authorId: userId,
+              parentId: parentMessageId,
+            })
+            .returning({
+              id: messages.id,
+              status: messages.status,
+              role: messages.role,
+              parts: messages.parts,
+              metadata: messages.metadata,
+              authorId: messages.authorId,
+              parentId: messages.parentId,
+            })
+
+          if (!questionMessage) {
+            throw new BadRequestError({
+              code: 'QUESTION_MESSAGE_NOT_CREATED',
+              message: 'Question message not created',
+            })
+          }
+
+          const [answerMessage] = await tx
+            .insert(messages)
+            .values({
+              conversationId,
+              status: 'queued',
+              role: 'assistant',
+              parts: [],
+              parentId: questionMessage.id,
+            })
+            .returning({
+              id: messages.id,
+            })
+
+          if (!answerMessage) {
+            throw new BadRequestError({
+              code: 'ANSWER_MESSAGE_NOT_CREATED',
+              message: 'Answer message not created',
+            })
+          }
+
+          const handle = await answerMessageTask.trigger({
+            conversationId,
+            questionMessageId: questionMessage.id,
+            answerMessageId: answerMessage.id,
+          })
+
+          const metadata: AIMessageMetadata = {
+            realtimeRun: { messageId: answerMessage.id, ...handle },
+            authorId: userId,
+          }
+
+          const [answerMessageUpdated] = await tx
+            .update(messages)
+            .set({
+              metadata: sql`COALESCE(${messages.metadata}, '{}'::jsonb) || ${JSON.stringify(metadata)}::jsonb`,
+            })
+            .where(eq(messages.id, answerMessage.id))
+            .returning({
+              id: messages.id,
+              status: messages.status,
+              role: messages.role,
+              parts: messages.parts,
+              metadata: messages.metadata,
+              authorId: messages.authorId,
+              parentId: messages.parentId,
+            })
+
+          if (!answerMessageUpdated) {
+            throw new BadRequestError({
+              code: 'ANSWER_MESSAGE_NOT_UPDATED',
+              message: 'Answer message not updated',
+            })
+          }
+
+          return {
+            questionMessage: {
+              ...questionMessage,
+              children: [answerMessage.id],
+            },
+            answerMessage: {
+              ...answerMessageUpdated,
+              children: [],
+            },
+          }
+        },
+      )
+
+      return { questionMessage, answerMessage }
+    },
+  )
+}

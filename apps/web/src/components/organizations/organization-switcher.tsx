@@ -48,9 +48,7 @@ export function OrganizationSwitcher({
             {selectedOrganizationLabel ? (
               <>
                 <CircleDashed className="mr-1 size-5" />
-                <span className="truncate text-left">
-                  {selectedOrganizationLabel}
-                </span>
+                <span className="truncate">{selectedOrganizationLabel}</span>
               </>
             ) : activeOrganization ? (
               <>
@@ -60,9 +58,7 @@ export function OrganizationSwitcher({
                   )}
                   <AvatarFallback className="rounded-sm" />
                 </Avatar>
-                <span className="truncate text-left">
-                  {activeOrganization.name}
-                </span>
+                <span className="truncate">{activeOrganization.name}</span>
                 <div className="rounded-sm border px-2 py-0.5">
                   <span className="text-xs">Standard</span>
                   {/* <span className="text-xs">Pro</span> */}
@@ -76,9 +72,7 @@ export function OrganizationSwitcher({
                   )}
                   <AvatarFallback />
                 </Avatar>
-                <span className="truncate text-left">
-                  {personalAccount.name}
-                </span>
+                <span className="truncate">{personalAccount.name}</span>
                 <div className="rounded-sm border px-2 py-0.5">
                   <span className="text-xs">Hobby</span>
                 </div>

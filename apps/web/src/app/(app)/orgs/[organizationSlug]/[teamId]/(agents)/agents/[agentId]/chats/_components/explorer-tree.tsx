@@ -356,7 +356,7 @@ function ExplorerTreeContent({
         {
           explorerType,
           parentId: selectedItemInstance.getId(),
-          name: '(new folder)',
+          name: 'untitled folder',
         },
       )
 

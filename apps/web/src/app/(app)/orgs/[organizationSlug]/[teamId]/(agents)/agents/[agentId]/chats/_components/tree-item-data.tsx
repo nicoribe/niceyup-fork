@@ -79,7 +79,7 @@ export function TreeItemData({
       {
         explorerType,
         parentId: item.getId(),
-        name: '(new folder)',
+        name: 'untitled folder',
       },
     )
 

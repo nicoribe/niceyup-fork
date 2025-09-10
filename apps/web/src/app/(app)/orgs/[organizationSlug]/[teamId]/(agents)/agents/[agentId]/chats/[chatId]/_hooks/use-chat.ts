@@ -581,41 +581,30 @@ export function useChat({
         return
       }
 
-      console.log('sdk.resendMessage', {
+      const { data, error } = await sdk.resendQuestionMessage({
         conversationId: chatId,
         data: {
           organizationSlug,
           teamId,
-          agentId,
           parentMessageId: persistentParentMessageId,
           message: { parts },
+          // referenceMessageId: message.isPersisted === false ? undefined : message.id,
         },
       })
 
-      throw new Error('Implement resend message')
+      if (error) {
+        throw new Error(error.message)
+      }
 
-      // const { data, error } = await sdk.resendMessage({
-      //   conversationId: chatId,
-      //   data: {
-      //     organizationSlug,
-      //     teamId,
-      //     agentId,
-      //     parentMessageId: persistentParentMessageId,
-      //     message: { parts },
-      //   },
-      // })
+      replaceFakeMessage({
+        type: 'question',
+        parentMessageId,
+        fakeMessageId,
+        questionMessage: data.questionMessage as Message,
+        answerMessage: data.answerMessage as Message,
+      })
 
-      // if (error) {
-      //   throw new Error(error.message)
-      // }
-
-      // replaceFakeMessage({
-      //   type: 'question',
-      //   parentMessageId,
-      //   fakeMessageId,
-      //   questionMessage: data.questionMessage as Message,
-      //   answerMessage: data.answerMessage as Message,
-      // })
+      setTargetMessageId(data.questionMessage.id)
     } catch {
       setStatus('error')
 
@@ -654,38 +643,28 @@ export function useChat({
         return
       }
 
-      console.log('sdk.regenerateMessage', {
+      const { data, error } = await sdk.regenerateAnswerMessage({
         conversationId: chatId,
         data: {
           organizationSlug,
           teamId,
-          agentId,
           parentMessageId: persistentParentMessageId,
+          // referenceMessageId: message.isPersisted === false ? undefined : message.id,
         },
       })
 
-      throw new Error('Implement regenerate message')
+      if (error) {
+        throw new Error(error.message)
+      }
 
-      // const { data, error } = await sdk.regenerateMessage({
-      //   conversationId: chatId,
-      //   data: {
-      //     organizationSlug,
-      //     teamId,
-      //     agentId,
-      //     parentMessageId: persistentParentMessageId,
-      //   },
-      // })
+      replaceFakeMessage({
+        type: 'answer',
+        parentMessageId,
+        fakeMessageId,
+        answerMessage: data.answerMessage as Message,
+      })
 
-      // if (error) {
-      //   throw new Error(error.message)
-      // }
-
-      // replaceFakeMessage({
-      //   type: 'answer',
-      //   parentMessageId,
-      //   fakeMessageId,
-      //   answerMessage: data.answerMessage as Message,
-      // })
+      setTargetMessageId(data.answerMessage.id)
     } catch {
       setStatus('error')
 

@@ -31,7 +31,7 @@ export function TeamSwitcher({
           {activeTeam ? (
             <>
               <CircleDashed className="mr-1 size-4" />
-              <span className="truncate text-left">{activeTeam.name}</span>
+              <span className="truncate">{activeTeam.name}</span>
             </>
           ) : (
             <span className="text-muted-foreground">Select team</span>
