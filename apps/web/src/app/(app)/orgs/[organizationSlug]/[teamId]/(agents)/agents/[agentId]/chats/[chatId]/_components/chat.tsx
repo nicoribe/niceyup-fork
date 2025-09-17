@@ -1,5 +1,6 @@
 'use client'
 
+import { env } from '@/lib/env'
 import type { Message, PromptInputStatus } from '@/lib/types'
 import type { MessageRole, MessageStatus } from '@/lib/types'
 import { useRealtimeRunWithStreams } from '@workspace/engine/client'
@@ -35,9 +36,20 @@ import {
 } from '@workspace/ui/components/prompt-input'
 import { Response } from '@workspace/ui/components/response'
 import { Skeleton } from '@workspace/ui/components/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@workspace/ui/components/tooltip'
+import {
+  type FileMetadata,
+  type FileWithPreview,
+  useFileUpload,
+} from '@workspace/ui/hooks/use-file-upload'
 import { cn } from '@workspace/ui/lib/utils'
 import {
   CopyIcon,
+  FileIcon,
   HeartIcon,
   Loader,
   LoaderCircle,
@@ -48,6 +60,7 @@ import {
   Sparkles,
   ThumbsDownIcon,
   ThumbsUpIcon,
+  X,
   XCircle,
 } from 'lucide-react'
 import { PlusIcon } from 'lucide-react'
@@ -93,7 +106,68 @@ export function ChatPromptInput({
 }: {
   suggestion?: string
 }) {
-  const { sendMessage, status } = useChatContext()
+  const { sendMessage, status, uploadFiles } = useChatContext()
+
+  const onFilesAdded = async (addedFiles: FileWithPreview[]) => {
+    try {
+      const { data, error } = await uploadFiles({
+        files: addedFiles.map((file) => file.file as File),
+      })
+
+      if (error) {
+        toast.error('Error uploading files, please try again')
+        return
+      }
+
+      for (const file of data.files) {
+        const existingFile = addedFiles.find(
+          (existingFile) => existingFile.file.name === file.fileName,
+        )
+
+        if (existingFile) {
+          existingFile.file = {
+            id: file.id,
+            name: file.fileName,
+            type: file.fileMimeType,
+            url: new URL(file.fileUri, env.NEXT_PUBLIC_STORAGE_URL).toString(),
+          }
+        }
+      }
+
+      setFileUploadState((prev) => {
+        const updatedFiles = prev.files.map((file) => {
+          const existingFile = addedFiles.find(({ id }) => id === file.id)
+          return existingFile ? existingFile : file
+        })
+        return { ...prev, files: updatedFiles }
+      })
+    } catch {
+      toast.error('Error uploading files, please try again')
+    }
+  }
+
+  const [
+    fileUploadState,
+    {
+      setFileUploadState,
+      removeFile,
+      clearFiles,
+      openFileDialog,
+      getInputProps,
+    },
+  ] = useFileUpload({
+    accept: 'application/pdf,image/*,video/*,audio/*',
+    multiple: true,
+    maxFiles: 10,
+    maxSize: 15 * 1024 * 1024, // 15 MB
+    onFilesAdded,
+  })
+
+  React.useEffect(() => {
+    if (fileUploadState.errors.length) {
+      toast.error(fileUploadState.errors[0])
+    }
+  }, [fileUploadState.errors])
 
   const [text, setText] = React.useState<string>('')
 
@@ -113,26 +187,87 @@ export function ChatPromptInput({
     }
 
     setText('')
+    clearFiles()
 
-    await sendMessage({
-      // parts: [
-      //   {
-      //     type: 'text',
-      //     text: 'Describe the content of the image in detail!',
-      //   },
-      //   {
-      //     type: 'file',
-      //     mediaType: 'image/jpeg',
-      //     filename: 'two-puppies.jpeg',
-      //     url: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      //   },
-      // ],
-      parts: [{ type: 'text', text }],
-    })
+    const textPart = { type: 'text' as const, text }
+
+    const fileParts = fileUploadState.files
+      .filter(({ file }) => 'url' in file && file.url)
+      .map((f) => {
+        const file = f.file as FileMetadata
+        return {
+          type: 'file' as const,
+          mediaType: file.type,
+          filename: file.name,
+          url: file.url,
+        }
+      })
+
+    await sendMessage({ parts: [textPart, ...fileParts] })
   }
 
   return (
-    <PromptInput onSubmit={handleSubmit}>
+    <PromptInput className="divide-none" onSubmit={handleSubmit}>
+      <input {...getInputProps()} className="sr-only" tabIndex={-1} />
+
+      {!!fileUploadState.files.length && (
+        <div className="flex flex-row gap-2 px-3 pt-3 sm:flex-wrap">
+          {fileUploadState.files.map(({ file, id, preview }) => {
+            const isImage = file.type.includes('image/')
+            const isUploading = file instanceof File
+
+            return (
+              <Tooltip key={id}>
+                <TooltipTrigger asChild>
+                  <div className="group/card-file relative flex flex-row items-center rounded-md border bg-foreground/3 p-0.5">
+                    <div
+                      className="-right-2 -top-2 absolute z-10 rounded-full border bg-background p-0.5 opacity-0 transition-opacity hover:bg-accent group-hover/card-file:opacity-100"
+                      onClick={() => removeFile(id)}
+                    >
+                      <X className="size-3 text-foreground" />
+                    </div>
+
+                    <div className="relative flex size-10 items-center justify-center">
+                      {isImage && (
+                        <>
+                          {isUploading && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <LoaderCircle className="size-4 animate-spin" />
+                            </div>
+                          )}
+                          <img
+                            className={cn(
+                              'size-full rounded-sm',
+                              isUploading && 'opacity-50',
+                            )}
+                            src={preview}
+                            alt=""
+                          />
+                        </>
+                      )}
+
+                      {!isImage &&
+                        (isUploading ? (
+                          <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                          <FileIcon className="size-4 text-muted-foreground" />
+                        ))}
+                    </div>
+
+                    {!isImage && (
+                      <div className="max-w-40 truncate px-2 text-sm">
+                        {file.name}
+                      </div>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">{file.name}</TooltipContent>
+              </Tooltip>
+            )
+          })}
+        </div>
+      )}
+
       <PromptInputTextarea
         onChange={(e) => setText(e.target.value)}
         value={text}
@@ -140,7 +275,7 @@ export function ChatPromptInput({
 
       <PromptInputToolbar>
         <PromptInputTools>
-          <PromptInputButton>
+          <PromptInputButton onClick={openFileDialog}>
             <PlusIcon size={16} />
           </PromptInputButton>
         </PromptInputTools>

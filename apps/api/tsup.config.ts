@@ -11,6 +11,7 @@ export default defineConfig({
     '@workspace/db',
     '@workspace/engine',
     '@workspace/env',
+    '@workspace/storage',
     '@workspace/utils',
   ],
 })

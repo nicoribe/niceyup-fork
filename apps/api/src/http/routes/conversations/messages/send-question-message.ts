@@ -64,7 +64,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
           agentId: z.string().nullish(),
           parentMessageId: z.string().nullish(),
           message: z.object({
-            parts: z.array(promptMessagePartSchema).min(1),
+            parts: z.array(promptMessagePartSchema).nonempty(),
             metadata: aiMessageMetadataSchema.nullish(),
           }),
           explorerTree: z
@@ -111,11 +111,14 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
         explorerTree,
       } = request.body
 
-      const organizationIdentifier = getOrganizationIdentifier({
-        organizationId,
-        organizationSlug,
-        teamId,
-      })
+      const context = {
+        userId,
+        ...getOrganizationIdentifier({
+          organizationId,
+          organizationSlug,
+          teamId,
+        }),
+      }
 
       if (conversationId === 'new') {
         if (!agentId) {
@@ -125,9 +128,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
           })
         }
 
-        const agent = await queries.getAgent({
-          userId,
-          ...organizationIdentifier,
+        const agent = await queries.context.getAgent(context, {
           agentId,
         })
 
@@ -176,36 +177,16 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
           }
         }
       } else {
-        const conversation = await queries.getConversation({ conversationId })
-
-        if (conversation?.agentId) {
-          const agent = await queries.getAgent({
-            userId,
-            ...organizationIdentifier,
-            agentId: conversation.agentId,
-          })
-
-          if (!agent) {
-            throw new BadRequestError({
-              code: 'CONVERSATION_UNAVAILABLE',
-              message: 'Conversation not found or you don’t have access',
-            })
-          }
-        }
+        const conversation = await queries.context.getConversation(context, {
+          conversationId,
+        })
 
         if (!conversation) {
           throw new BadRequestError({
             code: 'CONVERSATION_NOT_FOUND',
-            message: 'Conversation not found',
+            message: 'Conversation not found or you don’t have access',
           })
         }
-
-        // if (messageInProcessing) {
-        //   throw new BadRequestError({
-        //     code: 'MESSAGE_IN_PROCESSING',
-        //     message: 'Message in processing',
-        //   })
-        // }
       }
 
       let _conversationId = conversationId
@@ -222,7 +203,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
 
             const ownerTypeCondition =
               explorerTree?.explorerType === 'team'
-                ? { teamId: organizationIdentifier.teamId }
+                ? { teamId: context.teamId }
                 : { ownerId: userId }
 
             const [conversation] = await tx

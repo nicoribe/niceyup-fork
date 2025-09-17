@@ -17,6 +17,7 @@
     "@workspace/ai": "workspace:*",
     "@workspace/db": "workspace:*",
     "@workspace/env": "workspace:*",
+    "@workspace/storage": "workspace:*",
     "zod": "^4.1.5"
   },
   "devDependencies": {

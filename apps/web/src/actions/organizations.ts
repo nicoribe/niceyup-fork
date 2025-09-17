@@ -45,10 +45,10 @@ export async function getOrganization({
     user: { id: userId },
   } = await authenticatedUser()
 
-  const organization = await queries.getOrganization({
-    userId,
-    organizationSlug,
-  })
+  const organization = await queries.context.getOrganization(
+    { userId },
+    { organizationSlug },
+  )
 
   return organization
 }
@@ -70,11 +70,10 @@ export async function getOrganizationTeam({
     user: { id: userId },
   } = await authenticatedUser()
 
-  const organizationTeam = await queries.getOrganizationTeam({
-    userId,
-    organizationSlug,
-    teamId,
-  })
+  const organizationTeam = await queries.context.getOrganizationTeam(
+    { userId },
+    { organizationSlug, teamId },
+  )
 
   return organizationTeam
 }
@@ -92,7 +91,7 @@ export async function getMembership({ organizationSlug }: GetMembershipParams) {
     user: { id: userId },
   } = await authenticatedUser()
 
-  const membership = await queries.getMembership({
+  const membership = await queries.context.getMembership({
     userId,
     organizationSlug,
   })

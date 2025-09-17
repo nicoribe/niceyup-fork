@@ -1,4 +1,16 @@
 export type {
+  GenerateUploadSignatureHeaderParamsSchema,
+  GenerateUploadSignature200Schema,
+  GenerateUploadSignature400Schema,
+  GenerateUploadSignature401Schema,
+  GenerateUploadSignature403Schema,
+  GenerateUploadSignature404Schema,
+  GenerateUploadSignature429Schema,
+  GenerateUploadSignature500Schema,
+  GenerateUploadSignatureMutationRequestSchema,
+  GenerateUploadSignatureMutationResponseSchema,
+} from './generateUploadSignatureSchema'
+export type {
   GetAgentPathParamsSchema,
   GetAgentQueryParamsSchema,
   GetAgent200Schema,
@@ -22,6 +34,18 @@ export type {
   GetConversation500Schema,
   GetConversationQueryResponseSchema,
 } from './getConversationSchema'
+export type {
+  GetFilePathParamsSchema,
+  GetFileQueryParamsSchema,
+  GetFile200Schema,
+  GetFile400Schema,
+  GetFile401Schema,
+  GetFile403Schema,
+  GetFile404Schema,
+  GetFile429Schema,
+  GetFile500Schema,
+  GetFileQueryResponseSchema,
+} from './getFileSchema'
 export type {
   GetProfile200Schema,
   GetProfile400Schema,
@@ -101,6 +125,29 @@ export type {
   SendQuestionMessageMutationRequestSchema,
   SendQuestionMessageMutationResponseSchema,
 } from './sendQuestionMessageSchema'
+export type {
+  UploadFileHeaderParamsSchema,
+  UploadFile200Schema,
+  UploadFile400Schema,
+  UploadFile401Schema,
+  UploadFile403Schema,
+  UploadFile404Schema,
+  UploadFile429Schema,
+  UploadFile500Schema,
+  UploadFileMutationResponseSchema,
+} from './uploadFileSchema'
+export {
+  generateUploadSignatureHeaderParamsSchema,
+  generateUploadSignature200Schema,
+  generateUploadSignature400Schema,
+  generateUploadSignature401Schema,
+  generateUploadSignature403Schema,
+  generateUploadSignature404Schema,
+  generateUploadSignature429Schema,
+  generateUploadSignature500Schema,
+  generateUploadSignatureMutationRequestSchema,
+  generateUploadSignatureMutationResponseSchema,
+} from './generateUploadSignatureSchema'
 export {
   getAgentPathParamsSchema,
   getAgentQueryParamsSchema,
@@ -125,6 +172,18 @@ export {
   getConversation500Schema,
   getConversationQueryResponseSchema,
 } from './getConversationSchema'
+export {
+  getFilePathParamsSchema,
+  getFileQueryParamsSchema,
+  getFile200Schema,
+  getFile400Schema,
+  getFile401Schema,
+  getFile403Schema,
+  getFile404Schema,
+  getFile429Schema,
+  getFile500Schema,
+  getFileQueryResponseSchema,
+} from './getFileSchema'
 export {
   getProfile200Schema,
   getProfile400Schema,
@@ -204,3 +263,14 @@ export {
   sendQuestionMessageMutationRequestSchema,
   sendQuestionMessageMutationResponseSchema,
 } from './sendQuestionMessageSchema'
+export {
+  uploadFileHeaderParamsSchema,
+  uploadFile200Schema,
+  uploadFile400Schema,
+  uploadFile401Schema,
+  uploadFile403Schema,
+  uploadFile404Schema,
+  uploadFile429Schema,
+  uploadFile500Schema,
+  uploadFileMutationResponseSchema,
+} from './uploadFileSchema'

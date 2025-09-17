@@ -7,6 +7,9 @@ import { listMessages } from './conversations/messages/list-messages'
 import { regenerateAnswerMessage } from './conversations/messages/regenerate-answer-message'
 import { resendQuestionMessage } from './conversations/messages/resend-question-message'
 import { sendQuestionMessage } from './conversations/messages/send-question-message'
+import { getFile } from './files/get-file'
+import { generateUploadSignature } from './files/internal/generate-upload-signature'
+import { uploadFile } from './files/internal/upload-file'
 import { health } from './health'
 import { getProfile } from './profile/get-profile'
 
@@ -24,4 +27,8 @@ export async function routes(app: FastifyTypedInstance) {
   app.register(sendQuestionMessage)
   app.register(resendQuestionMessage)
   app.register(regenerateAnswerMessage)
+
+  app.register(generateUploadSignature)
+  app.register(uploadFile)
+  app.register(getFile)
 }

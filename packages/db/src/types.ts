@@ -64,4 +64,14 @@ export type MessagePart = AIMessagePart
 
 export type MessageMetadata = AIMessageMetadata
 
+export type FileBucket = 'default' | 'engine'
+
+export type FileScope = 'public' | 'conversations' | 'sources'
+
+export type FileMetadata = {
+  authorId?: string
+  conversationId?: string | null
+  sourceId?: string
+}
+
 export type ConversationExplorerType = 'private' | 'shared' | 'team'

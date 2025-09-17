@@ -45,7 +45,7 @@ export default async function Page({
 
   return (
     <div className="flex size-full flex-1 flex-col">
-      <div className="sticky top-0 z-40 border-b bg-background p-4">
+      <div className="border-b bg-background p-4">
         <div className="mx-auto flex max-w-4xl flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
             <div className="md:max-w-sm">

@@ -30,7 +30,7 @@ export function AgentSwitcher({
           {activeAgent ? (
             <>
               <CircleDashed className="mr-1 size-4" />
-              <span className="truncate text-left">{activeAgent.name}</span>
+              <span className="truncate">{activeAgent.name}</span>
             </>
           ) : (
             <span className="text-muted-foreground">Select agent</span>

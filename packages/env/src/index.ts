@@ -7,12 +7,16 @@ const env = createEnv({
       .enum(['development', 'test', 'production'])
       .default('development'),
     API_URL: z.string().url(),
+    API_KEY: z.string(),
     WEB_URL: z.string().url(),
+    STORAGE_URL: z.string().url(),
   },
   runtimeEnv: {
     APP_ENV: process.env.APP_ENV,
     API_URL: process.env.API_URL,
+    API_KEY: process.env.API_KEY,
     WEB_URL: process.env.WEB_URL,
+    STORAGE_URL: process.env.STORAGE_URL,
   },
   emptyStringAsUndefined: true,
   skipValidation:

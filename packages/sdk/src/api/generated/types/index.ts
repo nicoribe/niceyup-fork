@@ -1,4 +1,19 @@
 export type {
+  GenerateUploadSignatureHeaderParams,
+  GenerateUploadSignature200,
+  GenerateUploadSignature400,
+  GenerateUploadSignature401,
+  GenerateUploadSignature403,
+  GenerateUploadSignature404,
+  GenerateUploadSignature429,
+  GenerateUploadSignature500,
+  GenerateUploadSignatureMutationRequestBucketEnum,
+  GenerateUploadSignatureMutationRequestScopeEnum,
+  GenerateUploadSignatureMutationRequest,
+  GenerateUploadSignatureMutationResponse,
+  GenerateUploadSignatureMutation,
+} from './GenerateUploadSignature'
+export type {
   GetAgentPathParams,
   GetAgentQueryParams,
   GetAgent200,
@@ -24,6 +39,21 @@ export type {
   GetConversationQueryResponse,
   GetConversationQuery,
 } from './GetConversation'
+export type {
+  GetFilePathParams,
+  GetFileQueryParams,
+  FileBucketEnum2,
+  FileScopeEnum2,
+  GetFile200,
+  GetFile400,
+  GetFile401,
+  GetFile403,
+  GetFile404,
+  GetFile429,
+  GetFile500,
+  GetFileQueryResponse,
+  GetFileQuery,
+} from './GetFile'
 export type {
   GetProfile200,
   GetProfile400,
@@ -247,6 +277,25 @@ export type {
   SendQuestionMessageMutationResponse,
   SendQuestionMessageMutation,
 } from './SendQuestionMessage'
+export type {
+  UploadFileHeaderParams,
+  FileBucketEnum,
+  FileScopeEnum,
+  UploadFile200,
+  UploadFile400,
+  UploadFile401,
+  UploadFile403,
+  UploadFile404,
+  UploadFile429,
+  UploadFile500,
+  UploadFileMutationResponse,
+  UploadFileMutation,
+} from './UploadFile'
+export {
+  generateUploadSignatureMutationRequestBucketEnum,
+  generateUploadSignatureMutationRequestScopeEnum,
+} from './GenerateUploadSignature'
+export { fileBucketEnum2, fileScopeEnum2 } from './GetFile'
 export {
   messagesStatusEnum,
   messagesRoleEnum,
@@ -392,3 +441,4 @@ export {
   partsTypeEnum32,
   explorerTreeExplorerTypeEnum,
 } from './SendQuestionMessage'
+export { fileBucketEnum, fileScopeEnum } from './UploadFile'

@@ -39,14 +39,16 @@ export async function listAgents(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, teamId } = request.query
 
-      const agents = await queries.listAgents({
+      const context = {
         userId,
         ...getOrganizationIdentifier({
           organizationId,
           organizationSlug,
           teamId,
         }),
-      })
+      }
+
+      const agents = await queries.context.listAgents(context)
 
       return { agents }
     },

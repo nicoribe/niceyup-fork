@@ -59,7 +59,7 @@ export async function updateMessage({
       parts,
       metadata: metadata
         ? sql`COALESCE(${messages.metadata}, '{}'::jsonb) || ${JSON.stringify(metadata)}::jsonb`
-        : messages.metadata,
+        : undefined,
     })
     .where(and(eq(messages.id, messageId), isNull(messages.deletedAt)))
 }

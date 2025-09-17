@@ -1,12 +1,10 @@
 import { and, eq } from 'drizzle-orm'
-import { db } from '../db'
-import { agents, teamMembers, teamsToAgents } from '../schema'
-import {
-  getOrganizationIdBySlug,
-  isOrganizationMemberAdmin,
-} from './organizations'
+import { db } from '../../db'
+import { agents, teamMembers, teamsToAgents } from '../../schema'
+import { getOrganizationIdBySlug } from '../organizations'
+import { isOrganizationMemberAdmin } from './organizations'
 
-type ListAgentsParams = {
+type ContextListAgentsParams = {
   userId: string
 } & (
   | {
@@ -21,25 +19,20 @@ type ListAgentsParams = {
     teamId?: string | null
   }
 
-export async function listAgents({
-  userId,
-  organizationId,
-  organizationSlug,
-  teamId,
-}: ListAgentsParams) {
-  if (!organizationId && !organizationSlug) {
+export async function listAgents(context: ContextListAgentsParams) {
+  if (!context.organizationId && !context.organizationSlug) {
     const listAgents = await db
       .select({
         id: agents.id,
         name: agents.name,
       })
       .from(agents)
-      .where(eq(agents.userId, userId))
+      .where(eq(agents.ownerId, context.userId))
 
     return listAgents
   }
 
-  if (teamId) {
+  if (context.teamId) {
     const listAgents = await db
       .select({
         id: agents.id,
@@ -49,22 +42,27 @@ export async function listAgents({
       .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
       .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
       .where(
-        and(eq(teamsToAgents.teamId, teamId), eq(teamMembers.userId, userId)),
+        and(
+          eq(teamsToAgents.teamId, context.teamId),
+          eq(teamMembers.userId, context.userId),
+        ),
       )
 
     return listAgents
   }
 
   const orgId =
-    organizationId ?? (await getOrganizationIdBySlug({ organizationSlug }))
+    context.organizationId ??
+    (await getOrganizationIdBySlug({
+      organizationSlug: context.organizationSlug,
+    }))
 
   if (!orgId) {
-    console.log('listAgents', 'Organization not found')
     return []
   }
 
   const isAdmin = await isOrganizationMemberAdmin({
-    userId,
+    userId: context.userId,
     organizationId: orgId,
   })
 
@@ -83,7 +81,7 @@ export async function listAgents({
   return []
 }
 
-type GetAgentParams = {
+type ContextGetAgentParams = {
   userId: string
 } & (
   | {
@@ -96,30 +94,32 @@ type GetAgentParams = {
     }
 ) & {
     teamId?: string | null
-    agentId: string
   }
 
-export async function getAgent({
-  userId,
-  organizationId,
-  organizationSlug,
-  teamId,
-  agentId,
-}: GetAgentParams) {
-  if (!organizationId && !organizationSlug) {
+type GetAgentParams = {
+  agentId: string
+}
+
+export async function getAgent(
+  context: ContextGetAgentParams,
+  params: GetAgentParams,
+) {
+  if (!context.organizationId && !context.organizationSlug) {
     const [agent] = await db
       .select({
         id: agents.id,
         name: agents.name,
       })
       .from(agents)
-      .where(and(eq(agents.id, agentId), eq(agents.userId, userId)))
+      .where(
+        and(eq(agents.id, params.agentId), eq(agents.ownerId, context.userId)),
+      )
       .limit(1)
 
     return agent || null
   }
 
-  if (teamId) {
+  if (context.teamId) {
     const [agent] = await db
       .select({
         id: agents.id,
@@ -130,9 +130,9 @@ export async function getAgent({
       .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
       .where(
         and(
-          eq(agents.id, agentId),
-          eq(teamsToAgents.teamId, teamId),
-          eq(teamMembers.userId, userId),
+          eq(agents.id, params.agentId),
+          eq(teamsToAgents.teamId, context.teamId),
+          eq(teamMembers.userId, context.userId),
         ),
       )
       .limit(1)
@@ -141,15 +141,17 @@ export async function getAgent({
   }
 
   const orgId =
-    organizationId ?? (await getOrganizationIdBySlug({ organizationSlug }))
+    context.organizationId ??
+    (await getOrganizationIdBySlug({
+      organizationSlug: context.organizationSlug,
+    }))
 
   if (!orgId) {
-    console.log('getAgent', 'Organization not found')
     return null
   }
 
   const isAdmin = await isOrganizationMemberAdmin({
-    userId,
+    userId: context.userId,
     organizationId: orgId,
   })
 
@@ -160,7 +162,9 @@ export async function getAgent({
         name: agents.name,
       })
       .from(agents)
-      .where(and(eq(agents.id, agentId), eq(agents.organizationId, orgId)))
+      .where(
+        and(eq(agents.id, params.agentId), eq(agents.organizationId, orgId)),
+      )
       .limit(1)
 
     return agent || null

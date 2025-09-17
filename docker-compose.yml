@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: supersecret
-      POSTGRES_DB: default
+      POSTGRES_DB: db-better-chat
     volumes:
       - postgres-data:/bitnami/postgresql
 

@@ -1,5 +1,6 @@
 import { env } from '@/lib/env'
 import { fastifyCors } from '@fastify/cors'
+import { fastifyMultipart } from '@fastify/multipart'
 import { fastifySwagger } from '@fastify/swagger'
 import fastifyScalar from '@scalar/fastify-api-reference'
 import { fastify } from 'fastify'
@@ -31,6 +32,9 @@ app.setValidatorCompiler(validatorCompiler)
 app.setErrorHandler(errorHandler)
 
 app.register(fastifyCors)
+app.register(fastifyMultipart, {
+  // attachFieldsToBody: true,
+})
 
 if (env.APP_ENV === 'development') {
   app.register(fastifySwagger, {

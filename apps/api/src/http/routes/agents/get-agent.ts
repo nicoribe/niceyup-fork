@@ -43,19 +43,20 @@ export async function getAgent(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, teamId } = request.query
 
-      const agent = await queries.getAgent({
+      const context = {
         userId,
         ...getOrganizationIdentifier({
           organizationId,
           organizationSlug,
           teamId,
         }),
-        agentId,
-      })
+      }
+
+      const agent = await queries.context.getAgent(context, { agentId })
 
       if (!agent) {
         throw new BadRequestError({
-          code: 'AGENT_UNAVAILABLE',
+          code: 'AGENT_NOT_FOUND',
           message: 'Agent not found or you don’t have access',
         })
       }

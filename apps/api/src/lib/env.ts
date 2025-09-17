@@ -3,13 +3,18 @@ import { env as authEnv } from '@workspace/auth/env'
 import { env as databaseEnv } from '@workspace/db/env'
 import { triggerEnv } from '@workspace/engine/env'
 import { env as baseEnv, createEnv, z } from '@workspace/env'
+import { env as storageEnv } from '@workspace/storage/env'
 
 export const env = createEnv({
-  extends: [baseEnv, aiEnv, authEnv, databaseEnv, triggerEnv],
+  extends: [baseEnv, aiEnv, authEnv, databaseEnv, storageEnv, triggerEnv],
   server: {
     PORT: z.coerce.number().optional(),
+
+    UPLOAD_SECRET: z.string(),
   },
   runtimeEnv: {
     PORT: process.env.PORT,
+
+    UPLOAD_SECRET: process.env.UPLOAD_SECRET,
   },
 })

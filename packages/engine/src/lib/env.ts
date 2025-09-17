@@ -1,6 +1,7 @@
 import { env as aiEnv } from '@workspace/ai/env'
 import { env as databaseEnv } from '@workspace/db/env'
 import { createEnv, z } from '@workspace/env'
+import { env as storageEnv } from '@workspace/storage/env'
 
 export const triggerEnv = createEnv({
   server: {
@@ -10,21 +11,6 @@ export const triggerEnv = createEnv({
   runtimeEnv: {
     TRIGGER_DEV_PROJECT_ID: process.env.TRIGGER_DEV_PROJECT_ID,
     TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,
-  },
-})
-
-const cloudflareEnv = createEnv({
-  server: {
-    CLOUDFLARE_BUCKET: z.string(),
-    CLOUDFLARE_ACCOUNT_ID: z.string(),
-    CLOUDFLARE_ACCESS_KEY: z.string(),
-    CLOUDFLARE_SECRET_KEY: z.string(),
-  },
-  runtimeEnv: {
-    CLOUDFLARE_BUCKET: process.env.CLOUDFLARE_BUCKET,
-    CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
-    CLOUDFLARE_ACCESS_KEY: process.env.CLOUDFLARE_ACCESS_KEY,
-    CLOUDFLARE_SECRET_KEY: process.env.CLOUDFLARE_SECRET_KEY,
   },
 })
 
@@ -40,6 +26,6 @@ const upstashEnv = createEnv({
 })
 
 export const env = createEnv({
-  extends: [triggerEnv, cloudflareEnv, upstashEnv, aiEnv, databaseEnv],
+  extends: [triggerEnv, upstashEnv, aiEnv, databaseEnv, storageEnv],
   runtimeEnv: {},
 })

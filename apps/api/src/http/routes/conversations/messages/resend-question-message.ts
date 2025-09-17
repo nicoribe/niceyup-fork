@@ -59,7 +59,7 @@ export async function resendQuestionMessage(app: FastifyTypedInstance) {
           teamId: z.string().nullish(),
           parentMessageId: z.string(),
           message: z.object({
-            parts: z.array(promptMessagePartSchema).min(1),
+            parts: z.array(promptMessagePartSchema).nonempty(),
             metadata: aiMessageMetadataSchema.nullish(),
           }),
         }),
@@ -88,31 +88,23 @@ export async function resendQuestionMessage(app: FastifyTypedInstance) {
         message,
       } = request.body
 
-      const conversation = await queries.getConversation({ conversationId })
-
-      if (conversation?.agentId) {
-        const agent = await queries.getAgent({
-          userId,
-          ...getOrganizationIdentifier({
-            organizationId,
-            organizationSlug,
-            teamId,
-          }),
-          agentId: conversation.agentId,
-        })
-
-        if (!agent) {
-          throw new BadRequestError({
-            code: 'CONVERSATION_UNAVAILABLE',
-            message: 'Conversation not found or you don’t have access',
-          })
-        }
+      const context = {
+        userId,
+        ...getOrganizationIdentifier({
+          organizationId,
+          organizationSlug,
+          teamId,
+        }),
       }
+
+      const conversation = await queries.context.getConversation(context, {
+        conversationId,
+      })
 
       if (!conversation) {
         throw new BadRequestError({
-          code: 'CONVERSATION_NOT_FOUND',
-          message: 'Conversation not found',
+          code: 'CONVERSATION_UNAVAILABLE',
+          message: 'Conversation not found or you don’t have access',
         })
       }
 

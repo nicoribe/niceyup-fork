@@ -6,18 +6,20 @@ import {
 } from 'cookies-next'
 
 export async function getHeaders() {
-  if (typeof window === 'undefined') {
-    const { headers: serverHeaders } = await import('next/headers')
-
-    const headersEntries = (await serverHeaders()).entries()
-
-    return Object.fromEntries(headersEntries)
-  }
-
-  return {
+  const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   }
+
+  if (typeof window === 'undefined') {
+    const { headers: serverHeaders } = await import('next/headers')
+
+    const headersCookies = (await serverHeaders()).get('cookie')
+
+    return { ...headers, Cookie: headersCookies }
+  }
+
+  return headers
 }
 
 async function getCookieStore(): Promise<CookiesFn | undefined> {

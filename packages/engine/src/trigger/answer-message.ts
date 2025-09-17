@@ -46,21 +46,13 @@ export const answerMessageTask = schemaTask({
       throw new AbortTaskRunError('Question message not found')
     }
 
-    const answerMessage = await queries.getMessage({
-      messageId: payload.answerMessageId,
-    })
-
-    if (!answerMessage) {
-      throw new AbortTaskRunError('Answer message not found')
-    }
-
-    return { questionMessage, answerMessage }
+    return { questionMessage }
   },
   run: async (payload, { init, signal }) => {
-    const { questionMessage, answerMessage } = init!
+    const { questionMessage } = init!
 
     await queries.updateMessage({
-      messageId: answerMessage.id,
+      messageId: payload.answerMessageId,
       status: 'in_progress',
     })
 
@@ -98,7 +90,7 @@ export const answerMessageTask = schemaTask({
     })
 
     let message = {
-      id: answerMessage.id,
+      id: payload.answerMessageId,
       status: 'in_progress',
       role: 'assistant',
       parts: [],
@@ -141,12 +133,10 @@ export const answerMessageTask = schemaTask({
 
     return { message }
   },
-  onFailure: async ({ init, error }) => {
-    const answerMessage = init?.answerMessage
-
-    if (answerMessage) {
+  onFailure: async ({ payload, init, error }) => {
+    if (init?.questionMessage) {
       await queries.updateMessage({
-        messageId: answerMessage.id,
+        messageId: payload.answerMessageId,
         status: 'failed',
         metadata: {
           error: error instanceof Error ? error.message : String(error),

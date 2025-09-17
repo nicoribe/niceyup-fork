@@ -12,10 +12,12 @@ export async function baseFetch<TVariables>(
     method: config.method?.toUpperCase(),
     body: JSON.stringify(config.data),
     signal: config.signal,
-    headers:
-      typeof config.headers === 'function'
-        ? await config.headers()
-        : config.headers,
+    headers: {
+      ...(typeof globalConfig.headers === 'function'
+        ? await globalConfig.headers()
+        : globalConfig.headers),
+      ...(paramsConfig.headers || {}),
+    },
     ...(config.next && {
       next: {
         revalidate: config.next?.revalidate,

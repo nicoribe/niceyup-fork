@@ -12,6 +12,9 @@ import type {
   ConversationExplorerType,
   DatabaseConnection,
   DatabaseDialect,
+  FileBucket,
+  FileMetadata,
+  FileScope,
   MessageMetadata,
   MessagePart,
   MessageRole,
@@ -34,11 +37,12 @@ export const sources = pgTable('sources', {
   // embaddingModel: text('embadding_model'), // "text-embedding-3-small"
   // llmModel: text('llm_model'), // "gpt-4o-mini"
 
-  // chuckSize: integer('chuck_size'), // 4000
+  // chuckSize: integer('chuck_size'), // 2500
   // chunkOverlap: integer('chunk_overlap'), // 100
+  // chuckLimit: integer('chuck_limit'), // 10
 
-  userId: text('user_id').references(() => users.id),
-  organizationId: text('organization_id').references(() => organizations.id),
+  ownerId: text('owner_id').references(() => users.id), // Personal account id
+  organizationId: text('organization_id').references(() => organizations.id), // Organization id
   databaseConnectionId: text('database_connection_id').references(
     () => databaseConnections.id,
   ),
@@ -47,7 +51,7 @@ export const sources = pgTable('sources', {
 
 export const sourcesRelations = relations(sources, ({ one, many }) => ({
   user: one(users, {
-    fields: [sources.userId],
+    fields: [sources.ownerId],
     references: [users.id],
   }),
   organization: one(organizations, {
@@ -120,14 +124,14 @@ export const agents = pgTable('agents', {
 
   // storeLogs: boolean('store_logs').default(false), // Whether to store logs for later retrieval. Logs are visible to your organization.
 
-  userId: text('user_id').references(() => users.id),
-  organizationId: text('organization_id').references(() => organizations.id),
+  ownerId: text('owner_id').references(() => users.id), // Personal account id
+  organizationId: text('organization_id').references(() => organizations.id), // Organization id
   ...timestamps,
 })
 
 export const agentsRelations = relations(agents, ({ one, many }) => ({
   user: one(users, {
-    fields: [agents.userId],
+    fields: [agents.ownerId],
     references: [users.id],
   }),
   organization: one(organizations, {
@@ -291,6 +295,32 @@ export const conversationsToUsersRelations = relations(
     }),
   }),
 )
+
+export const files = pgTable('files', {
+  ...id,
+  fileName: text('file_name').notNull(),
+  fileMimeType: text('file_mime_type').notNull(),
+  fileUri: text('file_uri').notNull(),
+  bucket: text('bucket').notNull().$type<FileBucket>(),
+  scope: text('scope').notNull().$type<FileScope>(),
+  metadata: jsonb('metadata').$type<FileMetadata>(),
+
+  ownerId: text('owner_id').references(() => users.id), // Personal account id
+  organizationId: text('organization_id').references(() => organizations.id), // Organization id
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  ...timestamps,
+})
+
+export const filesRelations = relations(files, ({ one }) => ({
+  user: one(users, {
+    fields: [files.ownerId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [files.organizationId],
+    references: [organizations.id],
+  }),
+}))
 
 export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
   ...id,

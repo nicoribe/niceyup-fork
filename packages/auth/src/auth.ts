@@ -48,6 +48,21 @@ const config = {
     cookiePrefix: COOKIE_PREFIX,
     database: { generateId },
   },
+  // secondaryStorage: {
+  //   get: async (key: string) => {
+  //     return await redis.get(key)
+  //   },
+  //   set: async (key: string, value: string, ttl?: number) => {
+  //     await redis.set(key, value)
+
+  //     if (ttl) {
+  //       await redis.expire(key, ttl)
+  //     }
+  //   },
+  //   delete: async (key: string) => {
+  //     await redis.del(key)
+  //   },
+  // },
   plugins: [
     organization({
       ac,

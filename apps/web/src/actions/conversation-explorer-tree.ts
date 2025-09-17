@@ -14,8 +14,26 @@ import {
   conversationsToUsers,
 } from '@workspace/db/schema'
 
-type ConversationExplorerTreeParams = OrganizationTeamParams & {
+type ContextConversationExplorerTreeParams = OrganizationTeamParams & {
   agentId: string
+}
+
+async function checkAccessToAgent(
+  context: { userId: string } & ContextConversationExplorerTreeParams,
+) {
+  const agent = await queries.context.getAgent(
+    {
+      userId: context.userId,
+      organizationSlug:
+        context.organizationSlug !== 'my-account'
+          ? context.organizationSlug
+          : null,
+      teamId: context.teamId !== '~' ? context.teamId : null,
+    },
+    { agentId: context.agentId },
+  )
+
+  return Boolean(agent)
 }
 
 type GetItemInConversationExplorerTreeParams = {
@@ -24,11 +42,10 @@ type GetItemInConversationExplorerTreeParams = {
 }
 
 export async function getItemInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   { explorerType, itemId }: GetItemInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log('getItemInConversationExplorerTree', 'Team not found')
+  if (explorerType === 'team' && context.teamId === '~') {
     return null
   }
 
@@ -36,22 +53,13 @@ export async function getItemInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log('getItemInConversationExplorerTree', 'Agent not found')
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return null
   }
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? eq(conversationExplorerTree.teamId, params.teamId)
+      ? eq(conversationExplorerTree.teamId, context.teamId)
       : eq(conversationExplorerTree.ownerId, userId)
 
   const [itemData] = await db
@@ -80,7 +88,7 @@ export async function getItemInConversationExplorerTree(
     .where(
       and(
         eq(conversationExplorerTree.explorerType, explorerType),
-        eq(conversationExplorerTree.agentId, params.agentId),
+        eq(conversationExplorerTree.agentId, context.agentId),
         ownerTypeCondition,
         eq(conversationExplorerTree.id, itemId),
         isNull(conversationExplorerTree.deletedAt),
@@ -97,14 +105,10 @@ type GetChildrenWithDataInConversationExplorerTreeParams = {
 }
 
 export async function getChildrenWithDataInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   { explorerType, itemId }: GetChildrenWithDataInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log(
-      'getChildrenWithDataInConversationExplorerTree',
-      'Team not found',
-    )
+  if (explorerType === 'team' && context.teamId === '~') {
     return []
   }
 
@@ -112,25 +116,13 @@ export async function getChildrenWithDataInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log(
-      'getChildrenWithDataInConversationExplorerTree',
-      'Agent not found',
-    )
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return []
   }
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? eq(conversationExplorerTree.teamId, params.teamId)
+      ? eq(conversationExplorerTree.teamId, context.teamId)
       : eq(conversationExplorerTree.ownerId, userId)
 
   if (itemId === 'root') {
@@ -163,7 +155,7 @@ export async function getChildrenWithDataInConversationExplorerTree(
       .where(
         and(
           eq(conversationExplorerTree.explorerType, explorerType),
-          eq(conversationExplorerTree.agentId, params.agentId),
+          eq(conversationExplorerTree.agentId, context.agentId),
           ownerTypeCondition,
           isNull(conversationExplorerTree.parentId),
           isNull(conversationExplorerTree.deletedAt),
@@ -202,7 +194,7 @@ export async function getChildrenWithDataInConversationExplorerTree(
     .where(
       and(
         eq(conversationExplorerTree.explorerType, explorerType),
-        eq(conversationExplorerTree.agentId, params.agentId),
+        eq(conversationExplorerTree.agentId, context.agentId),
         ownerTypeCondition,
         eq(conversationExplorerTree.parentId, itemId),
         isNull(conversationExplorerTree.deletedAt),
@@ -226,15 +218,14 @@ type GetParentsInConversationExplorerTreeParams = {
 )
 
 export async function getParentsInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   {
     explorerType,
     itemId,
     conversationId,
   }: GetParentsInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log('getParentsInConversationExplorerTree', 'Team not found')
+  if (explorerType === 'team' && context.teamId === '~') {
     return []
   }
 
@@ -242,16 +233,7 @@ export async function getParentsInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log('getParentsInConversationExplorerTree', 'Agent not found')
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return []
   }
 
@@ -261,7 +243,7 @@ export async function getParentsInConversationExplorerTree(
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? sql`tree_node.team_id = ${params.teamId}`
+      ? sql`tree_node.team_id = ${context.teamId}`
       : sql`tree_node.owner_id = ${userId}`
 
   const parents = await db.execute<{
@@ -287,7 +269,7 @@ export async function getParentsInConversationExplorerTree(
       LEFT JOIN ${conversations} conv ON tree_node.conversation_id = conv.id
       WHERE ${itemTypeCondition}
         AND tree_node.explorer_type = ${explorerType}
-        AND tree_node.agent_id = ${params.agentId}
+        AND tree_node.agent_id = ${context.agentId}
         AND ${ownerTypeCondition}
       UNION ALL
       
@@ -328,7 +310,7 @@ type UpdateNameOfItemInConversationExplorerTreeParams = {
 )
 
 export async function updateNameOfItemInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   {
     explorerType,
     itemId,
@@ -336,8 +318,7 @@ export async function updateNameOfItemInConversationExplorerTree(
     name,
   }: UpdateNameOfItemInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log('updateNameOfItemInConversationExplorerTree', 'Team not found')
+  if (explorerType === 'team' && context.teamId === '~') {
     return
   }
 
@@ -345,23 +326,14 @@ export async function updateNameOfItemInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log('updateNameOfItemInConversationExplorerTree', 'Agent not found')
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return
   }
 
   if (conversationId !== undefined) {
     const ownerTypeCondition =
       explorerType === 'team'
-        ? eq(conversations.teamId, params.teamId)
+        ? eq(conversations.teamId, context.teamId)
         : eq(conversations.ownerId, userId)
 
     await db
@@ -370,7 +342,7 @@ export async function updateNameOfItemInConversationExplorerTree(
       .where(
         and(
           eq(conversations.id, conversationId),
-          eq(conversations.agentId, params.agentId),
+          eq(conversations.agentId, context.agentId),
           ownerTypeCondition,
           isNull(conversations.deletedAt),
         ),
@@ -381,7 +353,7 @@ export async function updateNameOfItemInConversationExplorerTree(
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? eq(conversationExplorerTree.teamId, params.teamId)
+      ? eq(conversationExplorerTree.teamId, context.teamId)
       : eq(conversationExplorerTree.ownerId, userId)
 
   await db
@@ -390,7 +362,7 @@ export async function updateNameOfItemInConversationExplorerTree(
     .where(
       and(
         eq(conversationExplorerTree.explorerType, explorerType),
-        eq(conversationExplorerTree.agentId, params.agentId),
+        eq(conversationExplorerTree.agentId, context.agentId),
         ownerTypeCondition,
         eq(conversationExplorerTree.id, itemId),
         isNull(conversationExplorerTree.deletedAt),
@@ -405,18 +377,14 @@ type UpdateParentIdOfItemsInConversationExplorerTreeParams = {
 }
 
 export async function updateParentIdOfItemsInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   {
     explorerType,
     itemIds,
     parentId,
   }: UpdateParentIdOfItemsInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log(
-      'updateParentIdOfItemsInConversationExplorerTree',
-      'Team not found',
-    )
+  if (explorerType === 'team' && context.teamId === '~') {
     return
   }
 
@@ -424,25 +392,13 @@ export async function updateParentIdOfItemsInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log(
-      'updateParentIdOfItemsInConversationExplorerTree',
-      'Agent not found',
-    )
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return
   }
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? eq(conversationExplorerTree.teamId, params.teamId)
+      ? eq(conversationExplorerTree.teamId, context.teamId)
       : eq(conversationExplorerTree.ownerId, userId)
 
   await db
@@ -451,7 +407,7 @@ export async function updateParentIdOfItemsInConversationExplorerTree(
     .where(
       and(
         eq(conversationExplorerTree.explorerType, explorerType),
-        eq(conversationExplorerTree.agentId, params.agentId),
+        eq(conversationExplorerTree.agentId, context.agentId),
         ownerTypeCondition,
         inArray(conversationExplorerTree.id, itemIds),
         isNull(conversationExplorerTree.deletedAt),
@@ -466,15 +422,14 @@ type CreateFolderInConversationExplorerTreeParams = {
 }
 
 export async function createFolderInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   {
     explorerType,
     parentId,
     name,
   }: CreateFolderInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log('createFolderInConversationExplorerTree', 'Team not found')
+  if (explorerType === 'team' && context.teamId === '~') {
     return null
   }
 
@@ -482,27 +437,18 @@ export async function createFolderInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log('createFolderInConversationExplorerTree', 'Agent not found')
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return null
   }
 
   const ownerTypeCondition =
-    explorerType === 'team' ? { teamId: params.teamId } : { ownerId: userId }
+    explorerType === 'team' ? { teamId: context.teamId } : { ownerId: userId }
 
   const [newFolder] = await db
     .insert(conversationExplorerTree)
     .values({
       explorerType,
-      agentId: params.agentId,
+      agentId: context.agentId,
       ...ownerTypeCondition,
       parentId: parentId === 'root' ? null : parentId,
       name,
@@ -520,11 +466,10 @@ type DeleteItemInConversationExplorerTreeParams = {
 }
 
 export async function deleteItemInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   { explorerType, itemId }: DeleteItemInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log('deleteItemInConversationExplorerTree', 'Team not found')
+  if (explorerType === 'team' && context.teamId === '~') {
     return
   }
 
@@ -532,22 +477,13 @@ export async function deleteItemInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log('deleteItemInConversationExplorerTree', 'Agent not found')
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return
   }
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? sql`team_id = ${params.teamId}`
+      ? sql`team_id = ${context.teamId}`
       : sql`owner_id = ${userId}`
 
   if (explorerType === 'shared') {
@@ -559,7 +495,7 @@ export async function deleteItemInConversationExplorerTree(
         FROM ${conversationExplorerTree}
         WHERE id = ${itemId}
           AND explorer_type = ${explorerType}
-          AND agent_id = ${params.agentId}
+          AND agent_id = ${context.agentId}
           AND ${ownerTypeCondition}
           AND deleted_at IS NULL
   
@@ -612,7 +548,7 @@ export async function deleteItemInConversationExplorerTree(
         FROM ${conversationExplorerTree}
         WHERE id = ${itemId}
           AND explorer_type = ${explorerType}
-          AND agent_id = ${params.agentId}
+          AND agent_id = ${context.agentId}
           AND ${ownerTypeCondition}
           AND deleted_at IS NULL
   
@@ -655,11 +591,10 @@ type GetItemsDeletedInConversationExplorerTreeParams = {
 }
 
 export async function getItemsDeletedInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   { explorerType }: GetItemsDeletedInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log('getItemsDeletedInConversationExplorerTree', 'Team not found')
+  if (explorerType === 'team' && context.teamId === '~') {
     return []
   }
 
@@ -667,22 +602,13 @@ export async function getItemsDeletedInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log('getItemsDeletedInConversationExplorerTree', 'Agent not found')
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return []
   }
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? sql`team_id = ${params.teamId}`
+      ? sql`team_id = ${context.teamId}`
       : sql`owner_id = ${userId}`
 
   const deletedItems = await db.execute<{
@@ -703,14 +629,14 @@ export async function getItemsDeletedInConversationExplorerTree(
       tree.deleted_at
     FROM ${conversationExplorerTree} tree
     LEFT JOIN ${conversations} conv ON tree.conversation_id = conv.id
-    WHERE tree.agent_id = ${params.agentId}
+    WHERE tree.agent_id = ${context.agentId}
       AND tree.explorer_type = ${explorerType}
       AND ${ownerTypeCondition}
       AND tree.deleted_at IS NOT NULL
       AND (tree.parent_id IS NULL OR NOT EXISTS (
         SELECT 1 FROM ${conversationExplorerTree} parent
         WHERE parent.id = tree.parent_id 
-          AND parent.agent_id = ${params.agentId} 
+          AND parent.agent_id = ${context.agentId} 
           AND parent.explorer_type = ${explorerType} 
           AND parent.deleted_at IS NOT NULL
       ))
@@ -726,11 +652,10 @@ type RestoreItemInConversationExplorerTreeParams = {
 }
 
 export async function restoreItemInConversationExplorerTree(
-  params: ConversationExplorerTreeParams,
+  context: ContextConversationExplorerTreeParams,
   { explorerType, itemId }: RestoreItemInConversationExplorerTreeParams,
 ) {
-  if (explorerType === 'team' && params.teamId === '~') {
-    console.log('restoreItemInConversationExplorerTree', 'Team not found')
+  if (explorerType === 'team' && context.teamId === '~') {
     return
   }
 
@@ -738,22 +663,13 @@ export async function restoreItemInConversationExplorerTree(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const agent = await queries.getAgent({
-    userId,
-    organizationSlug:
-      params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-    teamId: params.teamId !== '~' ? params.teamId : null,
-    agentId: params.agentId,
-  })
-
-  if (!agent) {
-    console.log('restoreItemInConversationExplorerTree', 'Agent not found')
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
     return
   }
 
   const ownerTypeCondition =
     explorerType === 'team'
-      ? sql`team_id = ${params.teamId}`
+      ? sql`team_id = ${context.teamId}`
       : sql`owner_id = ${userId}`
 
   await db.execute(sql`
@@ -762,7 +678,7 @@ export async function restoreItemInConversationExplorerTree(
       FROM ${conversationExplorerTree}
       WHERE id = ${itemId}
         AND explorer_type = ${explorerType}
-        AND agent_id = ${params.agentId}
+        AND agent_id = ${context.agentId}
         AND ${ownerTypeCondition}
         AND deleted_at IS NOT NULL
       
@@ -790,85 +706,78 @@ export async function restoreItemInConversationExplorerTree(
         WHERE explorer_tree_path.conversation_id = ${conversations}.id
           AND explorer_tree_path.conversation_id IS NOT NULL
       )
-        AND agent_id = ${params.agentId}
+        AND agent_id = ${context.agentId}
         AND deleted_at IS NOT NULL
     )
   `)
 }
 
-// type DestroyItemInConversationExplorerTreeParams = {
-//   explorerType: ConversationExplorerType
-//   itemId: string
-// }
+type DestroyItemInConversationExplorerTreeParams = {
+  explorerType: ConversationExplorerType
+  itemId: string
+}
 
-// export async function destroyItemInConversationExplorerTree(
-//   params: ConversationExplorerTreeParams,
-//   { explorerType, itemId }: DestroyItemInConversationExplorerTreeParams,
-// ) {
-//   if (explorerType === 'team' && params.teamId === '~') {
-//     console.log('destroyItemInConversationExplorerTree', 'Team not found')
-//     return
-//   }
+export async function destroyItemInConversationExplorerTree(
+  context: ContextConversationExplorerTreeParams,
+  { explorerType, itemId }: DestroyItemInConversationExplorerTreeParams,
+) {
+  if (explorerType === 'team' && context.teamId === '~') {
+    return
+  }
 
-//   const {
-//     user: { id: userId },
-//   } = await authenticatedUser()
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
 
-//   const agent = await queries.getAgent({
-//     userId,
-//     organizationSlug:
-//       params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-//     teamId: params.teamId !== '~' ? params.teamId : null,
-//     agentId: params.agentId,
-//   })
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
+    return
+  }
 
-//   if (!agent) {
-//     console.log('destroyItemInConversationExplorerTree', 'Agent not found')
-//     return
-//   }
+  const ownerTypeCondition =
+    explorerType === 'team'
+      ? sql`team_id = ${context.teamId}`
+      : sql`owner_id = ${userId}`
 
-//   const ownerTypeCondition =
-//     explorerType === 'team'
-//       ? sql`team_id = ${params.teamId}`
-//       : sql`owner_id = ${userId}`
+  console.log({
+    itemId,
+    explorerType,
+    agentId: context.agentId,
+    ...ownerTypeCondition,
+  })
 
-//   await db.execute(sql``)
-// }
+  throw new Error('Not implemented')
+}
 
-// type DestroyAllItemsInConversationExplorerTreeParams = {
-//   explorerType: ConversationExplorerType
-// }
+type DestroyAllItemsInConversationExplorerTreeParams = {
+  explorerType: ConversationExplorerType
+}
 
-// export async function destroyAllItemsInConversationExplorerTree(
-//   params: ConversationExplorerTreeParams,
-//   { explorerType }: DestroyAllItemsInConversationExplorerTreeParams,
-// ) {
-//   if (explorerType === 'team' && params.teamId === '~') {
-//     console.log('destroyAllItemsInConversationExplorerTree', 'Team not found')
-//     return
-//   }
+export async function destroyAllItemsInConversationExplorerTree(
+  context: ContextConversationExplorerTreeParams,
+  { explorerType }: DestroyAllItemsInConversationExplorerTreeParams,
+) {
+  if (explorerType === 'team' && context.teamId === '~') {
+    return
+  }
 
-//   const {
-//     user: { id: userId },
-//   } = await authenticatedUser()
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
 
-//   const agent = await queries.getAgent({
-//     userId,
-//     organizationSlug:
-//       params.organizationSlug !== 'my-account' ? params.organizationSlug : null,
-//     teamId: params.teamId !== '~' ? params.teamId : null,
-//     agentId: params.agentId,
-//   })
+  if (!(await checkAccessToAgent({ userId, ...context }))) {
+    return
+  }
 
-//   if (!agent) {
-//     console.log('destroyAllItemsInConversationExplorerTree', 'Agent not found')
-//     return
-//   }
+  const ownerTypeCondition =
+    explorerType === 'team'
+      ? sql`team_id = ${context.teamId}`
+      : sql`owner_id = ${userId}`
 
-//   const ownerTypeCondition =
-//     explorerType === 'team'
-//       ? sql`team_id = ${params.teamId}`
-//       : sql`owner_id = ${userId}`
+  console.log({
+    explorerType,
+    agentId: context.agentId,
+    ...ownerTypeCondition,
+  })
 
-//   await db.execute(sql``)
-// }
+  throw new Error('Not implemented')
+}

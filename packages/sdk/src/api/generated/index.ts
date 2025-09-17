@@ -1,5 +1,7 @@
+export type { GenerateUploadSignatureMutationKey } from './react-query/hooks/useGenerateUploadSignature'
 export type { GetAgentQueryKey } from './react-query/hooks/useGetAgent'
 export type { GetConversationQueryKey } from './react-query/hooks/useGetConversation'
+export type { GetFileQueryKey } from './react-query/hooks/useGetFile'
 export type { GetProfileQueryKey } from './react-query/hooks/useGetProfile'
 export type { HealthQueryKey } from './react-query/hooks/useHealth'
 export type { ListAgentsQueryKey } from './react-query/hooks/useListAgents'
@@ -7,6 +9,19 @@ export type { ListMessagesQueryKey } from './react-query/hooks/useListMessages'
 export type { RegenerateAnswerMessageMutationKey } from './react-query/hooks/useRegenerateAnswerMessage'
 export type { ResendQuestionMessageMutationKey } from './react-query/hooks/useResendQuestionMessage'
 export type { SendQuestionMessageMutationKey } from './react-query/hooks/useSendQuestionMessage'
+export type { UploadFileMutationKey } from './react-query/hooks/useUploadFile'
+export type {
+  GenerateUploadSignatureHeaderParamsSchema,
+  GenerateUploadSignature200Schema,
+  GenerateUploadSignature400Schema,
+  GenerateUploadSignature401Schema,
+  GenerateUploadSignature403Schema,
+  GenerateUploadSignature404Schema,
+  GenerateUploadSignature429Schema,
+  GenerateUploadSignature500Schema,
+  GenerateUploadSignatureMutationRequestSchema,
+  GenerateUploadSignatureMutationResponseSchema,
+} from './schemas/generateUploadSignatureSchema'
 export type {
   GetAgentPathParamsSchema,
   GetAgentQueryParamsSchema,
@@ -31,6 +46,18 @@ export type {
   GetConversation500Schema,
   GetConversationQueryResponseSchema,
 } from './schemas/getConversationSchema'
+export type {
+  GetFilePathParamsSchema,
+  GetFileQueryParamsSchema,
+  GetFile200Schema,
+  GetFile400Schema,
+  GetFile401Schema,
+  GetFile403Schema,
+  GetFile404Schema,
+  GetFile429Schema,
+  GetFile500Schema,
+  GetFileQueryResponseSchema,
+} from './schemas/getFileSchema'
 export type {
   GetProfile200Schema,
   GetProfile400Schema,
@@ -111,6 +138,32 @@ export type {
   SendQuestionMessageMutationResponseSchema,
 } from './schemas/sendQuestionMessageSchema'
 export type {
+  UploadFileHeaderParamsSchema,
+  UploadFile200Schema,
+  UploadFile400Schema,
+  UploadFile401Schema,
+  UploadFile403Schema,
+  UploadFile404Schema,
+  UploadFile429Schema,
+  UploadFile500Schema,
+  UploadFileMutationResponseSchema,
+} from './schemas/uploadFileSchema'
+export type {
+  GenerateUploadSignatureHeaderParams,
+  GenerateUploadSignature200,
+  GenerateUploadSignature400,
+  GenerateUploadSignature401,
+  GenerateUploadSignature403,
+  GenerateUploadSignature404,
+  GenerateUploadSignature429,
+  GenerateUploadSignature500,
+  GenerateUploadSignatureMutationRequestBucketEnum,
+  GenerateUploadSignatureMutationRequestScopeEnum,
+  GenerateUploadSignatureMutationRequest,
+  GenerateUploadSignatureMutationResponse,
+  GenerateUploadSignatureMutation,
+} from './types/GenerateUploadSignature'
+export type {
   GetAgentPathParams,
   GetAgentQueryParams,
   GetAgent200,
@@ -136,6 +189,21 @@ export type {
   GetConversationQueryResponse,
   GetConversationQuery,
 } from './types/GetConversation'
+export type {
+  GetFilePathParams,
+  GetFileQueryParams,
+  FileBucketEnum2,
+  FileScopeEnum2,
+  GetFile200,
+  GetFile400,
+  GetFile401,
+  GetFile403,
+  GetFile404,
+  GetFile429,
+  GetFile500,
+  GetFileQueryResponse,
+  GetFileQuery,
+} from './types/GetFile'
 export type {
   GetProfile200,
   GetProfile400,
@@ -359,8 +427,24 @@ export type {
   SendQuestionMessageMutationResponse,
   SendQuestionMessageMutation,
 } from './types/SendQuestionMessage'
+export type {
+  UploadFileHeaderParams,
+  FileBucketEnum,
+  FileScopeEnum,
+  UploadFile200,
+  UploadFile400,
+  UploadFile401,
+  UploadFile403,
+  UploadFile404,
+  UploadFile429,
+  UploadFile500,
+  UploadFileMutationResponse,
+  UploadFileMutation,
+} from './types/UploadFile'
+export { generateUploadSignature } from './operations/generateUploadSignature'
 export { getAgent } from './operations/getAgent'
 export { getConversation } from './operations/getConversation'
+export { getFile } from './operations/getFile'
 export { getProfile } from './operations/getProfile'
 export { health } from './operations/health'
 export { listAgents } from './operations/listAgents'
@@ -368,6 +452,11 @@ export { listMessages } from './operations/listMessages'
 export { regenerateAnswerMessage } from './operations/regenerateAnswerMessage'
 export { resendQuestionMessage } from './operations/resendQuestionMessage'
 export { sendQuestionMessage } from './operations/sendQuestionMessage'
+export { uploadFile } from './operations/uploadFile'
+export {
+  generateUploadSignatureMutationKey,
+  useGenerateUploadSignature,
+} from './react-query/hooks/useGenerateUploadSignature'
 export {
   getAgentQueryKey,
   getAgentQueryOptions,
@@ -378,6 +467,11 @@ export {
   getConversationQueryOptions,
   useGetConversation,
 } from './react-query/hooks/useGetConversation'
+export {
+  getFileQueryKey,
+  getFileQueryOptions,
+  useGetFile,
+} from './react-query/hooks/useGetFile'
 export {
   getProfileQueryKey,
   getProfileQueryOptions,
@@ -411,6 +505,22 @@ export {
   useSendQuestionMessage,
 } from './react-query/hooks/useSendQuestionMessage'
 export {
+  uploadFileMutationKey,
+  useUploadFile,
+} from './react-query/hooks/useUploadFile'
+export {
+  generateUploadSignatureHeaderParamsSchema,
+  generateUploadSignature200Schema,
+  generateUploadSignature400Schema,
+  generateUploadSignature401Schema,
+  generateUploadSignature403Schema,
+  generateUploadSignature404Schema,
+  generateUploadSignature429Schema,
+  generateUploadSignature500Schema,
+  generateUploadSignatureMutationRequestSchema,
+  generateUploadSignatureMutationResponseSchema,
+} from './schemas/generateUploadSignatureSchema'
+export {
   getAgentPathParamsSchema,
   getAgentQueryParamsSchema,
   getAgent200Schema,
@@ -434,6 +544,18 @@ export {
   getConversation500Schema,
   getConversationQueryResponseSchema,
 } from './schemas/getConversationSchema'
+export {
+  getFilePathParamsSchema,
+  getFileQueryParamsSchema,
+  getFile200Schema,
+  getFile400Schema,
+  getFile401Schema,
+  getFile403Schema,
+  getFile404Schema,
+  getFile429Schema,
+  getFile500Schema,
+  getFileQueryResponseSchema,
+} from './schemas/getFileSchema'
 export {
   getProfile200Schema,
   getProfile400Schema,
@@ -513,6 +635,22 @@ export {
   sendQuestionMessageMutationRequestSchema,
   sendQuestionMessageMutationResponseSchema,
 } from './schemas/sendQuestionMessageSchema'
+export {
+  uploadFileHeaderParamsSchema,
+  uploadFile200Schema,
+  uploadFile400Schema,
+  uploadFile401Schema,
+  uploadFile403Schema,
+  uploadFile404Schema,
+  uploadFile429Schema,
+  uploadFile500Schema,
+  uploadFileMutationResponseSchema,
+} from './schemas/uploadFileSchema'
+export {
+  generateUploadSignatureMutationRequestBucketEnum,
+  generateUploadSignatureMutationRequestScopeEnum,
+} from './types/GenerateUploadSignature'
+export { fileBucketEnum2, fileScopeEnum2 } from './types/GetFile'
 export {
   messagesStatusEnum,
   messagesRoleEnum,
@@ -658,3 +796,4 @@ export {
   partsTypeEnum32,
   explorerTreeExplorerTypeEnum,
 } from './types/SendQuestionMessage'
+export { fileBucketEnum, fileScopeEnum } from './types/UploadFile'

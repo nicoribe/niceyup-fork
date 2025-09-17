@@ -1,5 +1,6 @@
 'use client'
 
+import { useUploadFiles } from '@/hooks/use-upload-files'
 import { sdk } from '@/lib/sdk'
 import type {
   ChatParams,
@@ -672,17 +673,31 @@ export function useChat({
     }
   }
 
+  const { uploadFiles } = useUploadFiles(
+    { organizationSlug, teamId },
+    {
+      bucket: 'default',
+      scope: 'conversations',
+      metadata: {
+        conversationId: chatId === 'new' ? null : chatId,
+      },
+      accept: 'application/pdf,image/*,video/*,audio/*',
+      expires: 5 * 60, // 5 minutes
+    },
+  )
+
   return {
     messages: messagesFiltered,
     loadingMessage,
     getMessageById,
     updateMessageById,
     handleBranchChange,
+    refConversationScroll,
     sendMessage,
     resendMessage,
     regenerate,
     status,
     setStatus,
-    refConversationScroll,
+    uploadFiles,
   }
 }

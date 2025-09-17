@@ -64,31 +64,23 @@ export async function regenerateAnswerMessage(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, parentMessageId } =
         request.body
 
-      const conversation = await queries.getConversation({ conversationId })
-
-      if (conversation?.agentId) {
-        const agent = await queries.getAgent({
-          userId,
-          ...getOrganizationIdentifier({
-            organizationId,
-            organizationSlug,
-            teamId,
-          }),
-          agentId: conversation.agentId,
-        })
-
-        if (!agent) {
-          throw new BadRequestError({
-            code: 'CONVERSATION_UNAVAILABLE',
-            message: 'Conversation not found or you don’t have access',
-          })
-        }
+      const context = {
+        userId,
+        ...getOrganizationIdentifier({
+          organizationId,
+          organizationSlug,
+          teamId,
+        }),
       }
+
+      const conversation = await queries.context.getConversation(context, {
+        conversationId,
+      })
 
       if (!conversation) {
         throw new BadRequestError({
           code: 'CONVERSATION_NOT_FOUND',
-          message: 'Conversation not found',
+          message: 'Conversation not found or you don’t have access',
         })
       }
 
