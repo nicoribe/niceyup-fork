@@ -3,19 +3,34 @@
   "ui": "tui",
   "tasks": {
     "build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env"
+      ],
       "dependsOn": [
         "^build"
       ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env*"
-      ],
       "outputs": [
         ".next/**",
-        "!.next/cache/**"
+        "!.next/cache/**",
+        "dist/**"
       ]
     },
     "start": {
+      "cache": false,
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "dev": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env"
+      ],
+      "persistent": true,
+      "cache": false
+    },
+    "clean": {
       "cache": false
     },
     "lint": {
@@ -23,15 +38,7 @@
         "^lint"
       ]
     },
-    "check-types": {
-      "dependsOn": [
-        "^check-types"
-      ]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "format": {}
   },
   "globalEnv": [
     "APP_ENV",
@@ -68,7 +75,8 @@
     "NOVU_SECRET_KEY",
     "NEXT_PUBLIC_API_URL",
     "NEXT_PUBLIC_WEB_URL",
-    "NEXT_PUBLIC_STORAGE_URL"
+    "NEXT_PUBLIC_STORAGE_URL",
+    "NEXT_CONFIG_OUTPUT"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

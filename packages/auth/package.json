@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "auth:generate": "pnpm with-env pnpm dlx @better-auth/cli generate --output ../db/src/schema/auth.ts --y",
+    "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
     "with-env": "dotenv -e ../../.env --"

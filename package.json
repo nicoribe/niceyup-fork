@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "start": "turbo start",
     "dev": "turbo dev",
+    "clean": "rm -rf .turbo node_modules",
+    "clean:all": "turbo clean",
     "lint": "turbo lint",
-    "format": "biome format --write ."
+    "format": "turbo format"
   },
   "devDependencies": {
     "@workspace/tsconfig": "workspace:*",

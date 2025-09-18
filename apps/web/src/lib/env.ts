@@ -5,6 +5,9 @@ import { env as baseEnv, createEnv, z } from '@workspace/env'
 
 export const env = createEnv({
   extends: [baseEnv, aiEnv, authEnv, databaseEnv],
+  server: {
+    NEXT_CONFIG_OUTPUT: z.enum(['standalone']).optional(),
+  },
   shared: {
     NEXT_PUBLIC_WEB_URL: z.string().url(),
     NEXT_PUBLIC_API_URL: z.string().url(),
@@ -14,5 +17,7 @@ export const env = createEnv({
     NEXT_PUBLIC_WEB_URL: process.env.NEXT_PUBLIC_WEB_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL,
+
+    NEXT_CONFIG_OUTPUT: process.env.NEXT_CONFIG_OUTPUT,
   },
 })
