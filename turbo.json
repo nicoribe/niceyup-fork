@@ -15,6 +15,9 @@
         "!.next/cache/**"
       ]
     },
+    "start": {
+      "cache": false
+    },
     "lint": {
       "dependsOn": [
         "^lint"
