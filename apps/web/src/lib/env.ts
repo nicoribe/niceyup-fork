@@ -1,10 +1,10 @@
 import { env as aiEnv } from '@workspace/ai/env'
+import { env as authEnv } from '@workspace/auth/env'
 import { env as databaseEnv } from '@workspace/db/env'
-import { triggerEnv } from '@workspace/engine/env'
 import { env as baseEnv, createEnv, z } from '@workspace/env'
 
 export const env = createEnv({
-  extends: [baseEnv, aiEnv, databaseEnv, triggerEnv],
+  extends: [baseEnv, aiEnv, authEnv, databaseEnv],
   shared: {
     NEXT_PUBLIC_WEB_URL: z.string().url(),
     NEXT_PUBLIC_API_URL: z.string().url(),

@@ -3,17 +3,6 @@ import { env as databaseEnv } from '@workspace/db/env'
 import { createEnv, z } from '@workspace/env'
 import { env as storageEnv } from '@workspace/storage/env'
 
-export const triggerEnv = createEnv({
-  server: {
-    TRIGGER_DEV_PROJECT_ID: z.string(),
-    TRIGGER_SECRET_KEY: z.string(),
-  },
-  runtimeEnv: {
-    TRIGGER_DEV_PROJECT_ID: process.env.TRIGGER_DEV_PROJECT_ID,
-    TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,
-  },
-})
-
 const upstashEnv = createEnv({
   server: {
     UPSTASH_VECTOR_REST_URL: z.string(),
@@ -26,6 +15,13 @@ const upstashEnv = createEnv({
 })
 
 export const env = createEnv({
-  extends: [triggerEnv, upstashEnv, aiEnv, databaseEnv, storageEnv],
-  runtimeEnv: {},
+  extends: [upstashEnv, aiEnv, databaseEnv, storageEnv],
+  server: {
+    TRIGGER_DEV_PROJECT_ID: z.string(),
+    TRIGGER_SECRET_KEY: z.string(),
+  },
+  runtimeEnv: {
+    TRIGGER_DEV_PROJECT_ID: process.env.TRIGGER_DEV_PROJECT_ID,
+    TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,
+  },
 })
