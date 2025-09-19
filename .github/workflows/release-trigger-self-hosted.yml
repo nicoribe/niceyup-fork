@@ -45,3 +45,4 @@ jobs:
           TRIGGER_API_URL: ${{ secrets.TRIGGER_API_URL }}
         run: |
           pnpm run trigger:deploy
+        working-directory: packages/engine
