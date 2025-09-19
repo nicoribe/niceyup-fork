@@ -19,10 +19,12 @@ const upstashEnv = createEnv({
 export const env = createEnv({
   extends: [upstashEnv, aiEnv, databaseEnv, storageEnv],
   server: {
+    TRIGGER_API_URL: z.string().url().optional(),
     TRIGGER_DEV_PROJECT_ID: z.string(),
     TRIGGER_SECRET_KEY: z.string(),
   },
   runtimeEnv: {
+    TRIGGER_API_URL: process.env.TRIGGER_API_URL,
     TRIGGER_DEV_PROJECT_ID: process.env.TRIGGER_DEV_PROJECT_ID,
     TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,
   },

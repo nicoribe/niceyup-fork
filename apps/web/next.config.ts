@@ -40,6 +40,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: '/api/engine/trigger/:path*',
+        destination: `${env.TRIGGER_API_URL}/:path*`,
+      },
+      {
         source: '/api/:path*',
         destination: `${env.API_URL}/api/:path*`,
       },

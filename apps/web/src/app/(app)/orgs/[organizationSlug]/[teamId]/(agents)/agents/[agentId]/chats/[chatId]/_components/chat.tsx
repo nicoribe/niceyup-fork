@@ -431,6 +431,7 @@ function ChatMessageContentStream({
     typeof answerMessageTask,
     STREAMS
   >(message.metadata?.realtimeRun?.id, {
+    baseURL: `${env.NEXT_PUBLIC_WEB_URL}/api/engine/trigger`,
     accessToken: message.metadata?.realtimeRun?.publicAccessToken,
   })
 

@@ -7,6 +7,12 @@ export const env = createEnv({
   extends: [baseEnv, aiEnv, authEnv, databaseEnv],
   server: {
     NEXT_CONFIG_OUTPUT: z.enum(['standalone']).optional(),
+
+    TRIGGER_API_URL: z
+      .string()
+      .url()
+      .optional()
+      .default('https://api.trigger.dev'),
   },
   shared: {
     NEXT_PUBLIC_WEB_URL: z.string().url(),
@@ -15,6 +21,9 @@ export const env = createEnv({
   },
   runtimeEnv: {
     NEXT_CONFIG_OUTPUT: process.env.NEXT_CONFIG_OUTPUT,
+
+    TRIGGER_API_URL: process.env.TRIGGER_API_URL,
+
     NEXT_PUBLIC_WEB_URL: process.env.NEXT_PUBLIC_WEB_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL,
