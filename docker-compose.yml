@@ -5,8 +5,8 @@ services:
   #     dockerfile: apps/api/Dockerfile
   #   ports:
   #     - 3333:3333
-  #   depends_on:
-  #     - postgres
+  #   env_file:
+  #     - .env
 
   # web:
   #   build:
@@ -14,10 +14,10 @@ services:
   #     dockerfile: apps/web/Dockerfile
   #   ports:
   #     - 3000:3000
-  #   environment:
-  #     NEXT_CONFIG_OUTPUT: standalone
+  #   env_file:
+  #     - .env
   #   depends_on:
-  #     - postgres
+  #     - api
 
   postgres:
     image: bitnami/postgresql

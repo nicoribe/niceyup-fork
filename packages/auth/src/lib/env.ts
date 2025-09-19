@@ -1,6 +1,6 @@
 import { env as databaseEnv } from '@workspace/db/env'
 import { env as emailEnv } from '@workspace/email/env'
-import { env as baseEnv, createEnv, skipValidation, z } from '@workspace/env'
+import { env as baseEnv, createEnv, z } from '@workspace/env'
 
 const stripeEnv = createEnv({
   server: {
@@ -28,7 +28,7 @@ const stripeEnv = createEnv({
       process.env.STRIPE_PRO_PLAN_ANNUAL_DISCOUNT_PRICE_ID,
   },
   emptyStringAsUndefined: true,
-  skipValidation,
+  skipValidation: !!process.env.CI,
 })
 
 const oauthEnv = createEnv({
@@ -41,7 +41,7 @@ const oauthEnv = createEnv({
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
   },
   emptyStringAsUndefined: true,
-  skipValidation,
+  skipValidation: !!process.env.CI,
 })
 
 export const env = createEnv({
@@ -53,5 +53,5 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
   },
   emptyStringAsUndefined: true,
-  skipValidation,
+  skipValidation: !!process.env.CI,
 })

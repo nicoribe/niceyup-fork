@@ -31,6 +31,17 @@ RUN pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
+
+# Environment variables
+COPY --from=builder /app/.env .env
+
+# Uncomment and use build args to enable remote caching
+# ARG TURBO_TEAM
+# ENV TURBO_TEAM $TURBO_TEAM
+
+# ARG TURBO_TOKEN
+# ENV TURBO_TOKEN $TURBO_TOKEN
+
 RUN pnpm turbo run build
 
 FROM base AS runner
@@ -39,9 +50,17 @@ WORKDIR /app
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 fastify
-USER fastify
+
+COPY --from=installer --chown=fastify:nodejs /app/node_modules ./node_modules
+COPY --from=installer --chown=fastify:nodejs /app/apps/api/node_modules ./apps/api/node_modules
 
 COPY --from=installer --chown=fastify:nodejs /app/apps/api/dist ./apps/api/dist
 COPY --from=installer --chown=fastify:nodejs /app/apps/api/package.json ./apps/api/package.json
+
+USER fastify
+
+EXPOSE 3333
+
+ENV PORT 3333
 
 CMD node apps/api/dist/http/server.js

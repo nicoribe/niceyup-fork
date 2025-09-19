@@ -20,6 +20,14 @@ const nextConfig: NextConfig = {
     '@workspace/utils',
     'shiki',
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: new URL(env.STORAGE_URL).hostname,
+      },
+    ],
+  },
   async redirects() {
     return [
       {
