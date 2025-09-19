@@ -39,7 +39,7 @@ jobs:
         with:
           registry: ${{ secrets.DOCKER_REGISTRY_URL }}
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
-          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 
       - name: 🚀 Deploy Trigger.dev
         env:
