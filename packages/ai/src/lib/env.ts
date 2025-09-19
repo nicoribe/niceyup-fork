@@ -1,4 +1,4 @@
-import { createEnv, z } from '@workspace/env'
+import { createEnv, skipValidation, z } from '@workspace/env'
 
 export const env = createEnv({
   server: {
@@ -9,4 +9,6 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
   },
+  emptyStringAsUndefined: true,
+  skipValidation,
 })

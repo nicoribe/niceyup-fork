@@ -2,7 +2,7 @@ import { env as aiEnv } from '@workspace/ai/env'
 import { env as authEnv } from '@workspace/auth/env'
 import { env as databaseEnv } from '@workspace/db/env'
 import { env as engineEnv } from '@workspace/engine/env'
-import { env as baseEnv, createEnv, z } from '@workspace/env'
+import { env as baseEnv, createEnv, skipValidation, z } from '@workspace/env'
 import { env as storageEnv } from '@workspace/storage/env'
 
 export const env = createEnv({
@@ -17,4 +17,6 @@ export const env = createEnv({
 
     UPLOAD_SECRET: process.env.UPLOAD_SECRET,
   },
+  emptyStringAsUndefined: true,
+  skipValidation,
 })

@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      CI: true
 
     steps:
       - uses: actions/checkout@v4
@@ -44,5 +46,5 @@ jobs:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
           TRIGGER_API_URL: ${{ secrets.TRIGGER_API_URL }}
         run: |
-          pnpm run trigger:deploy
+          pnpm dlx trigger.dev deploy
         working-directory: packages/engine

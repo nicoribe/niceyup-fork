@@ -1,4 +1,4 @@
-import { createEnv, z } from '@workspace/env'
+import { createEnv, skipValidation, z } from '@workspace/env'
 
 export const env = createEnv({
   server: {
@@ -7,4 +7,6 @@ export const env = createEnv({
   runtimeEnv: {
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
   },
+  emptyStringAsUndefined: true,
+  skipValidation,
 })

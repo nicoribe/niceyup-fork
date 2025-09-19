@@ -1,4 +1,4 @@
-import { createEnv, z } from '@workspace/env'
+import { createEnv, skipValidation, z } from '@workspace/env'
 
 export const env = createEnv({
   server: {
@@ -7,4 +7,6 @@ export const env = createEnv({
   runtimeEnv: {
     RESEND_API_KEY: process.env.RESEND_API_KEY,
   },
+  emptyStringAsUndefined: true,
+  skipValidation,
 })

@@ -1,7 +1,7 @@
 import { env as aiEnv } from '@workspace/ai/env'
 import { env as authEnv } from '@workspace/auth/env'
 import { env as databaseEnv } from '@workspace/db/env'
-import { env as baseEnv, createEnv, z } from '@workspace/env'
+import { env as baseEnv, createEnv, skipValidation, z } from '@workspace/env'
 
 export const env = createEnv({
   extends: [baseEnv, aiEnv, authEnv, databaseEnv],
@@ -20,4 +20,6 @@ export const env = createEnv({
 
     NEXT_CONFIG_OUTPUT: process.env.NEXT_CONFIG_OUTPUT,
   },
+  emptyStringAsUndefined: true,
+  skipValidation,
 })

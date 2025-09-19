@@ -1,5 +1,5 @@
 import { env as encryptionEnv } from '@workspace/encryption/env'
-import { env as baseEnv, createEnv, z } from '@workspace/env'
+import { env as baseEnv, createEnv, skipValidation, z } from '@workspace/env'
 
 export const env = createEnv({
   extends: [baseEnv, encryptionEnv],
@@ -9,4 +9,6 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
   },
+  emptyStringAsUndefined: true,
+  skipValidation,
 })

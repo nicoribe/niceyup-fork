@@ -1,4 +1,4 @@
-import { createEnv, z } from '@workspace/env'
+import { createEnv, skipValidation, z } from '@workspace/env'
 
 export const env = createEnv({
   server: {
@@ -7,4 +7,6 @@ export const env = createEnv({
   runtimeEnv: {
     NOVU_SECRET_KEY: process.env.NOVU_SECRET_KEY,
   },
+  emptyStringAsUndefined: true,
+  skipValidation,
 })

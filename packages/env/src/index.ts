@@ -1,6 +1,9 @@
 import { createEnv } from '@t3-oss/env-nextjs'
 import { z } from 'zod'
 
+const skipValidation =
+  !!process.env.CI || process.env.npm_lifecycle_event === 'lint'
+
 const env = createEnv({
   server: {
     APP_ENV: z
@@ -19,8 +22,7 @@ const env = createEnv({
     STORAGE_URL: process.env.STORAGE_URL,
   },
   emptyStringAsUndefined: true,
-  skipValidation:
-    !!process.env.CI || process.env.npm_lifecycle_event === 'lint',
+  skipValidation,
 })
 
-export { env, createEnv, z }
+export { env, createEnv, skipValidation, z }
