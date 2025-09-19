@@ -15,10 +15,6 @@ node_modules
 .git
 .gitignore
 
-# Local env files
-.env*
-*.local
-
 # Misc
 .DS_Store
 .idea

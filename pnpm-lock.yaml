@@ -337,17 +337,17 @@ importers:
   packages/engine:
     dependencies:
       '@trigger.dev/core':
-        specifier: 4.0.2
-        version: 4.0.2
+        specifier: 4.0.4
+        version: 4.0.4
       '@trigger.dev/python':
-        specifier: 4.0.2
-        version: 4.0.2(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.2(ai@5.0.28(zod@4.1.5))(zod@4.1.5))
+        specifier: 4.0.4
+        version: 4.0.4(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.4(ai@5.0.28(zod@4.1.5))(zod@4.1.5))
       '@trigger.dev/react-hooks':
-        specifier: 4.0.2
-        version: 4.0.2(react-dom@19.0.0(react@19.1.1))(react@19.1.1)
+        specifier: 4.0.4
+        version: 4.0.4(react-dom@19.0.0(react@19.1.1))(react@19.1.1)
       '@trigger.dev/sdk':
-        specifier: 4.0.2
-        version: 4.0.2(ai@5.0.28(zod@4.1.5))(zod@4.1.5)
+        specifier: 4.0.4
+        version: 4.0.4(ai@5.0.28(zod@4.1.5))(zod@4.1.5)
       '@workspace/ai':
         specifier: workspace:*
         version: link:../ai
@@ -3412,26 +3412,26 @@ packages:
     resolution: {integrity: sha512-n8XPKzotMAHtZTcChdAcddCKoDhKp5ZXDU2U3tnLbIL1LAtWxvKW56fzuFBmf6e69wb9rrFL+xyOsf5YIoH/rg==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/core@4.0.2':
-    resolution: {integrity: sha512-hc/alfT7iVdJNZ5YSMbGR9FirLjURqdZ7tCBX4btKas0GDg6M5onwcQsJ3oom5TDp/Nrt+dHaviNMhFxhKCu3g==}
+  '@trigger.dev/core@4.0.4':
+    resolution: {integrity: sha512-c5myttkNhqaqvLlEz3ttE1qEsULlD6ILBge5FAfEtMv9HVS/pNlgvMKrdFMefaGO/bE4HoxrNGdJsY683Kq32w==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/python@4.0.2':
-    resolution: {integrity: sha512-gCPhmp/aH/rMYDHUHz2DV07/i5rZkatYmByBcl75cKqrQlGzeqXGN/JS1qqfmiPzjhThwIOf6Khninrlr00z7g==}
+  '@trigger.dev/python@4.0.4':
+    resolution: {integrity: sha512-46eYZZtvMsd+kahHlysOABDip2aLtyQHnR9PK+NqL7UDaKj9Rj67tG5Qb9UWgolc4W4tIDpBBedipexmJaJhtA==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
-      '@trigger.dev/build': ^4.0.2
-      '@trigger.dev/sdk': ^4.0.2
+      '@trigger.dev/build': ^4.0.4
+      '@trigger.dev/sdk': ^4.0.4
 
-  '@trigger.dev/react-hooks@4.0.2':
-    resolution: {integrity: sha512-xIKRUFu+X+16HmrRvkdLpIR7Bl/z2VIc4mGqzvrbeo9/sc70K8t2yEn6S4e48p59mfUBZBk3kG7aUmvMI3MvIA==}
+  '@trigger.dev/react-hooks@4.0.4':
+    resolution: {integrity: sha512-tgyaGKwFTbVaD4QZdR5GBc2R7T/yq+vHpWw506ys75Mo9uEZN0rGmw7g5q1Pe4XJvsdDiVjcxcJ4tK8zwUM5Zg==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
       react-dom: ^18.0 || ^19.0 || ^19.0.0-rc
 
-  '@trigger.dev/sdk@4.0.2':
-    resolution: {integrity: sha512-ulhWJRSHPXOHz0bMvkhAKThkW63x7lnjAb87LPi6dUps1YwwoOL8Nkr15xLXa73UrldPFT+9Y/GvQ9qpzU478w==}
+  '@trigger.dev/sdk@4.0.4':
+    resolution: {integrity: sha512-54krRw9SN1CGm5u17JBzu0hNzRf1u37jKbSFFngPJjUOltOgi/owey5+KNu1rGthabhOBK2VKzvKEd4sn08RCA==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       ai: ^4.2.0 || ^5.0.0
@@ -10674,7 +10674,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/core@4.0.2':
+  '@trigger.dev/core@4.0.4':
     dependencies:
       '@bugsnag/cuid': 3.2.1
       '@electric-sql/client': 1.0.0-beta.1
@@ -10713,20 +10713,20 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/python@4.0.2(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.2(ai@5.0.28(zod@4.1.5))(zod@4.1.5))':
+  '@trigger.dev/python@4.0.4(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.4(ai@5.0.28(zod@4.1.5))(zod@4.1.5))':
     dependencies:
       '@trigger.dev/build': 4.0.0-v4-beta.23(typescript@5.7.3)
-      '@trigger.dev/core': 4.0.2
-      '@trigger.dev/sdk': 4.0.2(ai@5.0.28(zod@4.1.5))(zod@4.1.5)
+      '@trigger.dev/core': 4.0.4
+      '@trigger.dev/sdk': 4.0.4(ai@5.0.28(zod@4.1.5))(zod@4.1.5)
       tinyexec: 0.3.2
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/react-hooks@4.0.2(react-dom@19.0.0(react@19.1.1))(react@19.1.1)':
+  '@trigger.dev/react-hooks@4.0.4(react-dom@19.0.0(react@19.1.1))(react@19.1.1)':
     dependencies:
-      '@trigger.dev/core': 4.0.2
+      '@trigger.dev/core': 4.0.4
       react: 19.1.1
       react-dom: 19.0.0(react@19.1.1)
       swr: 2.3.4(react@19.1.1)
@@ -10735,11 +10735,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.0.2(ai@5.0.28(zod@4.1.5))(zod@4.1.5)':
+  '@trigger.dev/sdk@4.0.4(ai@5.0.28(zod@4.1.5))(zod@4.1.5)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
-      '@trigger.dev/core': 4.0.2
+      '@trigger.dev/core': 4.0.4
       chalk: 5.4.1
       cronstrue: 2.59.0
       debug: 4.4.0

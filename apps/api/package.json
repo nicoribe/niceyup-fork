@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "pnpm with-env tsx watch src/http/server.ts",
     "build": "pnpm with-env tsup",
-    "start": "pnpm with-env node dist/http/server.js",
+    "start": "node dist/http/server.js",
     "clean": "rm -rf dist .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
