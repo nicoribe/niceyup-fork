@@ -44,8 +44,8 @@ jobs:
       - name: 🚀 Deploy Trigger.dev
         env:
           TRIGGER_API_URL: ${{ secrets.TRIGGER_API_URL }}
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
           TRIGGER_DEV_PROJECT_ID: ${{ secrets.TRIGGER_DEV_PROJECT_ID }}
-          TRIGGER_SECRET_KEY: ${{ secrets.TRIGGER_SECRET_KEY }}
         run: |
           pnpm dlx trigger.dev deploy
         working-directory: packages/engine
