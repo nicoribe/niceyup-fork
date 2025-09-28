@@ -2,12 +2,10 @@ import { createEnv, z } from '@workspace/env'
 
 export const env = createEnv({
   server: {
-    REDIS_HOST: z.string(),
-    REDIS_PORT: z.coerce.number(),
+    REDIS_URL: z.string().url(),
   },
   runtimeEnv: {
-    REDIS_HOST: process.env.REDIS_HOST,
-    REDIS_PORT: process.env.REDIS_PORT,
+    REDIS_URL: process.env.REDIS_URL,
   },
   emptyStringAsUndefined: true,
   skipValidation: !!process.env.CI,
