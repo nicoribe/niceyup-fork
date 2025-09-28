@@ -13,9 +13,9 @@
   "dependencies": {
     "@trigger.dev/core": "4.0.4",
     "@trigger.dev/python": "4.0.4",
-    "@trigger.dev/react-hooks": "4.0.4",
     "@trigger.dev/sdk": "4.0.4",
     "@workspace/ai": "workspace:*",
+    "@workspace/cache": "workspace:*",
     "@workspace/db": "workspace:*",
     "@workspace/env": "workspace:*",
     "@workspace/storage": "workspace:*",
@@ -29,7 +29,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./trigger/*": "./src/trigger/*.ts",
-    "./client": "./src/client.ts",
+    "./types": "./src/lib/types.ts",
     "./env": "./src/lib/env.ts"
   }
 }

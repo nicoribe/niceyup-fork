@@ -23,7 +23,7 @@ import type {
   SourceType,
   TableInfo,
   TableMetadata,
-} from '../types'
+} from '../lib/types'
 import { encryptedJson, id, timestamps } from '../utils'
 import { organizations, teams, users } from './auth'
 

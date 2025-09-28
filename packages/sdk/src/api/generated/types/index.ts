@@ -278,6 +278,19 @@ export type {
   SendQuestionMessageMutation,
 } from './SendQuestionMessage'
 export type {
+  StreamAnswerMessagePathParams,
+  StreamAnswerMessageQueryParams,
+  StreamAnswerMessage200,
+  StreamAnswerMessage400,
+  StreamAnswerMessage401,
+  StreamAnswerMessage403,
+  StreamAnswerMessage404,
+  StreamAnswerMessage429,
+  StreamAnswerMessage500,
+  StreamAnswerMessageQueryResponse,
+  StreamAnswerMessageQuery,
+} from './StreamAnswerMessage'
+export type {
   UploadFileHeaderParams,
   FileBucketEnum,
   FileScopeEnum,

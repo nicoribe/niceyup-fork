@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     '@workspace/ai',
     '@workspace/auth',
+    '@workspace/cache',
     '@workspace/db',
-    '@workspace/engine',
     '@workspace/env',
     '@workspace/sdk',
     '@workspace/ui',
@@ -39,10 +39,6 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      {
-        source: '/api/engine/trigger/:path*',
-        destination: `${env.TRIGGER_API_URL}/:path*`,
-      },
       {
         source: '/api/:path*',
         destination: `${env.API_URL}/api/:path*`,

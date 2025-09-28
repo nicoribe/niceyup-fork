@@ -9,6 +9,7 @@ export type { ListMessagesQueryKey } from './useListMessages'
 export type { RegenerateAnswerMessageMutationKey } from './useRegenerateAnswerMessage'
 export type { ResendQuestionMessageMutationKey } from './useResendQuestionMessage'
 export type { SendQuestionMessageMutationKey } from './useSendQuestionMessage'
+export type { StreamAnswerMessageQueryKey } from './useStreamAnswerMessage'
 export type { UploadFileMutationKey } from './useUploadFile'
 export {
   generateUploadSignatureMutationKey,
@@ -53,4 +54,9 @@ export {
   sendQuestionMessageMutationKey,
   useSendQuestionMessage,
 } from './useSendQuestionMessage'
+export {
+  streamAnswerMessageQueryKey,
+  streamAnswerMessageQueryOptions,
+  useStreamAnswerMessage,
+} from './useStreamAnswerMessage'
 export { uploadFileMutationKey, useUploadFile } from './useUploadFile'

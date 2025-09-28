@@ -13,10 +13,10 @@ export async function uploadFile(app: FastifyTypedInstance) {
     '/files',
     {
       schema: {
+        consumes: ['multipart/form-data'],
         tags: ['[Internal] Files'],
         description: 'Upload File',
         operationId: 'uploadFile',
-        consumes: ['multipart/form-data'],
         headers: z.object({
           'x-upload-signature': z.string(),
         }),

@@ -16,7 +16,11 @@ import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
 
 export type STREAMS = {
-  messageStream: AIMessage
+  [K in 'message-start' | 'message-delta' | 'message-end']: AIMessage
+}
+
+async function* toStream(message: AIMessage) {
+  yield message
 }
 
 export const answerMessageTask = schemaTask({
@@ -29,15 +33,7 @@ export const answerMessageTask = schemaTask({
     questionMessageId: z.string(),
     answerMessageId: z.string(),
   }),
-  init: async ({ payload }) => {
-    const conversation = await queries.getConversation({
-      conversationId: payload.conversationId,
-    })
-
-    if (!conversation) {
-      throw new AbortTaskRunError('Conversation not found')
-    }
-
+  run: async (payload, { signal }) => {
     const questionMessage = await queries.getMessage({
       messageId: payload.questionMessageId,
     })
@@ -45,16 +41,6 @@ export const answerMessageTask = schemaTask({
     if (!questionMessage) {
       throw new AbortTaskRunError('Question message not found')
     }
-
-    return { questionMessage }
-  },
-  run: async (payload, { init, signal }) => {
-    const { questionMessage } = init!
-
-    await queries.updateMessage({
-      messageId: payload.answerMessageId,
-      status: 'in_progress',
-    })
 
     const contextMessages = true // TODO: Make this configurable
     const maxContextMessages = 10 // TODO: Make this configurable
@@ -74,6 +60,11 @@ export const answerMessageTask = schemaTask({
     const messages = convertToModelMessages(validatedMessages)
 
     let error: unknown
+
+    await queries.updateMessage({
+      messageId: payload.answerMessageId,
+      status: 'in_progress',
+    })
 
     const streamingResult = streamText({
       model: gateway.languageModel('openai/gpt-5'),
@@ -96,8 +87,10 @@ export const answerMessageTask = schemaTask({
       parts: [],
     } as AIMessage
 
+    await metadata.stream('message-start', toStream(message))
+
     const stream = await metadata.stream(
-      'messageStream',
+      'message-delta',
       readAIMessageStream({ message, stream: streamingResult }),
     )
 
@@ -106,6 +99,21 @@ export const answerMessageTask = schemaTask({
     }
 
     if (error) {
+      message.status = 'failed'
+      message.metadata = {
+        ...message.metadata,
+        error: error instanceof Error ? error.message : String(error),
+      }
+
+      await queries.updateMessage({
+        messageId: message.id,
+        status: message.status,
+        parts: message.parts,
+        metadata: message.metadata,
+      })
+
+      await metadata.stream('message-end', toStream(message))
+
       logger.error('Error streaming result', {
         error,
         message,
@@ -126,22 +134,13 @@ export const answerMessageTask = schemaTask({
       metadata: message.metadata,
     })
 
+    await metadata.stream('message-end', toStream(message))
+
     logger.warn('Streaming result', {
       message,
       streamingResult,
     })
 
     return { message }
-  },
-  onFailure: async ({ payload, init, error }) => {
-    if (init?.questionMessage) {
-      await queries.updateMessage({
-        messageId: payload.answerMessageId,
-        status: 'failed',
-        metadata: {
-          error: error instanceof Error ? error.message : String(error),
-        },
-      })
-    }
   },
 })

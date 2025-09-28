@@ -1,12 +1,13 @@
+import { cache } from '@workspace/cache'
 import { db, generateId } from '@workspace/db'
 import { sendEmailResetPassword, sendVerificationEmail } from '@workspace/email'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
-import { ac, roles } from './access'
-import { COOKIE_PREFIX } from './constants'
+import { ac, roles } from './lib/access'
+import { COOKIE_PREFIX } from './lib/constants'
 import { env } from './lib/env'
-import { stripe } from './stripe'
+import { stripe } from './lib/stripe'
 
 const config = {
   appName: 'Better Chat',
@@ -48,21 +49,21 @@ const config = {
     cookiePrefix: COOKIE_PREFIX,
     database: { generateId },
   },
-  // secondaryStorage: {
-  //   get: async (key: string) => {
-  //     return await redis.get(key)
-  //   },
-  //   set: async (key: string, value: string, ttl?: number) => {
-  //     await redis.set(key, value)
+  secondaryStorage: {
+    get: async (key: string) => {
+      return await cache.get(key)
+    },
+    set: async (key: string, value: string, ttl?: number) => {
+      await cache.set(key, value)
 
-  //     if (ttl) {
-  //       await redis.expire(key, ttl)
-  //     }
-  //   },
-  //   delete: async (key: string) => {
-  //     await redis.del(key)
-  //   },
-  // },
+      if (ttl) {
+        await cache.expire(key, ttl)
+      }
+    },
+    delete: async (key: string) => {
+      await cache.del(key)
+    },
+  },
   plugins: [
     organization({
       ac,

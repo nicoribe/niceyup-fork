@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@better-auth/stripe": "^1.3.4",
+    "@workspace/cache": "workspace:*",
     "@workspace/db": "workspace:*",
     "@workspace/email": "workspace:*",
     "@workspace/env": "workspace:*",
@@ -23,8 +24,9 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./constants": "./src/constants.ts",
     "./client": "./src/client.ts",
+    "./constants": "./src/lib/constants.ts",
+    "./types": "./src/lib/types.ts",
     "./env": "./src/lib/env.ts"
   }
 }

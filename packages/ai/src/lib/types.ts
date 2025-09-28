@@ -1,11 +1,9 @@
 import type { UIDataTypes, UIMessage, UIMessagePart, UITools } from 'ai'
 
 export type AIMessageMetadata = {
-  realtimeRun?: {
-    messageId: string
+  triggerTask?: {
     id: string
     taskIdentifier: string
-    publicAccessToken: string
   }
   authorId?: string
   error?: any

@@ -1,8 +1,11 @@
 import { env } from '@/lib/env'
 import { fastifyCors } from '@fastify/cors'
 import { fastifyMultipart } from '@fastify/multipart'
+import { fastifyRedis } from '@fastify/redis'
 import { fastifySwagger } from '@fastify/swagger'
+import { fastifyWebsocket } from '@fastify/websocket'
 import fastifyScalar from '@scalar/fastify-api-reference'
+import { cache } from '@workspace/cache'
 import { fastify } from 'fastify'
 import {
   type ZodTypeProvider,
@@ -11,7 +14,8 @@ import {
   validatorCompiler,
 } from 'fastify-type-provider-zod'
 import { version } from '../../package.json'
-import { errorHandler } from './errors/error-handler'
+import { errorHandler, errorHandlerWebsocket } from './errors/error-handler'
+import { fastifyRealtime } from './realtime'
 import { routes } from './routes'
 
 export const app = fastify({
@@ -32,6 +36,15 @@ app.setValidatorCompiler(validatorCompiler)
 app.setErrorHandler(errorHandler)
 
 app.register(fastifyCors)
+
+app.register(fastifyRedis, {
+  client: cache,
+})
+
+app.register(fastifyWebsocket, {
+  errorHandler: errorHandlerWebsocket,
+})
+
 app.register(fastifyMultipart, {
   // attachFieldsToBody: true,
 })
@@ -74,5 +87,7 @@ if (env.APP_ENV === 'development') {
     },
   })
 }
+
+app.register(fastifyRealtime)
 
 app.register(routes, { prefix: '/api' })

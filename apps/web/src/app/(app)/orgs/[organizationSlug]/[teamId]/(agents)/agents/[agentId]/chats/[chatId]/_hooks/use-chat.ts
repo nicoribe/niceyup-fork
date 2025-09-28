@@ -19,18 +19,19 @@ type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
 export type MessageProps = Message & {
   isBranch?: boolean
-  isStream?: boolean
   isPersisted?: boolean
 }
 
-function isBranch(message: Message) {
-  return Boolean(message.children?.length && message.children.length > 1)
+function hasMultipleChildren(parentMessage: Message) {
+  return Boolean(
+    parentMessage.children?.length && parentMessage.children.length > 1,
+  )
 }
 
-function isStream(message: Message) {
+export function isMessageStream(message: Message) {
   return Boolean(
     (message.status === 'queued' || message.status === 'in_progress') &&
-      message.metadata?.realtimeRun?.id,
+      message.role === 'assistant',
   )
 }
 
@@ -77,8 +78,7 @@ const buildMessageTree = (
 
       const message = {
         ...targetMessage,
-        isBranch: lastAncestor ? isBranch(lastAncestor) : false,
-        isStream: isStream(targetMessage),
+        isBranch: lastAncestor ? hasMultipleChildren(lastAncestor) : false,
       }
 
       return [...ancestors, message]
@@ -96,8 +96,7 @@ const buildMessageTree = (
 
   const message = {
     ...targetMessage,
-    isBranch: lastAncestor ? isBranch(lastAncestor) : false,
-    isStream: isStream(targetMessage),
+    isBranch: lastAncestor ? hasMultipleChildren(lastAncestor) : false,
   }
 
   return [...ancestors, message, ...descendants]
@@ -118,8 +117,7 @@ const buildAncestors = (
     }
 
     if (ancestors[0]) {
-      ancestors[0].isBranch = isBranch(parent)
-      ancestors[0].isStream = isStream(current)
+      ancestors[0].isBranch = hasMultipleChildren(parent)
     }
 
     ancestors.unshift(parent)
@@ -151,8 +149,7 @@ const buildDescendants = (
 
     descendants.push({
       ...firstChild,
-      isBranch: isBranch(message),
-      isStream: isStream(firstChild),
+      isBranch: hasMultipleChildren(message),
     })
     current = firstChild
   }
@@ -244,11 +241,11 @@ export type RegenerateMessageParams = {
   messageId: string
 }
 
-export function useChat({
-  initialMessages,
-}: {
+type UseChatParams = {
   initialMessages?: Message[]
-} = {}) {
+}
+
+export function useChat({ initialMessages }: UseChatParams = {}) {
   const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
   const router = useRouter()
 
@@ -343,7 +340,8 @@ export function useChat({
     )
   }, [targetMessageId, loadingMessage, messageIndexData])
 
-  const [status, setStatus] = React.useState<PromptInputStatus>('ready')
+  const [promptInputStatus, setPromptInputStatus] =
+    React.useState<PromptInputStatus>('ready')
 
   const generateFakeMessageId = () => {
     return Math.random().toString(36).substring(2, 15)
@@ -476,11 +474,14 @@ export function useChat({
   }
 
   const sendMessage = async ({ parts }: SendMessageParams) => {
-    if (status === 'submitted' || status === 'streaming') {
+    if (
+      promptInputStatus === 'submitted' ||
+      promptInputStatus === 'streaming'
+    ) {
       return
     }
 
-    setStatus('submitted')
+    setPromptInputStatus('submitted')
 
     const parentMessageId = messagesFiltered.at(-1)?.id
     const fakeMessageId = generateFakeMessageId()
@@ -545,18 +546,21 @@ export function useChat({
         answerMessage: data.answerMessage as Message,
       })
     } catch {
-      setStatus('error')
+      setPromptInputStatus('error')
 
       setErrorFakeMessage({ type: 'question', fakeMessageId })
     }
   }
 
   const resendMessage = async ({ messageId, parts }: ResendMessageParams) => {
-    if (status === 'submitted' || status === 'streaming') {
+    if (
+      promptInputStatus === 'submitted' ||
+      promptInputStatus === 'streaming'
+    ) {
       return
     }
 
-    setStatus('submitted')
+    setPromptInputStatus('submitted')
 
     const message = getMessageById(messageId)
 
@@ -607,18 +611,21 @@ export function useChat({
 
       setTargetMessageId(data.questionMessage.id)
     } catch {
-      setStatus('error')
+      setPromptInputStatus('error')
 
       setErrorFakeMessage({ type: 'question', fakeMessageId })
     }
   }
 
   const regenerate = async ({ messageId }: RegenerateMessageParams) => {
-    if (status === 'submitted' || status === 'streaming') {
+    if (
+      promptInputStatus === 'submitted' ||
+      promptInputStatus === 'streaming'
+    ) {
       return
     }
 
-    setStatus('submitted')
+    setPromptInputStatus('submitted')
 
     const message = getMessageById(messageId)
 
@@ -667,7 +674,7 @@ export function useChat({
 
       setTargetMessageId(data.answerMessage.id)
     } catch {
-      setStatus('error')
+      setPromptInputStatus('error')
 
       setErrorFakeMessage({ type: 'answer', fakeMessageId })
     }
@@ -696,8 +703,8 @@ export function useChat({
     sendMessage,
     resendMessage,
     regenerate,
-    status,
-    setStatus,
+    promptInputStatus,
+    setPromptInputStatus,
     uploadFiles,
   }
 }

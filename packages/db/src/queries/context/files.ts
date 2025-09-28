@@ -1,5 +1,5 @@
 import { db } from '../../db'
-import { and, eq, isNull } from '../../orm'
+import { and, eq, isNull } from '../../lib/orm'
 import { files } from '../../schema'
 import { getConversation } from './conversations'
 import { getSource } from './sources'

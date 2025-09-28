@@ -1,0 +1,61 @@
+import { db } from '../../db'
+import { and, eq, isNull } from '../../lib/orm'
+import { messages } from '../../schema'
+import { getConversation } from './conversations'
+
+type ContextGetMessageParams = {
+  userId: string
+} & (
+  | {
+      organizationId?: string | null
+      organizationSlug?: never
+    }
+  | {
+      organizationId?: never
+      organizationSlug?: string | null
+    }
+) & {
+    teamId?: string | null
+  }
+
+type GetMessageParams = {
+  conversationId: string
+  messageId: string
+}
+
+export async function getMessage(
+  context: ContextGetMessageParams,
+  params: GetMessageParams,
+) {
+  const [message] = await db
+    .select({
+      id: messages.id,
+      status: messages.status,
+      role: messages.role,
+      parts: messages.parts,
+      metadata: messages.metadata,
+      authorId: messages.authorId,
+      parentId: messages.parentId,
+    })
+    .from(messages)
+    .where(
+      and(
+        eq(messages.conversationId, params.conversationId),
+        eq(messages.id, params.messageId),
+        isNull(messages.deletedAt),
+      ),
+    )
+    .limit(1)
+
+  if (message) {
+    const conversation = await getConversation(context, {
+      conversationId: params.conversationId,
+    })
+
+    if (conversation) {
+      return message
+    }
+  }
+
+  return null
+}

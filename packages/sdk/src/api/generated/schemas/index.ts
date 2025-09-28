@@ -126,6 +126,18 @@ export type {
   SendQuestionMessageMutationResponseSchema,
 } from './sendQuestionMessageSchema'
 export type {
+  StreamAnswerMessagePathParamsSchema,
+  StreamAnswerMessageQueryParamsSchema,
+  StreamAnswerMessage200Schema,
+  StreamAnswerMessage400Schema,
+  StreamAnswerMessage401Schema,
+  StreamAnswerMessage403Schema,
+  StreamAnswerMessage404Schema,
+  StreamAnswerMessage429Schema,
+  StreamAnswerMessage500Schema,
+  StreamAnswerMessageQueryResponseSchema,
+} from './streamAnswerMessageSchema'
+export type {
   UploadFileHeaderParamsSchema,
   UploadFile200Schema,
   UploadFile400Schema,
@@ -263,6 +275,18 @@ export {
   sendQuestionMessageMutationRequestSchema,
   sendQuestionMessageMutationResponseSchema,
 } from './sendQuestionMessageSchema'
+export {
+  streamAnswerMessagePathParamsSchema,
+  streamAnswerMessageQueryParamsSchema,
+  streamAnswerMessage200Schema,
+  streamAnswerMessage400Schema,
+  streamAnswerMessage401Schema,
+  streamAnswerMessage403Schema,
+  streamAnswerMessage404Schema,
+  streamAnswerMessage429Schema,
+  streamAnswerMessage500Schema,
+  streamAnswerMessageQueryResponseSchema,
+} from './streamAnswerMessageSchema'
 export {
   uploadFileHeaderParamsSchema,
   uploadFile200Schema,

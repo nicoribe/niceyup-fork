@@ -41,3 +41,19 @@ export const errorHandler: FastifyErrorHandler = (error, _, reply) => {
     message: 'Internal server error',
   })
 }
+
+export const errorHandlerWebsocket = (error: Error, socket: WebSocket) => {
+  if (error instanceof BaseError) {
+    const { code, message } = JSON.parse(error.message) as BaseErrorParams
+
+    socket.close(1008, JSON.stringify({ code, message }))
+  }
+
+  socket.close(
+    1011,
+    JSON.stringify({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Internal server error',
+    }),
+  )
+}

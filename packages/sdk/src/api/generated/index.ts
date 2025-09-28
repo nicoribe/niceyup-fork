@@ -9,6 +9,7 @@ export type { ListMessagesQueryKey } from './react-query/hooks/useListMessages'
 export type { RegenerateAnswerMessageMutationKey } from './react-query/hooks/useRegenerateAnswerMessage'
 export type { ResendQuestionMessageMutationKey } from './react-query/hooks/useResendQuestionMessage'
 export type { SendQuestionMessageMutationKey } from './react-query/hooks/useSendQuestionMessage'
+export type { StreamAnswerMessageQueryKey } from './react-query/hooks/useStreamAnswerMessage'
 export type { UploadFileMutationKey } from './react-query/hooks/useUploadFile'
 export type {
   GenerateUploadSignatureHeaderParamsSchema,
@@ -137,6 +138,18 @@ export type {
   SendQuestionMessageMutationRequestSchema,
   SendQuestionMessageMutationResponseSchema,
 } from './schemas/sendQuestionMessageSchema'
+export type {
+  StreamAnswerMessagePathParamsSchema,
+  StreamAnswerMessageQueryParamsSchema,
+  StreamAnswerMessage200Schema,
+  StreamAnswerMessage400Schema,
+  StreamAnswerMessage401Schema,
+  StreamAnswerMessage403Schema,
+  StreamAnswerMessage404Schema,
+  StreamAnswerMessage429Schema,
+  StreamAnswerMessage500Schema,
+  StreamAnswerMessageQueryResponseSchema,
+} from './schemas/streamAnswerMessageSchema'
 export type {
   UploadFileHeaderParamsSchema,
   UploadFile200Schema,
@@ -428,6 +441,19 @@ export type {
   SendQuestionMessageMutation,
 } from './types/SendQuestionMessage'
 export type {
+  StreamAnswerMessagePathParams,
+  StreamAnswerMessageQueryParams,
+  StreamAnswerMessage200,
+  StreamAnswerMessage400,
+  StreamAnswerMessage401,
+  StreamAnswerMessage403,
+  StreamAnswerMessage404,
+  StreamAnswerMessage429,
+  StreamAnswerMessage500,
+  StreamAnswerMessageQueryResponse,
+  StreamAnswerMessageQuery,
+} from './types/StreamAnswerMessage'
+export type {
   UploadFileHeaderParams,
   FileBucketEnum,
   FileScopeEnum,
@@ -452,6 +478,7 @@ export { listMessages } from './operations/listMessages'
 export { regenerateAnswerMessage } from './operations/regenerateAnswerMessage'
 export { resendQuestionMessage } from './operations/resendQuestionMessage'
 export { sendQuestionMessage } from './operations/sendQuestionMessage'
+export { streamAnswerMessage } from './operations/streamAnswerMessage'
 export { uploadFile } from './operations/uploadFile'
 export {
   generateUploadSignatureMutationKey,
@@ -504,6 +531,11 @@ export {
   sendQuestionMessageMutationKey,
   useSendQuestionMessage,
 } from './react-query/hooks/useSendQuestionMessage'
+export {
+  streamAnswerMessageQueryKey,
+  streamAnswerMessageQueryOptions,
+  useStreamAnswerMessage,
+} from './react-query/hooks/useStreamAnswerMessage'
 export {
   uploadFileMutationKey,
   useUploadFile,
@@ -635,6 +667,18 @@ export {
   sendQuestionMessageMutationRequestSchema,
   sendQuestionMessageMutationResponseSchema,
 } from './schemas/sendQuestionMessageSchema'
+export {
+  streamAnswerMessagePathParamsSchema,
+  streamAnswerMessageQueryParamsSchema,
+  streamAnswerMessage200Schema,
+  streamAnswerMessage400Schema,
+  streamAnswerMessage401Schema,
+  streamAnswerMessage403Schema,
+  streamAnswerMessage404Schema,
+  streamAnswerMessage429Schema,
+  streamAnswerMessage500Schema,
+  streamAnswerMessageQueryResponseSchema,
+} from './schemas/streamAnswerMessageSchema'
 export {
   uploadFileHeaderParamsSchema,
   uploadFile200Schema,

@@ -1,7 +1,7 @@
 import { db } from '../db'
-import { and, eq, isNull, sql } from '../orm'
+import { and, eq, isNull, sql } from '../lib/orm'
+import type { FileBucket, FileMetadata, FileScope } from '../lib/types'
 import { files } from '../schema'
-import type { FileBucket, FileMetadata, FileScope } from '../types'
 
 type CreateFileParams = {
   fileName: string

@@ -186,7 +186,10 @@ export async function resendQuestionMessage(app: FastifyTypedInstance) {
           })
 
           const metadata: AIMessageMetadata = {
-            realtimeRun: { messageId: answerMessage.id, ...handle },
+            triggerTask: {
+              id: handle.id,
+              taskIdentifier: handle.taskIdentifier,
+            },
             authorId: userId,
           }
 

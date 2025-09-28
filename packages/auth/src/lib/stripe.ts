@@ -1,7 +1,7 @@
 import { stripe as stripePlugin } from '@better-auth/stripe'
 import type { StripePlan } from '@better-auth/stripe'
 import { Stripe } from 'stripe'
-import { env } from './lib/env'
+import { env } from './env'
 
 const stripeClient = new Stripe(env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-07-30.basil',

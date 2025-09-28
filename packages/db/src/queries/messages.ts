@@ -1,12 +1,12 @@
 import { db } from '../db'
-import { and, eq, isNull, sql } from '../orm'
-import { messages } from '../schema'
+import { and, eq, isNull, sql } from '../lib/orm'
 import type {
   MessageMetadata,
   MessagePart,
   MessageRole,
   MessageStatus,
-} from '../types'
+} from '../lib/types'
+import { messages } from '../schema'
 
 type Message = {
   id: string

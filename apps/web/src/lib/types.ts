@@ -64,8 +64,6 @@ export type Message = {
   children?: string[]
 }
 
-export type MessageRealtimeRun = NonNullable<AIMessageMetadata['realtimeRun']>
-
 export type PromptMessagePart =
   | {
       type: 'text'
