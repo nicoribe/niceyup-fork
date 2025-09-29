@@ -21,9 +21,12 @@ export function useChatRealtime() {
     let websocket: WebSocket | null = null
 
     try {
-      const queryParams = new URLSearchParams({ organizationSlug, teamId })
+      const params = new URLSearchParams({ organizationSlug, teamId })
 
-      const url = `${env.NEXT_PUBLIC_WEBSOCKET_URL}/api/conversations/${chatId}/messages?${queryParams.toString()}`
+      const url = new URL(
+        `/api/conversations/${chatId}/messages?${params}`,
+        env.NEXT_PUBLIC_WEBSOCKET_URL,
+      )
 
       websocket = new WebSocket(url)
 

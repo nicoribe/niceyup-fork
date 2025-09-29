@@ -2,6 +2,7 @@
 
 import { env } from '@/lib/env'
 import type { ChatParams, Message, OrganizationTeamParams } from '@/lib/types'
+import { consumeStream } from '@workspace/utils'
 import { useParams } from 'next/navigation'
 import * as React from 'react'
 
@@ -15,45 +16,68 @@ export function useChatAssistantMessageRealtime({
   const [error, setError] = React.useState<string>()
   const [message, setMessage] = React.useState<Message>()
 
+  async function startStreamingMessage({
+    signal,
+    onChunk,
+  }: {
+    signal?: AbortSignal
+    onChunk: (data: Message) => void
+  }) {
+    try {
+      const params = new URLSearchParams({ organizationSlug, teamId })
+
+      const url = new URL(
+        `/api/conversations/${chatId}/messages/${messageId}/stream-answer?${params}`,
+        env.NEXT_PUBLIC_WEB_URL,
+      )
+
+      const response = await fetch(url, { signal })
+
+      if (!response.body) {
+        return
+      }
+
+      const reader = response.body.getReader()
+
+      if (!reader) {
+        return
+      }
+
+      await consumeStream({ stream: reader, onChunk })
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        // Request was cancelled, don't set error
+        return
+      }
+
+      setError(error instanceof Error ? error.message : String(error))
+    }
+  }
+
   React.useEffect(() => {
     if (!organizationSlug || !teamId || !chatId || !messageId) {
       return
     }
 
-    let eventSource: EventSource | null = null
+    const abortController = new AbortController()
 
-    try {
-      const queryParams = new URLSearchParams({ organizationSlug, teamId })
-
-      const url = `${env.NEXT_PUBLIC_WEB_URL}/api/conversations/${chatId}/messages/${messageId}/stream-answer?${queryParams.toString()}`
-
-      eventSource = new EventSource(url)
-
-      eventSource.onopen = () => {
-        setError(undefined)
-      }
-
-      eventSource.onmessage = (event) => {
-        try {
-          const data: Message = JSON.parse(event.data)
-
-          setMessage(data)
-        } catch {
-          setError('Connection error occurred')
+    startStreamingMessage({
+      signal: abortController.signal,
+      onChunk: (data) => {
+        if (
+          data.status === 'stopped' ||
+          data.status === 'finished' ||
+          data.status === 'failed'
+        ) {
+          abortController.abort()
         }
-      }
 
-      eventSource.onerror = () => {
-        setError('Connection error occurred, please try again')
-      }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : String(error))
-    }
+        setMessage(data)
+      },
+    })
 
     return () => {
-      if (eventSource) {
-        eventSource.close()
-      }
+      abortController.abort()
     }
   }, [organizationSlug, teamId, chatId, messageId])
 

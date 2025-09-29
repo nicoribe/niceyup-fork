@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream'
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
@@ -60,13 +61,19 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
         })
       }
 
-      reply.sse(
+      if (message.role !== 'assistant') {
+        throw new BadRequestError({
+          code: 'MESSAGE_ROLE_NOT_ASSISTANT',
+          message: 'Message role is not assistant',
+        })
+      }
+
+      const stream = Readable.from(
         (async function* source() {
-          yield { data: JSON.stringify(message) }
+          yield `${JSON.stringify(message)}\n`
 
           if (
             (message.status === 'queued' || message.status === 'in_progress') &&
-            message.role === 'assistant' &&
             message.metadata?.triggerTask?.id
           ) {
             const realtimeRunStream = runs
@@ -78,12 +85,21 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
                 case 'message-start':
                 case 'message-delta':
                 case 'message-end':
-                  yield { data: JSON.stringify({ ...message, ...part.chunk }) }
+                  yield `${JSON.stringify({ ...message, ...part.chunk })}\n`
+                  break
               }
             }
           }
         })(),
       )
+
+      reply.header('Content-Type', 'application/x-ndjson; charset=utf-8')
+      reply.header('Cache-Control', 'no-cache')
+      reply.header('Connection', 'keep-alive')
+      reply.header('Transfer-Encoding', 'chunked')
+      reply.header('Content-Encoding', 'none')
+
+      return reply.send(stream)
     },
   )
 }
