@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream'
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
@@ -27,7 +26,7 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
           teamId: z.string().optional(),
         }),
         response: withDefaultErrorResponses({
-          200: z.unknown().describe('Success. NDJSON stream of AIMessage'),
+          200: z.unknown().describe('Success'),
         }),
       },
     },
@@ -61,12 +60,13 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
         })
       }
 
-      const stream = Readable.from(
-        (async function* () {
-          yield `${JSON.stringify(message)}\n`
+      reply.sse(
+        (async function* source() {
+          yield { data: JSON.stringify(message) }
 
           if (
             (message.status === 'queued' || message.status === 'in_progress') &&
+            message.role === 'assistant' &&
             message.metadata?.triggerTask?.id
           ) {
             const realtimeRunStream = runs
@@ -78,19 +78,12 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
                 case 'message-start':
                 case 'message-delta':
                 case 'message-end':
-                  yield `${JSON.stringify({ ...message, ...part.chunk })}\n`
-                  break
+                  yield { data: JSON.stringify({ ...message, ...part.chunk }) }
               }
             }
           }
         })(),
       )
-
-      reply.header('Content-Type', 'application/x-ndjson; charset=utf-8')
-      reply.header('Cache-Control', 'no-cache')
-      reply.header('Connection', 'keep-alive')
-
-      return stream
     },
   )
 }

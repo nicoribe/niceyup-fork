@@ -5,51 +5,11 @@ import type { ChatParams, Message, OrganizationTeamParams } from '@/lib/types'
 import { useParams } from 'next/navigation'
 import * as React from 'react'
 
-async function consumeStream<T>({
-  stream,
-  onChunk,
-}: {
-  stream: ReadableStreamDefaultReader<Uint8Array>
-  onChunk: (data: T) => void
-}) {
-  const decoder = new TextDecoder()
-  let buf = ''
-
-  while (true) {
-    const { value, done } = await stream.read()
-
-    if (done) {
-      break
-    }
-
-    buf += decoder.decode(value, { stream: true })
-
-    const lines = buf.split('\n')
-    buf = lines.pop() ?? ''
-
-    for (const line of lines) {
-      if (!line) {
-        continue
-      }
-
-      onChunk(JSON.parse(line) as T)
-    }
-  }
-
-  if (buf.trim()) {
-    onChunk(JSON.parse(buf) as T)
-  }
-}
-
 type Params = OrganizationTeamParams & ChatParams
-
-type UseChatAssistantMessageRealtimeParams = {
-  messageId: string
-}
 
 export function useChatAssistantMessageRealtime({
   messageId,
-}: UseChatAssistantMessageRealtimeParams) {
+}: { messageId: string }) {
   const { organizationSlug, teamId, chatId } = useParams<Params>()
 
   const [error, setError] = React.useState<string>()
@@ -60,44 +20,39 @@ export function useChatAssistantMessageRealtime({
       return
     }
 
-    let abortController: AbortController | null = null
+    let eventSource: EventSource | null = null
 
-    const getMessageStream = async () => {
-      try {
-        abortController = new AbortController()
+    try {
+      const queryParams = new URLSearchParams({ organizationSlug, teamId })
 
-        const response = await fetch(
-          `${env.NEXT_PUBLIC_WEB_URL}/api/conversations/${chatId}/messages/${messageId}/stream-answer?organizationSlug=${organizationSlug}&teamId=${teamId}`,
-          { signal: abortController.signal },
-        )
+      const url = `${env.NEXT_PUBLIC_WEB_URL}/api/conversations/${chatId}/messages/${messageId}/stream-answer?${queryParams.toString()}`
 
-        if (!response.body) {
-          return
-        }
+      eventSource = new EventSource(url)
 
-        const reader = response.body.getReader()
-
-        if (!reader) {
-          return
-        }
-
-        await consumeStream<Message>({ stream: reader, onChunk: setMessage })
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          // Request was cancelled, don't set error
-          return
-        }
-
-        setError(error instanceof Error ? error.message : String(error))
+      eventSource.onopen = () => {
+        setError(undefined)
       }
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data: Message = JSON.parse(event.data)
+
+          setMessage(data)
+        } catch {
+          setError('Connection error occurred')
+        }
+      }
+
+      eventSource.onerror = () => {
+        setError('Connection error occurred, please try again')
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error))
     }
 
-    getMessageStream()
-
-    // Cleanup function
     return () => {
-      if (abortController) {
-        abortController.abort()
+      if (eventSource) {
+        eventSource.close()
       }
     }
   }, [organizationSlug, teamId, chatId, messageId])

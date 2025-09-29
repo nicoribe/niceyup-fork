@@ -18,29 +18,39 @@ export function useChatRealtime() {
       return
     }
 
-    let ws: WebSocket | null = null
+    let websocket: WebSocket | null = null
 
     try {
-      ws = new WebSocket(
-        `${env.NEXT_PUBLIC_WEBSOCKET_URL}/api/conversations/${chatId}/messages?organizationSlug=${organizationSlug}&teamId=${teamId}`,
-      )
+      const queryParams = new URLSearchParams({ organizationSlug, teamId })
 
-      ws.onmessage = (event) => {
-        const data: Message[] = JSON.parse(event.data)
-        setMessages(data)
+      const url = `${env.NEXT_PUBLIC_WEBSOCKET_URL}/api/conversations/${chatId}/messages?${queryParams.toString()}`
+
+      websocket = new WebSocket(url)
+
+      websocket.onopen = () => {
+        setError(undefined)
       }
 
-      ws.onerror = () => {
-        setError('Error connecting to WebSocket')
+      websocket.onmessage = (event) => {
+        try {
+          const data: Message[] = JSON.parse(event.data)
+
+          setMessages(data)
+        } catch {
+          setError('Connection error occurred')
+        }
+      }
+
+      websocket.onerror = () => {
+        setError('Connection error occurred, please try again')
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error))
     }
 
-    // Cleanup function
     return () => {
-      if (ws) {
-        ws.close()
+      if (websocket) {
+        websocket.close()
       }
     }
   }, [organizationSlug, teamId, chatId])
