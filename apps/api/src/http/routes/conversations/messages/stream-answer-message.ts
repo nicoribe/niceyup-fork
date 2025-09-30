@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream'
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
@@ -68,9 +67,17 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
         })
       }
 
-      const stream = Readable.from(
+      reply.raw.setHeader('Content-Type', 'text/event-stream; charset=utf-8')
+      reply.raw.setHeader('Cache-Control', 'no-cache')
+      reply.raw.setHeader('Connection', 'keep-alive')
+
+      reply.raw.setHeader('Transfer-Encoding', 'chunked')
+      reply.raw.setHeader('Content-Encoding', 'none')
+      reply.raw.setHeader('X-Accel-Buffering', 'no') // disable nginx buffering
+
+      reply.sse(
         (async function* source() {
-          yield `${JSON.stringify(message)}\n`
+          yield { data: JSON.stringify(message) }
 
           if (
             (message.status === 'queued' || message.status === 'in_progress') &&
@@ -85,21 +92,13 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
                 case 'message-start':
                 case 'message-delta':
                 case 'message-end':
-                  yield `${JSON.stringify({ ...message, ...part.chunk })}\n`
+                  yield { data: JSON.stringify({ ...message, ...part.chunk }) }
                   break
               }
             }
           }
         })(),
       )
-
-      reply.header('Content-Type', 'application/x-ndjson; charset=utf-8')
-      reply.header('Cache-Control', 'no-cache')
-      reply.header('Connection', 'keep-alive')
-      reply.header('Transfer-Encoding', 'chunked')
-      reply.header('Content-Encoding', 'none')
-
-      return reply.send(stream)
     },
   )
 }

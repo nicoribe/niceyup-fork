@@ -2,27 +2,30 @@
 
 import { env } from '@/lib/env'
 import type { ChatParams, Message, OrganizationTeamParams } from '@/lib/types'
-import { consumeStream } from '@workspace/utils'
 import { useParams } from 'next/navigation'
 import * as React from 'react'
 
 type Params = OrganizationTeamParams & ChatParams
 
+type UseChatAssistantMessageRealtimeParams = {
+  messageId: string
+}
+
 export function useChatAssistantMessageRealtime({
   messageId,
-}: { messageId: string }) {
+}: UseChatAssistantMessageRealtimeParams) {
   const { organizationSlug, teamId, chatId } = useParams<Params>()
 
   const [error, setError] = React.useState<string>()
   const [message, setMessage] = React.useState<Message>()
 
-  async function startStreamingMessage({
-    signal,
-    onChunk,
-  }: {
-    signal?: AbortSignal
-    onChunk: (data: Message) => void
-  }) {
+  React.useEffect(() => {
+    if (!organizationSlug || !teamId || !chatId || !messageId) {
+      return
+    }
+
+    let eventSource: EventSource | null = null
+
     try {
       const params = new URLSearchParams({ organizationSlug, teamId })
 
@@ -31,53 +34,42 @@ export function useChatAssistantMessageRealtime({
         env.NEXT_PUBLIC_WEB_URL,
       )
 
-      const response = await fetch(url, { signal })
+      eventSource = new EventSource(url)
 
-      if (!response.body) {
-        return
+      eventSource.onopen = () => {
+        setError(undefined)
       }
 
-      const reader = response.body.getReader()
+      eventSource.onmessage = (event) => {
+        try {
+          const data: Message = JSON.parse(event.data)
 
-      if (!reader) {
-        return
+          if (
+            data.status === 'stopped' ||
+            data.status === 'finished' ||
+            data.status === 'failed'
+          ) {
+            eventSource?.close()
+          }
+
+          setMessage(data)
+        } catch {
+          eventSource?.close()
+          setError('Connection error occurred')
+        }
       }
 
-      await consumeStream({ stream: reader, onChunk })
+      eventSource.onerror = () => {
+        eventSource?.close()
+        setError('Connection error occurred, please try again')
+      }
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        // Request was cancelled, don't set error
-        return
-      }
-
+      eventSource?.close()
       setError(error instanceof Error ? error.message : String(error))
     }
-  }
-
-  React.useEffect(() => {
-    if (!organizationSlug || !teamId || !chatId || !messageId) {
-      return
-    }
-
-    const abortController = new AbortController()
-
-    startStreamingMessage({
-      signal: abortController.signal,
-      onChunk: (data) => {
-        if (
-          data.status === 'stopped' ||
-          data.status === 'finished' ||
-          data.status === 'failed'
-        ) {
-          abortController.abort()
-        }
-
-        setMessage(data)
-      },
-    })
 
     return () => {
-      abortController.abort()
+      eventSource?.close()
     }
   }, [organizationSlug, teamId, chatId, messageId])
 

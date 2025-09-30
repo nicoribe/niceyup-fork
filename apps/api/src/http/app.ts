@@ -7,6 +7,7 @@ import { fastifyWebsocket } from '@fastify/websocket'
 import fastifyScalar from '@scalar/fastify-api-reference'
 import { cache } from '@workspace/cache'
 import { fastify } from 'fastify'
+import { FastifySSEPlugin } from 'fastify-sse-v2'
 import {
   type ZodTypeProvider,
   jsonSchemaTransform,
@@ -40,6 +41,8 @@ app.register(fastifyCors)
 app.register(fastifyRedis, {
   client: cache,
 })
+
+app.register(FastifySSEPlugin)
 
 app.register(fastifyWebsocket, {
   errorHandler: errorHandlerWebsocket,

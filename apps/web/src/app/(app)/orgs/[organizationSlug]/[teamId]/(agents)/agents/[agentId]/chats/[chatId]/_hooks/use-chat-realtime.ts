@@ -40,21 +40,22 @@ export function useChatRealtime() {
 
           setMessages(data)
         } catch {
+          websocket?.close()
           setError('Connection error occurred')
         }
       }
 
       websocket.onerror = () => {
+        websocket?.close()
         setError('Connection error occurred, please try again')
       }
     } catch (error) {
+      websocket?.close()
       setError(error instanceof Error ? error.message : String(error))
     }
 
     return () => {
-      if (websocket) {
-        websocket.close()
-      }
+      websocket?.close()
     }
   }, [organizationSlug, teamId, chatId])
 
