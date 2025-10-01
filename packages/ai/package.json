@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@ai-sdk/gateway": "^1.0.15",
+    "@ai-sdk/rsc": "^1.0.59",
     "@workspace/env": "workspace:*",
     "ai": "^5.0.28",
     "zod": "^3.25.76"
@@ -21,6 +22,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./gateway": "./src/gateway.ts",
+    "./rsc": "./src/rsc.ts",
     "./schemas": "./src/lib/schemas.ts",
     "./types": "./src/lib/types.ts",
     "./utils": "./src/lib/utils.ts",
