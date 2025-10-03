@@ -14,14 +14,5 @@
     "quickfix.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
-  // "typescript.enablePromptUseWorkspaceTsdk": true,
-  // "typescript.tsdk": "node_modules/typescript/lib",
-  // "typescript.preferences.autoImportFileExcludePatterns": [
-  //   "next/router.d.ts",
-  //   "next/dist/client/router.d.ts"
-  // ],
-  // "search.exclude": {
-  //   "**/node_modules": true
-  // },
   "python.defaultInterpreterPath": "${workspaceFolder}/packages/engine/python/.venv/bin/python"
 }

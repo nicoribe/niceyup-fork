@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 const env = createEnv({
   server: {
+    LOGGER: z.enum(['debug']).optional(),
     APP_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
@@ -12,6 +13,7 @@ const env = createEnv({
     STORAGE_URL: z.string().url(),
   },
   runtimeEnv: {
+    LOGGER: process.env.LOGGER,
     APP_ENV: process.env.APP_ENV,
     API_URL: process.env.API_URL,
     API_KEY: process.env.API_KEY,

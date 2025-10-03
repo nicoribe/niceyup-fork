@@ -4,6 +4,7 @@ import { listAgents } from './agents/list-agents'
 import { authRoutes } from './auth-routes'
 import { getConversation } from './conversations/get-conversation'
 import { listMessages } from './conversations/messages/list-messages'
+import { realtimeMessages } from './conversations/messages/realtime-messages'
 import { regenerateAnswerMessage } from './conversations/messages/regenerate-answer-message'
 import { resendQuestionMessage } from './conversations/messages/resend-question-message'
 import { sendQuestionMessage } from './conversations/messages/send-question-message'
@@ -25,6 +26,7 @@ export async function routes(app: FastifyTypedInstance) {
 
   app.register(getConversation)
   app.register(listMessages)
+  app.register(realtimeMessages)
   app.register(sendQuestionMessage)
   app.register(resendQuestionMessage)
   app.register(regenerateAnswerMessage)

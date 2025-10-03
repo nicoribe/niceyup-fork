@@ -102,7 +102,8 @@ export function ChatPromptInput({
 }: {
   suggestion?: string
 }) {
-  const { sendMessage, promptInputStatus, uploadFiles } = useChatContext()
+  const { sendMessage, promptInputStatus, uploading, uploadFiles } =
+    useChatContext()
 
   const onFilesAdded = async (addedFiles: FileWithPreview[]) => {
     try {
@@ -179,6 +180,7 @@ export function ChatPromptInput({
     event.preventDefault()
 
     if (
+      uploading ||
       !text.trim() ||
       promptInputStatus === 'submitted' ||
       promptInputStatus === 'streaming'
@@ -275,7 +277,7 @@ export function ChatPromptInput({
 
       <PromptInputToolbar>
         <PromptInputTools>
-          <PromptInputButton onClick={openFileDialog}>
+          <PromptInputButton onClick={openFileDialog} disabled={uploading}>
             <PlusIcon size={16} />
           </PromptInputButton>
         </PromptInputTools>
@@ -283,8 +285,9 @@ export function ChatPromptInput({
         <PromptInputSubmit
           status={promptInputStatus}
           disabled={
-            !text.trim() &&
-            (promptInputStatus === 'ready' || promptInputStatus === 'error')
+            uploading ||
+            (!text.trim() &&
+              (promptInputStatus === 'ready' || promptInputStatus === 'error'))
           }
         />
       </PromptInputToolbar>
@@ -471,7 +474,7 @@ function ChatMessageContent({
 }: {
   message: MessageProps
 }) {
-  const { regenerate } = useChatContext()
+  const { authorId, regenerate } = useChatContext()
 
   // Messages from the system are not displayed
   if (message.role !== 'user' && message.role !== 'assistant') {
@@ -551,6 +554,12 @@ function ChatMessageContent({
     return listActions
   }, [message])
 
+  const files = React.useMemo(() => {
+    if (message.role === 'user') {
+      return message.parts?.filter((part) => part.type === 'file')
+    }
+  }, [message.parts])
+
   return (
     <UIMessage
       className={cn(
@@ -560,7 +569,13 @@ function ChatMessageContent({
       )}
       from={message.role}
     >
-      <UIMessageContent>
+      <UIMessageContent
+        className={cn(
+          message.authorId &&
+            authorId !== message.authorId &&
+            'group-[.is-user]:bg-secondary',
+        )}
+      >
         {/* If the message failed and there is no text, display an error message */}
         {message.status === 'failed' && !messageNotEmpty && (
           <div className="flex flex-row items-center gap-2 not-only:p-2">
@@ -621,6 +636,45 @@ function ChatMessageContent({
           <ChatErrorResponse errorMessage={message.metadata?.error} />
         )}
       </UIMessageContent>
+
+      {!!files && (
+        <div className="flex flex-wrap justify-end gap-2">
+          {files.map((part, i) => {
+            const isImage = part.mediaType.includes('image/')
+
+            return (
+              <Tooltip key={`${part.type}-${i}`}>
+                <TooltipTrigger asChild>
+                  <div className="group/card-file flex flex-row items-center rounded-md border bg-foreground/3 p-0.5">
+                    <div className="relative flex size-10 items-center justify-center">
+                      {isImage && (
+                        <img
+                          className="size-full rounded-sm"
+                          src={part.url}
+                          alt=""
+                        />
+                      )}
+
+                      {!isImage && (
+                        <FileIcon className="size-4 text-muted-foreground" />
+                      )}
+                    </div>
+
+                    {!isImage && (
+                      <div className="max-w-40 truncate px-2 text-sm">
+                        {part.filename || 'untitled file'}
+                      </div>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {part.filename || 'untitled file'}
+                </TooltipContent>
+              </Tooltip>
+            )
+          })}
+        </div>
+      )}
 
       <Actions>
         {actions.map((action) => (

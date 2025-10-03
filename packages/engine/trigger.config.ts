@@ -5,7 +5,7 @@ import { env } from './src/lib/env'
 export default defineConfig({
   project: env.TRIGGER_PROJECT_REF,
   runtime: 'node-22',
-  logLevel: env.APP_ENV === 'development' ? 'debug' : 'info',
+  logLevel: env.LOGGER === 'debug' ? 'debug' : 'info',
   maxDuration: 3600,
   processKeepAlive: true,
   retries: {

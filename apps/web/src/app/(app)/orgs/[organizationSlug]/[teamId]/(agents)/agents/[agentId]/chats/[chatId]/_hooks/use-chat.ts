@@ -13,13 +13,20 @@ import type {
 import type { ScrollToBottom } from '@workspace/ui/components/conversation'
 import { useParams, useRouter } from 'next/navigation'
 import * as React from 'react'
+import { toast } from 'sonner'
 import { useExplorerTree } from '../../_components/explorer-tree'
+import { useChatRealtime } from './use-chat-realtime'
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
 export type MessageProps = Message & {
   isBranch?: boolean
   isPersisted?: boolean
+}
+
+type LoadingMessageProps = {
+  id: string
+  role: MessageRole
 }
 
 function hasMultipleChildren(parentMessage: Message) {
@@ -55,7 +62,7 @@ const createMessageIndex = (messages: Message[]) => {
 // Optimized tree building with memoization
 const buildMessageTree = (
   targetMessageId: string | undefined,
-  loadingMessage: { id: string; role: MessageRole } | false,
+  loadingMessage: LoadingMessageProps | false,
   messageIndex: Map<string, Message>,
   childrenIndex: Map<string, string[]>,
 ) => {
@@ -161,11 +168,9 @@ const buildDescendants = (
 const createBranchChangeHandler = (
   params: OrganizationTeamParams & ChatParams,
   messages: Message[],
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
-  setTargetMessageId: React.Dispatch<React.SetStateAction<string | undefined>>,
-  setLoadingMessage: React.Dispatch<
-    React.SetStateAction<{ id: string; role: MessageRole } | false>
-  >,
+  setMessages: (messages: Message[]) => void,
+  setTargetMessageId: (targetMessageId: string | undefined) => void,
+  setLoadingMessage: (loadingMessage: LoadingMessageProps | false) => void,
 ) => {
   return React.useCallback(
     async ({
@@ -200,22 +205,7 @@ const createBranchChangeHandler = (
 
         const newMessages = (data?.messages || []) as Message[]
 
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages]
-
-          for (const newMessage of newMessages) {
-            const existingIndex = updatedMessages.findIndex(
-              ({ id }) => id === newMessage.id,
-            )
-            if (existingIndex >= 0) {
-              updatedMessages[existingIndex] = newMessage
-            } else {
-              updatedMessages.push(newMessage)
-            }
-          }
-
-          return updatedMessages
-        })
+        setMessages(newMessages)
 
         setTargetMessageId(targetMessageId)
       } catch (error) {
@@ -228,16 +218,16 @@ const createBranchChangeHandler = (
   )
 }
 
-export type SendMessageParams = {
+type SendMessageParams = {
   parts: PromptMessagePart[]
 }
 
-export type ResendMessageParams = {
+type ResendMessageParams = {
   messageId: string
   parts: PromptMessagePart[]
 }
 
-export type RegenerateMessageParams = {
+type RegenerateMessageParams = {
   messageId: string
 }
 
@@ -262,8 +252,48 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
   >(initialMessages?.at(-1)?.id)
 
   const [loadingMessage, setLoadingMessage] = React.useState<
-    { id: string; role: MessageRole } | false
+    LoadingMessageProps | false
   >(false)
+
+  const setMessages = (messages: Message[]) => {
+    setAllMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages]
+      const indexById = new Map(updatedMessages.map((m, i) => [m.id, i]))
+      let changed = false
+
+      for (const msg of messages) {
+        const idx = indexById.get(msg.id)
+        if (idx !== undefined) {
+          if (updatedMessages[idx] !== msg) {
+            updatedMessages[idx] = msg
+            changed = true
+          }
+        } else {
+          indexById.set(msg.id, updatedMessages.length)
+          updatedMessages.push(msg)
+          changed = true
+        }
+      }
+
+      return changed ? updatedMessages : prevMessages
+    })
+  }
+
+  const { messages: messagesRealtime, error: errorRealtime } = useChatRealtime({
+    explorerType: selectedExplorerType,
+  })
+
+  React.useEffect(() => {
+    if (errorRealtime) {
+      toast.error(errorRealtime)
+    }
+  }, [errorRealtime])
+
+  React.useEffect(() => {
+    if (messagesRealtime.length) {
+      setMessages(messagesRealtime)
+    }
+  }, [messagesRealtime])
 
   // Memoized message index
   const messageIndexData = React.useMemo(
@@ -325,7 +355,7 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
   const handleBranchChange = createBranchChangeHandler(
     { organizationSlug, teamId, chatId },
     allMessages,
-    setAllMessages,
+    setMessages,
     setTargetMessageId,
     setLoadingMessage,
   )
@@ -475,6 +505,7 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
 
   const sendMessage = async ({ parts }: SendMessageParams) => {
     if (
+      uploading ||
       promptInputStatus === 'submitted' ||
       promptInputStatus === 'streaming'
     ) {
@@ -554,6 +585,7 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
 
   const resendMessage = async ({ messageId, parts }: ResendMessageParams) => {
     if (
+      uploading ||
       promptInputStatus === 'submitted' ||
       promptInputStatus === 'streaming'
     ) {
@@ -619,6 +651,7 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
 
   const regenerate = async ({ messageId }: RegenerateMessageParams) => {
     if (
+      uploading ||
       promptInputStatus === 'submitted' ||
       promptInputStatus === 'streaming'
     ) {
@@ -680,7 +713,7 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
     }
   }
 
-  const { uploadFiles } = useUploadFiles(
+  const { uploading, uploadFiles } = useUploadFiles(
     { organizationSlug, teamId },
     {
       bucket: 'default',
@@ -705,6 +738,7 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
     regenerate,
     promptInputStatus,
     setPromptInputStatus,
+    uploading,
     uploadFiles,
   }
 }

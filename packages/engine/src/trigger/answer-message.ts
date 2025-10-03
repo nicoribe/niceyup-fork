@@ -9,7 +9,7 @@ import {
   streamText,
   validateUIMessages,
 } from '@workspace/ai'
-import { gateway } from '@workspace/ai/gateway'
+import { openai } from '@workspace/ai/providers'
 import type { AIMessage } from '@workspace/ai/types'
 import { readAIMessageStream } from '@workspace/ai/utils'
 import { queries } from '@workspace/db/queries'
@@ -67,13 +67,8 @@ export const answerMessageTask = schemaTask({
     })
 
     const streamingResult = streamText({
-      model: gateway.languageModel('openai/gpt-5'),
+      model: openai('gpt-3.5-turbo'),
       messages,
-      providerOptions: {
-        gateway: {
-          order: ['openai'], // Force routing to OpenAI
-        },
-      },
       abortSignal: signal,
       onError: (event) => {
         error = event.error

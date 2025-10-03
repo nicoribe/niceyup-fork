@@ -1,20 +1,29 @@
 'use client'
 
 import { env } from '@/lib/env'
-import type { ChatParams, Message, OrganizationTeamParams } from '@/lib/types'
+import type {
+  ChatParams,
+  ConversationExplorerType,
+  Message,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import { useParams } from 'next/navigation'
 import * as React from 'react'
 
 type Params = OrganizationTeamParams & ChatParams
 
-export function useChatRealtime() {
+type UseChatRealtimeParams = {
+  explorerType: ConversationExplorerType
+}
+
+export function useChatRealtime({ explorerType }: UseChatRealtimeParams) {
   const { organizationSlug, teamId, chatId } = useParams<Params>()
 
   const [error, setError] = React.useState<string>()
   const [messages, setMessages] = React.useState<Message[]>([])
 
   React.useEffect(() => {
-    if (!organizationSlug || !teamId || !chatId) {
+    if (!organizationSlug || !teamId || !chatId || explorerType === 'private') {
       return
     }
 
@@ -24,7 +33,7 @@ export function useChatRealtime() {
       const params = new URLSearchParams({ organizationSlug, teamId })
 
       const url = new URL(
-        `/api/conversations/${chatId}/messages?${params}`,
+        `/api/conversations/${chatId}/messages/realtime?${params}`,
         env.NEXT_PUBLIC_WEBSOCKET_URL,
       )
 
@@ -40,14 +49,8 @@ export function useChatRealtime() {
 
           setMessages(data)
         } catch {
-          websocket?.close()
           setError('Connection error occurred')
         }
-      }
-
-      websocket.onerror = () => {
-        websocket?.close()
-        setError('Connection error occurred, please try again')
       }
     } catch (error) {
       websocket?.close()
@@ -57,7 +60,7 @@ export function useChatRealtime() {
     return () => {
       websocket?.close()
     }
-  }, [organizationSlug, teamId, chatId])
+  }, [organizationSlug, teamId, chatId, explorerType])
 
   return { messages, setMessages, error }
 }

@@ -1,4 +1,3 @@
-import type { AIMessage } from '@workspace/ai/types'
 import { PubSubManager } from './pub-sub-manager'
 
 type ConversationId = string
@@ -23,7 +22,7 @@ export class ConversationPubSub extends PubSubManager<ConversationChannel> {
     messages,
   }: {
     channel: ConversationChannel
-    messages: AIMessage[]
+    messages: any[]
   }) {
     this.publishToChannel({ channel, message: JSON.stringify(messages) })
   }
