@@ -133,11 +133,14 @@ export function ExplorerTree({
 
   const noTeamSelected = explorerType === 'team' && teamId === '~'
 
+  // TODO: Remove this once the team explorer is implemented
+  const comingSoon = explorerType !== 'private'
+
   return (
     <div
       className={cn(
         'group/explorer-tree not-first:mt-2 flex flex-col items-stretch gap-2 overflow-hidden',
-        !noTeamSelected && expanded && 'flex-1',
+        !comingSoon && !noTeamSelected && expanded && 'flex-1',
       )}
     >
       <div className="px-2">
@@ -150,7 +153,7 @@ export function ExplorerTree({
             {explorerType}
           </div>
 
-          {!noTeamSelected && (
+          {!comingSoon && !noTeamSelected && (
             <div className="flex flex-row items-center opacity-0 transition-opacity group-hover/explorer-tree:opacity-100">
               {explorerType !== 'shared' && (
                 <div
@@ -185,6 +188,10 @@ export function ExplorerTree({
             <h1 className="mb-2 p-2 text-center text-xs">
               Select a team to view its conversations
             </h1>
+          </div>
+        ) : comingSoon ? (
+          <div className="flex h-full items-center justify-center gap-2 p-2 text-muted-foreground">
+            <h1 className="mb-2 p-2 text-center text-xs">Coming soon</h1>
           </div>
         ) : (
           <ExplorerTreeContent

@@ -279,9 +279,7 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
     })
   }
 
-  const { messages: messagesRealtime, error: errorRealtime } = useChatRealtime({
-    explorerType: selectedExplorerType,
-  })
+  const { messages: messagesRealtime, error: errorRealtime } = useChatRealtime()
 
   React.useEffect(() => {
     if (errorRealtime) {

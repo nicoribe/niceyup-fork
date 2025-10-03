@@ -1,29 +1,27 @@
 'use client'
 
 import { env } from '@/lib/env'
-import type {
-  ChatParams,
-  ConversationExplorerType,
-  Message,
-  OrganizationTeamParams,
-} from '@/lib/types'
+import type { ChatParams, Message, OrganizationTeamParams } from '@/lib/types'
 import { useParams } from 'next/navigation'
 import * as React from 'react'
 
 type Params = OrganizationTeamParams & ChatParams
 
-type UseChatRealtimeParams = {
-  explorerType: ConversationExplorerType
-}
-
-export function useChatRealtime({ explorerType }: UseChatRealtimeParams) {
+export function useChatRealtime() {
   const { organizationSlug, teamId, chatId } = useParams<Params>()
 
   const [error, setError] = React.useState<string>()
   const [messages, setMessages] = React.useState<Message[]>([])
 
   React.useEffect(() => {
-    if (!organizationSlug || !teamId || !chatId || explorerType === 'private') {
+    if (
+      !organizationSlug ||
+      organizationSlug === 'my-account' ||
+      !teamId ||
+      teamId === '~' ||
+      !chatId ||
+      chatId === 'new'
+    ) {
       return
     }
 
@@ -60,7 +58,7 @@ export function useChatRealtime({ explorerType }: UseChatRealtimeParams) {
     return () => {
       websocket?.close()
     }
-  }, [organizationSlug, teamId, chatId, explorerType])
+  }, [organizationSlug, teamId, chatId])
 
   return { messages, setMessages, error }
 }

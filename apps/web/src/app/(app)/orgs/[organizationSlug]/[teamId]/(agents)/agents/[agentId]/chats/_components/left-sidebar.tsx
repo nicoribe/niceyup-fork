@@ -73,9 +73,13 @@ function Explorer() {
 
       <ExplorerTree explorerType="private" expanded />
 
-      <Separator />
+      {organizationSlug !== 'my-account' && (
+        <>
+          <Separator />
 
-      <ExplorerTree explorerType="shared" />
+          <ExplorerTree explorerType="shared" />
+        </>
+      )}
     </div>
   )
 }
