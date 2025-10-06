@@ -481,16 +481,23 @@ function ChatMessageContent({
     return null
   }
 
+  const parts = message.parts || []
+
+  const { textPart, filesParts } = React.useMemo(() => {
+    const textPart = parts.find((part) => part.type === 'text')
+
+    const filesParts = parts.filter((part) => part.type === 'file')
+    return { textPart, filesParts }
+  }, [parts])
+
   // Check if the message is not empty
   const messageNotEmpty = React.useMemo(() => {
     if (message.status === 'queued' || message.status === 'in_progress') {
-      const textPart = message.parts?.find((part) => part.type === 'text')
-
-      return !!textPart?.text
+      return Boolean(textPart?.text)
     }
 
-    return !!message.parts?.length
-  }, [message.status, message.parts])
+    return Boolean(parts.length)
+  }, [message.status, parts.length, textPart?.text])
 
   const actions = React.useMemo(() => {
     const listActions: ItemAction[] = [
@@ -503,9 +510,7 @@ function ChatMessageContent({
         icon: CopyIcon,
         label: 'Copy',
         onClick: () => {
-          const content = message.parts?.find(
-            (part) => part.type === 'text',
-          )?.text
+          const content = textPart?.text
 
           navigator.clipboard.writeText(content || '')
 
@@ -552,13 +557,10 @@ function ChatMessageContent({
     }
 
     return listActions
-  }, [message])
+  }, [message.role, message.id, textPart?.text])
 
-  const files = React.useMemo(() => {
-    if (message.role === 'user') {
-      return message.parts?.filter((part) => part.type === 'file')
-    }
-  }, [message.parts])
+  const isStreaming = isMessageStream(message)
+  const isFailed = message.status === 'failed'
 
   return (
     <UIMessage
@@ -571,13 +573,13 @@ function ChatMessageContent({
     >
       <UIMessageContent
         className={cn(
+          message.role === 'assistant' && 'p-0',
           message.authorId &&
             authorId !== message.authorId &&
             'group-[.is-user]:bg-secondary',
         )}
       >
-        {/* If the message failed and there is no text, display an error message */}
-        {message.status === 'failed' && !messageNotEmpty && (
+        {isFailed && !messageNotEmpty && (
           <div className="flex flex-row items-center gap-2 not-only:p-2">
             <XCircle className="size-4 shrink-0 text-destructive" />
             {message.role === 'assistant'
@@ -586,8 +588,7 @@ function ChatMessageContent({
           </div>
         )}
 
-        {/* If the message is streaming and there is no text, display a loading message */}
-        {isMessageStream(message) && !messageNotEmpty && (
+        {isStreaming && !messageNotEmpty && (
           <div className="flex flex-row items-center gap-2">
             <Sparkles className="size-4 shrink-0 animate-pulse" />
             <AnimatedDots
@@ -596,50 +597,80 @@ function ChatMessageContent({
           </div>
         )}
 
-        {messageNotEmpty &&
-          message.parts?.map((part, i) => {
-            switch (part.type) {
-              case 'text':
-                // If the message is streaming and there is no text, display a loading message
-                if (isMessageStream(message) && !part.text) {
-                  return (
-                    <div
-                      key={`${part.type}-${i}`}
-                      className="flex flex-row items-center gap-2"
-                    >
-                      <Sparkles className="size-4 shrink-0 animate-pulse" />
-                      <AnimatedDots
-                        text={
-                          message.role === 'assistant'
-                            ? 'Generating response'
-                            : 'Loading message'
-                        }
-                      />
-                    </div>
-                  )
-                }
-
+        {parts.map((part, i) => {
+          switch (part.type) {
+            case 'text':
+              if (isStreaming && !part.text) {
                 return (
-                  <Response
+                  <div
                     key={`${part.type}-${i}`}
-                    className="[&_[data-streamdown='code-block']]:bg-background"
+                    className="flex flex-row items-center gap-2"
                   >
-                    {part.text}
-                  </Response>
+                    <Sparkles className="size-4 shrink-0 animate-pulse" />
+                    <AnimatedDots
+                      text={
+                        message.role === 'assistant'
+                          ? 'Generating response'
+                          : 'Loading message'
+                      }
+                    />
+                  </div>
                 )
-              default:
-                return null
-            }
-          })}
+              }
 
-        {message.status === 'failed' && message.metadata?.error && (
+              return (
+                <Response
+                  key={`${part.type}-${i}`}
+                  className="[&_[data-streamdown='code-block']]:bg-background"
+                >
+                  {part.text}
+                </Response>
+              )
+
+            case 'tool-image_generation':
+              const isGenerating = (part as any).state !== 'output-available'
+              const base64 = (part as any).output?.result
+
+              return (
+                <div
+                  key={`${part.type}-${i}`}
+                  className={cn(
+                    'relative rounded-md border bg-foreground/3 p-0.5',
+                    isGenerating && 'size-50',
+                  )}
+                >
+                  {isGenerating && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <LoaderCircle className="size-4 animate-spin" />
+                    </div>
+                  )}
+                  {base64 && (
+                    <img
+                      className="size-full rounded-md"
+                      src={`data:image/png;base64,${base64}`}
+                      alt=""
+                    />
+                  )}
+                </div>
+              )
+            default:
+              return null
+          }
+        })}
+
+        {isFailed && message.metadata?.error && (
           <ChatErrorResponse errorMessage={message.metadata?.error} />
         )}
       </UIMessageContent>
 
-      {!!files && (
-        <div className="flex flex-wrap justify-end gap-2">
-          {files.map((part, i) => {
+      {!!filesParts.length && (
+        <div
+          className={cn(
+            'flex flex-wrap gap-2',
+            message.role === 'assistant' ? 'justify-start' : 'justify-end',
+          )}
+        >
+          {filesParts.map((part, i) => {
             const isImage = part.mediaType.includes('image/')
 
             return (
@@ -723,7 +754,13 @@ function ChatLoadingMessage({ role }: { role: MessageRole }) {
   return (
     <UIMessage from={role}>
       <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
-        <Skeleton className="w-40" />
+        <Skeleton className="w-35" />
+        {role === 'assistant' && (
+          <>
+            <Skeleton className="w-60" />
+            <Skeleton className="w-50" />
+          </>
+        )}
       </UIMessageContent>
     </UIMessage>
   )

@@ -68,6 +68,14 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
         })
       }
 
+      reply.header('Content-Type', 'application/x-ndjson; charset=utf-8')
+      reply.header('Cache-Control', 'no-cache')
+      reply.header('Connection', 'keep-alive')
+
+      reply.header('Transfer-Encoding', 'chunked')
+      reply.header('Content-Encoding', 'none')
+      reply.header('X-Accel-Buffering', 'no') // disable nginx buffering
+
       const stream = Readable.from(
         (async function* source() {
           yield `${JSON.stringify(message)}\n`
@@ -90,16 +98,10 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
               }
             }
           }
+
+          return
         })(),
       )
-
-      reply.header('Content-Type', 'application/x-ndjson; charset=utf-8')
-      reply.header('Cache-Control', 'no-cache')
-      reply.header('Connection', 'keep-alive')
-
-      reply.header('Transfer-Encoding', 'chunked')
-      reply.header('Content-Encoding', 'none')
-      reply.header('X-Accel-Buffering', 'no') // disable nginx buffering
 
       return reply.send(stream)
     },

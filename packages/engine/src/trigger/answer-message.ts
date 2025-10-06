@@ -67,7 +67,10 @@ export const answerMessageTask = schemaTask({
     })
 
     const streamingResult = streamText({
-      model: openai('gpt-3.5-turbo'),
+      model: openai('gpt-5'),
+      tools: {
+        image_generation: openai.tools.imageGeneration(),
+      },
       messages,
       abortSignal: signal,
       onError: (event) => {

@@ -135,12 +135,39 @@ export function ExplorerTree({
 
   // TODO: Remove this once the team explorer is implemented
   const comingSoon = explorerType !== 'private'
+  if (comingSoon) {
+    return (
+      <div className="group/explorer-tree not-first:mt-2 flex flex-col items-stretch gap-2 overflow-hidden">
+        <div className="px-2">
+          <div
+            className="flex h-6 w-full select-none flex-row items-center justify-between text-nowrap rounded-md px-2 py-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide hover:bg-accent"
+            onClick={onToggleExpanded}
+          >
+            <div className="flex flex-row items-center gap-2">
+              <ChevronDown
+                className={cn('size-4', !expanded && '-rotate-90')}
+              />
+              {explorerType}
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={cn('flex-1 overflow-y-auto px-2', !expanded && 'max-h-0')}
+        >
+          <div className="flex h-full items-center justify-center gap-2 p-2 text-muted-foreground">
+            <h1 className="mb-2 p-2 text-center text-xs">Coming soon</h1>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
       className={cn(
         'group/explorer-tree not-first:mt-2 flex flex-col items-stretch gap-2 overflow-hidden',
-        !comingSoon && !noTeamSelected && expanded && 'flex-1',
+        !noTeamSelected && expanded && 'flex-1',
       )}
     >
       <div className="px-2">
@@ -153,7 +180,7 @@ export function ExplorerTree({
             {explorerType}
           </div>
 
-          {!comingSoon && !noTeamSelected && (
+          {!noTeamSelected && (
             <div className="flex flex-row items-center opacity-0 transition-opacity group-hover/explorer-tree:opacity-100">
               {explorerType !== 'shared' && (
                 <div
@@ -188,10 +215,6 @@ export function ExplorerTree({
             <h1 className="mb-2 p-2 text-center text-xs">
               Select a team to view its conversations
             </h1>
-          </div>
-        ) : comingSoon ? (
-          <div className="flex h-full items-center justify-center gap-2 p-2 text-muted-foreground">
-            <h1 className="mb-2 p-2 text-center text-xs">Coming soon</h1>
           </div>
         ) : (
           <ExplorerTreeContent

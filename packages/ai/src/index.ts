@@ -1,5 +1,6 @@
 export {
-  convertToModelMessages,
   streamText,
+  experimental_generateImage,
+  convertToModelMessages,
   validateUIMessages,
 } from 'ai'
