@@ -41,7 +41,7 @@ export type TableInfo = {
   }[]
 }
 
-export type ColumnProperNamesByTables = {
+export type TableColumnProperNouns = {
   name: string
   columns: { name: string }[]
 }

@@ -6,6 +6,7 @@ import {
 } from '@trigger.dev/sdk'
 import {
   convertToModelMessages,
+  stepCountIs,
   streamText,
   validateUIMessages,
 } from '@workspace/ai'
@@ -71,6 +72,7 @@ export const answerMessageTask = schemaTask({
       tools: {
         image_generation: openai.tools.imageGeneration(),
       },
+      stopWhen: stepCountIs(5),
       messages,
       abortSignal: signal,
       onError: (event) => {
@@ -89,7 +91,7 @@ export const answerMessageTask = schemaTask({
 
     const stream = await metadata.stream(
       'message-delta',
-      readAIMessageStream({ message, stream: streamingResult }),
+      readAIMessageStream({ message, stream: streamingResult as any }),
     )
 
     for await (const chunk of stream) {

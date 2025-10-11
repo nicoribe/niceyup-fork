@@ -400,6 +400,9 @@ importers:
       '@workspace/storage':
         specifier: workspace:*
         version: link:../storage
+      '@workspace/vector-store':
+        specifier: workspace:*
+        version: link:../vector-store
       zod:
         specifier: ^4.1.5
         version: 4.1.5
@@ -636,6 +639,25 @@ importers:
 
   packages/utils:
     dependencies:
+      '@workspace/env':
+        specifier: workspace:*
+        version: link:../env
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.17.19
+      '@workspace/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
+  packages/vector-store:
+    dependencies:
+      '@upstash/vector':
+        specifier: ^1.2.2
+        version: 1.2.2
       '@workspace/env':
         specifier: workspace:*
         version: link:../env
@@ -3696,6 +3718,9 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+
+  '@upstash/vector@1.2.2':
+    resolution: {integrity: sha512-ptQ9xnxtKqmpNK52PCcHCszlPOLxIBfjsv7ty8RoF95pkjctS9rSjTQ3Pl9bx5VFbpDj+0dMXw88WLt6swDkgQ==}
 
   '@vercel/oidc@3.0.1':
     resolution: {integrity: sha512-V/YRVrJDqM6VaMBjRUrd6qRMrTKvZjHdVdEmdXsOZMulTa3iK98ijKTc3wldBmst6W5rHpqMoKllKcBAHgN7GQ==}
@@ -11131,6 +11156,8 @@ snapshots:
   '@types/uuid@9.0.8': {}
 
   '@ungap/structured-clone@1.3.0': {}
+
+  '@upstash/vector@1.2.2': {}
 
   '@vercel/oidc@3.0.1': {}
 

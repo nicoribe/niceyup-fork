@@ -23,7 +23,7 @@ export default defineConfig({
     extensions: [
       pythonExtension({
         devPythonBinaryPath: './python/.venv/bin/python',
-        scripts: ['./python/**/*.py', './python/_legacy/**/*.py'],
+        scripts: ['./python/**/*.py'],
       }),
     ],
   },

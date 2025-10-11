@@ -19,6 +19,7 @@
     "@workspace/db": "workspace:*",
     "@workspace/env": "workspace:*",
     "@workspace/storage": "workspace:*",
+    "@workspace/vector-store": "workspace:*",
     "zod": "^4.1.5"
   },
   "devDependencies": {

@@ -573,7 +573,7 @@ function ChatMessageContent({
     >
       <UIMessageContent
         className={cn(
-          message.role === 'assistant' && 'p-0',
+          message.role === 'assistant' && 'px-0 py-0',
           message.authorId &&
             authorId !== message.authorId &&
             'group-[.is-user]:bg-secondary',
@@ -616,6 +616,10 @@ function ChatMessageContent({
                     />
                   </div>
                 )
+              }
+
+              if (!part.text) {
+                return null
               }
 
               return (

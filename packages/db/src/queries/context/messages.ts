@@ -27,6 +27,15 @@ export async function getMessage(
   context: ContextGetMessageParams,
   params: GetMessageParams,
 ) {
+  const conversation = await getConversation(context, {
+    conversationId: params.conversationId,
+  })
+
+  // Check if user has access to the conversation
+  if (!conversation) {
+    return null
+  }
+
   const [message] = await db
     .select({
       id: messages.id,
@@ -47,15 +56,5 @@ export async function getMessage(
     )
     .limit(1)
 
-  if (message) {
-    const conversation = await getConversation(context, {
-      conversationId: params.conversationId,
-    })
-
-    if (conversation) {
-      return message
-    }
-  }
-
-  return null
+  return message || null
 }

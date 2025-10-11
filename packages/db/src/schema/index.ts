@@ -8,7 +8,6 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core'
 import type {
-  ColumnProperNamesByTables,
   ConversationExplorerType,
   DatabaseConnection,
   DatabaseDialect,
@@ -21,6 +20,7 @@ import type {
   MessageStatus,
   QueryExample,
   SourceType,
+  TableColumnProperNouns,
   TableInfo,
   TableMetadata,
 } from '../lib/types'
@@ -71,6 +71,9 @@ export const databaseConnections = pgTable('database_connections', {
   name: text('name').notNull().default('Unnamed'),
   dialect: text('dialect').$type<DatabaseDialect>(),
   payload: encryptedJson('payload').$type<DatabaseConnection>(),
+
+  ownerId: text('owner_id').references(() => users.id), // Personal account id
+  organizationId: text('organization_id').references(() => organizations.id), // Organization id
   ...timestamps,
 })
 
@@ -85,8 +88,8 @@ export const structured = pgTable('structured', {
   ...id,
   tablesMetadata: jsonb('tables_metadata').$type<TableMetadata[]>(),
   tablesInfo: jsonb('tables_info').$type<TableInfo[]>(),
-  columnsProperNamesByTables: jsonb('columns_proper_names_by_tables').$type<
-    ColumnProperNamesByTables[]
+  tablesColumnProperNouns: jsonb('tables_column_proper_nouns').$type<
+    TableColumnProperNouns[]
   >(),
   queryExamples: jsonb('query_examples').$type<QueryExample[]>(),
   sourceId: text('source_id')
