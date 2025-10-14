@@ -30,7 +30,7 @@ export type StreamAnswerMessageQueryParams = {
 }
 
 /**
- * @description Success. NDJSON stream of AIMessage
+ * @description Success
  */
 export type StreamAnswerMessage200 = any
 

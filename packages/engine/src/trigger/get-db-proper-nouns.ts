@@ -1,7 +1,7 @@
 import { AbortTaskRunError, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
 import { eq } from '@workspace/db/orm'
-import { databaseConnections, sources, structured } from '@workspace/db/schema'
+import { sources, structuredSources } from '@workspace/db/schema'
 import { z } from 'zod'
 import { python } from '../python'
 
@@ -12,49 +12,33 @@ export const getDbProperNounsTask = schemaTask({
   }),
   run: async (payload) => {
     const [source] = await db
-      .select({
-        id: sources.id,
-        databaseConnectionId: sources.databaseConnectionId,
-      })
+      .select()
       .from(sources)
       .where(eq(sources.id, payload.sourceId))
+      .limit(1)
 
     if (!source) {
       throw new AbortTaskRunError('Source not found')
     }
 
-    if (!source.databaseConnectionId) {
-      throw new AbortTaskRunError('Database connection not found for source')
-    }
-
-    const [connection] = await db
+    const [structuredSource] = await db
       .select()
-      .from(databaseConnections)
-      .where(eq(databaseConnections.id, source.databaseConnectionId))
+      .from(structuredSources)
+      .where(eq(structuredSources.sourceId, payload.sourceId))
+      .limit(1)
 
-    if (!connection) {
-      throw new AbortTaskRunError('Database connection not found')
+    if (!structuredSource) {
+      throw new AbortTaskRunError('Structured source not found')
     }
 
-    if (!connection.dialect) {
-      throw new AbortTaskRunError('Database dialect not found')
-    }
-
-    const [sourceStructured] = await db
-      .select()
-      .from(structured)
-      .where(eq(structured.sourceId, payload.sourceId))
-
-    if (!sourceStructured) {
-      throw new AbortTaskRunError('Structured not found for source')
-    }
-
-    const tablesMetadata = sourceStructured.tablesColumnProperNouns?.map(
-      (t) => ({
+    const tablesMetadata = structuredSource.tablesMetadata
+      ?.map((t) => ({
         name: t.name,
-        columns: t.columns.map((c) => ({ name: c.name })),
-      }),
-    )
+        columns: t.columns
+          .filter((c) => c.meta?.properNoun)
+          .map((c) => ({ name: c.name })),
+      }))
+      .filter((t) => t.columns.length)
 
     const result = await python.getDbProperNouns({
       source_id: payload.sourceId,

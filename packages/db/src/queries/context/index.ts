@@ -5,13 +5,13 @@ import * as files from './files'
 import * as messages from './messages'
 import * as organizations from './organizations'
 import * as sources from './sources'
-import * as structured from './structured'
+import * as structuredSources from './structured-sources'
 
 export const contextQueries = {
   ...organizations,
   ...sources,
   ...databaseConnections,
-  ...structured,
+  ...structuredSources,
   ...agents,
   ...conversations,
   ...messages,

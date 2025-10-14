@@ -20,8 +20,6 @@ import type {
   MessageStatus,
   QueryExample,
   SourceType,
-  TableColumnProperNouns,
-  TableInfo,
   TableMetadata,
 } from '../lib/types'
 import { encryptedJson, id, timestamps } from '../utils'
@@ -39,10 +37,10 @@ export const sources = pgTable('sources', {
 
   // chuckSize: integer('chuck_size'), // 2500
   // chunkOverlap: integer('chunk_overlap'), // 100
-  // chuckLimit: integer('chuck_limit'), // 10
 
   ownerId: text('owner_id').references(() => users.id), // Personal account id
   organizationId: text('organization_id').references(() => organizations.id), // Organization id
+
   databaseConnectionId: text('database_connection_id').references(
     () => databaseConnections.id,
   ),
@@ -62,7 +60,7 @@ export const sourcesRelations = relations(sources, ({ one, many }) => ({
     fields: [sources.databaseConnectionId],
     references: [databaseConnections.id],
   }),
-  structured: one(structured),
+  structuredSource: one(structuredSources),
   agents: many(agentsToSources),
 }))
 
@@ -74,6 +72,7 @@ export const databaseConnections = pgTable('database_connections', {
 
   ownerId: text('owner_id').references(() => users.id), // Personal account id
   organizationId: text('organization_id').references(() => organizations.id), // Organization id
+
   ...timestamps,
 })
 
@@ -84,13 +83,9 @@ export const databaseConnectionsRelations = relations(
   }),
 )
 
-export const structured = pgTable('structured', {
+export const structuredSources = pgTable('structured_sources', {
   ...id,
   tablesMetadata: jsonb('tables_metadata').$type<TableMetadata[]>(),
-  tablesInfo: jsonb('tables_info').$type<TableInfo[]>(),
-  tablesColumnProperNouns: jsonb('tables_column_proper_nouns').$type<
-    TableColumnProperNouns[]
-  >(),
   queryExamples: jsonb('query_examples').$type<QueryExample[]>(),
   sourceId: text('source_id')
     .notNull()
@@ -99,12 +94,15 @@ export const structured = pgTable('structured', {
   ...timestamps,
 })
 
-export const structuredRelations = relations(structured, ({ one }) => ({
-  source: one(sources, {
-    fields: [structured.sourceId],
-    references: [sources.id],
+export const structuredSourcesRelations = relations(
+  structuredSources,
+  ({ one }) => ({
+    source: one(sources, {
+      fields: [structuredSources.sourceId],
+      references: [sources.id],
+    }),
   }),
-}))
+)
 
 export const agents = pgTable('agents', {
   ...id,
@@ -113,6 +111,8 @@ export const agents = pgTable('agents', {
 
   // embaddingModel: text('embadding_model'), // "text-embedding-3-small"
   // llmModel: text('llm_model'), // "gpt-4o-mini"
+
+  // chuckLimit: integer('chuck_limit'), // 10
 
   // variables: jsonb('variables').$type<string[]>(), // Create variables to dynamically insert values into your prompt
   // tools: jsonb('tools').$type<any[]>(), // Define tools to use in your prompt
@@ -129,6 +129,7 @@ export const agents = pgTable('agents', {
 
   ownerId: text('owner_id').references(() => users.id), // Personal account id
   organizationId: text('organization_id').references(() => organizations.id), // Organization id
+
   ...timestamps,
 })
 
@@ -150,10 +151,11 @@ export const conversations = pgTable('conversations', {
   ...id,
   title: text('title').notNull().default('Untitled'),
 
-  teamId: text('team_id').references(() => teams.id),
   ownerId: text('owner_id').references(() => users.id),
+  teamId: text('team_id').references(() => teams.id),
 
   agentId: text('agent_id').references(() => agents.id),
+
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
@@ -172,7 +174,6 @@ export const conversationsRelations = relations(
 
 export const messages = pgTable('messages', {
   ...id,
-
   status: text('status').notNull().default('queued').$type<MessageStatus>(),
   role: text('role').notNull().default('user').$type<MessageRole>(),
   parts: jsonb('parts').$type<MessagePart[]>(),
@@ -183,6 +184,7 @@ export const messages = pgTable('messages', {
     .references(() => conversations.id, { onDelete: 'cascade' }),
   authorId: text('author_id').references(() => users.id),
   parentId: text('parent_id'),
+
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
@@ -310,6 +312,7 @@ export const files = pgTable('files', {
 
   ownerId: text('owner_id').references(() => users.id), // Personal account id
   organizationId: text('organization_id').references(() => organizations.id), // Organization id
+
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
@@ -333,13 +336,16 @@ export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
     .default('private')
     .$type<ConversationExplorerType>(),
   shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
-  agentId: text('agent_id').references(() => agents.id),
+
   ownerId: text('owner_id').references(() => users.id),
   teamId: text('team_id').references(() => teams.id),
+
+  agentId: text('agent_id').references(() => agents.id),
   conversationId: text('conversation_id').references(() => conversations.id, {
     onDelete: 'cascade',
   }),
   parentId: text('parent_id'),
+
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })

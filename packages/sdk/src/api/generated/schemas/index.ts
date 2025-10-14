@@ -35,6 +35,18 @@ export type {
   GetConversationQueryResponseSchema,
 } from './getConversationSchema'
 export type {
+  GetDatabaseConnectionPathParamsSchema,
+  GetDatabaseConnectionQueryParamsSchema,
+  GetDatabaseConnection200Schema,
+  GetDatabaseConnection400Schema,
+  GetDatabaseConnection401Schema,
+  GetDatabaseConnection403Schema,
+  GetDatabaseConnection404Schema,
+  GetDatabaseConnection429Schema,
+  GetDatabaseConnection500Schema,
+  GetDatabaseConnectionQueryResponseSchema,
+} from './getDatabaseConnectionSchema'
+export type {
   GetFilePathParamsSchema,
   GetFileQueryParamsSchema,
   GetFile200Schema,
@@ -57,6 +69,30 @@ export type {
   GetProfileQueryResponseSchema,
 } from './getProfileSchema'
 export type {
+  GetSourcePathParamsSchema,
+  GetSourceQueryParamsSchema,
+  GetSource200Schema,
+  GetSource400Schema,
+  GetSource401Schema,
+  GetSource403Schema,
+  GetSource404Schema,
+  GetSource429Schema,
+  GetSource500Schema,
+  GetSourceQueryResponseSchema,
+} from './getSourceSchema'
+export type {
+  GetStructuredSourcePathParamsSchema,
+  GetStructuredSourceQueryParamsSchema,
+  GetStructuredSource200Schema,
+  GetStructuredSource400Schema,
+  GetStructuredSource401Schema,
+  GetStructuredSource403Schema,
+  GetStructuredSource404Schema,
+  GetStructuredSource429Schema,
+  GetStructuredSource500Schema,
+  GetStructuredSourceQueryResponseSchema,
+} from './getStructuredSourceSchema'
+export type {
   Health200Schema,
   Health400Schema,
   Health401Schema,
@@ -78,6 +114,17 @@ export type {
   ListAgentsQueryResponseSchema,
 } from './listAgentsSchema'
 export type {
+  ListDatabaseConnectionsQueryParamsSchema,
+  ListDatabaseConnections200Schema,
+  ListDatabaseConnections400Schema,
+  ListDatabaseConnections401Schema,
+  ListDatabaseConnections403Schema,
+  ListDatabaseConnections404Schema,
+  ListDatabaseConnections429Schema,
+  ListDatabaseConnections500Schema,
+  ListDatabaseConnectionsQueryResponseSchema,
+} from './listDatabaseConnectionsSchema'
+export type {
   ListMessagesPathParamsSchema,
   ListMessagesQueryParamsSchema,
   ListMessages200Schema,
@@ -89,6 +136,17 @@ export type {
   ListMessages500Schema,
   ListMessagesQueryResponseSchema,
 } from './listMessagesSchema'
+export type {
+  ListSourcesQueryParamsSchema,
+  ListSources200Schema,
+  ListSources400Schema,
+  ListSources401Schema,
+  ListSources403Schema,
+  ListSources404Schema,
+  ListSources429Schema,
+  ListSources500Schema,
+  ListSourcesQueryResponseSchema,
+} from './listSourcesSchema'
 export type {
   RegenerateAnswerMessagePathParamsSchema,
   RegenerateAnswerMessage200Schema,
@@ -185,6 +243,18 @@ export {
   getConversationQueryResponseSchema,
 } from './getConversationSchema'
 export {
+  getDatabaseConnectionPathParamsSchema,
+  getDatabaseConnectionQueryParamsSchema,
+  getDatabaseConnection200Schema,
+  getDatabaseConnection400Schema,
+  getDatabaseConnection401Schema,
+  getDatabaseConnection403Schema,
+  getDatabaseConnection404Schema,
+  getDatabaseConnection429Schema,
+  getDatabaseConnection500Schema,
+  getDatabaseConnectionQueryResponseSchema,
+} from './getDatabaseConnectionSchema'
+export {
   getFilePathParamsSchema,
   getFileQueryParamsSchema,
   getFile200Schema,
@@ -207,6 +277,30 @@ export {
   getProfileQueryResponseSchema,
 } from './getProfileSchema'
 export {
+  getSourcePathParamsSchema,
+  getSourceQueryParamsSchema,
+  getSource200Schema,
+  getSource400Schema,
+  getSource401Schema,
+  getSource403Schema,
+  getSource404Schema,
+  getSource429Schema,
+  getSource500Schema,
+  getSourceQueryResponseSchema,
+} from './getSourceSchema'
+export {
+  getStructuredSourcePathParamsSchema,
+  getStructuredSourceQueryParamsSchema,
+  getStructuredSource200Schema,
+  getStructuredSource400Schema,
+  getStructuredSource401Schema,
+  getStructuredSource403Schema,
+  getStructuredSource404Schema,
+  getStructuredSource429Schema,
+  getStructuredSource500Schema,
+  getStructuredSourceQueryResponseSchema,
+} from './getStructuredSourceSchema'
+export {
   health200Schema,
   health400Schema,
   health401Schema,
@@ -228,6 +322,17 @@ export {
   listAgentsQueryResponseSchema,
 } from './listAgentsSchema'
 export {
+  listDatabaseConnectionsQueryParamsSchema,
+  listDatabaseConnections200Schema,
+  listDatabaseConnections400Schema,
+  listDatabaseConnections401Schema,
+  listDatabaseConnections403Schema,
+  listDatabaseConnections404Schema,
+  listDatabaseConnections429Schema,
+  listDatabaseConnections500Schema,
+  listDatabaseConnectionsQueryResponseSchema,
+} from './listDatabaseConnectionsSchema'
+export {
   listMessagesPathParamsSchema,
   listMessagesQueryParamsSchema,
   listMessages200Schema,
@@ -239,6 +344,17 @@ export {
   listMessages500Schema,
   listMessagesQueryResponseSchema,
 } from './listMessagesSchema'
+export {
+  listSourcesQueryParamsSchema,
+  listSources200Schema,
+  listSources400Schema,
+  listSources401Schema,
+  listSources403Schema,
+  listSources404Schema,
+  listSources429Schema,
+  listSources500Schema,
+  listSourcesQueryResponseSchema,
+} from './listSourcesSchema'
 export {
   regenerateAnswerMessagePathParamsSchema,
   regenerateAnswerMessage200Schema,

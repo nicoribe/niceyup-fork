@@ -1,8 +1,14 @@
 export {
+  generateText,
+  generateObject,
   streamText,
+  streamObject,
   experimental_generateImage,
-  convertToModelMessages,
-  validateUIMessages,
+  embed,
+  embedMany,
   tool,
   stepCountIs,
+  Output,
+  convertToModelMessages,
+  validateUIMessages,
 } from 'ai'

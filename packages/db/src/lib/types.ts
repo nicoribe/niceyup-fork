@@ -21,29 +21,19 @@ export type DatabaseConnection = {
 
 export type TableMetadata = {
   name: string
-  columns: {
-    name: string
-    data_type: string
-    foreign_table?: string
-    foreign_column?: string
-  }[]
-}
-
-export type TableInfo = {
-  name: string
-  description?: string
-  columns: {
-    name: string
+  meta?: {
     description?: string
+  }
+  columns: {
+    name: string
+    meta?: {
+      description?: string
+      properNoun?: boolean
+    }
     data_type: string
     foreign_table?: string
     foreign_column?: string
   }[]
-}
-
-export type TableColumnProperNouns = {
-  name: string
-  columns: { name: string }[]
 }
 
 export type QueryExample = {

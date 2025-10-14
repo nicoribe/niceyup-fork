@@ -8,35 +8,23 @@ import { z } from 'zod'
 
 const tableMetadataSchema = z.object({
   name: z.string(),
-  columns: z.array(
-    z.object({
-      name: z.string(),
-      data_type: z.string(),
-      foreign_table: z.string().optional(),
-      foreign_column: z.string().optional(),
-    }),
-  ),
-})
-
-const tableInfoSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  columns: z.array(
-    z.object({
-      name: z.string(),
+  meta: z
+    .object({
       description: z.string().optional(),
-      data_type: z.string(),
-      foreign_table: z.string().optional(),
-      foreign_column: z.string().optional(),
-    }),
-  ),
-})
-
-const tableColumnProperNounsSchema = z.object({
-  name: z.string(),
+    })
+    .optional(),
   columns: z.array(
     z.object({
       name: z.string(),
+      meta: z
+        .object({
+          description: z.string().optional(),
+          properNoun: z.boolean().optional(),
+        })
+        .optional(),
+      data_type: z.string(),
+      foreign_table: z.string().optional(),
+      foreign_column: z.string().optional(),
     }),
   ),
 })
@@ -46,14 +34,14 @@ const queryExampleSchema = z.object({
   query: z.string(),
 })
 
-export async function getStructured(app: FastifyTypedInstance) {
+export async function getStructuredSource(app: FastifyTypedInstance) {
   app.register(authenticate).get(
     '/sources/:sourceId/structured',
     {
       schema: {
         tags: ['Sources'],
-        description: 'Get structured details',
-        operationId: 'getStructured',
+        description: 'Get structured source details',
+        operationId: 'getStructuredSource',
         params: z.object({
           sourceId: z.string(),
         }),
@@ -64,13 +52,9 @@ export async function getStructured(app: FastifyTypedInstance) {
         response: withDefaultErrorResponses({
           200: z
             .object({
-              structured: z.object({
+              structuredSource: z.object({
                 id: z.string(),
                 tablesMetadata: z.array(tableMetadataSchema).nullable(),
-                tablesInfo: z.array(tableInfoSchema).nullable(),
-                tablesColumnProperNouns: z
-                  .array(tableColumnProperNounsSchema)
-                  .nullable(),
                 queryExamples: z.array(queryExampleSchema).nullable(),
               }),
             })
@@ -95,18 +79,21 @@ export async function getStructured(app: FastifyTypedInstance) {
         }),
       }
 
-      const structured = await queries.context.getStructured(context, {
-        sourceId,
-      })
+      const structuredSource = await queries.context.getStructuredSource(
+        context,
+        {
+          sourceId,
+        },
+      )
 
-      if (!structured) {
+      if (!structuredSource) {
         throw new BadRequestError({
-          code: 'STRUCTURED_NOT_FOUND',
-          message: 'Structured not found or you don’t have access',
+          code: 'STRUCTURED_SOURCE_NOT_FOUND',
+          message: 'Structured source not found or you don’t have access',
         })
       }
 
-      return { structured }
+      return { structuredSource }
     },
   )
 }

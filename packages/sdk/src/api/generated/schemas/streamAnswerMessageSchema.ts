@@ -37,7 +37,7 @@ export type StreamAnswerMessageQueryParamsSchema =
   StreamAnswerMessageQueryParams
 
 /**
- * @description Success. NDJSON stream of AIMessage
+ * @description Success
  */
 export const streamAnswerMessage200Schema =
   z.any() as unknown as ToZod<StreamAnswerMessage200>

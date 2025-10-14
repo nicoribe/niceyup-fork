@@ -1,7 +1,11 @@
 import { AbortTaskRunError, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
 import { eq } from '@workspace/db/orm'
-import { databaseConnections, sources, structured } from '@workspace/db/schema'
+import {
+  databaseConnections,
+  sources,
+  structuredSources,
+} from '@workspace/db/schema'
 import { z } from 'zod'
 import { python } from '../python'
 
@@ -12,12 +16,10 @@ export const runDbReplicationTask = schemaTask({
   }),
   run: async (payload) => {
     const [source] = await db
-      .select({
-        id: sources.id,
-        databaseConnectionId: sources.databaseConnectionId,
-      })
+      .select()
       .from(sources)
       .where(eq(sources.id, payload.sourceId))
+      .limit(1)
 
     if (!source) {
       throw new AbortTaskRunError('Source not found')
@@ -31,6 +33,7 @@ export const runDbReplicationTask = schemaTask({
       .select()
       .from(databaseConnections)
       .where(eq(databaseConnections.id, source.databaseConnectionId))
+      .limit(1)
 
     if (!connection) {
       throw new AbortTaskRunError('Database connection not found')
@@ -40,16 +43,17 @@ export const runDbReplicationTask = schemaTask({
       throw new AbortTaskRunError('Database dialect not found')
     }
 
-    const [sourceStructured] = await db
+    const [structuredSource] = await db
       .select()
-      .from(structured)
-      .where(eq(structured.sourceId, payload.sourceId))
+      .from(structuredSources)
+      .where(eq(structuredSources.sourceId, payload.sourceId))
+      .limit(1)
 
-    if (!sourceStructured) {
-      throw new AbortTaskRunError('Structured not found for source')
+    if (!structuredSource) {
+      throw new AbortTaskRunError('Structured source not found')
     }
 
-    const tablesMetadata = sourceStructured.tablesMetadata?.map((t) => ({
+    const tablesMetadata = structuredSource.tablesMetadata?.map((t) => ({
       name: t.name,
       columns: t.columns.map((c) => ({ name: c.name })),
     }))

@@ -12,12 +12,10 @@ export const getDbSchemaTask = schemaTask({
   }),
   run: async (payload) => {
     const [source] = await db
-      .select({
-        id: sources.id,
-        databaseConnectionId: sources.databaseConnectionId,
-      })
+      .select()
       .from(sources)
       .where(eq(sources.id, payload.sourceId))
+      .limit(1)
 
     if (!source) {
       throw new AbortTaskRunError('Source not found')
@@ -31,6 +29,7 @@ export const getDbSchemaTask = schemaTask({
       .select()
       .from(databaseConnections)
       .where(eq(databaseConnections.id, source.databaseConnectionId))
+      .limit(1)
 
     if (!connection) {
       throw new AbortTaskRunError('Database connection not found')

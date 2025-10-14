@@ -18,7 +18,7 @@ import { health } from './health'
 import { getProfile } from './profile/get-profile'
 import { getSource } from './sources/get-source'
 import { listSources } from './sources/list-sources'
-import { getStructured } from './sources/structured/get-structured'
+import { getStructuredSource } from './sources/structured-sources/get-structured-source'
 
 export async function routes(app: FastifyTypedInstance) {
   app.register(health)
@@ -30,7 +30,7 @@ export async function routes(app: FastifyTypedInstance) {
   app.register(getAgent)
   app.register(listSources)
   app.register(getSource)
-  app.register(getStructured)
+  app.register(getStructuredSource)
   app.register(listDatabaseConnections)
   app.register(getDatabaseConnection)
 
