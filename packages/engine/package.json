@@ -11,6 +11,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@langchain/community": "^0.3.57",
     "@trigger.dev/core": "4.0.4",
     "@trigger.dev/python": "4.0.4",
     "@trigger.dev/sdk": "4.0.4",
@@ -20,6 +21,8 @@
     "@workspace/env": "workspace:*",
     "@workspace/storage": "workspace:*",
     "@workspace/vector-store": "workspace:*",
+    "langchain": "^0.3.36",
+    "pdfjs-dist": "^5.4.296",
     "uuid": "^13.0.0",
     "zod": "^4.1.8"
   },

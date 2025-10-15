@@ -32,49 +32,57 @@ export const runIngestionTask = schemaTask({
       throw new AbortTaskRunError('Namespace not found')
     }
 
-    if (source.type === 'structured') {
-      const [structuredSource] = await db
-        .select()
-        .from(structuredSources)
-        .where(eq(structuredSources.sourceId, payload.sourceId))
-        .limit(1)
+    switch (source.type) {
+      case 'structured':
+        const [structuredSource] = await db
+          .select()
+          .from(structuredSources)
+          .where(eq(structuredSources.sourceId, payload.sourceId))
+          .limit(1)
 
-      if (!structuredSource) {
-        throw new AbortTaskRunError('Structured source not found')
-      }
+        if (!structuredSource) {
+          throw new AbortTaskRunError('Structured source not found')
+        }
 
-      const { tablesMetadata, queryExamples } = structuredSource
+        const { tablesMetadata, queryExamples } = structuredSource
 
-      await logger.trace('Ingest Source', async () => {
-        await ingestStructuredSource({
-          namespace,
-          sourceId: payload.sourceId,
-          tablesMetadata: tablesMetadata || [],
+        await logger.trace('Ingest Structured Source', async () => {
+          await ingestStructuredSource({
+            namespace,
+            sourceId: payload.sourceId,
+            tablesMetadata: tablesMetadata || [],
+          })
         })
-      })
 
-      await logger.trace('Ingest Tables Metadata from Source', async () => {
-        await ingestStructuredSourceTablesMetadata({
-          namespace,
-          sourceId: payload.sourceId,
-          tablesMetadata: tablesMetadata || [],
+        await logger.trace('Ingest Tables Metadata from Source', async () => {
+          await ingestStructuredSourceTablesMetadata({
+            namespace,
+            sourceId: payload.sourceId,
+            tablesMetadata: tablesMetadata || [],
+          })
         })
-      })
 
-      await logger.trace('Ingest Proper Nouns from Source', async () => {
-        await ingestStructuredSourceProperNouns({
-          namespace,
-          sourceId: payload.sourceId,
+        await logger.trace('Ingest Proper Nouns from Source', async () => {
+          await ingestStructuredSourceProperNouns({
+            namespace,
+            sourceId: payload.sourceId,
+          })
         })
-      })
 
-      await logger.trace('Ingest Query Examples from Source', async () => {
-        await ingestStructuredSourceQueryExamples({
-          namespace,
-          sourceId: payload.sourceId,
-          queryExamples: queryExamples || [],
+        await logger.trace('Ingest Query Examples from Source', async () => {
+          await ingestStructuredSourceQueryExamples({
+            namespace,
+            sourceId: payload.sourceId,
+            queryExamples: queryExamples || [],
+          })
         })
-      })
+        break
+
+      default:
+        await logger.trace('Ingest Source', async () => {
+          // TODO: Implement logic to ingest source
+        })
+        break
     }
 
     return {

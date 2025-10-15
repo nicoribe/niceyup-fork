@@ -1,6 +1,6 @@
 import { AbortTaskRunError, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
-import { eq } from '@workspace/db/orm'
+import { and, eq } from '@workspace/db/orm'
 import {
   databaseConnections,
   sources,
@@ -18,7 +18,9 @@ export const runDbReplicationTask = schemaTask({
     const [source] = await db
       .select()
       .from(sources)
-      .where(eq(sources.id, payload.sourceId))
+      .where(
+        and(eq(sources.id, payload.sourceId), eq(sources.type, 'structured')),
+      )
       .limit(1)
 
     if (!source) {

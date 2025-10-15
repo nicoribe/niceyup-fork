@@ -49,23 +49,29 @@ export async function retrieveSources({
 
   const structuredDocuments = Array.from(uniqueStructuredDocuments.values())
 
-  const documentsContent = await Promise.all(
-    [...structuredDocuments, ...unstructedDocuments].map(async (document) => {
-      if (document.sourceType === 'structured') {
-        const structuredContent = await retrieveStructuredSourceTablesMetadata({
-          namespace,
-          question,
-          sourceId: document.sourceId,
-        })
+  const structuredDocumentsContent = await Promise.all(
+    structuredDocuments.map(async (document) => {
+      const structuredContent = await retrieveStructuredSourceTablesMetadata({
+        namespace,
+        question,
+        sourceId: document.sourceId,
+      })
 
-        return structuredContent
-      }
-
-      return document.data.content
+      return `<source id="${document.sourceId}" type="structured">${structuredContent}</source>`
     }),
   )
 
-  logger.warn('Output', { output: documentsContent })
+  const unstructedDocumentsContent = unstructedDocuments.map(
+    (document) =>
+      `<source id="${document.sourceId}" type="${document.sourceType}">${document.data.content}</source>`,
+  )
+
+  const documentsContent = [
+    ...structuredDocumentsContent,
+    ...unstructedDocumentsContent,
+  ]
+
+  logger.warn('Output', { output: { documentsContent } })
 
   return documentsContent
 }

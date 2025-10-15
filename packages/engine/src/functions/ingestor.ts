@@ -1,6 +1,9 @@
 import { logger } from '@trigger.dev/sdk'
+import { generateText } from '@workspace/ai'
 import type { QueryExample, TableMetadata } from '../lib/types'
 import { getDbProperNounsTask } from '../trigger/get-db-proper-nouns'
+import { languageModel } from './models'
+import { experimental_templatePromptSummarizeStructuredSource } from './prompts'
 import { vectorStoreUpsert } from './vector-store'
 
 export async function ingestStructuredSource({
@@ -170,5 +173,63 @@ export async function ingestStructuredSourceQueryExamples({
     sourceId,
     sourceType: 'structured',
     data: documents,
+  })
+}
+
+/**
+ * Experimental. Do not use this function in production. Use {@link ingestStructuredSource} instead.
+ */
+export async function experimental_ingestStructuredSource({
+  namespace,
+  sourceId,
+  tablesMetadata,
+}: {
+  namespace: string
+  sourceId: string
+  tablesMetadata: TableMetadata[]
+}) {
+  const tablesContent = []
+
+  for (const table of tablesMetadata) {
+    let content = table.name
+
+    if (table.meta?.description) {
+      content += `\n${table.meta.description}`
+    }
+
+    content += '\n'
+
+    for (const column of table.columns) {
+      content += `-\n${column.name}`
+
+      if (column.meta?.description) {
+        content += `\n${column.meta.description}`
+      }
+
+      content += '\n'
+    }
+
+    tablesContent.push(content)
+  }
+
+  const generatedContent = await generateText({
+    model: languageModel,
+    messages: experimental_templatePromptSummarizeStructuredSource({
+      content: tablesContent.join('\n-\n'),
+    }),
+  })
+
+  const document = {
+    content: generatedContent.text,
+  }
+
+  logger.warn('Document', { document })
+
+  await vectorStoreUpsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'structured',
+    data: document,
   })
 }

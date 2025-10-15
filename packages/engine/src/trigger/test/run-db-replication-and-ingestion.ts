@@ -31,7 +31,7 @@ export const runDbReplicationAndIngestionTask = schemaTask({
         const [createDatabaseConnection] = await tx
           .insert(databaseConnections)
           .values({
-            name: 'Test Database Connection',
+            name: '(Test) Database Connection',
             dialect: payload.databaseConnection.dialect,
             payload: {
               host: payload.databaseConnection.host,
@@ -52,7 +52,7 @@ export const runDbReplicationAndIngestionTask = schemaTask({
         const [createSource] = await tx
           .insert(sources)
           .values({
-            name: 'Test Source',
+            name: '(Test) Structured Source',
             type: 'structured',
             databaseConnectionId: createDatabaseConnection.id,
             ownerId: payload.ownerId,

@@ -20,6 +20,7 @@ export default defineConfig({
   },
   dirs: ['./src/trigger'],
   build: {
+    external: ['pdfjs-dist'],
     extensions: [
       pythonExtension({
         devPythonBinaryPath: './python/.venv/bin/python',
