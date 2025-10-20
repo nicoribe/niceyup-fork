@@ -82,7 +82,7 @@ if (env.APP_ENV === 'development') {
     routePrefix: '/api/docs',
     configuration: {
       pageTitle: 'Niceyup API',
-      favicon: `${env.WEB_URL}/logo-light.svg`,
+      favicon: `${env.WEB_URL}/logo-light.png`,
       theme: 'saturn',
     },
   })

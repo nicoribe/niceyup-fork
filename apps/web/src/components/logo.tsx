@@ -8,14 +8,14 @@ export async function Logo({
   return (
     <div className={cn('relative', className)} {...props}>
       <Image
-        className="absolute flex dark:hidden"
-        src="/logo-light.svg"
+        className="absolute flex p-1 dark:hidden"
+        src="/logo-light.png"
         alt="Niceyup"
         fill
       />
       <Image
-        className="absolute hidden dark:flex"
-        src="/logo-dark.svg"
+        className="absolute hidden p-1 dark:flex"
+        src="/logo-dark.png"
         alt="Niceyup"
         fill
       />
