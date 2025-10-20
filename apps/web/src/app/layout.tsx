@@ -15,8 +15,8 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Better Chat',
-    template: '%s | Better Chat',
+    default: 'Niceyup',
+    template: '%s | Niceyup',
   },
   icons: {
     icon: [

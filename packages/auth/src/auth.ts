@@ -11,7 +11,7 @@ import { env } from './lib/env'
 import { stripe } from './lib/stripe'
 
 const config = {
-  appName: 'Better Chat',
+  appName: 'Niceyup',
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',

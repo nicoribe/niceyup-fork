@@ -7,7 +7,7 @@ import { pluginZod } from '@kubb/plugin-zod'
 import { env } from './src/lib/env'
 
 export const config: UserConfig = {
-  name: 'Better Chat API',
+  name: 'Niceyup API',
   root: '.',
   input: {
     path: `${env.API_URL}/api/docs/openapi.json`,

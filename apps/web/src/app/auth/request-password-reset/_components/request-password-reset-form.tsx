@@ -1,6 +1,7 @@
 'use client'
 
 import { authClient } from '@/lib/auth/client'
+import { env } from '@/lib/env'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@workspace/ui/components/button'
 import {
@@ -46,7 +47,10 @@ export function RequestPasswordResetForm() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { data, error } = await authClient.requestPasswordReset({
       email: values.email,
-      redirectTo: '/auth/reset-password',
+      redirectTo: new URL(
+        '/auth/reset-password',
+        env.NEXT_PUBLIC_WEB_URL,
+      ).toString(),
     })
 
     if (data) {

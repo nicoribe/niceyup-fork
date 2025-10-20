@@ -12,7 +12,7 @@ export const runDocumentLoadersTask = schemaTask({
 
     await logger.trace('Run Document Loaders', async () => {
       const docs = await filesLoader({
-        filePaths: ['./tmp/.better-chat-engine/test/test_document_rag.pdf'],
+        filePaths: ['./tmp/.niceyup-engine/test/test_document_rag.pdf'],
       })
 
       logger.warn('Docs', { docs })

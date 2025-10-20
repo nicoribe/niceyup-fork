@@ -53,8 +53,8 @@ if (env.APP_ENV === 'development') {
   app.register(fastifySwagger, {
     openapi: {
       info: {
-        title: 'Better Chat',
-        description: 'API Reference for Better Chat',
+        title: 'Niceyup',
+        description: 'API Reference for Niceyup',
         version,
       },
       components: {
@@ -81,7 +81,7 @@ if (env.APP_ENV === 'development') {
   app.register(fastifyScalar, {
     routePrefix: '/api/docs',
     configuration: {
-      pageTitle: 'Better Chat API',
+      pageTitle: 'Niceyup API',
       favicon: `${env.WEB_URL}/logo-light.svg`,
       theme: 'saturn',
     },

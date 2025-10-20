@@ -10,13 +10,13 @@ export async function Logo({
       <Image
         className="absolute flex dark:hidden"
         src="/logo-light.svg"
-        alt="Better Chat"
+        alt="Niceyup"
         fill
       />
       <Image
         className="absolute hidden dark:flex"
         src="/logo-dark.svg"
-        alt="Better Chat"
+        alt="Niceyup"
         fill
       />
     </div>

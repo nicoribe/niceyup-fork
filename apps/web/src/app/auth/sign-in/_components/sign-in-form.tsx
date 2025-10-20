@@ -1,6 +1,7 @@
 'use client'
 
 import { authClient } from '@/lib/auth/client'
+import { env } from '@/lib/env'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@workspace/ui/components/button'
 import {
@@ -52,7 +53,7 @@ export function SignInForm() {
     const { data, error } = await authClient.signIn.email({
       email: values.email,
       password: values.password,
-      callbackURL: redirectTo,
+      callbackURL: new URL(redirectTo, env.NEXT_PUBLIC_WEB_URL).toString(),
     })
 
     if (data) {
