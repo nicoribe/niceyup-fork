@@ -10,8 +10,8 @@ import { cn } from '@workspace/ui/lib/utils'
 import * as React from 'react'
 import { useComponentSize } from 'react-use-size'
 
-const DEFAULT_MIN_SIZE = 220
-const DEFAULT_MAX_SIZE = 30
+const DEFAULT_MIN_SIZE = 220 // 220px
+const DEFAULT_MAX_SIZE = 30 // 30% of the width
 
 export function Resizable({
   leftSidebar: leftSidebarComponent,
@@ -27,23 +27,13 @@ export function Resizable({
 
   const { topbar, leftSidebar, rightSidebar } = useAppearance()
 
-  const [minSize, setMinSize] = React.useState(0)
-  const [maxLeftSidebarSize, setMaxLeftSidebarSize] = React.useState(0)
-  const [maxRightSidebarSize, setMaxRightSidebarSize] = React.useState(0)
+  const [minSidebarSize, setMinSidebarSize] = React.useState(0)
 
   React.useEffect(() => {
     if (width) {
-      setMinSize(Math.round((DEFAULT_MIN_SIZE / width) * 100))
+      setMinSidebarSize(Math.round((DEFAULT_MIN_SIZE / width) * 100))
     }
   }, [width])
-
-  React.useEffect(() => {
-    setMaxLeftSidebarSize(!leftSidebar ? DEFAULT_MAX_SIZE : 0)
-  }, [leftSidebar])
-
-  React.useEffect(() => {
-    setMaxRightSidebarSize(!rightSidebar ? DEFAULT_MAX_SIZE : 0)
-  }, [rightSidebar])
 
   return (
     <div
@@ -56,21 +46,31 @@ export function Resizable({
     >
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel
-          defaultSize={minSize}
-          minSize={minSize}
-          maxSize={maxLeftSidebarSize}
-          className="flex flex-col border-r bg-background"
+          defaultSize={0}
+          minSize={leftSidebar ? minSidebarSize : 0}
+          maxSize={leftSidebar ? DEFAULT_MAX_SIZE : 0}
+          className={cn(
+            'flex flex-col border-r bg-background',
+            !leftSidebar && 'hidden',
+          )}
         >
           {leftSidebarComponent}
         </ResizablePanel>
+
         <ResizableHandle className="w-0.1" />
+
         <ResizablePanel>{children}</ResizablePanel>
+
         <ResizableHandle className="w-0.1" />
+
         <ResizablePanel
-          defaultSize={minSize}
-          minSize={minSize}
-          maxSize={maxRightSidebarSize}
-          className="flex flex-col border-l bg-background"
+          defaultSize={0}
+          minSize={rightSidebar ? minSidebarSize : 0}
+          maxSize={rightSidebar ? DEFAULT_MAX_SIZE : 0}
+          className={cn(
+            'flex flex-col border-l bg-background',
+            !rightSidebar && 'hidden',
+          )}
         >
           {rightSidebarComponent}
         </ResizablePanel>

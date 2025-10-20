@@ -13,7 +13,7 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { ChevronsUpDown, CircleDashed, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
-import { redirect, useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 export function TeamSwitcher({
   activeTeam,
@@ -23,6 +23,7 @@ export function TeamSwitcher({
   teams: Team[]
 }) {
   const { organizationSlug } = useParams<OrganizationTeamParams>()
+  const router = useRouter()
 
   return (
     <DropdownMenu>
@@ -51,7 +52,8 @@ export function TeamSwitcher({
                     organizationId: team.organizationId,
                     teamId: team.id,
                   })
-                  redirect(`/orgs/${organizationSlug}/${team.id}/overview`)
+
+                  router.push(`/orgs/${organizationSlug}/${team.id}/overview`)
                 }}
               >
                 <CircleDashed className="mr-1 size-4" />

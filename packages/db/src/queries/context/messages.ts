@@ -1,5 +1,5 @@
+import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '../../db'
-import { and, eq, isNull } from '../../lib/orm'
 import { messages } from '../../schema'
 import { getConversation } from './conversations'
 
@@ -19,6 +19,7 @@ type ContextGetMessageParams = {
   }
 
 type GetMessageParams = {
+  agentId: string
   conversationId: string
   messageId: string
 }
@@ -28,6 +29,7 @@ export async function getMessage(
   params: GetMessageParams,
 ) {
   const conversation = await getConversation(context, {
+    agentId: params.agentId,
     conversationId: params.conversationId,
   })
 

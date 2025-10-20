@@ -1,41 +1,40 @@
 'use client'
 
+import { revalidateTag } from '@/actions/revalidate'
 import { useUploadFiles } from '@/hooks/use-upload-files'
 import { sdk } from '@/lib/sdk'
 import type {
   ChatParams,
   Message,
+  MessageNode,
   MessageRole,
   OrganizationTeamParams,
   PromptInputStatus,
   PromptMessagePart,
 } from '@/lib/types'
 import type { ScrollToBottom } from '@workspace/ui/components/conversation'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { toast } from 'sonner'
-import { useExplorerTree } from '../../_components/explorer-tree'
 import { useChatRealtime } from './use-chat-realtime'
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
-export type MessageProps = Message & {
+export type ChatMessageNode = MessageNode & {
   isBranch?: boolean
   isPersisted?: boolean
 }
 
-type LoadingMessageProps = {
+type ChatLoadingMessage = {
   id: string
   role: MessageRole
 }
 
-function hasMultipleChildren(parentMessage: Message) {
-  return Boolean(
-    parentMessage.children?.length && parentMessage.children.length > 1,
-  )
+function hasMultipleChildren(parentNode: MessageNode) {
+  return Boolean(parentNode.children?.length && parentNode.children.length > 1)
 }
 
-export function isMessageStream(message: Message) {
+export function isStream(message: Message) {
   return Boolean(
     (message.status === 'queued' || message.status === 'in_progress') &&
       message.role === 'assistant',
@@ -43,178 +42,190 @@ export function isMessageStream(message: Message) {
 }
 
 // Memoized message index for O(1) lookups
-const createMessageIndex = (messages: Message[]) => {
-  const index = new Map<string, MessageProps>()
+const createMessageNodeIndex = (messageNodes: ChatMessageNode[]) => {
+  const index = new Map<string, ChatMessageNode>()
   const childrenIndex = new Map<string, string[]>()
 
-  for (const message of messages) {
-    if (message.parentId) {
-      const existing = childrenIndex.get(message.parentId) || []
-      existing.push(message.id)
-      childrenIndex.set(message.parentId, existing)
+  for (const messageNode of messageNodes) {
+    if (messageNode.parentId) {
+      const existing = childrenIndex.get(messageNode.parentId) || []
+      existing.push(messageNode.id)
+      childrenIndex.set(messageNode.parentId, existing)
     }
-    index.set(message.id, message)
+    index.set(messageNode.id, messageNode)
   }
 
   return { index, childrenIndex }
 }
 
-// Optimized tree building with memoization
-const buildMessageTree = (
-  targetMessageId: string | undefined,
-  loadingMessage: LoadingMessageProps | false,
-  messageIndex: Map<string, Message>,
+// Optimized nodes building with memoization
+const buildMessageNodes = (
+  targetNodeId: string | undefined,
+  loadingMessage: ChatLoadingMessage | false,
+  messageNodeIndex: Map<string, ChatMessageNode>,
   childrenIndex: Map<string, string[]>,
 ) => {
-  if (!targetMessageId) {
+  if (!targetNodeId) {
     return []
   }
 
-  const targetMessage = messageIndex.get(targetMessageId)
-  if (!targetMessage) {
+  const targetNode = messageNodeIndex.get(targetNodeId)
+  if (!targetNode) {
     return []
   }
 
   // Handle loading state
   if (loadingMessage) {
-    const loadingMsg = messageIndex.get(loadingMessage.id)
-    if (loadingMsg) {
-      const ancestors = buildAncestors(loadingMsg, messageIndex)
+    const loadingMessageNode = messageNodeIndex.get(loadingMessage.id)
+    if (loadingMessageNode) {
+      const ancestorNodes = buildAncestorNodes(
+        loadingMessageNode,
+        messageNodeIndex,
+      )
 
-      const lastAncestor = ancestors.at(-1)
+      const lastAncestorNode = ancestorNodes.at(-1)
 
-      const message = {
-        ...targetMessage,
-        isBranch: lastAncestor ? hasMultipleChildren(lastAncestor) : false,
+      const messageNode = {
+        ...targetNode,
+        isBranch: lastAncestorNode
+          ? hasMultipleChildren(lastAncestorNode)
+          : false,
       }
 
-      return [...ancestors, message]
+      return [...ancestorNodes, messageNode]
     }
   }
 
-  const ancestors = buildAncestors(targetMessage, messageIndex)
-  const descendants = buildDescendants(
-    targetMessage,
-    messageIndex,
+  const ancestorNodes = buildAncestorNodes(targetNode, messageNodeIndex)
+  const descendantNodes = buildDescendantNodes(
+    targetNode,
+    messageNodeIndex,
     childrenIndex,
   )
 
-  const lastAncestor = ancestors.at(-1)
+  const lastAncestorNode = ancestorNodes.at(-1)
 
-  const message = {
-    ...targetMessage,
-    isBranch: lastAncestor ? hasMultipleChildren(lastAncestor) : false,
+  const messageNode = {
+    ...targetNode,
+    isBranch: lastAncestorNode ? hasMultipleChildren(lastAncestorNode) : false,
   }
 
-  return [...ancestors, message, ...descendants]
+  return [...ancestorNodes, messageNode, ...descendantNodes]
 }
 
-// Build ancestors chain efficiently
-const buildAncestors = (
-  message: Message,
-  messageIndex: Map<string, Message>,
+// Build ancestor nodes chain efficiently
+const buildAncestorNodes = (
+  messageNode: ChatMessageNode,
+  messageNodeIndex: Map<string, ChatMessageNode>,
 ) => {
-  const ancestors: MessageProps[] = []
-  let current = message
+  const ancestorNodes: ChatMessageNode[] = []
+  let currentNode = messageNode
 
-  while (current.parentId) {
-    const parent = messageIndex.get(current.parentId)
-    if (!parent) {
+  while (currentNode.parentId) {
+    const parentNode = messageNodeIndex.get(currentNode.parentId)
+    if (!parentNode) {
       break
     }
 
-    if (ancestors[0]) {
-      ancestors[0].isBranch = hasMultipleChildren(parent)
+    if (ancestorNodes[0]) {
+      ancestorNodes[0].isBranch = hasMultipleChildren(parentNode)
     }
 
-    ancestors.unshift(parent)
-    current = parent
+    ancestorNodes.unshift(parentNode)
+    currentNode = parentNode
   }
 
-  return ancestors
+  return ancestorNodes
 }
 
-// Build descendants chain efficiently
-const buildDescendants = (
-  message: Message,
-  messageIndex: Map<string, Message>,
+// Build descendant nodes chain efficiently
+const buildDescendantNodes = (
+  messageNode: ChatMessageNode,
+  messageNodeIndex: Map<string, ChatMessageNode>,
   childrenIndex: Map<string, string[]>,
 ) => {
-  const descendants: MessageProps[] = []
-  let current = message
+  const descendantNodes: ChatMessageNode[] = []
+  let currentNode = messageNode
 
   while (true) {
-    const [firstChildId] = childrenIndex.get(current.id) || []
+    const [firstChildId] = childrenIndex.get(currentNode.id) || []
     if (!firstChildId) {
       break
     }
 
-    const firstChild = messageIndex.get(firstChildId)
-    if (!firstChild) {
+    const firstChildNode = messageNodeIndex.get(firstChildId)
+    if (!firstChildNode) {
       break
     }
 
-    descendants.push({
-      ...firstChild,
-      isBranch: hasMultipleChildren(message),
+    descendantNodes.push({
+      ...firstChildNode,
+      isBranch: hasMultipleChildren(firstChildNode),
     })
-    current = firstChild
+    currentNode = firstChildNode
   }
 
-  return descendants
+  return descendantNodes
 }
 
 // Memoized branch change handler
 const createBranchChangeHandler = (
-  params: OrganizationTeamParams & ChatParams,
-  messages: Message[],
-  setMessages: (messages: Message[]) => void,
-  setTargetMessageId: (targetMessageId: string | undefined) => void,
-  setLoadingMessage: (loadingMessage: LoadingMessageProps | false) => void,
+  params: Params,
+  loadedMessageNodes: ChatMessageNode[],
+  upsertLoadedMessageNodes: (messageNodes: ChatMessageNode[]) => void,
+  setTargetNodeId: (targetNodeId: string | undefined) => void,
+  setLoadingMessage: (loadingMessage: ChatLoadingMessage | false) => void,
 ) => {
   return React.useCallback(
     async ({
-      previousMessageId,
-      targetMessageId,
+      previousNodeId,
+      targetNodeId,
       role,
     }: {
-      previousMessageId: string
-      targetMessageId: string
+      previousNodeId: string
+      targetNodeId: string
       role: MessageRole
     }) => {
-      // Check if message is already loaded using the index
-      const messageIndex = createMessageIndex(messages)
-      const targetMessage = messageIndex.index.get(targetMessageId)
+      // Check if message node is already loaded using the index
+      const messageNodeIndex = createMessageNodeIndex(loadedMessageNodes)
+      const targetNode = messageNodeIndex.index.get(targetNodeId)
 
-      if (targetMessage) {
-        setTargetMessageId(targetMessageId)
+      if (targetNode) {
+        setTargetNodeId(targetNodeId)
         return
       }
 
       try {
-        setLoadingMessage({ id: previousMessageId, role })
+        setLoadingMessage({ id: previousNodeId, role })
 
         const { data } = await sdk.listMessages({
           conversationId: params.chatId,
           params: {
             organizationSlug: params.organizationSlug,
             teamId: params.teamId,
-            targetMessageId,
+            agentId: params.agentId,
+            targetMessageId: targetNodeId,
           },
         })
 
-        const newMessages = (data?.messages || []) as Message[]
+        const messageNodes = (data?.messages || []) as ChatMessageNode[]
 
-        setMessages(newMessages)
+        upsertLoadedMessageNodes(messageNodes)
 
-        setTargetMessageId(targetMessageId)
+        setTargetNodeId(targetNodeId)
       } catch (error) {
         console.error(error)
       } finally {
         setLoadingMessage(false)
       }
     },
-    [params, messages, setMessages, setTargetMessageId, setLoadingMessage],
+    [
+      params,
+      loadedMessageNodes,
+      upsertLoadedMessageNodes,
+      setTargetNodeId,
+      setLoadingMessage,
+    ],
   )
 }
 
@@ -232,54 +243,60 @@ type RegenerateMessageParams = {
 }
 
 type UseChatParams = {
-  initialMessages?: Message[]
+  params: Params
+  initialMessages?: MessageNode[]
+  explorerNode?: {
+    visibility: 'private' | 'team'
+    folderId?: string | null
+  }
 }
 
-export function useChat({ initialMessages }: UseChatParams = {}) {
-  const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
+export function useChat({
+  params,
+  initialMessages,
+  explorerNode,
+}: UseChatParams) {
   const router = useRouter()
-
-  const { selectedExplorerType, selectedFolder, setRevealItemInExplorer } =
-    useExplorerTree()
 
   const refConversationScroll = React.useRef<ScrollToBottom | null>(null)
 
-  const [allMessages, setAllMessages] = React.useState<MessageProps[]>(
-    initialMessages || [],
+  const [loadedMessageNodes, setLoadedMessageNodes] = React.useState<
+    ChatMessageNode[]
+  >(initialMessages || [])
+  const [targetNodeId, setTargetNodeId] = React.useState<string | undefined>(
+    initialMessages?.at(-1)?.id,
   )
-  const [targetMessageId, setTargetMessageId] = React.useState<
-    string | undefined
-  >(initialMessages?.at(-1)?.id)
 
   const [loadingMessage, setLoadingMessage] = React.useState<
-    LoadingMessageProps | false
+    ChatLoadingMessage | false
   >(false)
 
-  const setMessages = (messages: Message[]) => {
-    setAllMessages((prevMessages) => {
-      const updatedMessages = [...prevMessages]
-      const indexById = new Map(updatedMessages.map((m, i) => [m.id, i]))
+  const upsertLoadedMessageNodes = (messageNodes: ChatMessageNode[]) => {
+    setLoadedMessageNodes((prevMessageNodes) => {
+      const updatedMessageNodes = [...prevMessageNodes]
+      const indexById = new Map(updatedMessageNodes.map((mn, i) => [mn.id, i]))
       let changed = false
 
-      for (const msg of messages) {
-        const idx = indexById.get(msg.id)
+      for (const messageNode of messageNodes) {
+        const idx = indexById.get(messageNode.id)
         if (idx !== undefined) {
-          if (updatedMessages[idx] !== msg) {
-            updatedMessages[idx] = msg
+          if (updatedMessageNodes[idx] !== messageNode) {
+            updatedMessageNodes[idx] = messageNode
             changed = true
           }
         } else {
-          indexById.set(msg.id, updatedMessages.length)
-          updatedMessages.push(msg)
+          indexById.set(messageNode.id, updatedMessageNodes.length)
+          updatedMessageNodes.push(messageNode)
           changed = true
         }
       }
 
-      return changed ? updatedMessages : prevMessages
+      return changed ? updatedMessageNodes : prevMessageNodes
     })
   }
 
-  const { messages: messagesRealtime, error: errorRealtime } = useChatRealtime()
+  const { messages: messageNodesRealtime, error: errorRealtime } =
+    useChatRealtime({ params })
 
   React.useEffect(() => {
     if (errorRealtime) {
@@ -288,202 +305,202 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
   }, [errorRealtime])
 
   React.useEffect(() => {
-    if (messagesRealtime.length) {
-      setMessages(messagesRealtime)
+    if (messageNodesRealtime.length) {
+      upsertLoadedMessageNodes(messageNodesRealtime)
     }
-  }, [messagesRealtime])
+  }, [messageNodesRealtime])
 
-  // Memoized message index
-  const messageIndexData = React.useMemo(
-    () => createMessageIndex(allMessages),
-    [allMessages],
+  // Memoized message node index
+  const messageNodeIndex = React.useMemo(
+    () => createMessageNodeIndex(loadedMessageNodes),
+    [loadedMessageNodes],
   )
 
-  // Memoized message lookup function
-  const getMessageById = React.useCallback(
+  // Memoized message node lookup function
+  const getMessageNodeById = React.useCallback(
     (id: string | null | undefined) => {
       if (!id) {
         return undefined
       }
 
-      return messageIndexData.index.get(id)
+      return messageNodeIndex.index.get(id)
     },
-    [messageIndexData.index],
+    [messageNodeIndex.index],
   )
 
-  const updateMessageById = (
-    messageId: string,
-    message: Partial<Omit<Message, 'id'>>,
+  const updateMessageNodeById = (
+    messageNodeId: string,
+    messageNode: Partial<Omit<ChatMessageNode, 'id'>>,
   ) => {
-    setAllMessages((prevMessages) => {
-      return prevMessages.map((prevMessage) =>
-        prevMessage.id === messageId
-          ? { ...prevMessage, ...message }
-          : prevMessage,
+    setLoadedMessageNodes((prevMessageNodes) => {
+      return prevMessageNodes.map((prevMessageNode) =>
+        prevMessageNode.id === messageNodeId
+          ? { ...prevMessageNode, ...messageNode }
+          : prevMessageNode,
       )
     })
   }
 
-  const getPersistentParentMessage = React.useCallback(
-    (parentMessageId: string | undefined): MessageProps | undefined => {
-      if (!parentMessageId) {
+  const getPersistentParentNode = React.useCallback(
+    (parentNodeId: string | undefined): ChatMessageNode | undefined => {
+      if (!parentNodeId) {
         return undefined
       }
 
-      let currentMessage = messageIndexData.index.get(parentMessageId)
+      let currentNode = messageNodeIndex.index.get(parentNodeId)
 
-      while (currentMessage) {
-        if (currentMessage.isPersisted !== false) {
-          return currentMessage
+      while (currentNode) {
+        if (currentNode.isPersisted !== false) {
+          return currentNode
         }
 
-        if (!currentMessage.parentId) {
+        if (!currentNode.parentId) {
           break
         }
 
-        currentMessage = messageIndexData.index.get(currentMessage.parentId)
+        currentNode = messageNodeIndex.index.get(currentNode.parentId)
       }
 
       return undefined
     },
-    [messageIndexData.index],
+    [messageNodeIndex.index],
   )
 
   // Memoized branch change handler
   const handleBranchChange = createBranchChangeHandler(
-    { organizationSlug, teamId, chatId },
-    allMessages,
-    setMessages,
-    setTargetMessageId,
+    params,
+    loadedMessageNodes,
+    upsertLoadedMessageNodes,
+    setTargetNodeId,
     setLoadingMessage,
   )
 
-  // Memoized message filtered by targetMessageId
-  const messagesFiltered = React.useMemo<MessageProps[]>(() => {
-    return buildMessageTree(
-      targetMessageId,
+  // Memoized message node chain filtered by targetNodeId
+  const messageNodeChain = React.useMemo<ChatMessageNode[]>(() => {
+    return buildMessageNodes(
+      targetNodeId,
       loadingMessage,
-      messageIndexData.index,
-      messageIndexData.childrenIndex,
+      messageNodeIndex.index,
+      messageNodeIndex.childrenIndex,
     )
-  }, [targetMessageId, loadingMessage, messageIndexData])
+  }, [targetNodeId, loadingMessage, messageNodeIndex])
 
   const [promptInputStatus, setPromptInputStatus] =
     React.useState<PromptInputStatus>('ready')
 
-  const generateFakeMessageId = () => {
+  const generateFakeNodeId = () => {
     return Math.random().toString(36).substring(2, 15)
   }
 
-  const addFakeMessage = ({
+  const addFakeNode = ({
     type,
-    parentMessageId,
-    fakeMessageId,
+    parentNodeId,
+    fakeNodeId,
     parts,
   }:
     | {
         type: 'question'
-        parentMessageId?: string
-        fakeMessageId: string
+        parentNodeId?: string
+        fakeNodeId: string
         parts: PromptMessagePart[]
       }
     | {
         type: 'answer'
-        parentMessageId: string
-        fakeMessageId: string
+        parentNodeId: string
+        fakeNodeId: string
         parts?: never
       }) => {
-    setAllMessages((prevMessages) => {
-      const updatedMessages = prevMessages.map((message) => {
-        if (message.id === parentMessageId) {
+    setLoadedMessageNodes((prevMessageNodes) => {
+      const updatedMessageNodes = prevMessageNodes.map((messageNode) => {
+        if (messageNode.id === parentNodeId) {
           return {
-            ...message,
-            children: [...(message.children || []), fakeMessageId],
+            ...messageNode,
+            children: [...(messageNode.children || []), fakeNodeId],
           }
         }
 
-        return message
+        return messageNode
       })
 
-      updatedMessages.push({
-        id: fakeMessageId,
+      updatedMessageNodes.push({
+        id: fakeNodeId,
         status: 'queued',
         role: type === 'question' ? 'user' : 'assistant',
         parts: type === 'question' ? parts : [],
-        parentId: parentMessageId,
+        parentId: parentNodeId,
         isPersisted: false,
       })
 
-      return updatedMessages
+      return updatedMessageNodes
     })
   }
 
-  const replaceFakeMessage = ({
+  const replaceFakeNode = ({
     type,
-    parentMessageId,
-    fakeMessageId,
-    questionMessage,
-    answerMessage,
+    parentNodeId,
+    fakeNodeId,
+    questionMessageNode,
+    answerMessageNode,
   }:
     | {
         type: 'question'
-        parentMessageId?: string
-        fakeMessageId: string
-        questionMessage: Message
-        answerMessage: Message
+        parentNodeId?: string
+        fakeNodeId: string
+        questionMessageNode: ChatMessageNode
+        answerMessageNode: ChatMessageNode
       }
     | {
         type: 'answer'
-        parentMessageId: string
-        fakeMessageId: string
-        questionMessage?: never
-        answerMessage: Message
+        parentNodeId: string
+        fakeNodeId: string
+        questionMessageNode?: never
+        answerMessageNode: ChatMessageNode
       }) => {
-    setAllMessages((prevMessages) => {
-      const updatedMessages = prevMessages.map((message) => {
-        if (message.id === parentMessageId) {
+    setLoadedMessageNodes((prevMessageNodes) => {
+      const updatedMessageNodes = prevMessageNodes.map((messageNode) => {
+        if (messageNode.id === parentNodeId) {
           return {
-            ...message,
-            children: message.children?.map((id) =>
-              id === fakeMessageId
+            ...messageNode,
+            children: messageNode.children?.map((id) =>
+              id === fakeNodeId
                 ? type === 'question'
-                  ? questionMessage.id
-                  : answerMessage.id
+                  ? questionMessageNode.id
+                  : answerMessageNode.id
                 : id,
             ),
           }
         }
 
-        if (message.id === fakeMessageId) {
+        if (messageNode.id === fakeNodeId) {
           return {
-            ...(type === 'question' ? questionMessage : answerMessage),
-            parentId: message.parentId, // Non-persistent parent message, kept to remain visually hierarchical
+            ...(type === 'question' ? questionMessageNode : answerMessageNode),
+            parentId: messageNode.parentId, // Non-persistent parent node, kept to remain visually hierarchical
           }
         }
 
-        return message
+        return messageNode
       })
 
       if (type === 'question') {
-        updatedMessages.push(answerMessage)
+        updatedMessageNodes.push(answerMessageNode)
       }
 
-      return updatedMessages
+      return updatedMessageNodes
     })
   }
 
-  const setErrorFakeMessage = ({
+  const setErrorFakeNode = ({
     type,
-    fakeMessageId,
+    fakeNodeId,
   }: {
     type: 'question' | 'answer'
-    fakeMessageId: string
+    fakeNodeId: string
   }) => {
-    setAllMessages((prevMessages) => {
-      const updatedMessages = prevMessages.map((message) => {
-        if (message.id === fakeMessageId) {
+    setLoadedMessageNodes((prevMessageNodes) => {
+      const updatedMessageNodes = prevMessageNodes.map((messageNode) => {
+        if (messageNode.id === fakeNodeId) {
           return {
-            ...message,
+            ...messageNode,
             status: 'failed',
             metadata: {
               error:
@@ -491,13 +508,13 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
                   ? 'Failed to send message'
                   : 'Failed to generate answer',
             },
-          } as Message
+          } as ChatMessageNode
         }
 
-        return message
+        return messageNode
       })
 
-      return updatedMessages
+      return updatedMessageNodes
     })
   }
 
@@ -512,38 +529,25 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
 
     setPromptInputStatus('submitted')
 
-    const parentMessageId = messagesFiltered.at(-1)?.id
-    const fakeMessageId = generateFakeMessageId()
+    const parentNodeId = messageNodeChain.at(-1)?.id
+    const fakeNodeId = generateFakeNodeId()
 
-    addFakeMessage({ type: 'question', parentMessageId, fakeMessageId, parts })
+    addFakeNode({ type: 'question', parentNodeId, fakeNodeId, parts })
 
     refConversationScroll.current?.scrollToBottom()
 
-    // If chat is new, we need to reveal the item in the explorer tree
-    const explorerType =
-      selectedExplorerType === 'shared' ? 'private' : selectedExplorerType
-    const pathFolderIdExplorerTree = selectedFolder.map(({ id }) => id)
-
     try {
-      const persistentParentMessageId =
-        getPersistentParentMessage(parentMessageId)?.id
+      const persistentParentNodeId = getPersistentParentNode(parentNodeId)?.id
 
       const { data, error } = await sdk.sendQuestionMessage({
-        conversationId: chatId,
+        conversationId: params.chatId,
         data: {
-          organizationSlug,
-          teamId,
-          agentId,
-          parentMessageId: persistentParentMessageId,
+          organizationSlug: params.organizationSlug,
+          teamId: params.teamId,
+          agentId: params.agentId,
+          parentMessageId: persistentParentNodeId,
           message: { parts },
-          ...(chatId === 'new'
-            ? {
-                explorerTree: {
-                  explorerType,
-                  folderId: pathFolderIdExplorerTree.at(-1),
-                },
-              }
-            : {}),
+          explorerNode,
         },
       })
 
@@ -551,33 +555,25 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
         throw new Error(error.message)
       }
 
-      if (chatId === 'new') {
-        if (data.explorerTree) {
-          setRevealItemInExplorer({
-            explorerType,
-            revealItemInExplorer: {
-              parentIds: pathFolderIdExplorerTree,
-              id: data.explorerTree.itemId,
-            },
-          })
-        }
+      if (params.chatId === 'new') {
+        await revalidateTag(`agent-${params.agentId}-chats`)
 
         router.push(
-          `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/chats/${data.conversationId}`,
+          `/orgs/${params.organizationSlug}/${params.teamId}/agents/${params.agentId}/chats/${data.conversationId}`,
         )
       }
 
-      replaceFakeMessage({
+      replaceFakeNode({
         type: 'question',
-        parentMessageId,
-        fakeMessageId,
-        questionMessage: data.questionMessage as Message,
-        answerMessage: data.answerMessage as Message,
+        parentNodeId,
+        fakeNodeId,
+        questionMessageNode: data.questionMessage as ChatMessageNode,
+        answerMessageNode: data.answerMessage as ChatMessageNode,
       })
     } catch {
       setPromptInputStatus('error')
 
-      setErrorFakeMessage({ type: 'question', fakeMessageId })
+      setErrorFakeNode({ type: 'question', fakeNodeId })
     }
   }
 
@@ -592,36 +588,36 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
 
     setPromptInputStatus('submitted')
 
-    const message = getMessageById(messageId)
+    const messageNode = getMessageNodeById(messageId)
 
-    const parentMessageId = message?.parentId
+    const parentNodeId = messageNode?.parentId
 
-    if (!parentMessageId) {
+    if (!parentNodeId) {
       return
     }
 
-    const fakeMessageId = generateFakeMessageId()
+    const fakeNodeId = generateFakeNodeId()
 
-    addFakeMessage({ type: 'question', parentMessageId, fakeMessageId, parts })
+    addFakeNode({ type: 'question', parentNodeId, fakeNodeId, parts })
 
-    setTargetMessageId(fakeMessageId)
+    setTargetNodeId(fakeNodeId)
 
     refConversationScroll.current?.scrollToBottom()
 
     try {
-      const persistentParentMessageId =
-        getPersistentParentMessage(parentMessageId)?.id
+      const persistentParentNodeId = getPersistentParentNode(parentNodeId)?.id
 
-      if (!persistentParentMessageId) {
+      if (!persistentParentNodeId) {
         return
       }
 
       const { data, error } = await sdk.resendQuestionMessage({
-        conversationId: chatId,
+        conversationId: params.chatId,
         data: {
-          organizationSlug,
-          teamId,
-          parentMessageId: persistentParentMessageId,
+          organizationSlug: params.organizationSlug,
+          teamId: params.teamId,
+          agentId: params.agentId,
+          parentMessageId: persistentParentNodeId,
           message: { parts },
           // referenceMessageId: message.isPersisted === false ? undefined : message.id,
         },
@@ -631,19 +627,19 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
         throw new Error(error.message)
       }
 
-      replaceFakeMessage({
+      replaceFakeNode({
         type: 'question',
-        parentMessageId,
-        fakeMessageId,
-        questionMessage: data.questionMessage as Message,
-        answerMessage: data.answerMessage as Message,
+        parentNodeId,
+        fakeNodeId,
+        questionMessageNode: data.questionMessage as ChatMessageNode,
+        answerMessageNode: data.answerMessage as ChatMessageNode,
       })
 
-      setTargetMessageId(data.questionMessage.id)
+      setTargetNodeId(data.questionMessage.id)
     } catch {
       setPromptInputStatus('error')
 
-      setErrorFakeMessage({ type: 'question', fakeMessageId })
+      setErrorFakeNode({ type: 'question', fakeNodeId })
     }
   }
 
@@ -658,36 +654,36 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
 
     setPromptInputStatus('submitted')
 
-    const message = getMessageById(messageId)
+    const messageNode = getMessageNodeById(messageId)
 
-    const parentMessageId = message?.parentId
+    const parentNodeId = messageNode?.parentId
 
-    if (!parentMessageId) {
+    if (!parentNodeId) {
       return
     }
 
-    const fakeMessageId = generateFakeMessageId()
+    const fakeNodeId = generateFakeNodeId()
 
-    addFakeMessage({ type: 'answer', parentMessageId, fakeMessageId })
+    addFakeNode({ type: 'answer', parentNodeId, fakeNodeId })
 
-    setTargetMessageId(fakeMessageId)
+    setTargetNodeId(fakeNodeId)
 
     refConversationScroll.current?.scrollToBottom()
 
     try {
-      const persistentParentMessageId =
-        getPersistentParentMessage(parentMessageId)?.id
+      const persistentParentNodeId = getPersistentParentNode(parentNodeId)?.id
 
-      if (!persistentParentMessageId) {
+      if (!persistentParentNodeId) {
         return
       }
 
       const { data, error } = await sdk.regenerateAnswerMessage({
-        conversationId: chatId,
+        conversationId: params.chatId,
         data: {
-          organizationSlug,
-          teamId,
-          parentMessageId: persistentParentMessageId,
+          organizationSlug: params.organizationSlug,
+          teamId: params.teamId,
+          agentId: params.agentId,
+          parentMessageId: persistentParentNodeId,
           // referenceMessageId: message.isPersisted === false ? undefined : message.id,
         },
       })
@@ -696,28 +692,29 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
         throw new Error(error.message)
       }
 
-      replaceFakeMessage({
+      replaceFakeNode({
         type: 'answer',
-        parentMessageId,
-        fakeMessageId,
-        answerMessage: data.answerMessage as Message,
+        parentNodeId,
+        fakeNodeId,
+        answerMessageNode: data.answerMessage as ChatMessageNode,
       })
 
-      setTargetMessageId(data.answerMessage.id)
+      setTargetNodeId(data.answerMessage.id)
     } catch {
       setPromptInputStatus('error')
 
-      setErrorFakeMessage({ type: 'answer', fakeMessageId })
+      setErrorFakeNode({ type: 'answer', fakeNodeId })
     }
   }
 
   const { uploading, uploadFiles } = useUploadFiles(
-    { organizationSlug, teamId },
+    { organizationSlug: params.organizationSlug, teamId: params.teamId },
     {
       bucket: 'default',
       scope: 'conversations',
       metadata: {
-        conversationId: chatId === 'new' ? null : chatId,
+        agentId: params.agentId,
+        conversationId: params.chatId !== 'new' ? params.chatId : null,
       },
       accept: 'application/pdf,image/*,video/*,audio/*',
       expires: 5 * 60, // 5 minutes
@@ -725,10 +722,10 @@ export function useChat({ initialMessages }: UseChatParams = {}) {
   )
 
   return {
-    messages: messagesFiltered,
+    messages: messageNodeChain,
     loadingMessage,
-    getMessageById,
-    updateMessageById,
+    getMessageNodeById,
+    updateMessageNodeById,
     handleBranchChange,
     refConversationScroll,
     sendMessage,

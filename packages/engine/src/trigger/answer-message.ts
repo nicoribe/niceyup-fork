@@ -43,16 +43,17 @@ export const answerMessageTask = schemaTask({
       throw new AbortTaskRunError('Question message not found')
     }
 
-    const contextMessages = true // TODO: Make this configurable
-    const maxContextMessages = 10 // TODO: Make this configurable
+    // TODO: Make this dynamic based on the agent's configuration
+    const contextMessages = true
+    const maxContextMessages = 10
 
-    const messageHistory = await queries.listMessages({
-      conversationId: payload.conversationId,
-      targetMessageId: questionMessage.id,
-      parents: contextMessages, // Get the context messages
-      children: false, // Not needed, only parents are used
-      parentsLimit: maxContextMessages, // Limit the number of context messages
-    })
+    const messageHistory = contextMessages
+      ? await queries.listMessageParentNodes({
+          conversationId: payload.conversationId,
+          targetMessageId: questionMessage.id,
+          limit: maxContextMessages,
+        })
+      : []
 
     const validatedMessages = await validateUIMessages({
       messages: [...messageHistory, questionMessage],

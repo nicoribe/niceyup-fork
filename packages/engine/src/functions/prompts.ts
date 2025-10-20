@@ -87,7 +87,7 @@ ${query}`,
 /**
  * Experimental. Do not use this prompt in production.
  */
-export function experimental_templatePromptSummarizeStructuredSource({
+export function experimental_templatePromptSummarizeDatabaseSource({
   content,
 }: {
   content: string

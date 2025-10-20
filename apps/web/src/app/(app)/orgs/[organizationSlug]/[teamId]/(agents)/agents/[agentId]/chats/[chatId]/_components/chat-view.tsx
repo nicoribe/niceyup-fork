@@ -1,44 +1,40 @@
-import { authenticatedUser } from '@/lib/auth/server'
-import { sdk } from '@/lib/sdk'
-import type { Chat, Message } from '@/lib/types'
+'use client'
+
+import type {
+  ChatParams,
+  MessageNode,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { ChatConversation, ChatPromptInput, ChatProvider } from './chat'
 
-export async function ChatView({
-  organizationSlug,
-  teamId,
-  chat,
-}: { organizationSlug: string; teamId: string; chat: Chat }) {
-  const {
-    user: { id: userId },
-  } = await authenticatedUser()
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
-  const { data, error } = await sdk.listMessages({
-    conversationId: chat.id,
-    params: { organizationSlug, teamId, parents: true },
-  })
-
-  if (error) {
-    return (
-      <div className="flex size-full flex-col items-center justify-center bg-background">
-        <div className="p-2">
-          <h1 className="text-sm">{error.message}</h1>
-        </div>
-      </div>
-    )
-  }
-
+export function ChatView({
+  params,
+  authorId,
+  initialMessages,
+}: {
+  params: Params
+  authorId: string
+  initialMessages: MessageNode[]
+}) {
   return (
     <ChatProvider
-      authorId={userId}
-      initialMessages={data.messages as Message[]}
+      params={params}
+      authorId={authorId}
+      initialMessages={initialMessages}
     >
       <ChatConversation />
 
       <Separator />
 
-      <div className="mx-auto w-full max-w-3xl p-4">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-4 py-2">
         <ChatPromptInput />
+
+        <div className="text-center text-[11px] text-muted-foreground">
+          AI assistants might make mistakes. Check important information.
+        </div>
       </div>
     </ChatProvider>
   )

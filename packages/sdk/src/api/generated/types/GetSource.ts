@@ -22,8 +22,11 @@ export type GetSourceQueryParams = {
 }
 
 export const sourceTypeEnum = {
+  file: 'file',
   text: 'text',
-  structured: 'structured',
+  'question-answer': 'question-answer',
+  website: 'website',
+  database: 'database',
 } as const
 
 export type SourceTypeEnum =
@@ -49,10 +52,6 @@ export type GetSource200 = {
      * @type string
      */
     type: SourceTypeEnum
-    /**
-     * @type string
-     */
-    databaseConnectionId: string | null
   }
 }
 

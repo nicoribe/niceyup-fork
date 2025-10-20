@@ -15,7 +15,7 @@ export const useAppearance = create<AppearanceStore>()(
     (set) => ({
       topbar: true,
       leftSidebar: true,
-      rightSidebar: true,
+      rightSidebar: false,
       setTopbar: (topbar) => set(() => ({ topbar })),
       setLeftSidebar: (leftSidebar) => set(() => ({ leftSidebar })),
       setRightSidebar: (rightSidebar) => set(() => ({ rightSidebar })),

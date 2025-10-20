@@ -10,6 +10,330 @@ export type ResendQuestionMessagePathParams = {
   conversationId: string
 }
 
+export const questionMessageStatusEnum2 = {
+  queued: 'queued',
+  in_progress: 'in_progress',
+  finished: 'finished',
+  stopped: 'stopped',
+  failed: 'failed',
+} as const
+
+export type QuestionMessageStatusEnum2 =
+  (typeof questionMessageStatusEnum2)[keyof typeof questionMessageStatusEnum2]
+
+export const questionMessageRoleEnum2 = {
+  system: 'system',
+  user: 'user',
+  assistant: 'assistant',
+} as const
+
+export type QuestionMessageRoleEnum2 =
+  (typeof questionMessageRoleEnum2)[keyof typeof questionMessageRoleEnum2]
+
+export const partsTypeEnum33 = {
+  text: 'text',
+} as const
+
+export type PartsTypeEnum33 =
+  (typeof partsTypeEnum33)[keyof typeof partsTypeEnum33]
+
+export const partsStateEnum31 = {
+  streaming: 'streaming',
+  done: 'done',
+} as const
+
+export type PartsStateEnum31 =
+  (typeof partsStateEnum31)[keyof typeof partsStateEnum31]
+
+export const partsTypeEnum34 = {
+  reasoning: 'reasoning',
+} as const
+
+export type PartsTypeEnum34 =
+  (typeof partsTypeEnum34)[keyof typeof partsTypeEnum34]
+
+export const partsStateEnum32 = {
+  streaming: 'streaming',
+  done: 'done',
+} as const
+
+export type PartsStateEnum32 =
+  (typeof partsStateEnum32)[keyof typeof partsStateEnum32]
+
+export const partsTypeEnum35 = {
+  'source-url': 'source-url',
+} as const
+
+export type PartsTypeEnum35 =
+  (typeof partsTypeEnum35)[keyof typeof partsTypeEnum35]
+
+export const partsTypeEnum36 = {
+  'source-document': 'source-document',
+} as const
+
+export type PartsTypeEnum36 =
+  (typeof partsTypeEnum36)[keyof typeof partsTypeEnum36]
+
+export const partsTypeEnum37 = {
+  file: 'file',
+} as const
+
+export type PartsTypeEnum37 =
+  (typeof partsTypeEnum37)[keyof typeof partsTypeEnum37]
+
+export const partsTypeEnum38 = {
+  'step-start': 'step-start',
+} as const
+
+export type PartsTypeEnum38 =
+  (typeof partsTypeEnum38)[keyof typeof partsTypeEnum38]
+
+export const partsTypeEnum39 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum39 =
+  (typeof partsTypeEnum39)[keyof typeof partsTypeEnum39]
+
+export const partsStateEnum33 = {
+  'input-streaming': 'input-streaming',
+} as const
+
+export type PartsStateEnum33 =
+  (typeof partsStateEnum33)[keyof typeof partsStateEnum33]
+
+export const partsTypeEnum40 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum40 =
+  (typeof partsTypeEnum40)[keyof typeof partsTypeEnum40]
+
+export const partsStateEnum34 = {
+  'input-available': 'input-available',
+} as const
+
+export type PartsStateEnum34 =
+  (typeof partsStateEnum34)[keyof typeof partsStateEnum34]
+
+export const partsTypeEnum41 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum41 =
+  (typeof partsTypeEnum41)[keyof typeof partsTypeEnum41]
+
+export const partsStateEnum35 = {
+  'output-available': 'output-available',
+} as const
+
+export type PartsStateEnum35 =
+  (typeof partsStateEnum35)[keyof typeof partsStateEnum35]
+
+export const partsTypeEnum42 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum42 =
+  (typeof partsTypeEnum42)[keyof typeof partsTypeEnum42]
+
+export const partsStateEnum36 = {
+  'output-error': 'output-error',
+} as const
+
+export type PartsStateEnum36 =
+  (typeof partsStateEnum36)[keyof typeof partsStateEnum36]
+
+export const partsStateEnum37 = {
+  'input-streaming': 'input-streaming',
+} as const
+
+export type PartsStateEnum37 =
+  (typeof partsStateEnum37)[keyof typeof partsStateEnum37]
+
+export const partsStateEnum38 = {
+  'input-available': 'input-available',
+} as const
+
+export type PartsStateEnum38 =
+  (typeof partsStateEnum38)[keyof typeof partsStateEnum38]
+
+export const partsStateEnum39 = {
+  'output-available': 'output-available',
+} as const
+
+export type PartsStateEnum39 =
+  (typeof partsStateEnum39)[keyof typeof partsStateEnum39]
+
+export const partsStateEnum40 = {
+  'output-error': 'output-error',
+} as const
+
+export type PartsStateEnum40 =
+  (typeof partsStateEnum40)[keyof typeof partsStateEnum40]
+
+export const answerMessageStatusEnum2 = {
+  queued: 'queued',
+  in_progress: 'in_progress',
+  finished: 'finished',
+  stopped: 'stopped',
+  failed: 'failed',
+} as const
+
+export type AnswerMessageStatusEnum2 =
+  (typeof answerMessageStatusEnum2)[keyof typeof answerMessageStatusEnum2]
+
+export const answerMessageRoleEnum2 = {
+  system: 'system',
+  user: 'user',
+  assistant: 'assistant',
+} as const
+
+export type AnswerMessageRoleEnum2 =
+  (typeof answerMessageRoleEnum2)[keyof typeof answerMessageRoleEnum2]
+
+export const partsTypeEnum43 = {
+  text: 'text',
+} as const
+
+export type PartsTypeEnum43 =
+  (typeof partsTypeEnum43)[keyof typeof partsTypeEnum43]
+
+export const partsStateEnum41 = {
+  streaming: 'streaming',
+  done: 'done',
+} as const
+
+export type PartsStateEnum41 =
+  (typeof partsStateEnum41)[keyof typeof partsStateEnum41]
+
+export const partsTypeEnum44 = {
+  reasoning: 'reasoning',
+} as const
+
+export type PartsTypeEnum44 =
+  (typeof partsTypeEnum44)[keyof typeof partsTypeEnum44]
+
+export const partsStateEnum42 = {
+  streaming: 'streaming',
+  done: 'done',
+} as const
+
+export type PartsStateEnum42 =
+  (typeof partsStateEnum42)[keyof typeof partsStateEnum42]
+
+export const partsTypeEnum45 = {
+  'source-url': 'source-url',
+} as const
+
+export type PartsTypeEnum45 =
+  (typeof partsTypeEnum45)[keyof typeof partsTypeEnum45]
+
+export const partsTypeEnum46 = {
+  'source-document': 'source-document',
+} as const
+
+export type PartsTypeEnum46 =
+  (typeof partsTypeEnum46)[keyof typeof partsTypeEnum46]
+
+export const partsTypeEnum47 = {
+  file: 'file',
+} as const
+
+export type PartsTypeEnum47 =
+  (typeof partsTypeEnum47)[keyof typeof partsTypeEnum47]
+
+export const partsTypeEnum48 = {
+  'step-start': 'step-start',
+} as const
+
+export type PartsTypeEnum48 =
+  (typeof partsTypeEnum48)[keyof typeof partsTypeEnum48]
+
+export const partsTypeEnum49 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum49 =
+  (typeof partsTypeEnum49)[keyof typeof partsTypeEnum49]
+
+export const partsStateEnum43 = {
+  'input-streaming': 'input-streaming',
+} as const
+
+export type PartsStateEnum43 =
+  (typeof partsStateEnum43)[keyof typeof partsStateEnum43]
+
+export const partsTypeEnum50 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum50 =
+  (typeof partsTypeEnum50)[keyof typeof partsTypeEnum50]
+
+export const partsStateEnum44 = {
+  'input-available': 'input-available',
+} as const
+
+export type PartsStateEnum44 =
+  (typeof partsStateEnum44)[keyof typeof partsStateEnum44]
+
+export const partsTypeEnum51 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum51 =
+  (typeof partsTypeEnum51)[keyof typeof partsTypeEnum51]
+
+export const partsStateEnum45 = {
+  'output-available': 'output-available',
+} as const
+
+export type PartsStateEnum45 =
+  (typeof partsStateEnum45)[keyof typeof partsStateEnum45]
+
+export const partsTypeEnum52 = {
+  'dynamic-tool': 'dynamic-tool',
+} as const
+
+export type PartsTypeEnum52 =
+  (typeof partsTypeEnum52)[keyof typeof partsTypeEnum52]
+
+export const partsStateEnum46 = {
+  'output-error': 'output-error',
+} as const
+
+export type PartsStateEnum46 =
+  (typeof partsStateEnum46)[keyof typeof partsStateEnum46]
+
+export const partsStateEnum47 = {
+  'input-streaming': 'input-streaming',
+} as const
+
+export type PartsStateEnum47 =
+  (typeof partsStateEnum47)[keyof typeof partsStateEnum47]
+
+export const partsStateEnum48 = {
+  'input-available': 'input-available',
+} as const
+
+export type PartsStateEnum48 =
+  (typeof partsStateEnum48)[keyof typeof partsStateEnum48]
+
+export const partsStateEnum49 = {
+  'output-available': 'output-available',
+} as const
+
+export type PartsStateEnum49 =
+  (typeof partsStateEnum49)[keyof typeof partsStateEnum49]
+
+export const partsStateEnum50 = {
+  'output-error': 'output-error',
+} as const
+
+export type PartsStateEnum50 =
+  (typeof partsStateEnum50)[keyof typeof partsStateEnum50]
+
 /**
  * @description Success
  */
@@ -23,9 +347,361 @@ export type ResendQuestionMessage200 = {
      */
     id: string
     /**
+     * @type string
+     */
+    status: QuestionMessageStatusEnum2
+    /**
+     * @type string
+     */
+    role: QuestionMessageRoleEnum2
+    /**
      * @type array
      */
-    parts: any[] | null
+    parts:
+      | (
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum33
+              /**
+               * @type string
+               */
+              text: string
+              /**
+               * @type string | undefined
+               */
+              state?: PartsStateEnum31
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum34
+              /**
+               * @type string
+               */
+              text: string
+              /**
+               * @type string | undefined
+               */
+              state?: PartsStateEnum32
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum35
+              /**
+               * @type string
+               */
+              sourceId: string
+              /**
+               * @type string
+               */
+              url: string
+              /**
+               * @type string | undefined
+               */
+              title?: string
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum36
+              /**
+               * @type string
+               */
+              sourceId: string
+              /**
+               * @type string
+               */
+              mediaType: string
+              /**
+               * @type string
+               */
+              title: string
+              /**
+               * @type string | undefined
+               */
+              filename?: string
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum37
+              /**
+               * @type string
+               */
+              mediaType: string
+              /**
+               * @type string | undefined
+               */
+              filename?: string
+              /**
+               * @type string
+               */
+              url: string
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum38
+            }
+          | {
+              /**
+               * @pattern ^data-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string | undefined
+               */
+              id?: string
+              data: any
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum39
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum33
+              input?: any
+              output?: any
+              errorText?: any
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum40
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum34
+              input: any
+              output?: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum41
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum35
+              input: any
+              output: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+              /**
+               * @type boolean | undefined
+               */
+              preliminary?: boolean
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum42
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum36
+              input: any
+              output?: any
+              /**
+               * @type string
+               */
+              errorText: string
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum37
+              input?: any
+              output?: any
+              errorText?: any
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum38
+              input: any
+              output?: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum39
+              input: any
+              output: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+              /**
+               * @type boolean | undefined
+               */
+              preliminary?: boolean
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum40
+              input: any
+              output?: any
+              /**
+               * @type string
+               */
+              errorText: string
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+        )[]
+      | null
+    metadata: any
     /**
      * @type string
      */
@@ -48,9 +724,361 @@ export type ResendQuestionMessage200 = {
      */
     id: string
     /**
+     * @type string
+     */
+    status: AnswerMessageStatusEnum2
+    /**
+     * @type string
+     */
+    role: AnswerMessageRoleEnum2
+    /**
      * @type array
      */
-    parts: any[] | null
+    parts:
+      | (
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum43
+              /**
+               * @type string
+               */
+              text: string
+              /**
+               * @type string | undefined
+               */
+              state?: PartsStateEnum41
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum44
+              /**
+               * @type string
+               */
+              text: string
+              /**
+               * @type string | undefined
+               */
+              state?: PartsStateEnum42
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum45
+              /**
+               * @type string
+               */
+              sourceId: string
+              /**
+               * @type string
+               */
+              url: string
+              /**
+               * @type string | undefined
+               */
+              title?: string
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum46
+              /**
+               * @type string
+               */
+              sourceId: string
+              /**
+               * @type string
+               */
+              mediaType: string
+              /**
+               * @type string
+               */
+              title: string
+              /**
+               * @type string | undefined
+               */
+              filename?: string
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum47
+              /**
+               * @type string
+               */
+              mediaType: string
+              /**
+               * @type string | undefined
+               */
+              filename?: string
+              /**
+               * @type string
+               */
+              url: string
+              /**
+               * @type object | undefined
+               */
+              providerMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum48
+            }
+          | {
+              /**
+               * @pattern ^data-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string | undefined
+               */
+              id?: string
+              data: any
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum49
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum43
+              input?: any
+              output?: any
+              errorText?: any
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum50
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum44
+              input: any
+              output?: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum51
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum45
+              input: any
+              output: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+              /**
+               * @type boolean | undefined
+               */
+              preliminary?: boolean
+            }
+          | {
+              /**
+               * @type string
+               */
+              type: PartsTypeEnum52
+              /**
+               * @type string
+               */
+              toolName: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum46
+              input: any
+              output?: any
+              /**
+               * @type string
+               */
+              errorText: string
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum47
+              input?: any
+              output?: any
+              errorText?: any
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum48
+              input: any
+              output?: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum49
+              input: any
+              output: any
+              errorText?: any
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+              /**
+               * @type boolean | undefined
+               */
+              preliminary?: boolean
+            }
+          | {
+              /**
+               * @pattern ^tool-.*
+               * @type string
+               */
+              type: string
+              /**
+               * @type string
+               */
+              toolCallId: string
+              /**
+               * @type string
+               */
+              state: PartsStateEnum50
+              input: any
+              output?: any
+              /**
+               * @type string
+               */
+              errorText: string
+              /**
+               * @type object | undefined
+               */
+              callProviderMetadata?: {
+                [key: string]: any
+              }
+            }
+        )[]
+      | null
+    metadata: any
     /**
      * @type string
      */
@@ -157,19 +1185,19 @@ export type ResendQuestionMessage500 = {
   message: string
 }
 
-export const partsTypeEnum3 = {
+export const partsTypeEnum53 = {
   text: 'text',
 } as const
 
-export type PartsTypeEnum3 =
-  (typeof partsTypeEnum3)[keyof typeof partsTypeEnum3]
+export type PartsTypeEnum53 =
+  (typeof partsTypeEnum53)[keyof typeof partsTypeEnum53]
 
-export const partsTypeEnum4 = {
+export const partsTypeEnum54 = {
   file: 'file',
 } as const
 
-export type PartsTypeEnum4 =
-  (typeof partsTypeEnum4)[keyof typeof partsTypeEnum4]
+export type PartsTypeEnum54 =
+  (typeof partsTypeEnum54)[keyof typeof partsTypeEnum54]
 
 export type ResendQuestionMessageMutationRequest = {
   /**
@@ -187,6 +1215,10 @@ export type ResendQuestionMessageMutationRequest = {
   /**
    * @type string
    */
+  agentId: string
+  /**
+   * @type string
+   */
   parentMessageId: string
   /**
    * @type object
@@ -200,7 +1232,7 @@ export type ResendQuestionMessageMutationRequest = {
           /**
            * @type string
            */
-          type: PartsTypeEnum3
+          type: PartsTypeEnum53
           /**
            * @type string
            */
@@ -210,7 +1242,7 @@ export type ResendQuestionMessageMutationRequest = {
           /**
            * @type string
            */
-          type: PartsTypeEnum4
+          type: PartsTypeEnum54
           /**
            * @type string
            */
@@ -225,6 +1257,7 @@ export type ResendQuestionMessageMutationRequest = {
           url: string
         }
     )[]
+    metadata?: any
   }
 }
 

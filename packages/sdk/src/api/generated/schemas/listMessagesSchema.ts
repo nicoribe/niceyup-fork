@@ -24,15 +24,14 @@ export const listMessagesPathParamsSchema = z.object({
 
 export type ListMessagesPathParamsSchema = ListMessagesPathParams
 
-export const listMessagesQueryParamsSchema = z
-  .object({
-    organizationId: z.string().optional(),
-    organizationSlug: z.string().optional(),
-    teamId: z.string().optional(),
-    targetMessageId: z.string().optional(),
-    parents: z.boolean().optional(),
-  })
-  .optional() as unknown as ToZod<ListMessagesQueryParams>
+export const listMessagesQueryParamsSchema = z.object({
+  organizationId: z.string().optional(),
+  organizationSlug: z.string().optional(),
+  teamId: z.string().optional(),
+  agentId: z.string(),
+  targetMessageId: z.string().optional(),
+  parentNodes: z.boolean().optional(),
+}) as unknown as ToZod<ListMessagesQueryParams>
 
 export type ListMessagesQueryParamsSchema = ListMessagesQueryParams
 
@@ -44,7 +43,139 @@ export const listMessages200Schema = z
     messages: z.array(
       z.object({
         id: z.string(),
-        parts: z.array(z.any()).nullable(),
+        status: z.enum([
+          'queued',
+          'in_progress',
+          'finished',
+          'stopped',
+          'failed',
+        ]),
+        role: z.enum(['system', 'user', 'assistant']),
+        parts: z
+          .array(
+            z.union([
+              z.object({
+                type: z.enum(['text']),
+                text: z.string(),
+                state: z.enum(['streaming', 'done']).optional(),
+                providerMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.enum(['reasoning']),
+                text: z.string(),
+                state: z.enum(['streaming', 'done']).optional(),
+                providerMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.enum(['source-url']),
+                sourceId: z.string(),
+                url: z.string(),
+                title: z.string().optional(),
+                providerMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.enum(['source-document']),
+                sourceId: z.string(),
+                mediaType: z.string(),
+                title: z.string(),
+                filename: z.string().optional(),
+                providerMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.enum(['file']),
+                mediaType: z.string(),
+                filename: z.string().optional(),
+                url: z.string(),
+                providerMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.enum(['step-start']),
+              }),
+              z.object({
+                type: z.string().regex(/^data-.*/),
+                id: z.string().optional(),
+                data: z.any(),
+              }),
+              z.object({
+                type: z.enum(['dynamic-tool']),
+                toolName: z.string(),
+                toolCallId: z.string(),
+                state: z.enum(['input-streaming']),
+                input: z.any().optional(),
+                output: z.any().optional(),
+                errorText: z.any().optional(),
+              }),
+              z.object({
+                type: z.enum(['dynamic-tool']),
+                toolName: z.string(),
+                toolCallId: z.string(),
+                state: z.enum(['input-available']),
+                input: z.any(),
+                output: z.any().optional(),
+                errorText: z.any().optional(),
+                callProviderMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.enum(['dynamic-tool']),
+                toolName: z.string(),
+                toolCallId: z.string(),
+                state: z.enum(['output-available']),
+                input: z.any(),
+                output: z.any(),
+                errorText: z.any().optional(),
+                callProviderMetadata: z.object({}).catchall(z.any()).optional(),
+                preliminary: z.boolean().optional(),
+              }),
+              z.object({
+                type: z.enum(['dynamic-tool']),
+                toolName: z.string(),
+                toolCallId: z.string(),
+                state: z.enum(['output-error']),
+                input: z.any(),
+                output: z.any().optional(),
+                errorText: z.string(),
+                callProviderMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.string().regex(/^tool-.*/),
+                toolCallId: z.string(),
+                state: z.enum(['input-streaming']),
+                input: z.any().optional(),
+                output: z.any().optional(),
+                errorText: z.any().optional(),
+              }),
+              z.object({
+                type: z.string().regex(/^tool-.*/),
+                toolCallId: z.string(),
+                state: z.enum(['input-available']),
+                input: z.any(),
+                output: z.any().optional(),
+                errorText: z.any().optional(),
+                callProviderMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+              z.object({
+                type: z.string().regex(/^tool-.*/),
+                toolCallId: z.string(),
+                state: z.enum(['output-available']),
+                input: z.any(),
+                output: z.any(),
+                errorText: z.any().optional(),
+                callProviderMetadata: z.object({}).catchall(z.any()).optional(),
+                preliminary: z.boolean().optional(),
+              }),
+              z.object({
+                type: z.string().regex(/^tool-.*/),
+                toolCallId: z.string(),
+                state: z.enum(['output-error']),
+                input: z.any(),
+                output: z.any().optional(),
+                errorText: z.string(),
+                callProviderMetadata: z.object({}).catchall(z.any()).optional(),
+              }),
+            ]),
+          )
+          .nullable(),
+        metadata: z.any(),
         authorId: z.string().nullable().nullish(),
         parentId: z.string().nullable().nullish(),
         children: z.array(z.string()).optional(),

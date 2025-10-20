@@ -1,21 +1,32 @@
+export type { CreateSourceMutationKey } from './useCreateSource'
+export type { DeleteConversationMutationKey } from './useDeleteConversation'
+export type { DeleteSourceMutationKey } from './useDeleteSource'
 export type { GenerateUploadSignatureMutationKey } from './useGenerateUploadSignature'
 export type { GetAgentQueryKey } from './useGetAgent'
+export type { GetConnectionQueryKey } from './useGetConnection'
 export type { GetConversationQueryKey } from './useGetConversation'
-export type { GetDatabaseConnectionQueryKey } from './useGetDatabaseConnection'
 export type { GetFileQueryKey } from './useGetFile'
 export type { GetProfileQueryKey } from './useGetProfile'
 export type { GetSourceQueryKey } from './useGetSource'
-export type { GetStructuredSourceQueryKey } from './useGetStructuredSource'
 export type { HealthQueryKey } from './useHealth'
 export type { ListAgentsQueryKey } from './useListAgents'
-export type { ListDatabaseConnectionsQueryKey } from './useListDatabaseConnections'
+export type { ListConnectionsQueryKey } from './useListConnections'
+export type { ListConversationsQueryKey } from './useListConversations'
 export type { ListMessagesQueryKey } from './useListMessages'
 export type { ListSourcesQueryKey } from './useListSources'
 export type { RegenerateAnswerMessageMutationKey } from './useRegenerateAnswerMessage'
 export type { ResendQuestionMessageMutationKey } from './useResendQuestionMessage'
 export type { SendQuestionMessageMutationKey } from './useSendQuestionMessage'
 export type { StreamAnswerMessageQueryKey } from './useStreamAnswerMessage'
+export type { UpdateConversationMutationKey } from './useUpdateConversation'
+export type { UpdateSourceMutationKey } from './useUpdateSource'
 export type { UploadFileMutationKey } from './useUploadFile'
+export { createSourceMutationKey, useCreateSource } from './useCreateSource'
+export {
+  deleteConversationMutationKey,
+  useDeleteConversation,
+} from './useDeleteConversation'
+export { deleteSourceMutationKey, useDeleteSource } from './useDeleteSource'
 export {
   generateUploadSignatureMutationKey,
   useGenerateUploadSignature,
@@ -26,15 +37,15 @@ export {
   useGetAgent,
 } from './useGetAgent'
 export {
+  getConnectionQueryKey,
+  getConnectionQueryOptions,
+  useGetConnection,
+} from './useGetConnection'
+export {
   getConversationQueryKey,
   getConversationQueryOptions,
   useGetConversation,
 } from './useGetConversation'
-export {
-  getDatabaseConnectionQueryKey,
-  getDatabaseConnectionQueryOptions,
-  useGetDatabaseConnection,
-} from './useGetDatabaseConnection'
 export { getFileQueryKey, getFileQueryOptions, useGetFile } from './useGetFile'
 export {
   getProfileQueryKey,
@@ -46,11 +57,6 @@ export {
   getSourceQueryOptions,
   useGetSource,
 } from './useGetSource'
-export {
-  getStructuredSourceQueryKey,
-  getStructuredSourceQueryOptions,
-  useGetStructuredSource,
-} from './useGetStructuredSource'
 export { healthQueryKey, healthQueryOptions, useHealth } from './useHealth'
 export {
   listAgentsQueryKey,
@@ -58,10 +64,15 @@ export {
   useListAgents,
 } from './useListAgents'
 export {
-  listDatabaseConnectionsQueryKey,
-  listDatabaseConnectionsQueryOptions,
-  useListDatabaseConnections,
-} from './useListDatabaseConnections'
+  listConnectionsQueryKey,
+  listConnectionsQueryOptions,
+  useListConnections,
+} from './useListConnections'
+export {
+  listConversationsQueryKey,
+  listConversationsQueryOptions,
+  useListConversations,
+} from './useListConversations'
 export {
   listMessagesQueryKey,
   listMessagesQueryOptions,
@@ -89,4 +100,9 @@ export {
   streamAnswerMessageQueryOptions,
   useStreamAnswerMessage,
 } from './useStreamAnswerMessage'
+export {
+  updateConversationMutationKey,
+  useUpdateConversation,
+} from './useUpdateConversation'
+export { updateSourceMutationKey, useUpdateSource } from './useUpdateSource'
 export { uploadFileMutationKey, useUploadFile } from './useUploadFile'

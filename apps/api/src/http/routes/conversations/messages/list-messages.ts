@@ -15,6 +15,17 @@ import { queries } from '@workspace/db/queries'
 import { messages } from '@workspace/db/schema'
 import { z } from 'zod'
 
+const messageSchema = z.object({
+  id: z.string(),
+  status: aiMessageStatusSchema,
+  role: aiMessageRoleSchema,
+  parts: z.array(aiMessagePartSchema).nullable(),
+  metadata: aiMessageMetadataSchema.nullable(),
+  authorId: z.string().nullish(),
+  parentId: z.string().nullish(),
+  children: z.array(z.string()).optional(),
+})
+
 export async function listMessages(app: FastifyTypedInstance) {
   app.register(authenticate).get(
     '/conversations/:conversationId/messages',
@@ -30,24 +41,14 @@ export async function listMessages(app: FastifyTypedInstance) {
           organizationId: z.string().optional(),
           organizationSlug: z.string().optional(),
           teamId: z.string().optional(),
+          agentId: z.string(),
           targetMessageId: z.string().optional(),
-          parents: z.coerce.boolean().optional(),
+          parentNodes: z.coerce.boolean().optional(),
         }),
         response: withDefaultErrorResponses({
           200: z
             .object({
-              messages: z.array(
-                z.object({
-                  id: z.string(),
-                  status: aiMessageStatusSchema,
-                  role: aiMessageRoleSchema,
-                  parts: z.array(aiMessagePartSchema).nullable(),
-                  metadata: aiMessageMetadataSchema.nullable(),
-                  authorId: z.string().nullish(),
-                  parentId: z.string().nullish(),
-                  children: z.array(z.string()).optional(),
-                }),
-              ),
+              messages: z.array(messageSchema),
             })
             .describe('Success'),
         }),
@@ -60,7 +61,8 @@ export async function listMessages(app: FastifyTypedInstance) {
 
       const { conversationId } = request.params
 
-      const { organizationId, organizationSlug, teamId } = request.query
+      const { organizationId, organizationSlug, teamId, agentId } =
+        request.query
 
       const context = {
         userId,
@@ -72,6 +74,7 @@ export async function listMessages(app: FastifyTypedInstance) {
       }
 
       const conversation = await queries.context.getConversation(context, {
+        agentId,
         conversationId,
       })
 
@@ -82,7 +85,7 @@ export async function listMessages(app: FastifyTypedInstance) {
         })
       }
 
-      const { targetMessageId, parents } = request.query
+      const { targetMessageId, parentNodes } = request.query
 
       const [targetMessage] = await db
         .select({
@@ -111,10 +114,10 @@ export async function listMessages(app: FastifyTypedInstance) {
         })
       }
 
-      const listMessages = await queries.listMessages({
+      const listMessages = await queries.listMessageNodes({
         conversationId,
         targetMessageId: targetMessage.id,
-        parents,
+        parentNodes,
       })
 
       return { messages: listMessages }

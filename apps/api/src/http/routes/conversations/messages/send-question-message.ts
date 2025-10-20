@@ -1,7 +1,8 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { generateTitleFromUserMessage } from '@/http/functions/ai'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { conversationPubSub } from '@/http/realtime/conversation-pub-sub'
+import { conversationPubSub } from '@/http/realtime/pub-sub/conversation-pub-sub'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import {
@@ -15,7 +16,7 @@ import { db } from '@workspace/db'
 import { and, desc, eq, isNull, sql } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
 import {
-  conversationExplorerTree,
+  conversationExplorerNodes,
   conversations,
   messages,
 } from '@workspace/db/schema'
@@ -62,15 +63,15 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
           organizationId: z.string().nullish(),
           organizationSlug: z.string().nullish(),
           teamId: z.string().nullish(),
-          agentId: z.string().nullish(),
+          agentId: z.string(),
           parentMessageId: z.string().nullish(),
           message: z.object({
             parts: z.array(promptMessagePartSchema).nonempty(),
             metadata: aiMessageMetadataSchema.nullish(),
           }),
-          explorerTree: z
+          explorerNode: z
             .object({
-              explorerType: z.enum(['private', 'team']),
+              visibility: z.enum(['private', 'team']),
               folderId: z.string().nullish(),
             })
             .optional()
@@ -82,13 +83,13 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
               conversationId: z.string(),
               questionMessage: messageSchema,
               answerMessage: messageSchema,
-              explorerTree: z
+              explorerNode: z
                 .object({
                   itemId: z.string(),
                 })
                 .optional()
                 .describe(
-                  'Return only when the conversation is created in the explorerTree',
+                  'Return only when the conversation is created in the explorerNode',
                 ),
             })
             .describe('Success'),
@@ -109,7 +110,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
         agentId,
         parentMessageId,
         message,
-        explorerTree,
+        explorerNode,
       } = request.body
 
       const context = {
@@ -122,63 +123,57 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
       }
 
       if (conversationId === 'new') {
-        if (!agentId) {
-          throw new BadRequestError({
-            code: 'AGENT_REQUIRED',
-            message: 'Agent is required',
-          })
-        }
-
         const agent = await queries.context.getAgent(context, {
           agentId,
         })
 
         if (!agent) {
           throw new BadRequestError({
-            code: 'AGENT_UNAVAILABLE',
+            code: 'AGENT_NOT_FOUND',
             message: 'Agent not found or you don’t have access',
           })
         }
 
-        if (explorerTree?.explorerType) {
-          if (explorerTree.explorerType === 'team' && teamId === '~') {
+        if (explorerNode?.visibility) {
+          if (explorerNode.visibility === 'team' && teamId === '~') {
             throw new BadRequestError({
               code: 'TEAM_NOT_FOUND',
               message: 'Team not found',
             })
           }
 
-          if (explorerTree.folderId && explorerTree.folderId !== 'root') {
-            const [folderExplorerTree] = await db
+          if (explorerNode.folderId && explorerNode.folderId !== 'root') {
+            const [folderExplorerNode] = await db
               .select({
-                id: conversationExplorerTree.id,
+                id: conversationExplorerNodes.id,
               })
-              .from(conversationExplorerTree)
+              .from(conversationExplorerNodes)
               .where(
                 and(
-                  eq(conversationExplorerTree.id, explorerTree.folderId),
+                  eq(conversationExplorerNodes.id, explorerNode.folderId),
                   eq(
-                    conversationExplorerTree.explorerType,
-                    explorerTree.explorerType,
+                    conversationExplorerNodes.visibility,
+                    explorerNode.visibility,
                   ),
-                  eq(conversationExplorerTree.agentId, agentId),
-                  isNull(conversationExplorerTree.conversationId),
-                  isNull(conversationExplorerTree.deletedAt),
+                  eq(conversationExplorerNodes.agentId, agentId),
+                  isNull(conversationExplorerNodes.conversationId),
+                  isNull(conversationExplorerNodes.deletedAt),
                 ),
               )
               .limit(1)
 
-            if (!folderExplorerTree) {
+            if (!folderExplorerNode) {
               throw new BadRequestError({
-                code: 'FOLDER_EXPLORER_TREE_NOT_FOUND',
+                code: 'FOLDER_IN_EXPLORER_NOT_FOUND',
                 message:
-                  'Folder explorer tree not found or you don’t have access',
+                  'Folder in explorer not found or you don’t have access',
               })
             }
           }
         }
       } else {
         const conversation = await queries.context.getConversation(context, {
+          agentId,
           conversationId,
         })
 
@@ -192,20 +187,21 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
 
       let _conversationId = conversationId
       let _parentMessageId = parentMessageId
-      let _explorerTree = null
+      let _explorerNode = null
 
       const { questionMessage, answerMessage } = await db.transaction(
         async (tx) => {
           if (conversationId === 'new') {
-            // TODO: Implement AI to generate the title
-            const title = message.parts
-              .find((part) => part.type === 'text')
-              ?.text?.slice(0, 50)
+            let title = message.parts.find((part) => part.type === 'text')?.text
+
+            if (title) {
+              title = await generateTitleFromUserMessage({ message: title })
+            }
 
             const ownerTypeCondition =
-              explorerTree?.explorerType === 'team'
-                ? { teamId: context.teamId }
-                : { ownerId: userId }
+              explorerNode?.visibility === 'team'
+                ? { ownerTeamId: context.teamId }
+                : { ownerUserId: userId }
 
             const [conversation] = await tx
               .insert(conversations)
@@ -227,6 +223,10 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
 
             _conversationId = conversation.id
 
+            // TODO: Make this dynamic based on the agent's configuration
+            const systemMessageText = `### Role
+- Primary Function: You are an AI agent who helps users with their inquiries, issues and requests. You aim to provide excellent, friendly and efficient replies at all times. Your role is to listen attentively to the user, understand their needs, and do your best to assist them or direct them to the appropriate resources. If a question is not clear, ask clarifying questions. Make sure to end your replies with a positive note.`
+
             const [systemMessage] = await tx
               .insert(messages)
               .values({
@@ -236,9 +236,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
                 parts: [
                   {
                     type: 'text',
-                    text: `You are a helpful assistant. Check your knowledge base before answering any questions.
-                    Only respond to questions using information from tool calls.
-                    if no relevant information is found in the tool calls, respond, "Sorry, I don't know."`,
+                    text: systemMessageText,
                   },
                 ],
               })
@@ -255,26 +253,26 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
 
             _parentMessageId = systemMessage.id
 
-            // Create a new conversation in the explorer tree
-            if (explorerTree?.explorerType) {
-              const [newItemExplorerTree] = await tx
-                .insert(conversationExplorerTree)
+            // Create a new conversation in the explorerNode
+            if (explorerNode?.visibility) {
+              const [newItemExplorerNode] = await tx
+                .insert(conversationExplorerNodes)
                 .values({
-                  explorerType: explorerTree.explorerType,
+                  visibility: explorerNode.visibility,
                   agentId,
                   ...ownerTypeCondition,
                   conversationId: conversation.id,
                   parentId:
-                    explorerTree.folderId === 'root'
+                    explorerNode.folderId === 'root'
                       ? null
-                      : explorerTree.folderId,
+                      : explorerNode.folderId,
                 })
                 .returning({
-                  id: conversationExplorerTree.id,
+                  id: conversationExplorerNodes.id,
                 })
 
-              if (newItemExplorerTree) {
-                _explorerTree = { itemId: newItemExplorerTree.id }
+              if (newItemExplorerNode) {
+                _explorerNode = { itemId: newItemExplorerNode.id }
               }
             }
           } else {
@@ -412,7 +410,7 @@ export async function sendQuestionMessage(app: FastifyTypedInstance) {
         conversationId: _conversationId,
         questionMessage,
         answerMessage,
-        ...(_explorerTree ? { explorerTree: _explorerTree } : {}),
+        ...(_explorerNode ? { explorerNode: _explorerNode } : {}),
       }
     },
   )

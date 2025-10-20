@@ -24,8 +24,13 @@ export async function listSources(app: FastifyTypedInstance) {
                 z.object({
                   id: z.string(),
                   name: z.string(),
-                  type: z.enum(['text', 'structured']),
-                  databaseConnectionId: z.string().nullable(),
+                  type: z.enum([
+                    'file',
+                    'text',
+                    'question-answer',
+                    'website',
+                    'database',
+                  ]),
                 }),
               ),
             })

@@ -150,19 +150,23 @@ export type GenerateUploadSignatureMutationRequest = {
    * @type string
    */
   scope: GenerateUploadSignatureMutationRequestScopeEnum
-  /**
-   * @type object | undefined
-   */
-  metadata?: {
-    /**
-     * @type string
-     */
-    conversationId?: string | null
-    /**
-     * @type string | undefined
-     */
-    sourceId?: string
-  }
+  metadata?:
+    | {
+        /**
+         * @type string | undefined
+         */
+        agentId?: string
+        /**
+         * @type string
+         */
+        conversationId?: string | null
+      }
+    | {
+        /**
+         * @type string | undefined
+         */
+        sourceId?: string
+      }
   /**
    * @default "*"
    * @type string | undefined

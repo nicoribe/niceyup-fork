@@ -3,7 +3,7 @@
 import { setActiveOrganizationTeam } from '@/actions/organizations'
 import { TeamSwitcher } from '@/components/organizations/team-switcher'
 import type { Organization, Team } from '@/lib/types'
-import type { User } from '@workspace/auth'
+import type { User } from '@workspace/auth/types'
 import {
   Avatar,
   AvatarFallback,
@@ -21,7 +21,7 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { ChevronsUpDown, CircleDashed, PlusCircle, Slash } from 'lucide-react'
 import Link from 'next/link'
-import { redirect, usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export function OrganizationSwitcher({
   selectedOrganizationLabel,
@@ -39,6 +39,7 @@ export function OrganizationSwitcher({
   teams: Team[]
 }) {
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <>
@@ -91,7 +92,8 @@ export function OrganizationSwitcher({
             <DropdownMenuItem
               onClick={async () => {
                 await setActiveOrganizationTeam()
-                redirect('/orgs/my-account/~/overview')
+
+                router.push('/orgs/my-account/~/overview')
               }}
             >
               <Avatar className="mr-1 size-4">
@@ -116,7 +118,8 @@ export function OrganizationSwitcher({
                     await setActiveOrganizationTeam({
                       organizationId: organization.id,
                     })
-                    redirect(`/orgs/${organization.slug}/~/select-team`)
+
+                    router.push(`/orgs/${organization.slug}/~/select-team`)
                   }}
                 >
                   <Avatar className="mr-1 size-4 rounded-sm">

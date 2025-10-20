@@ -33,7 +33,7 @@ export async function listMessages(
     params,
   }: {
     conversationId: ListMessagesPathParams['conversationId']
-    params?: ListMessagesQueryParams
+    params: ListMessagesQueryParams
   },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {

@@ -1,21 +1,61 @@
+export type { CreateSourceMutationKey } from './react-query/hooks/useCreateSource'
+export type { DeleteConversationMutationKey } from './react-query/hooks/useDeleteConversation'
+export type { DeleteSourceMutationKey } from './react-query/hooks/useDeleteSource'
 export type { GenerateUploadSignatureMutationKey } from './react-query/hooks/useGenerateUploadSignature'
 export type { GetAgentQueryKey } from './react-query/hooks/useGetAgent'
+export type { GetConnectionQueryKey } from './react-query/hooks/useGetConnection'
 export type { GetConversationQueryKey } from './react-query/hooks/useGetConversation'
-export type { GetDatabaseConnectionQueryKey } from './react-query/hooks/useGetDatabaseConnection'
 export type { GetFileQueryKey } from './react-query/hooks/useGetFile'
 export type { GetProfileQueryKey } from './react-query/hooks/useGetProfile'
 export type { GetSourceQueryKey } from './react-query/hooks/useGetSource'
-export type { GetStructuredSourceQueryKey } from './react-query/hooks/useGetStructuredSource'
 export type { HealthQueryKey } from './react-query/hooks/useHealth'
 export type { ListAgentsQueryKey } from './react-query/hooks/useListAgents'
-export type { ListDatabaseConnectionsQueryKey } from './react-query/hooks/useListDatabaseConnections'
+export type { ListConnectionsQueryKey } from './react-query/hooks/useListConnections'
+export type { ListConversationsQueryKey } from './react-query/hooks/useListConversations'
 export type { ListMessagesQueryKey } from './react-query/hooks/useListMessages'
 export type { ListSourcesQueryKey } from './react-query/hooks/useListSources'
 export type { RegenerateAnswerMessageMutationKey } from './react-query/hooks/useRegenerateAnswerMessage'
 export type { ResendQuestionMessageMutationKey } from './react-query/hooks/useResendQuestionMessage'
 export type { SendQuestionMessageMutationKey } from './react-query/hooks/useSendQuestionMessage'
 export type { StreamAnswerMessageQueryKey } from './react-query/hooks/useStreamAnswerMessage'
+export type { UpdateConversationMutationKey } from './react-query/hooks/useUpdateConversation'
+export type { UpdateSourceMutationKey } from './react-query/hooks/useUpdateSource'
 export type { UploadFileMutationKey } from './react-query/hooks/useUploadFile'
+export type {
+  CreateSource200Schema,
+  CreateSource400Schema,
+  CreateSource401Schema,
+  CreateSource403Schema,
+  CreateSource404Schema,
+  CreateSource429Schema,
+  CreateSource500Schema,
+  CreateSourceMutationRequestSchema,
+  CreateSourceMutationResponseSchema,
+} from './schemas/createSourceSchema'
+export type {
+  DeleteConversationPathParamsSchema,
+  DeleteConversation204Schema,
+  DeleteConversation400Schema,
+  DeleteConversation401Schema,
+  DeleteConversation403Schema,
+  DeleteConversation404Schema,
+  DeleteConversation429Schema,
+  DeleteConversation500Schema,
+  DeleteConversationMutationRequestSchema,
+  DeleteConversationMutationResponseSchema,
+} from './schemas/deleteConversationSchema'
+export type {
+  DeleteSourcePathParamsSchema,
+  DeleteSource204Schema,
+  DeleteSource400Schema,
+  DeleteSource401Schema,
+  DeleteSource403Schema,
+  DeleteSource404Schema,
+  DeleteSource429Schema,
+  DeleteSource500Schema,
+  DeleteSourceMutationRequestSchema,
+  DeleteSourceMutationResponseSchema,
+} from './schemas/deleteSourceSchema'
 export type {
   GenerateUploadSignatureHeaderParamsSchema,
   GenerateUploadSignature200Schema,
@@ -41,6 +81,18 @@ export type {
   GetAgentQueryResponseSchema,
 } from './schemas/getAgentSchema'
 export type {
+  GetConnectionPathParamsSchema,
+  GetConnectionQueryParamsSchema,
+  GetConnection200Schema,
+  GetConnection400Schema,
+  GetConnection401Schema,
+  GetConnection403Schema,
+  GetConnection404Schema,
+  GetConnection429Schema,
+  GetConnection500Schema,
+  GetConnectionQueryResponseSchema,
+} from './schemas/getConnectionSchema'
+export type {
   GetConversationPathParamsSchema,
   GetConversationQueryParamsSchema,
   GetConversation200Schema,
@@ -52,18 +104,6 @@ export type {
   GetConversation500Schema,
   GetConversationQueryResponseSchema,
 } from './schemas/getConversationSchema'
-export type {
-  GetDatabaseConnectionPathParamsSchema,
-  GetDatabaseConnectionQueryParamsSchema,
-  GetDatabaseConnection200Schema,
-  GetDatabaseConnection400Schema,
-  GetDatabaseConnection401Schema,
-  GetDatabaseConnection403Schema,
-  GetDatabaseConnection404Schema,
-  GetDatabaseConnection429Schema,
-  GetDatabaseConnection500Schema,
-  GetDatabaseConnectionQueryResponseSchema,
-} from './schemas/getDatabaseConnectionSchema'
 export type {
   GetFilePathParamsSchema,
   GetFileQueryParamsSchema,
@@ -99,18 +139,6 @@ export type {
   GetSourceQueryResponseSchema,
 } from './schemas/getSourceSchema'
 export type {
-  GetStructuredSourcePathParamsSchema,
-  GetStructuredSourceQueryParamsSchema,
-  GetStructuredSource200Schema,
-  GetStructuredSource400Schema,
-  GetStructuredSource401Schema,
-  GetStructuredSource403Schema,
-  GetStructuredSource404Schema,
-  GetStructuredSource429Schema,
-  GetStructuredSource500Schema,
-  GetStructuredSourceQueryResponseSchema,
-} from './schemas/getStructuredSourceSchema'
-export type {
   Health200Schema,
   Health400Schema,
   Health401Schema,
@@ -132,16 +160,27 @@ export type {
   ListAgentsQueryResponseSchema,
 } from './schemas/listAgentsSchema'
 export type {
-  ListDatabaseConnectionsQueryParamsSchema,
-  ListDatabaseConnections200Schema,
-  ListDatabaseConnections400Schema,
-  ListDatabaseConnections401Schema,
-  ListDatabaseConnections403Schema,
-  ListDatabaseConnections404Schema,
-  ListDatabaseConnections429Schema,
-  ListDatabaseConnections500Schema,
-  ListDatabaseConnectionsQueryResponseSchema,
-} from './schemas/listDatabaseConnectionsSchema'
+  ListConnectionsQueryParamsSchema,
+  ListConnections200Schema,
+  ListConnections400Schema,
+  ListConnections401Schema,
+  ListConnections403Schema,
+  ListConnections404Schema,
+  ListConnections429Schema,
+  ListConnections500Schema,
+  ListConnectionsQueryResponseSchema,
+} from './schemas/listConnectionsSchema'
+export type {
+  ListConversationsQueryParamsSchema,
+  ListConversations200Schema,
+  ListConversations400Schema,
+  ListConversations401Schema,
+  ListConversations403Schema,
+  ListConversations404Schema,
+  ListConversations429Schema,
+  ListConversations500Schema,
+  ListConversationsQueryResponseSchema,
+} from './schemas/listConversationsSchema'
 export type {
   ListMessagesPathParamsSchema,
   ListMessagesQueryParamsSchema,
@@ -214,6 +253,30 @@ export type {
   StreamAnswerMessageQueryResponseSchema,
 } from './schemas/streamAnswerMessageSchema'
 export type {
+  UpdateConversationPathParamsSchema,
+  UpdateConversation204Schema,
+  UpdateConversation400Schema,
+  UpdateConversation401Schema,
+  UpdateConversation403Schema,
+  UpdateConversation404Schema,
+  UpdateConversation429Schema,
+  UpdateConversation500Schema,
+  UpdateConversationMutationRequestSchema,
+  UpdateConversationMutationResponseSchema,
+} from './schemas/updateConversationSchema'
+export type {
+  UpdateSourcePathParamsSchema,
+  UpdateSource204Schema,
+  UpdateSource400Schema,
+  UpdateSource401Schema,
+  UpdateSource403Schema,
+  UpdateSource404Schema,
+  UpdateSource429Schema,
+  UpdateSource500Schema,
+  UpdateSourceMutationRequestSchema,
+  UpdateSourceMutationResponseSchema,
+} from './schemas/updateSourceSchema'
+export type {
   UploadFileHeaderParamsSchema,
   UploadFile200Schema,
   UploadFile400Schema,
@@ -224,6 +287,47 @@ export type {
   UploadFile500Schema,
   UploadFileMutationResponseSchema,
 } from './schemas/uploadFileSchema'
+export type {
+  CreateSource200,
+  CreateSource400,
+  CreateSource401,
+  CreateSource403,
+  CreateSource404,
+  CreateSource429,
+  CreateSource500,
+  CreateSourceMutationRequestTypeEnum,
+  CreateSourceMutationRequest,
+  CreateSourceMutationResponse,
+  CreateSourceMutation,
+} from './types/CreateSource'
+export type {
+  DeleteConversationPathParams,
+  DeleteConversation204Enum,
+  DeleteConversation204,
+  DeleteConversation400,
+  DeleteConversation401,
+  DeleteConversation403,
+  DeleteConversation404,
+  DeleteConversation429,
+  DeleteConversation500,
+  DeleteConversationMutationRequest,
+  DeleteConversationMutationResponse,
+  DeleteConversationMutation,
+} from './types/DeleteConversation'
+export type {
+  DeleteSourcePathParams,
+  DeleteSource204Enum,
+  DeleteSource204,
+  DeleteSource400,
+  DeleteSource401,
+  DeleteSource403,
+  DeleteSource404,
+  DeleteSource429,
+  DeleteSource500,
+  DeleteSourceMutationRequest,
+  DeleteSourceMutationResponse,
+  DeleteSourceMutation,
+} from './types/DeleteSource'
 export type {
   GenerateUploadSignatureHeaderParams,
   GenerateUploadSignature200,
@@ -253,6 +357,19 @@ export type {
   GetAgentQuery,
 } from './types/GetAgent'
 export type {
+  GetConnectionPathParams,
+  GetConnectionQueryParams,
+  GetConnection200,
+  GetConnection400,
+  GetConnection401,
+  GetConnection403,
+  GetConnection404,
+  GetConnection429,
+  GetConnection500,
+  GetConnectionQueryResponse,
+  GetConnectionQuery,
+} from './types/GetConnection'
+export type {
   GetConversationPathParams,
   GetConversationQueryParams,
   GetConversation200,
@@ -265,20 +382,6 @@ export type {
   GetConversationQueryResponse,
   GetConversationQuery,
 } from './types/GetConversation'
-export type {
-  GetDatabaseConnectionPathParams,
-  GetDatabaseConnectionQueryParams,
-  DatabaseConnectionDialectEnum,
-  GetDatabaseConnection200,
-  GetDatabaseConnection400,
-  GetDatabaseConnection401,
-  GetDatabaseConnection403,
-  GetDatabaseConnection404,
-  GetDatabaseConnection429,
-  GetDatabaseConnection500,
-  GetDatabaseConnectionQueryResponse,
-  GetDatabaseConnectionQuery,
-} from './types/GetDatabaseConnection'
 export type {
   GetFilePathParams,
   GetFileQueryParams,
@@ -320,19 +423,6 @@ export type {
   GetSourceQuery,
 } from './types/GetSource'
 export type {
-  GetStructuredSourcePathParams,
-  GetStructuredSourceQueryParams,
-  GetStructuredSource200,
-  GetStructuredSource400,
-  GetStructuredSource401,
-  GetStructuredSource403,
-  GetStructuredSource404,
-  GetStructuredSource429,
-  GetStructuredSource500,
-  GetStructuredSourceQueryResponse,
-  GetStructuredSourceQuery,
-} from './types/GetStructuredSource'
-export type {
   Health200,
   Health400,
   Health401,
@@ -356,21 +446,54 @@ export type {
   ListAgentsQuery,
 } from './types/ListAgents'
 export type {
-  ListDatabaseConnectionsQueryParams,
-  DatabaseConnectionsDialectEnum,
-  ListDatabaseConnections200,
-  ListDatabaseConnections400,
-  ListDatabaseConnections401,
-  ListDatabaseConnections403,
-  ListDatabaseConnections404,
-  ListDatabaseConnections429,
-  ListDatabaseConnections500,
-  ListDatabaseConnectionsQueryResponse,
-  ListDatabaseConnectionsQuery,
-} from './types/ListDatabaseConnections'
+  ListConnectionsQueryParams,
+  ListConnections200,
+  ListConnections400,
+  ListConnections401,
+  ListConnections403,
+  ListConnections404,
+  ListConnections429,
+  ListConnections500,
+  ListConnectionsQueryResponse,
+  ListConnectionsQuery,
+} from './types/ListConnections'
+export type {
+  ListConversationsQueryParams,
+  ListConversations200,
+  ListConversations400,
+  ListConversations401,
+  ListConversations403,
+  ListConversations404,
+  ListConversations429,
+  ListConversations500,
+  ListConversationsQueryResponse,
+  ListConversationsQuery,
+} from './types/ListConversations'
 export type {
   ListMessagesPathParams,
   ListMessagesQueryParams,
+  MessagesStatusEnum,
+  MessagesRoleEnum,
+  PartsTypeEnum,
+  PartsStateEnum,
+  PartsTypeEnum2,
+  PartsStateEnum2,
+  PartsTypeEnum3,
+  PartsTypeEnum4,
+  PartsTypeEnum5,
+  PartsTypeEnum6,
+  PartsTypeEnum7,
+  PartsStateEnum3,
+  PartsTypeEnum8,
+  PartsStateEnum4,
+  PartsTypeEnum9,
+  PartsStateEnum5,
+  PartsTypeEnum10,
+  PartsStateEnum6,
+  PartsStateEnum7,
+  PartsStateEnum8,
+  PartsStateEnum9,
+  PartsStateEnum10,
   ListMessages200,
   ListMessages400,
   ListMessages401,
@@ -396,6 +519,28 @@ export type {
 } from './types/ListSources'
 export type {
   RegenerateAnswerMessagePathParams,
+  AnswerMessageStatusEnum3,
+  AnswerMessageRoleEnum3,
+  PartsTypeEnum55,
+  PartsStateEnum51,
+  PartsTypeEnum56,
+  PartsStateEnum52,
+  PartsTypeEnum57,
+  PartsTypeEnum58,
+  PartsTypeEnum59,
+  PartsTypeEnum60,
+  PartsTypeEnum61,
+  PartsStateEnum53,
+  PartsTypeEnum62,
+  PartsStateEnum54,
+  PartsTypeEnum63,
+  PartsStateEnum55,
+  PartsTypeEnum64,
+  PartsStateEnum56,
+  PartsStateEnum57,
+  PartsStateEnum58,
+  PartsStateEnum59,
+  PartsStateEnum60,
   RegenerateAnswerMessage200,
   RegenerateAnswerMessage400,
   RegenerateAnswerMessage401,
@@ -409,6 +554,50 @@ export type {
 } from './types/RegenerateAnswerMessage'
 export type {
   ResendQuestionMessagePathParams,
+  QuestionMessageStatusEnum2,
+  QuestionMessageRoleEnum2,
+  PartsTypeEnum33,
+  PartsStateEnum31,
+  PartsTypeEnum34,
+  PartsStateEnum32,
+  PartsTypeEnum35,
+  PartsTypeEnum36,
+  PartsTypeEnum37,
+  PartsTypeEnum38,
+  PartsTypeEnum39,
+  PartsStateEnum33,
+  PartsTypeEnum40,
+  PartsStateEnum34,
+  PartsTypeEnum41,
+  PartsStateEnum35,
+  PartsTypeEnum42,
+  PartsStateEnum36,
+  PartsStateEnum37,
+  PartsStateEnum38,
+  PartsStateEnum39,
+  PartsStateEnum40,
+  AnswerMessageStatusEnum2,
+  AnswerMessageRoleEnum2,
+  PartsTypeEnum43,
+  PartsStateEnum41,
+  PartsTypeEnum44,
+  PartsStateEnum42,
+  PartsTypeEnum45,
+  PartsTypeEnum46,
+  PartsTypeEnum47,
+  PartsTypeEnum48,
+  PartsTypeEnum49,
+  PartsStateEnum43,
+  PartsTypeEnum50,
+  PartsStateEnum44,
+  PartsTypeEnum51,
+  PartsStateEnum45,
+  PartsTypeEnum52,
+  PartsStateEnum46,
+  PartsStateEnum47,
+  PartsStateEnum48,
+  PartsStateEnum49,
+  PartsStateEnum50,
   ResendQuestionMessage200,
   ResendQuestionMessage400,
   ResendQuestionMessage401,
@@ -416,14 +605,58 @@ export type {
   ResendQuestionMessage404,
   ResendQuestionMessage429,
   ResendQuestionMessage500,
-  PartsTypeEnum3,
-  PartsTypeEnum4,
+  PartsTypeEnum53,
+  PartsTypeEnum54,
   ResendQuestionMessageMutationRequest,
   ResendQuestionMessageMutationResponse,
   ResendQuestionMessageMutation,
 } from './types/ResendQuestionMessage'
 export type {
   SendQuestionMessagePathParams,
+  QuestionMessageStatusEnum,
+  QuestionMessageRoleEnum,
+  PartsTypeEnum11,
+  PartsStateEnum11,
+  PartsTypeEnum12,
+  PartsStateEnum12,
+  PartsTypeEnum13,
+  PartsTypeEnum14,
+  PartsTypeEnum15,
+  PartsTypeEnum16,
+  PartsTypeEnum17,
+  PartsStateEnum13,
+  PartsTypeEnum18,
+  PartsStateEnum14,
+  PartsTypeEnum19,
+  PartsStateEnum15,
+  PartsTypeEnum20,
+  PartsStateEnum16,
+  PartsStateEnum17,
+  PartsStateEnum18,
+  PartsStateEnum19,
+  PartsStateEnum20,
+  AnswerMessageStatusEnum,
+  AnswerMessageRoleEnum,
+  PartsTypeEnum21,
+  PartsStateEnum21,
+  PartsTypeEnum22,
+  PartsStateEnum22,
+  PartsTypeEnum23,
+  PartsTypeEnum24,
+  PartsTypeEnum25,
+  PartsTypeEnum26,
+  PartsTypeEnum27,
+  PartsStateEnum23,
+  PartsTypeEnum28,
+  PartsStateEnum24,
+  PartsTypeEnum29,
+  PartsStateEnum25,
+  PartsTypeEnum30,
+  PartsStateEnum26,
+  PartsStateEnum27,
+  PartsStateEnum28,
+  PartsStateEnum29,
+  PartsStateEnum30,
   SendQuestionMessage200,
   SendQuestionMessage400,
   SendQuestionMessage401,
@@ -431,9 +664,9 @@ export type {
   SendQuestionMessage404,
   SendQuestionMessage429,
   SendQuestionMessage500,
-  PartsTypeEnum,
-  PartsTypeEnum2,
-  ExplorerTreeExplorerTypeEnum,
+  PartsTypeEnum31,
+  PartsTypeEnum32,
+  ExplorerNodeVisibilityEnum,
   SendQuestionMessageMutationRequest,
   SendQuestionMessageMutationResponse,
   SendQuestionMessageMutation,
@@ -452,6 +685,34 @@ export type {
   StreamAnswerMessageQuery,
 } from './types/StreamAnswerMessage'
 export type {
+  UpdateConversationPathParams,
+  UpdateConversation204Enum,
+  UpdateConversation204,
+  UpdateConversation400,
+  UpdateConversation401,
+  UpdateConversation403,
+  UpdateConversation404,
+  UpdateConversation429,
+  UpdateConversation500,
+  UpdateConversationMutationRequest,
+  UpdateConversationMutationResponse,
+  UpdateConversationMutation,
+} from './types/UpdateConversation'
+export type {
+  UpdateSourcePathParams,
+  UpdateSource204Enum,
+  UpdateSource204,
+  UpdateSource400,
+  UpdateSource401,
+  UpdateSource403,
+  UpdateSource404,
+  UpdateSource429,
+  UpdateSource500,
+  UpdateSourceMutationRequest,
+  UpdateSourceMutationResponse,
+  UpdateSourceMutation,
+} from './types/UpdateSource'
+export type {
   UploadFileHeaderParams,
   FileBucketEnum,
   FileScopeEnum,
@@ -465,24 +726,41 @@ export type {
   UploadFileMutationResponse,
   UploadFileMutation,
 } from './types/UploadFile'
+export { createSource } from './operations/createSource'
+export { deleteConversation } from './operations/deleteConversation'
+export { deleteSource } from './operations/deleteSource'
 export { generateUploadSignature } from './operations/generateUploadSignature'
 export { getAgent } from './operations/getAgent'
+export { getConnection } from './operations/getConnection'
 export { getConversation } from './operations/getConversation'
-export { getDatabaseConnection } from './operations/getDatabaseConnection'
 export { getFile } from './operations/getFile'
 export { getProfile } from './operations/getProfile'
 export { getSource } from './operations/getSource'
-export { getStructuredSource } from './operations/getStructuredSource'
 export { health } from './operations/health'
 export { listAgents } from './operations/listAgents'
-export { listDatabaseConnections } from './operations/listDatabaseConnections'
+export { listConnections } from './operations/listConnections'
+export { listConversations } from './operations/listConversations'
 export { listMessages } from './operations/listMessages'
 export { listSources } from './operations/listSources'
 export { regenerateAnswerMessage } from './operations/regenerateAnswerMessage'
 export { resendQuestionMessage } from './operations/resendQuestionMessage'
 export { sendQuestionMessage } from './operations/sendQuestionMessage'
 export { streamAnswerMessage } from './operations/streamAnswerMessage'
+export { updateConversation } from './operations/updateConversation'
+export { updateSource } from './operations/updateSource'
 export { uploadFile } from './operations/uploadFile'
+export {
+  createSourceMutationKey,
+  useCreateSource,
+} from './react-query/hooks/useCreateSource'
+export {
+  deleteConversationMutationKey,
+  useDeleteConversation,
+} from './react-query/hooks/useDeleteConversation'
+export {
+  deleteSourceMutationKey,
+  useDeleteSource,
+} from './react-query/hooks/useDeleteSource'
 export {
   generateUploadSignatureMutationKey,
   useGenerateUploadSignature,
@@ -493,15 +771,15 @@ export {
   useGetAgent,
 } from './react-query/hooks/useGetAgent'
 export {
+  getConnectionQueryKey,
+  getConnectionQueryOptions,
+  useGetConnection,
+} from './react-query/hooks/useGetConnection'
+export {
   getConversationQueryKey,
   getConversationQueryOptions,
   useGetConversation,
 } from './react-query/hooks/useGetConversation'
-export {
-  getDatabaseConnectionQueryKey,
-  getDatabaseConnectionQueryOptions,
-  useGetDatabaseConnection,
-} from './react-query/hooks/useGetDatabaseConnection'
 export {
   getFileQueryKey,
   getFileQueryOptions,
@@ -518,11 +796,6 @@ export {
   useGetSource,
 } from './react-query/hooks/useGetSource'
 export {
-  getStructuredSourceQueryKey,
-  getStructuredSourceQueryOptions,
-  useGetStructuredSource,
-} from './react-query/hooks/useGetStructuredSource'
-export {
   healthQueryKey,
   healthQueryOptions,
   useHealth,
@@ -533,10 +806,15 @@ export {
   useListAgents,
 } from './react-query/hooks/useListAgents'
 export {
-  listDatabaseConnectionsQueryKey,
-  listDatabaseConnectionsQueryOptions,
-  useListDatabaseConnections,
-} from './react-query/hooks/useListDatabaseConnections'
+  listConnectionsQueryKey,
+  listConnectionsQueryOptions,
+  useListConnections,
+} from './react-query/hooks/useListConnections'
+export {
+  listConversationsQueryKey,
+  listConversationsQueryOptions,
+  useListConversations,
+} from './react-query/hooks/useListConversations'
 export {
   listMessagesQueryKey,
   listMessagesQueryOptions,
@@ -565,9 +843,52 @@ export {
   useStreamAnswerMessage,
 } from './react-query/hooks/useStreamAnswerMessage'
 export {
+  updateConversationMutationKey,
+  useUpdateConversation,
+} from './react-query/hooks/useUpdateConversation'
+export {
+  updateSourceMutationKey,
+  useUpdateSource,
+} from './react-query/hooks/useUpdateSource'
+export {
   uploadFileMutationKey,
   useUploadFile,
 } from './react-query/hooks/useUploadFile'
+export {
+  createSource200Schema,
+  createSource400Schema,
+  createSource401Schema,
+  createSource403Schema,
+  createSource404Schema,
+  createSource429Schema,
+  createSource500Schema,
+  createSourceMutationRequestSchema,
+  createSourceMutationResponseSchema,
+} from './schemas/createSourceSchema'
+export {
+  deleteConversationPathParamsSchema,
+  deleteConversation204Schema,
+  deleteConversation400Schema,
+  deleteConversation401Schema,
+  deleteConversation403Schema,
+  deleteConversation404Schema,
+  deleteConversation429Schema,
+  deleteConversation500Schema,
+  deleteConversationMutationRequestSchema,
+  deleteConversationMutationResponseSchema,
+} from './schemas/deleteConversationSchema'
+export {
+  deleteSourcePathParamsSchema,
+  deleteSource204Schema,
+  deleteSource400Schema,
+  deleteSource401Schema,
+  deleteSource403Schema,
+  deleteSource404Schema,
+  deleteSource429Schema,
+  deleteSource500Schema,
+  deleteSourceMutationRequestSchema,
+  deleteSourceMutationResponseSchema,
+} from './schemas/deleteSourceSchema'
 export {
   generateUploadSignatureHeaderParamsSchema,
   generateUploadSignature200Schema,
@@ -593,6 +914,18 @@ export {
   getAgentQueryResponseSchema,
 } from './schemas/getAgentSchema'
 export {
+  getConnectionPathParamsSchema,
+  getConnectionQueryParamsSchema,
+  getConnection200Schema,
+  getConnection400Schema,
+  getConnection401Schema,
+  getConnection403Schema,
+  getConnection404Schema,
+  getConnection429Schema,
+  getConnection500Schema,
+  getConnectionQueryResponseSchema,
+} from './schemas/getConnectionSchema'
+export {
   getConversationPathParamsSchema,
   getConversationQueryParamsSchema,
   getConversation200Schema,
@@ -604,18 +937,6 @@ export {
   getConversation500Schema,
   getConversationQueryResponseSchema,
 } from './schemas/getConversationSchema'
-export {
-  getDatabaseConnectionPathParamsSchema,
-  getDatabaseConnectionQueryParamsSchema,
-  getDatabaseConnection200Schema,
-  getDatabaseConnection400Schema,
-  getDatabaseConnection401Schema,
-  getDatabaseConnection403Schema,
-  getDatabaseConnection404Schema,
-  getDatabaseConnection429Schema,
-  getDatabaseConnection500Schema,
-  getDatabaseConnectionQueryResponseSchema,
-} from './schemas/getDatabaseConnectionSchema'
 export {
   getFilePathParamsSchema,
   getFileQueryParamsSchema,
@@ -651,18 +972,6 @@ export {
   getSourceQueryResponseSchema,
 } from './schemas/getSourceSchema'
 export {
-  getStructuredSourcePathParamsSchema,
-  getStructuredSourceQueryParamsSchema,
-  getStructuredSource200Schema,
-  getStructuredSource400Schema,
-  getStructuredSource401Schema,
-  getStructuredSource403Schema,
-  getStructuredSource404Schema,
-  getStructuredSource429Schema,
-  getStructuredSource500Schema,
-  getStructuredSourceQueryResponseSchema,
-} from './schemas/getStructuredSourceSchema'
-export {
   health200Schema,
   health400Schema,
   health401Schema,
@@ -684,16 +993,27 @@ export {
   listAgentsQueryResponseSchema,
 } from './schemas/listAgentsSchema'
 export {
-  listDatabaseConnectionsQueryParamsSchema,
-  listDatabaseConnections200Schema,
-  listDatabaseConnections400Schema,
-  listDatabaseConnections401Schema,
-  listDatabaseConnections403Schema,
-  listDatabaseConnections404Schema,
-  listDatabaseConnections429Schema,
-  listDatabaseConnections500Schema,
-  listDatabaseConnectionsQueryResponseSchema,
-} from './schemas/listDatabaseConnectionsSchema'
+  listConnectionsQueryParamsSchema,
+  listConnections200Schema,
+  listConnections400Schema,
+  listConnections401Schema,
+  listConnections403Schema,
+  listConnections404Schema,
+  listConnections429Schema,
+  listConnections500Schema,
+  listConnectionsQueryResponseSchema,
+} from './schemas/listConnectionsSchema'
+export {
+  listConversationsQueryParamsSchema,
+  listConversations200Schema,
+  listConversations400Schema,
+  listConversations401Schema,
+  listConversations403Schema,
+  listConversations404Schema,
+  listConversations429Schema,
+  listConversations500Schema,
+  listConversationsQueryResponseSchema,
+} from './schemas/listConversationsSchema'
 export {
   listMessagesPathParamsSchema,
   listMessagesQueryParamsSchema,
@@ -766,6 +1086,30 @@ export {
   streamAnswerMessageQueryResponseSchema,
 } from './schemas/streamAnswerMessageSchema'
 export {
+  updateConversationPathParamsSchema,
+  updateConversation204Schema,
+  updateConversation400Schema,
+  updateConversation401Schema,
+  updateConversation403Schema,
+  updateConversation404Schema,
+  updateConversation429Schema,
+  updateConversation500Schema,
+  updateConversationMutationRequestSchema,
+  updateConversationMutationResponseSchema,
+} from './schemas/updateConversationSchema'
+export {
+  updateSourcePathParamsSchema,
+  updateSource204Schema,
+  updateSource400Schema,
+  updateSource401Schema,
+  updateSource403Schema,
+  updateSource404Schema,
+  updateSource429Schema,
+  updateSource500Schema,
+  updateSourceMutationRequestSchema,
+  updateSourceMutationResponseSchema,
+} from './schemas/updateSourceSchema'
+export {
   uploadFileHeaderParamsSchema,
   uploadFile200Schema,
   uploadFile400Schema,
@@ -776,19 +1120,161 @@ export {
   uploadFile500Schema,
   uploadFileMutationResponseSchema,
 } from './schemas/uploadFileSchema'
+export { createSourceMutationRequestTypeEnum } from './types/CreateSource'
+export { deleteConversation204Enum } from './types/DeleteConversation'
+export { deleteSource204Enum } from './types/DeleteSource'
 export {
   generateUploadSignatureMutationRequestBucketEnum,
   generateUploadSignatureMutationRequestScopeEnum,
 } from './types/GenerateUploadSignature'
-export { databaseConnectionDialectEnum } from './types/GetDatabaseConnection'
 export { fileBucketEnum2, fileScopeEnum2 } from './types/GetFile'
 export { sourceTypeEnum } from './types/GetSource'
-export { databaseConnectionsDialectEnum } from './types/ListDatabaseConnections'
-export { sourcesTypeEnum } from './types/ListSources'
-export { partsTypeEnum3, partsTypeEnum4 } from './types/ResendQuestionMessage'
 export {
+  messagesStatusEnum,
+  messagesRoleEnum,
   partsTypeEnum,
+  partsStateEnum,
   partsTypeEnum2,
-  explorerTreeExplorerTypeEnum,
+  partsStateEnum2,
+  partsTypeEnum3,
+  partsTypeEnum4,
+  partsTypeEnum5,
+  partsTypeEnum6,
+  partsTypeEnum7,
+  partsStateEnum3,
+  partsTypeEnum8,
+  partsStateEnum4,
+  partsTypeEnum9,
+  partsStateEnum5,
+  partsTypeEnum10,
+  partsStateEnum6,
+  partsStateEnum7,
+  partsStateEnum8,
+  partsStateEnum9,
+  partsStateEnum10,
+} from './types/ListMessages'
+export { sourcesTypeEnum } from './types/ListSources'
+export {
+  answerMessageStatusEnum3,
+  answerMessageRoleEnum3,
+  partsTypeEnum55,
+  partsStateEnum51,
+  partsTypeEnum56,
+  partsStateEnum52,
+  partsTypeEnum57,
+  partsTypeEnum58,
+  partsTypeEnum59,
+  partsTypeEnum60,
+  partsTypeEnum61,
+  partsStateEnum53,
+  partsTypeEnum62,
+  partsStateEnum54,
+  partsTypeEnum63,
+  partsStateEnum55,
+  partsTypeEnum64,
+  partsStateEnum56,
+  partsStateEnum57,
+  partsStateEnum58,
+  partsStateEnum59,
+  partsStateEnum60,
+} from './types/RegenerateAnswerMessage'
+export {
+  questionMessageStatusEnum2,
+  questionMessageRoleEnum2,
+  partsTypeEnum33,
+  partsStateEnum31,
+  partsTypeEnum34,
+  partsStateEnum32,
+  partsTypeEnum35,
+  partsTypeEnum36,
+  partsTypeEnum37,
+  partsTypeEnum38,
+  partsTypeEnum39,
+  partsStateEnum33,
+  partsTypeEnum40,
+  partsStateEnum34,
+  partsTypeEnum41,
+  partsStateEnum35,
+  partsTypeEnum42,
+  partsStateEnum36,
+  partsStateEnum37,
+  partsStateEnum38,
+  partsStateEnum39,
+  partsStateEnum40,
+  answerMessageStatusEnum2,
+  answerMessageRoleEnum2,
+  partsTypeEnum43,
+  partsStateEnum41,
+  partsTypeEnum44,
+  partsStateEnum42,
+  partsTypeEnum45,
+  partsTypeEnum46,
+  partsTypeEnum47,
+  partsTypeEnum48,
+  partsTypeEnum49,
+  partsStateEnum43,
+  partsTypeEnum50,
+  partsStateEnum44,
+  partsTypeEnum51,
+  partsStateEnum45,
+  partsTypeEnum52,
+  partsStateEnum46,
+  partsStateEnum47,
+  partsStateEnum48,
+  partsStateEnum49,
+  partsStateEnum50,
+  partsTypeEnum53,
+  partsTypeEnum54,
+} from './types/ResendQuestionMessage'
+export {
+  questionMessageStatusEnum,
+  questionMessageRoleEnum,
+  partsTypeEnum11,
+  partsStateEnum11,
+  partsTypeEnum12,
+  partsStateEnum12,
+  partsTypeEnum13,
+  partsTypeEnum14,
+  partsTypeEnum15,
+  partsTypeEnum16,
+  partsTypeEnum17,
+  partsStateEnum13,
+  partsTypeEnum18,
+  partsStateEnum14,
+  partsTypeEnum19,
+  partsStateEnum15,
+  partsTypeEnum20,
+  partsStateEnum16,
+  partsStateEnum17,
+  partsStateEnum18,
+  partsStateEnum19,
+  partsStateEnum20,
+  answerMessageStatusEnum,
+  answerMessageRoleEnum,
+  partsTypeEnum21,
+  partsStateEnum21,
+  partsTypeEnum22,
+  partsStateEnum22,
+  partsTypeEnum23,
+  partsTypeEnum24,
+  partsTypeEnum25,
+  partsTypeEnum26,
+  partsTypeEnum27,
+  partsStateEnum23,
+  partsTypeEnum28,
+  partsStateEnum24,
+  partsTypeEnum29,
+  partsStateEnum25,
+  partsTypeEnum30,
+  partsStateEnum26,
+  partsStateEnum27,
+  partsStateEnum28,
+  partsStateEnum29,
+  partsStateEnum30,
+  partsTypeEnum31,
+  partsTypeEnum32,
+  explorerNodeVisibilityEnum,
 } from './types/SendQuestionMessage'
+export { updateConversation204Enum } from './types/UpdateConversation'
+export { updateSource204Enum } from './types/UpdateSource'
 export { fileBucketEnum, fileScopeEnum } from './types/UploadFile'

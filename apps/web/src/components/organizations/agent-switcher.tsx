@@ -12,7 +12,7 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { ChevronsUpDown, CircleDashed, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
-import { redirect, useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 export function AgentSwitcher({
   activeAgent,
@@ -22,6 +22,7 @@ export function AgentSwitcher({
   agents: Agent[]
 }) {
   const { organizationSlug, teamId } = useParams<OrganizationTeamParams>()
+  const router = useRouter()
 
   return (
     <DropdownMenu>
@@ -46,7 +47,7 @@ export function AgentSwitcher({
               <DropdownMenuItem
                 key={agent.id}
                 onClick={async () => {
-                  redirect(
+                  router.push(
                     `/orgs/${organizationSlug}/${teamId}/agents/${agent.id}/chats`,
                   )
                 }}

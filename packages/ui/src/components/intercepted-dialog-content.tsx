@@ -2,7 +2,7 @@
 
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import type * as React from 'react'
 
 import { DialogOverlay, DialogPortal } from '@workspace/ui/components/dialog'
@@ -22,7 +22,7 @@ export function InterceptedDialogContent({
 
   function onDismiss() {
     if (callbackUrl) {
-      redirect(callbackUrl)
+      router.push(callbackUrl)
     } else {
       router.back()
     }

@@ -14,6 +14,7 @@ export type FileScope = 'public' | 'conversations' | 'sources'
 
 export type FileMetadata = {
   authorId?: string
+  agentId?: string
   conversationId?: string | null
   sourceId?: string
 }
@@ -64,12 +65,15 @@ export async function validateFileDataForUpload(
 
   if (context.organizationId || context.organizationSlug) {
     let organization = null
+
     if (context.organizationId) {
       organization = await queries.context.getOrganization(
         { userId: context.userId },
         { organizationId: context.organizationId },
       )
-    } else if (context.organizationSlug) {
+    }
+
+    if (context.organizationSlug) {
       organization = await queries.context.getOrganization(
         { userId: context.userId },
         { organizationSlug: context.organizationSlug },
@@ -90,56 +94,76 @@ export async function validateFileDataForUpload(
     authorId: ctx.userId,
   }
 
-  if (params.bucket === 'engine') {
-    if (params.scope === 'sources') {
-      if (!params.metadata?.sourceId) {
-        throw new BadRequestError({
-          code: 'SOURCE_REQUIRED',
-          message: 'Source is required',
-        })
-      }
+  if (params.bucket === 'engine' && params.scope === 'sources') {
+    if (!params.metadata?.sourceId) {
+      throw new BadRequestError({
+        code: 'SOURCE_REQUIRED',
+        message: 'Source is required',
+      })
+    }
 
-      const source = await queries.context.getSource(ctx, {
-        sourceId: params.metadata.sourceId,
+    const source = await queries.context.getSource(ctx, {
+      sourceId: params.metadata.sourceId,
+    })
+
+    if (!source) {
+      throw new BadRequestError({
+        code: 'SOURCE_NOT_FOUND',
+        message: 'Source not found or you don’t have access',
+      })
+    }
+
+    fileMetadata.sourceId = params.metadata.sourceId
+  }
+
+  if (params.bucket === 'default' && params.scope === 'conversations') {
+    if (!params.metadata?.agentId) {
+      throw new BadRequestError({
+        code: 'AGENT_REQUIRED',
+        message: 'Agent is required',
+      })
+    }
+
+    if (params.metadata.conversationId) {
+      const conversation = await queries.context.getConversation(ctx, {
+        agentId: params.metadata.agentId,
+        conversationId: params.metadata.conversationId,
       })
 
-      if (!source) {
+      if (!conversation) {
         throw new BadRequestError({
-          code: 'SOURCE_NOT_FOUND',
-          message: 'Source not found or you don’t have access',
+          code: 'CONVERSATION_NOT_FOUND',
+          message: 'Conversation not found or you don’t have access',
         })
       }
 
-      fileMetadata.sourceId = params.metadata.sourceId
-    }
-  } else {
-    if (params.scope === 'conversations') {
-      if (params.metadata?.conversationId) {
-        const conversation = await queries.context.getConversation(ctx, {
-          conversationId: params.metadata.conversationId,
+      fileMetadata.agentId = params.metadata.agentId
+      fileMetadata.conversationId = params.metadata.conversationId
+    } else {
+      const agent = await queries.context.getAgent(ctx, {
+        agentId: params.metadata.agentId,
+      })
+
+      if (!agent) {
+        throw new BadRequestError({
+          code: 'AGENT_NOT_FOUND',
+          message: 'Agent not found or you don’t have access',
         })
-
-        if (!conversation) {
-          throw new BadRequestError({
-            code: 'CONVERSATION_NOT_FOUND',
-            message: 'Conversation not found or you don’t have access',
-          })
-        }
-
-        fileMetadata.conversationId = params.metadata.conversationId
       }
+
+      fileMetadata.agentId = agent.id
     }
   }
 
   const ownerTypeCondition = ctx.organizationId
     ? { organizationId: ctx.organizationId }
-    : { ownerId: ctx.userId }
+    : { userId: ctx.userId }
 
   return {
     bucket: params.bucket,
     scope: params.scope,
-    ...ownerTypeCondition,
     metadata: fileMetadata,
+    owner: ownerTypeCondition,
   }
 }
 
@@ -147,16 +171,16 @@ type FileData = {
   bucket: FileBucket
   scope: FileScope
   metadata: FileMetadata
-} & (
-  | {
-      ownerId: string
-      organizationId?: never
-    }
-  | {
-      ownerId?: never
-      organizationId: string
-    }
-)
+  owner:
+    | {
+        userId: string
+        organizationId?: never
+      }
+    | {
+        userId?: never
+        organizationId: string
+      }
+}
 
 type FileUploadPayload = {
   data: FileData
@@ -275,11 +299,6 @@ export async function uploadFileToStorage(params: UploadFileToStorageParams) {
 
   await upload.done()
 
-  const ownerTypeCondition =
-    params.data.organizationId !== undefined
-      ? { organizationId: params.data.organizationId }
-      : { ownerId: params.data.ownerId }
-
   const createdFile = await queries.createFile({
     fileName: params.file.filename,
     fileMimeType: params.file.mimetype,
@@ -287,7 +306,7 @@ export async function uploadFileToStorage(params: UploadFileToStorageParams) {
     bucket: params.data.bucket,
     scope: params.data.scope,
     metadata: params.data.metadata,
-    ...ownerTypeCondition,
+    owner: params.data.owner,
   })
 
   if (!createdFile) {

@@ -59,10 +59,6 @@ export default async function Layout({
           label: 'Connections',
           href: `/orgs/${organizationSlug}/~/connections`,
         },
-        {
-          label: 'Integrations',
-          href: `/orgs/${organizationSlug}/~/integrations`,
-        },
       ],
     )
 

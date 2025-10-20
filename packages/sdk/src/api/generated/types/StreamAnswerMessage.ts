@@ -27,6 +27,10 @@ export type StreamAnswerMessageQueryParams = {
    * @type string | undefined
    */
   teamId?: string
+  /**
+   * @type string
+   */
+  agentId: string
 }
 
 /**

@@ -1,10 +1,7 @@
 import { logger } from '@trigger.dev/sdk'
 import { tool } from '@workspace/ai'
 import { z } from 'zod'
-import {
-  retrieveSources,
-  retrieveStructuredSourceProperNouns,
-} from './retriever'
+import { retrieveDatabaseSourceProperNouns, retrieveSources } from './retriever'
 
 export function GetInformationTool({ namespace }: { namespace: string }) {
   return tool({
@@ -34,7 +31,7 @@ export function SearchProperNounsTool({
     }),
     execute: async ({ tableName, columnName, search }) => {
       return logger.trace('Search Proper Nouns Tool', () => {
-        return retrieveStructuredSourceProperNouns({
+        return retrieveDatabaseSourceProperNouns({
           namespace,
           sourceId,
           tableName,

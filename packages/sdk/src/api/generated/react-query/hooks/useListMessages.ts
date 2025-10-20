@@ -32,7 +32,7 @@ export const listMessagesQueryKey = (
   {
     conversationId,
   }: { conversationId: ListMessagesPathParams['conversationId'] },
-  params?: ListMessagesQueryParams,
+  params: ListMessagesQueryParams,
 ) =>
   [
     {
@@ -50,7 +50,7 @@ export function listMessagesQueryOptions(
     params,
   }: {
     conversationId: ListMessagesPathParams['conversationId']
-    params?: ListMessagesQueryParams
+    params: ListMessagesQueryParams
   },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
@@ -68,7 +68,7 @@ export function listMessagesQueryOptions(
     ListMessagesQueryResponse,
     typeof queryKey
   >({
-    enabled: !!conversationId,
+    enabled: !!(conversationId && params),
     queryKey,
     queryFn: async ({ signal }) => {
       config.signal = signal
@@ -91,7 +91,7 @@ export function useListMessages<
     params,
   }: {
     conversationId: ListMessagesPathParams['conversationId']
-    params?: ListMessagesQueryParams
+    params: ListMessagesQueryParams
   },
   options: {
     query?: Partial<

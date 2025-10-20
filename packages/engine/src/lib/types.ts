@@ -1,6 +1,11 @@
-export type SourceType = 'text' | 'structured'
+export type SourceType =
+  | 'file'
+  | 'text'
+  | 'question-answer'
+  | 'website'
+  | 'database'
 
-export type ColumnMetadata = {
+export type DatabaseSourceColumnMetadata = {
   name: string
   meta?: {
     description?: string
@@ -11,15 +16,15 @@ export type ColumnMetadata = {
   foreign_column?: string
 }
 
-export type TableMetadata = {
+export type DatabaseSourceTableMetadata = {
   name: string
   meta?: {
     description?: string
   }
-  columns: ColumnMetadata[]
+  columns: DatabaseSourceColumnMetadata[]
 }
 
-export type QueryExample = {
+export type DatabaseSourceQueryExample = {
   input: string
   query: string
 }

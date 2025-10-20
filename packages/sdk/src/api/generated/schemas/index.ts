@@ -1,4 +1,39 @@
 export type {
+  CreateSource200Schema,
+  CreateSource400Schema,
+  CreateSource401Schema,
+  CreateSource403Schema,
+  CreateSource404Schema,
+  CreateSource429Schema,
+  CreateSource500Schema,
+  CreateSourceMutationRequestSchema,
+  CreateSourceMutationResponseSchema,
+} from './createSourceSchema'
+export type {
+  DeleteConversationPathParamsSchema,
+  DeleteConversation204Schema,
+  DeleteConversation400Schema,
+  DeleteConversation401Schema,
+  DeleteConversation403Schema,
+  DeleteConversation404Schema,
+  DeleteConversation429Schema,
+  DeleteConversation500Schema,
+  DeleteConversationMutationRequestSchema,
+  DeleteConversationMutationResponseSchema,
+} from './deleteConversationSchema'
+export type {
+  DeleteSourcePathParamsSchema,
+  DeleteSource204Schema,
+  DeleteSource400Schema,
+  DeleteSource401Schema,
+  DeleteSource403Schema,
+  DeleteSource404Schema,
+  DeleteSource429Schema,
+  DeleteSource500Schema,
+  DeleteSourceMutationRequestSchema,
+  DeleteSourceMutationResponseSchema,
+} from './deleteSourceSchema'
+export type {
   GenerateUploadSignatureHeaderParamsSchema,
   GenerateUploadSignature200Schema,
   GenerateUploadSignature400Schema,
@@ -23,6 +58,18 @@ export type {
   GetAgentQueryResponseSchema,
 } from './getAgentSchema'
 export type {
+  GetConnectionPathParamsSchema,
+  GetConnectionQueryParamsSchema,
+  GetConnection200Schema,
+  GetConnection400Schema,
+  GetConnection401Schema,
+  GetConnection403Schema,
+  GetConnection404Schema,
+  GetConnection429Schema,
+  GetConnection500Schema,
+  GetConnectionQueryResponseSchema,
+} from './getConnectionSchema'
+export type {
   GetConversationPathParamsSchema,
   GetConversationQueryParamsSchema,
   GetConversation200Schema,
@@ -34,18 +81,6 @@ export type {
   GetConversation500Schema,
   GetConversationQueryResponseSchema,
 } from './getConversationSchema'
-export type {
-  GetDatabaseConnectionPathParamsSchema,
-  GetDatabaseConnectionQueryParamsSchema,
-  GetDatabaseConnection200Schema,
-  GetDatabaseConnection400Schema,
-  GetDatabaseConnection401Schema,
-  GetDatabaseConnection403Schema,
-  GetDatabaseConnection404Schema,
-  GetDatabaseConnection429Schema,
-  GetDatabaseConnection500Schema,
-  GetDatabaseConnectionQueryResponseSchema,
-} from './getDatabaseConnectionSchema'
 export type {
   GetFilePathParamsSchema,
   GetFileQueryParamsSchema,
@@ -81,18 +116,6 @@ export type {
   GetSourceQueryResponseSchema,
 } from './getSourceSchema'
 export type {
-  GetStructuredSourcePathParamsSchema,
-  GetStructuredSourceQueryParamsSchema,
-  GetStructuredSource200Schema,
-  GetStructuredSource400Schema,
-  GetStructuredSource401Schema,
-  GetStructuredSource403Schema,
-  GetStructuredSource404Schema,
-  GetStructuredSource429Schema,
-  GetStructuredSource500Schema,
-  GetStructuredSourceQueryResponseSchema,
-} from './getStructuredSourceSchema'
-export type {
   Health200Schema,
   Health400Schema,
   Health401Schema,
@@ -114,16 +137,27 @@ export type {
   ListAgentsQueryResponseSchema,
 } from './listAgentsSchema'
 export type {
-  ListDatabaseConnectionsQueryParamsSchema,
-  ListDatabaseConnections200Schema,
-  ListDatabaseConnections400Schema,
-  ListDatabaseConnections401Schema,
-  ListDatabaseConnections403Schema,
-  ListDatabaseConnections404Schema,
-  ListDatabaseConnections429Schema,
-  ListDatabaseConnections500Schema,
-  ListDatabaseConnectionsQueryResponseSchema,
-} from './listDatabaseConnectionsSchema'
+  ListConnectionsQueryParamsSchema,
+  ListConnections200Schema,
+  ListConnections400Schema,
+  ListConnections401Schema,
+  ListConnections403Schema,
+  ListConnections404Schema,
+  ListConnections429Schema,
+  ListConnections500Schema,
+  ListConnectionsQueryResponseSchema,
+} from './listConnectionsSchema'
+export type {
+  ListConversationsQueryParamsSchema,
+  ListConversations200Schema,
+  ListConversations400Schema,
+  ListConversations401Schema,
+  ListConversations403Schema,
+  ListConversations404Schema,
+  ListConversations429Schema,
+  ListConversations500Schema,
+  ListConversationsQueryResponseSchema,
+} from './listConversationsSchema'
 export type {
   ListMessagesPathParamsSchema,
   ListMessagesQueryParamsSchema,
@@ -196,6 +230,30 @@ export type {
   StreamAnswerMessageQueryResponseSchema,
 } from './streamAnswerMessageSchema'
 export type {
+  UpdateConversationPathParamsSchema,
+  UpdateConversation204Schema,
+  UpdateConversation400Schema,
+  UpdateConversation401Schema,
+  UpdateConversation403Schema,
+  UpdateConversation404Schema,
+  UpdateConversation429Schema,
+  UpdateConversation500Schema,
+  UpdateConversationMutationRequestSchema,
+  UpdateConversationMutationResponseSchema,
+} from './updateConversationSchema'
+export type {
+  UpdateSourcePathParamsSchema,
+  UpdateSource204Schema,
+  UpdateSource400Schema,
+  UpdateSource401Schema,
+  UpdateSource403Schema,
+  UpdateSource404Schema,
+  UpdateSource429Schema,
+  UpdateSource500Schema,
+  UpdateSourceMutationRequestSchema,
+  UpdateSourceMutationResponseSchema,
+} from './updateSourceSchema'
+export type {
   UploadFileHeaderParamsSchema,
   UploadFile200Schema,
   UploadFile400Schema,
@@ -206,6 +264,41 @@ export type {
   UploadFile500Schema,
   UploadFileMutationResponseSchema,
 } from './uploadFileSchema'
+export {
+  createSource200Schema,
+  createSource400Schema,
+  createSource401Schema,
+  createSource403Schema,
+  createSource404Schema,
+  createSource429Schema,
+  createSource500Schema,
+  createSourceMutationRequestSchema,
+  createSourceMutationResponseSchema,
+} from './createSourceSchema'
+export {
+  deleteConversationPathParamsSchema,
+  deleteConversation204Schema,
+  deleteConversation400Schema,
+  deleteConversation401Schema,
+  deleteConversation403Schema,
+  deleteConversation404Schema,
+  deleteConversation429Schema,
+  deleteConversation500Schema,
+  deleteConversationMutationRequestSchema,
+  deleteConversationMutationResponseSchema,
+} from './deleteConversationSchema'
+export {
+  deleteSourcePathParamsSchema,
+  deleteSource204Schema,
+  deleteSource400Schema,
+  deleteSource401Schema,
+  deleteSource403Schema,
+  deleteSource404Schema,
+  deleteSource429Schema,
+  deleteSource500Schema,
+  deleteSourceMutationRequestSchema,
+  deleteSourceMutationResponseSchema,
+} from './deleteSourceSchema'
 export {
   generateUploadSignatureHeaderParamsSchema,
   generateUploadSignature200Schema,
@@ -231,6 +324,18 @@ export {
   getAgentQueryResponseSchema,
 } from './getAgentSchema'
 export {
+  getConnectionPathParamsSchema,
+  getConnectionQueryParamsSchema,
+  getConnection200Schema,
+  getConnection400Schema,
+  getConnection401Schema,
+  getConnection403Schema,
+  getConnection404Schema,
+  getConnection429Schema,
+  getConnection500Schema,
+  getConnectionQueryResponseSchema,
+} from './getConnectionSchema'
+export {
   getConversationPathParamsSchema,
   getConversationQueryParamsSchema,
   getConversation200Schema,
@@ -242,18 +347,6 @@ export {
   getConversation500Schema,
   getConversationQueryResponseSchema,
 } from './getConversationSchema'
-export {
-  getDatabaseConnectionPathParamsSchema,
-  getDatabaseConnectionQueryParamsSchema,
-  getDatabaseConnection200Schema,
-  getDatabaseConnection400Schema,
-  getDatabaseConnection401Schema,
-  getDatabaseConnection403Schema,
-  getDatabaseConnection404Schema,
-  getDatabaseConnection429Schema,
-  getDatabaseConnection500Schema,
-  getDatabaseConnectionQueryResponseSchema,
-} from './getDatabaseConnectionSchema'
 export {
   getFilePathParamsSchema,
   getFileQueryParamsSchema,
@@ -289,18 +382,6 @@ export {
   getSourceQueryResponseSchema,
 } from './getSourceSchema'
 export {
-  getStructuredSourcePathParamsSchema,
-  getStructuredSourceQueryParamsSchema,
-  getStructuredSource200Schema,
-  getStructuredSource400Schema,
-  getStructuredSource401Schema,
-  getStructuredSource403Schema,
-  getStructuredSource404Schema,
-  getStructuredSource429Schema,
-  getStructuredSource500Schema,
-  getStructuredSourceQueryResponseSchema,
-} from './getStructuredSourceSchema'
-export {
   health200Schema,
   health400Schema,
   health401Schema,
@@ -322,16 +403,27 @@ export {
   listAgentsQueryResponseSchema,
 } from './listAgentsSchema'
 export {
-  listDatabaseConnectionsQueryParamsSchema,
-  listDatabaseConnections200Schema,
-  listDatabaseConnections400Schema,
-  listDatabaseConnections401Schema,
-  listDatabaseConnections403Schema,
-  listDatabaseConnections404Schema,
-  listDatabaseConnections429Schema,
-  listDatabaseConnections500Schema,
-  listDatabaseConnectionsQueryResponseSchema,
-} from './listDatabaseConnectionsSchema'
+  listConnectionsQueryParamsSchema,
+  listConnections200Schema,
+  listConnections400Schema,
+  listConnections401Schema,
+  listConnections403Schema,
+  listConnections404Schema,
+  listConnections429Schema,
+  listConnections500Schema,
+  listConnectionsQueryResponseSchema,
+} from './listConnectionsSchema'
+export {
+  listConversationsQueryParamsSchema,
+  listConversations200Schema,
+  listConversations400Schema,
+  listConversations401Schema,
+  listConversations403Schema,
+  listConversations404Schema,
+  listConversations429Schema,
+  listConversations500Schema,
+  listConversationsQueryResponseSchema,
+} from './listConversationsSchema'
 export {
   listMessagesPathParamsSchema,
   listMessagesQueryParamsSchema,
@@ -403,6 +495,30 @@ export {
   streamAnswerMessage500Schema,
   streamAnswerMessageQueryResponseSchema,
 } from './streamAnswerMessageSchema'
+export {
+  updateConversationPathParamsSchema,
+  updateConversation204Schema,
+  updateConversation400Schema,
+  updateConversation401Schema,
+  updateConversation403Schema,
+  updateConversation404Schema,
+  updateConversation429Schema,
+  updateConversation500Schema,
+  updateConversationMutationRequestSchema,
+  updateConversationMutationResponseSchema,
+} from './updateConversationSchema'
+export {
+  updateSourcePathParamsSchema,
+  updateSource204Schema,
+  updateSource400Schema,
+  updateSource401Schema,
+  updateSource403Schema,
+  updateSource404Schema,
+  updateSource429Schema,
+  updateSource500Schema,
+  updateSourceMutationRequestSchema,
+  updateSourceMutationResponseSchema,
+} from './updateSourceSchema'
 export {
   uploadFileHeaderParamsSchema,
   uploadFile200Schema,

@@ -1,33 +1,37 @@
 'use client'
 
 import { streamAnswerMessage } from '@/actions/messages'
-import type { ChatParams, Message, OrganizationTeamParams } from '@/lib/types'
+import type {
+  ChatParams,
+  MessageNode,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import { readStreamableValue } from '@workspace/ai/rsc'
-import { useParams } from 'next/navigation'
 import * as React from 'react'
 
-type Params = OrganizationTeamParams & ChatParams
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
 type UseChatAssistantMessageRealtimeParams = {
+  params: Params
   messageId: string
 }
-
 export function useChatAssistantMessageRealtime({
+  params,
   messageId,
 }: UseChatAssistantMessageRealtimeParams) {
-  const { organizationSlug, teamId, chatId } = useParams<Params>()
-
   const [error, setError] = React.useState<string>()
-  const [message, setMessage] = React.useState<Message>()
+  const [message, setMessage] = React.useState<MessageNode>()
 
-  async function startStreamingMessage() {
+  async function startStreaming() {
     try {
-      const streamableValue = await streamAnswerMessage(
-        { organizationSlug, teamId },
-        { conversationId: chatId, messageId },
-      )
+      const streamableValue = await streamAnswerMessage(params, {
+        conversationId: params.chatId,
+        messageId,
+      })
 
-      for await (const messageDelta of readStreamableValue(streamableValue)) {
+      for await (const messageDelta of readStreamableValue<MessageNode>(
+        streamableValue,
+      )) {
         setMessage(messageDelta)
       }
     } catch (error) {
@@ -36,12 +40,25 @@ export function useChatAssistantMessageRealtime({
   }
 
   React.useEffect(() => {
-    if (!organizationSlug || !teamId || !chatId || !messageId) {
+    if (
+      !params.organizationSlug ||
+      !params.teamId ||
+      !params.agentId ||
+      !params.chatId ||
+      params.chatId === 'new' ||
+      !messageId
+    ) {
       return
     }
 
-    startStreamingMessage()
-  }, [organizationSlug, teamId, chatId, messageId])
+    startStreaming()
+  }, [
+    params.organizationSlug,
+    params.teamId,
+    params.agentId,
+    params.chatId,
+    messageId,
+  ])
 
   return { message, setMessage, error }
 }

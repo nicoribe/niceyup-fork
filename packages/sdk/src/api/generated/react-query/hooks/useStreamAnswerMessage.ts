@@ -36,7 +36,7 @@ export const streamAnswerMessageQueryKey = (
     conversationId: StreamAnswerMessagePathParams['conversationId']
     messageId: StreamAnswerMessagePathParams['messageId']
   },
-  params?: StreamAnswerMessageQueryParams,
+  params: StreamAnswerMessageQueryParams,
 ) =>
   [
     {
@@ -58,7 +58,7 @@ export function streamAnswerMessageQueryOptions(
   }: {
     conversationId: StreamAnswerMessagePathParams['conversationId']
     messageId: StreamAnswerMessagePathParams['messageId']
-    params?: StreamAnswerMessageQueryParams
+    params: StreamAnswerMessageQueryParams
   },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
@@ -79,7 +79,7 @@ export function streamAnswerMessageQueryOptions(
     StreamAnswerMessageQueryResponse,
     typeof queryKey
   >({
-    enabled: !!(conversationId && messageId),
+    enabled: !!(conversationId && messageId && params),
     queryKey,
     queryFn: async ({ signal }) => {
       config.signal = signal
@@ -104,7 +104,7 @@ export function useStreamAnswerMessage<
   }: {
     conversationId: StreamAnswerMessagePathParams['conversationId']
     messageId: StreamAnswerMessagePathParams['messageId']
-    params?: StreamAnswerMessageQueryParams
+    params: StreamAnswerMessageQueryParams
   },
   options: {
     query?: Partial<

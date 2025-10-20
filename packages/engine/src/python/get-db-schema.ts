@@ -1,7 +1,7 @@
 import { python } from '@trigger.dev/python'
 import { env } from '../lib/env'
 import { pyArgs, pyPath, pyStreamingResult } from '../lib/python'
-import type { TableMetadata } from '../lib/types'
+import type { DatabaseSourceTableMetadata } from '../lib/types'
 import { tmpDir } from '../lib/utils'
 
 type GetDbSchemaArgs = {
@@ -18,7 +18,7 @@ type GetDbSchemaEnvVars = {
   schema?: string
 }
 
-type GetDbSchemaResult = TableMetadata[]
+type GetDbSchemaResult = DatabaseSourceTableMetadata[]
 
 export async function getDbSchema(
   args: GetDbSchemaArgs,

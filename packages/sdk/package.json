@@ -13,7 +13,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.75.2",
     "@workspace/env": "workspace:*",
-    "zod": "^3.22.4"
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@kubb/cli": "^3.10.5",

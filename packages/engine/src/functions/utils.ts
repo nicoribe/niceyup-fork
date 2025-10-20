@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { v5 as uuidv5 } from 'uuid'
-import type { TableMetadata } from '../lib/types'
+import type { DatabaseSourceTableMetadata } from '../lib/types'
 
 const NAMESPACE = '00000000-0000-0000-0000-000000000000' as const
 
@@ -9,7 +9,7 @@ export function deterministicUuid(content: string): string {
   return uuidv5(hashHex, NAMESPACE)
 }
 
-export function createSchema(tablesMetadata: TableMetadata[]) {
+export function createSchema(tablesMetadata: DatabaseSourceTableMetadata[]) {
   const lines = []
 
   for (const table of tablesMetadata) {

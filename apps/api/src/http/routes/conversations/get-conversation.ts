@@ -21,6 +21,7 @@ export async function getConversation(app: FastifyTypedInstance) {
           organizationId: z.string().optional(),
           organizationSlug: z.string().optional(),
           teamId: z.string().optional(),
+          agentId: z.string(),
         }),
         response: withDefaultErrorResponses({
           200: z
@@ -28,9 +29,6 @@ export async function getConversation(app: FastifyTypedInstance) {
               conversation: z.object({
                 id: z.string(),
                 title: z.string(),
-                teamId: z.string().nullable(),
-                ownerId: z.string().nullable(),
-                agentId: z.string().nullable(),
               }),
             })
             .describe('Success'),
@@ -44,7 +42,8 @@ export async function getConversation(app: FastifyTypedInstance) {
 
       const { conversationId } = request.params
 
-      const { organizationId, organizationSlug, teamId } = request.query
+      const { organizationId, organizationSlug, teamId, agentId } =
+        request.query
 
       const context = {
         userId,
@@ -56,6 +55,7 @@ export async function getConversation(app: FastifyTypedInstance) {
       }
 
       const conversation = await queries.context.getConversation(context, {
+        agentId,
         conversationId,
       })
 

@@ -31,10 +31,15 @@ export async function generateUploadSignature(app: FastifyTypedInstance) {
           bucket: z.enum(['default', 'engine']).default('default'),
           scope: z.enum(['public', 'conversations', 'sources']),
           metadata: z
-            .object({
-              conversationId: z.string().nullish(),
-              sourceId: z.string().optional(),
-            })
+            .union([
+              z.object({
+                agentId: z.string().optional(),
+                conversationId: z.string().nullish(),
+              }),
+              z.object({
+                sourceId: z.string().optional(),
+              }),
+            ])
             .optional(),
           accept: z.string().default(DEFAULT_ACCEPT),
           expires: z.number().positive().default(DEFAULT_EXPIRES),

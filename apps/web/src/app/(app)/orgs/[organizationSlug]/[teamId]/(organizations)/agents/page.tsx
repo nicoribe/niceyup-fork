@@ -2,7 +2,11 @@ import { getMembership, getOrganizationTeam } from '@/actions/organizations'
 import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
 import { sdk } from '@/lib/sdk'
 import type { OrganizationTeamParams } from '@/lib/types'
-import { Avatar, AvatarFallback } from '@workspace/ui/components/avatar'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@workspace/ui/components/avatar'
 import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
 import {
@@ -77,6 +81,7 @@ export default async function Page({
             >
               <div className="flex flex-row items-center justify-between gap-2">
                 <Avatar className="size-8 rounded-sm">
+                  {agent.logo && <AvatarImage src={agent.logo} />}
                   <AvatarFallback className="rounded-sm" />
                 </Avatar>
 
@@ -108,20 +113,24 @@ export default async function Page({
               </div>
 
               <p className="line-clamp-3 text-muted-foreground text-sm">
-                AI Assistant for general tasks and automation
+                {agent.description}
               </p>
 
-              <div className="flex flex-wrap gap-2">
-                {['OpenAI', 'Google', 'Anthropic'].map((tag) => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+              {agent.tags && (
+                <div className="flex flex-wrap gap-2">
+                  {agent.tags.map((tag) => (
+                    <Badge key={tag} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
 
-              <p className="line-clamp-1 text-muted-foreground text-xs">
-                Last trained 12 hours ago
-              </p>
+              {/* {agent.lastTrainedAt && (
+                <p className="line-clamp-1 text-muted-foreground text-xs">
+                  Last trained 12 hours ago
+                </p>
+              )} */}
             </Link>
           ))}
         </div>

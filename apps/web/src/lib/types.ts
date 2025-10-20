@@ -31,19 +31,18 @@ export type Team = {
 export type Agent = {
   id: string
   name: string
+  slug: string | null
+  logo: string | null
+  description: string | null
+  tags: string[] | null
 }
-
-export type ConversationExplorerType = 'private' | 'shared' | 'team'
 
 export type Chat = {
   id: string
   title: string
-  teamId: string | null
-  ownerId: string | null
-  agentId: string | null
 }
 
-export type PromptInputStatus = 'submitted' | 'streaming' | 'ready' | 'error'
+export type ConversationExplorerNodeVisibility = 'private' | 'shared' | 'team'
 
 export type MessageStatus = AIMessageStatus
 
@@ -60,9 +59,14 @@ export type Message = {
   parts: MessagePart[] | null
   metadata?: MessageMetadata | null
   authorId?: string | null
+}
+
+export type MessageNode = Message & {
   parentId?: string | null
   children?: string[]
 }
+
+export type PromptInputStatus = 'submitted' | 'streaming' | 'ready' | 'error'
 
 export type PromptMessagePart =
   | {

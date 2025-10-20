@@ -25,9 +25,13 @@ export async function listAgents(context: ContextListAgentsParams) {
       .select({
         id: agents.id,
         name: agents.name,
+        slug: agents.slug,
+        logo: agents.logo,
+        description: agents.description,
+        tags: agents.tags,
       })
       .from(agents)
-      .where(eq(agents.ownerId, context.userId))
+      .where(eq(agents.ownerUserId, context.userId))
 
     return listAgents
   }
@@ -37,6 +41,10 @@ export async function listAgents(context: ContextListAgentsParams) {
       .select({
         id: agents.id,
         name: agents.name,
+        slug: agents.slug,
+        logo: agents.logo,
+        description: agents.description,
+        tags: agents.tags,
       })
       .from(agents)
       .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
@@ -71,9 +79,13 @@ export async function listAgents(context: ContextListAgentsParams) {
       .select({
         id: agents.id,
         name: agents.name,
+        slug: agents.slug,
+        logo: agents.logo,
+        description: agents.description,
+        tags: agents.tags,
       })
       .from(agents)
-      .where(eq(agents.organizationId, orgId))
+      .where(eq(agents.ownerOrganizationId, orgId))
 
     return listAgents
   }
@@ -109,10 +121,17 @@ export async function getAgent(
       .select({
         id: agents.id,
         name: agents.name,
+        slug: agents.slug,
+        logo: agents.logo,
+        description: agents.description,
+        tags: agents.tags,
       })
       .from(agents)
       .where(
-        and(eq(agents.id, params.agentId), eq(agents.ownerId, context.userId)),
+        and(
+          eq(agents.id, params.agentId),
+          eq(agents.ownerUserId, context.userId),
+        ),
       )
       .limit(1)
 
@@ -124,6 +143,10 @@ export async function getAgent(
       .select({
         id: agents.id,
         name: agents.name,
+        slug: agents.slug,
+        logo: agents.logo,
+        description: agents.description,
+        tags: agents.tags,
       })
       .from(agents)
       .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
@@ -160,10 +183,17 @@ export async function getAgent(
       .select({
         id: agents.id,
         name: agents.name,
+        slug: agents.slug,
+        logo: agents.logo,
+        description: agents.description,
+        tags: agents.tags,
       })
       .from(agents)
       .where(
-        and(eq(agents.id, params.agentId), eq(agents.organizationId, orgId)),
+        and(
+          eq(agents.id, params.agentId),
+          eq(agents.ownerOrganizationId, orgId),
+        ),
       )
       .limit(1)
 

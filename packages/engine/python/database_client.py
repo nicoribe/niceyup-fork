@@ -102,7 +102,7 @@ class DatabaseClient:
             self.connect()
 
         if self.conn is None:
-            raise RuntimeError("Database connection not established.")
+            raise RuntimeError("Database connection not established")
 
         return self.conn.execute(sql)
 

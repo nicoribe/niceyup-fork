@@ -7,7 +7,7 @@ import {
 } from '@workspace/ui/components/tooltip'
 import { Settings } from 'lucide-react'
 
-export function RightSidebar() {
+export async function RightSidebar() {
   return (
     <div className="flex h-full flex-col bg-background">
       <div className="z-20 flex flex-row items-center justify-end gap-1 p-1">
@@ -24,7 +24,9 @@ export function RightSidebar() {
       <Separator />
 
       <div className="flex-1 overflow-y-auto p-2">
-        <h1 className="text-center text-muted-foreground text-xs">Empty</h1>
+        <h1 className="py-6 text-center text-muted-foreground text-xs">
+          Coming soon
+        </h1>
       </div>
     </div>
   )

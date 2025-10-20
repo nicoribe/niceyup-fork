@@ -1,7 +1,7 @@
 import { AbortTaskRunError, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
 import { and, eq } from '@workspace/db/orm'
-import { sources, structuredSources } from '@workspace/db/schema'
+import { databaseSources } from '@workspace/db/schema'
 import { z } from 'zod'
 import { python } from '../python'
 
@@ -11,29 +11,17 @@ export const getDbProperNounsTask = schemaTask({
     sourceId: z.string(),
   }),
   run: async (payload) => {
-    const [source] = await db
+    const [databaseSource] = await db
       .select()
-      .from(sources)
-      .where(
-        and(eq(sources.id, payload.sourceId), eq(sources.type, 'structured')),
-      )
+      .from(databaseSources)
+      .where(and(eq(databaseSources.sourceId, payload.sourceId)))
       .limit(1)
 
-    if (!source) {
-      throw new AbortTaskRunError('Source not found')
+    if (!databaseSource) {
+      throw new AbortTaskRunError('Database source not found')
     }
 
-    const [structuredSource] = await db
-      .select()
-      .from(structuredSources)
-      .where(eq(structuredSources.sourceId, payload.sourceId))
-      .limit(1)
-
-    if (!structuredSource) {
-      throw new AbortTaskRunError('Structured source not found')
-    }
-
-    const tablesMetadata = structuredSource.tablesMetadata
+    const tablesMetadata = databaseSource.tablesMetadata
       ?.map((t) => ({
         name: t.name,
         columns: t.columns

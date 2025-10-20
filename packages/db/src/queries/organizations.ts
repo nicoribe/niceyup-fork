@@ -2,12 +2,14 @@ import { eq } from 'drizzle-orm'
 import { db } from '../db'
 import { organizations } from '../schema/auth'
 
-export async function getOrganizationSlugById({
-  organizationId,
-}: {
+type GetOrganizationSlugByIdParams = {
   organizationId: string | null | undefined
-}) {
-  if (!organizationId) {
+}
+
+export async function getOrganizationSlugById(
+  params: GetOrganizationSlugByIdParams,
+) {
+  if (!params.organizationId) {
     return null
   }
 
@@ -16,18 +18,20 @@ export async function getOrganizationSlugById({
       slug: organizations.slug,
     })
     .from(organizations)
-    .where(eq(organizations.id, organizationId))
+    .where(eq(organizations.id, params.organizationId))
     .limit(1)
 
   return organization?.slug || null
 }
 
-export async function getOrganizationIdBySlug({
-  organizationSlug,
-}: {
+type GetOrganizationIdBySlugParams = {
   organizationSlug: string | null | undefined
-}) {
-  if (!organizationSlug) {
+}
+
+export async function getOrganizationIdBySlug(
+  params: GetOrganizationIdBySlugParams,
+) {
+  if (!params.organizationSlug) {
     return null
   }
 
@@ -36,7 +40,7 @@ export async function getOrganizationIdBySlug({
       id: organizations.id,
     })
     .from(organizations)
-    .where(eq(organizations.slug, organizationSlug))
+    .where(eq(organizations.slug, params.organizationSlug))
     .limit(1)
 
   return organization?.id || null

@@ -1,26 +1,32 @@
 'use client'
 
 import { env } from '@/lib/env'
-import type { ChatParams, Message, OrganizationTeamParams } from '@/lib/types'
-import { useParams } from 'next/navigation'
+import type {
+  ChatParams,
+  MessageNode,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import * as React from 'react'
 
-type Params = OrganizationTeamParams & ChatParams
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
-export function useChatRealtime() {
-  const { organizationSlug, teamId, chatId } = useParams<Params>()
+type UseChatRealtimeParams = {
+  params: Params
+}
 
+export function useChatRealtime({ params }: UseChatRealtimeParams) {
   const [error, setError] = React.useState<string>()
-  const [messages, setMessages] = React.useState<Message[]>([])
+  const [messages, setMessages] = React.useState<MessageNode[]>([])
 
   React.useEffect(() => {
     if (
-      !organizationSlug ||
-      organizationSlug === 'my-account' ||
-      !teamId ||
-      teamId === '~' ||
-      !chatId ||
-      chatId === 'new'
+      !params.organizationSlug ||
+      params.organizationSlug === 'my-account' ||
+      !params.teamId ||
+      params.teamId === '~' ||
+      !params.agentId ||
+      !params.chatId ||
+      params.chatId === 'new'
     ) {
       return
     }
@@ -28,10 +34,13 @@ export function useChatRealtime() {
     let websocket: WebSocket | null = null
 
     try {
-      const params = new URLSearchParams({ organizationSlug, teamId })
+      const searchParams = new URLSearchParams({
+        organizationSlug: params.organizationSlug,
+        teamId: params.teamId,
+      })
 
       const url = new URL(
-        `/api/conversations/${chatId}/messages/realtime?${params}`,
+        `/api/conversations/${params.chatId}/messages/realtime?${searchParams}`,
         env.NEXT_PUBLIC_WEBSOCKET_URL,
       )
 
@@ -43,7 +52,7 @@ export function useChatRealtime() {
 
       websocket.onmessage = (event) => {
         try {
-          const data: Message[] = JSON.parse(event.data)
+          const data = JSON.parse(event.data) as MessageNode[]
 
           setMessages(data)
         } catch {
@@ -58,7 +67,7 @@ export function useChatRealtime() {
     return () => {
       websocket?.close()
     }
-  }, [organizationSlug, teamId, chatId])
+  }, [params.organizationSlug, params.teamId, params.agentId, params.chatId])
 
   return { messages, setMessages, error }
 }

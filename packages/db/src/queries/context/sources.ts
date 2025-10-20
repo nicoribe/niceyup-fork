@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '../../db'
 import { sources } from '../../schema'
 import { getOrganizationIdBySlug } from '../organizations'
@@ -24,10 +24,13 @@ export async function listSources(context: ContextListSourcesParams) {
         id: sources.id,
         name: sources.name,
         type: sources.type,
-        databaseConnectionId: sources.databaseConnectionId,
+        ownerUserId: sources.ownerUserId,
+        ownerOrganizationId: sources.ownerOrganizationId,
       })
       .from(sources)
-      .where(eq(sources.ownerId, context.userId))
+      .where(
+        and(eq(sources.ownerUserId, context.userId), isNull(sources.deletedAt)),
+      )
 
     return listSources
   }
@@ -53,10 +56,13 @@ export async function listSources(context: ContextListSourcesParams) {
         id: sources.id,
         name: sources.name,
         type: sources.type,
-        databaseConnectionId: sources.databaseConnectionId,
+        ownerUserId: sources.ownerUserId,
+        ownerOrganizationId: sources.ownerOrganizationId,
       })
       .from(sources)
-      .where(eq(sources.organizationId, orgId))
+      .where(
+        and(eq(sources.ownerOrganizationId, orgId), isNull(sources.deletedAt)),
+      )
 
     return listSources
   }
@@ -91,13 +97,15 @@ export async function getSource(
         id: sources.id,
         name: sources.name,
         type: sources.type,
-        databaseConnectionId: sources.databaseConnectionId,
+        ownerUserId: sources.ownerUserId,
+        ownerOrganizationId: sources.ownerOrganizationId,
       })
       .from(sources)
       .where(
         and(
           eq(sources.id, params.sourceId),
-          eq(sources.ownerId, context.userId),
+          eq(sources.ownerUserId, context.userId),
+          isNull(sources.deletedAt),
         ),
       )
       .limit(1)
@@ -126,11 +134,16 @@ export async function getSource(
         id: sources.id,
         name: sources.name,
         type: sources.type,
-        databaseConnectionId: sources.databaseConnectionId,
+        ownerUserId: sources.ownerUserId,
+        ownerOrganizationId: sources.ownerOrganizationId,
       })
       .from(sources)
       .where(
-        and(eq(sources.id, params.sourceId), eq(sources.organizationId, orgId)),
+        and(
+          eq(sources.id, params.sourceId),
+          eq(sources.ownerOrganizationId, orgId),
+          isNull(sources.deletedAt),
+        ),
       )
       .limit(1)
 

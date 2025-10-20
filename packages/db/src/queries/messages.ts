@@ -1,5 +1,5 @@
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import { db } from '../db'
-import { and, eq, isNull, sql } from '../lib/orm'
 import type {
   MessageMetadata,
   MessagePart,
@@ -8,7 +8,7 @@ import type {
 } from '../lib/types'
 import { messages } from '../schema'
 
-type Message = {
+type MessageNode = {
   id: string
   status: MessageStatus
   role: MessageRole
@@ -19,11 +19,11 @@ type Message = {
   children?: string[]
 }
 
-export async function getMessage({
-  messageId,
-}: {
+type GetMessageParams = {
   messageId: string
-}) {
+}
+
+export async function getMessage(params: GetMessageParams) {
   const [message] = await db
     .select({
       id: messages.id,
@@ -35,121 +35,150 @@ export async function getMessage({
       parentId: messages.parentId,
     })
     .from(messages)
-    .where(and(eq(messages.id, messageId), isNull(messages.deletedAt)))
+    .where(and(eq(messages.id, params.messageId), isNull(messages.deletedAt)))
     .limit(1)
 
   return message || null
 }
 
-export async function updateMessage({
-  messageId,
-  status,
-  parts,
-  metadata,
-}: {
+type UpdateMessageParams = {
   messageId: string
   status?: MessageStatus
   parts?: MessagePart[]
   metadata?: MessageMetadata
-}) {
+}
+
+export async function updateMessage(params: UpdateMessageParams) {
   await db
     .update(messages)
     .set({
-      status,
-      parts,
-      metadata: metadata
-        ? sql`COALESCE(${messages.metadata}, '{}'::jsonb) || ${JSON.stringify(metadata)}::jsonb`
+      status: params.status,
+      parts: params.parts,
+      metadata: params.metadata
+        ? sql`COALESCE(${messages.metadata}, '{}'::jsonb) || ${JSON.stringify(params.metadata)}::jsonb`
         : undefined,
     })
-    .where(and(eq(messages.id, messageId), isNull(messages.deletedAt)))
+    .where(and(eq(messages.id, params.messageId), isNull(messages.deletedAt)))
 }
 
-export async function listMessages({
-  conversationId,
-  targetMessageId,
-  parents,
-  children,
-  parentsLimit,
-}: {
+type ListMessageNodesParams = {
   conversationId: string
   targetMessageId: string
-  parents?: boolean
-  children?: boolean
-  parentsLimit?: number
-}) {
-  const listParents = !parents
-    ? { rows: [] }
-    : await db.execute<Message>(sql`
-    WITH RECURSIVE message_parents AS (
+  parentNodes?: { limit?: number } | boolean
+  childNodes?: boolean
+}
+
+export async function listMessageNodes(params: ListMessageNodesParams) {
+  const listMessageParents = !params.parentNodes
+    ? []
+    : await listMessageParentNodes({
+        targetMessageId: params.targetMessageId,
+        conversationId: params.conversationId,
+        limit:
+          typeof params.parentNodes === 'object'
+            ? params.parentNodes.limit
+            : undefined,
+      })
+
+  const listMessageChildren =
+    params.childNodes === false
+      ? []
+      : await listMessageChildNodes({
+          targetMessageId: params.targetMessageId,
+          conversationId: params.conversationId,
+        })
+
+  return [...listMessageParents, ...listMessageChildren]
+}
+
+type ListMessageParentNodesParams = {
+  conversationId: string
+  targetMessageId: string
+  limit?: number
+}
+
+export async function listMessageParentNodes(
+  params: ListMessageParentNodesParams,
+) {
+  const result = await db.execute<MessageNode>(sql`
+    WITH RECURSIVE message_parent_nodes AS (
       -- Base case: start with target message
       SELECT id, status, role, parts, metadata, author_id, parent_id, created_at,
-             (SELECT COALESCE(ARRAY_AGG(child.id), '{}'::text[]) 
-              FROM ${messages} child 
-              WHERE child.parent_id = ${messages}.id 
-              AND child.deleted_at IS NULL) as children
+             (SELECT COALESCE(ARRAY_AGG(child_node.id), '{}'::text[])
+              FROM ${messages} child_node
+              WHERE child_node.parent_id = ${messages}.id
+              AND child_node.deleted_at IS NULL) as children
       FROM ${messages}
-      WHERE id = ${targetMessageId}
-        AND conversation_id = ${conversationId}
+      WHERE id = ${params.targetMessageId}
+        AND conversation_id = ${params.conversationId}
         AND deleted_at IS NULL
       
       UNION ALL
       
       -- Recursive case: get parents of each message in the previous level
-      SELECT parent.id, parent.status, parent.role, parent.parts, parent.metadata, parent.author_id, parent.parent_id, parent.created_at,
-             (SELECT COALESCE(ARRAY_AGG(child.id), '{}'::text[]) 
-              FROM ${messages} child 
-              WHERE child.parent_id = parent.id 
-              AND child.deleted_at IS NULL) as children
-      FROM ${messages} parent
-      INNER JOIN message_parents mp ON parent.id = mp.parent_id
-      WHERE parent.deleted_at IS NULL
+      SELECT parent_node.id, parent_node.status, parent_node.role, parent_node.parts, parent_node.metadata, parent_node.author_id, parent_node.parent_id, parent_node.created_at,
+             (SELECT COALESCE(ARRAY_AGG(child_node.id), '{}'::text[])
+              FROM ${messages} child_node
+              WHERE child_node.parent_id = parent_node.id
+              AND child_node.deleted_at IS NULL) as children
+      FROM ${messages} parent_node
+      INNER JOIN message_parent_nodes mpn ON parent_node.id = mpn.parent_id
+      WHERE parent_node.deleted_at IS NULL
     )
     SELECT id, status, role, parts, metadata, author_id as "authorId", parent_id as "parentId", children, created_at as "createdAt"
-    FROM message_parents
-    WHERE id != ${targetMessageId}  -- Exclude the target message itself
+    FROM message_parent_nodes
+    WHERE id != ${params.targetMessageId}  -- Exclude the target message itself
     ORDER BY created_at ASC
-    ${parentsLimit ? sql`LIMIT ${parentsLimit}` : sql``}
+    ${params.limit ? sql`LIMIT ${params.limit}` : sql``}
   `)
 
-  const listChildren =
-    children === false
-      ? { rows: [] }
-      : await db.execute<Message>(sql`
-    WITH RECURSIVE message_children AS (
+  return result.rows
+}
+
+type ListMessageChildNodesParams = {
+  conversationId: string
+  targetMessageId: string
+}
+
+export async function listMessageChildNodes(
+  params: ListMessageChildNodesParams,
+) {
+  const result = await db.execute<MessageNode>(sql`
+    WITH RECURSIVE message_child_nodes AS (
       -- Base case: start with target message
       SELECT id, status, role, parts, metadata, author_id, parent_id, created_at,
-             (SELECT COALESCE(ARRAY_AGG(child.id ORDER BY child.created_at ASC), '{}'::text[]) 
-              FROM ${messages} child 
-              WHERE child.parent_id = ${messages}.id 
-              AND child.deleted_at IS NULL) as children
+             (SELECT COALESCE(ARRAY_AGG(child_node.id ORDER BY child_node.created_at ASC), '{}'::text[])
+              FROM ${messages} child_node
+              WHERE child_node.parent_id = ${messages}.id
+              AND child_node.deleted_at IS NULL) as children
       FROM ${messages}
-      WHERE id = ${targetMessageId}
-        AND conversation_id = ${conversationId}
+      WHERE id = ${params.targetMessageId}
+        AND conversation_id = ${params.conversationId}
         AND deleted_at IS NULL
       
       UNION ALL
       
-      -- Recursive case: get only the first (oldest) child of each message, but keep all children in the array
-      SELECT child.id, child.status, child.role, child.parts, child.metadata, child.author_id, child.parent_id, child.created_at,
-             (SELECT COALESCE(ARRAY_AGG(grandchild.id ORDER BY grandchild.created_at ASC), '{}'::text[]) 
-              FROM ${messages} grandchild 
-              WHERE grandchild.parent_id = child.id 
-              AND grandchild.deleted_at IS NULL) as children
-      FROM ${messages} child
-      INNER JOIN message_children mc ON child.id = (
-        SELECT first_child.id
-        FROM ${messages} first_child
-        WHERE first_child.parent_id = mc.id
-        AND first_child.deleted_at IS NULL
-        ORDER BY first_child.created_at ASC
+      -- Recursive case: get only the first (oldest) child_node of each message, but keep all children in the array
+      SELECT child_node.id, child_node.status, child_node.role, child_node.parts, child_node.metadata, child_node.author_id, child_node.parent_id, child_node.created_at,
+             (SELECT COALESCE(ARRAY_AGG(grandchild_node.id ORDER BY grandchild_node.created_at ASC), '{}'::text[])
+              FROM ${messages} grandchild_node
+              WHERE grandchild_node.parent_id = child_node.id
+              AND grandchild_node.deleted_at IS NULL) as children
+      FROM ${messages} child_node
+      INNER JOIN message_child_nodes mcn ON child_node.id = (
+        SELECT first_child_node.id
+        FROM ${messages} first_child_node
+        WHERE first_child_node.parent_id = mcn.id
+        AND first_child_node.deleted_at IS NULL
+        ORDER BY first_child_node.created_at ASC
         LIMIT 1
       )
-      WHERE child.deleted_at IS NULL
+      WHERE child_node.deleted_at IS NULL
     )
     SELECT id, status, role, parts, metadata, author_id as "authorId", parent_id as "parentId", children, created_at as "createdAt"
-    FROM message_children
+    FROM message_child_nodes
     ORDER BY created_at ASC
   `)
 
-  return [...listParents.rows, ...listChildren.rows]
+  return result.rows
 }

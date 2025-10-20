@@ -35,8 +35,13 @@ export const listSources200Schema = z
       z.object({
         id: z.string(),
         name: z.string(),
-        type: z.enum(['text', 'structured']),
-        databaseConnectionId: z.string().nullable(),
+        type: z.enum([
+          'file',
+          'text',
+          'question-answer',
+          'website',
+          'database',
+        ]),
       }),
     ),
   })

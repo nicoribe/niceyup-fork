@@ -25,6 +25,7 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
           organizationId: z.string().optional(),
           organizationSlug: z.string().optional(),
           teamId: z.string().optional(),
+          agentId: z.string(),
         }),
         response: withDefaultErrorResponses({
           200: z.unknown().describe('Success'),
@@ -38,7 +39,8 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
 
       const { conversationId, messageId } = request.params
 
-      const { organizationId, organizationSlug, teamId } = request.query
+      const { organizationId, organizationSlug, teamId, agentId } =
+        request.query
 
       const context = {
         userId,
@@ -50,6 +52,7 @@ export async function streamAnswerMessage(app: FastifyTypedInstance) {
       }
 
       const message = await queries.context.getMessage(context, {
+        agentId,
         conversationId,
         messageId,
       })

@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm'
 import {
   boolean,
+  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -8,9 +9,12 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core'
 import type {
-  ConversationExplorerType,
-  DatabaseConnection,
-  DatabaseDialect,
+  ConnectionApp,
+  ConnectionPayload,
+  ConversationExplorerNodeVisibility,
+  DatabaseSourceDialect,
+  DatabaseSourceQueryExample,
+  DatabaseSourceTableMetadata,
   FileBucket,
   FileMetadata,
   FileScope,
@@ -18,9 +22,7 @@ import type {
   MessagePart,
   MessageRole,
   MessageStatus,
-  QueryExample,
   SourceType,
-  TableMetadata,
 } from '../lib/types'
 import { encryptedJson, id, timestamps } from '../utils'
 import { organizations, teams, users } from './auth'
@@ -32,129 +34,199 @@ export const sources = pgTable('sources', {
   name: text('name').notNull().default('Unnamed'),
   type: text('type').notNull().$type<SourceType>(),
 
-  // embaddingModel: text('embadding_model'), // "text-embedding-3-small"
-  // llmModel: text('llm_model'), // "gpt-4o-mini"
+  chuckSize: integer('chuck_size'),
+  chunkOverlap: integer('chunk_overlap'),
 
-  // chuckSize: integer('chuck_size'), // 2500
-  // chunkOverlap: integer('chunk_overlap'), // 100
-
-  ownerId: text('owner_id').references(() => users.id), // Personal account id
-  organizationId: text('organization_id').references(() => organizations.id), // Organization id
-
-  databaseConnectionId: text('database_connection_id').references(
-    () => databaseConnections.id,
+  ownerUserId: text('owner_user_id').references(() => users.id),
+  ownerOrganizationId: text('owner_organization_id').references(
+    () => organizations.id,
   ),
+
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
 
 export const sourcesRelations = relations(sources, ({ one, many }) => ({
-  user: one(users, {
-    fields: [sources.ownerId],
-    references: [users.id],
-  }),
-  organization: one(organizations, {
-    fields: [sources.organizationId],
-    references: [organizations.id],
-  }),
-  databaseConnection: one(databaseConnections, {
-    fields: [sources.databaseConnectionId],
-    references: [databaseConnections.id],
-  }),
-  structuredSource: one(structuredSources),
+  fileSource: one(fileSources),
+  textSource: one(textSources),
+  questionAnswerSource: one(questionAnswerSources),
+  websiteSource: one(websiteSources),
+  databaseSource: one(databaseSources),
   agents: many(agentsToSources),
 }))
 
-export const databaseConnections = pgTable('database_connections', {
+export const fileSources = pgTable('file_sources', {
   ...id,
-  name: text('name').notNull().default('Unnamed'),
-  dialect: text('dialect').$type<DatabaseDialect>(),
-  payload: encryptedJson('payload').$type<DatabaseConnection>(),
 
-  ownerId: text('owner_id').references(() => users.id), // Personal account id
-  organizationId: text('organization_id').references(() => organizations.id), // Organization id
-
-  ...timestamps,
-})
-
-export const databaseConnectionsRelations = relations(
-  databaseConnections,
-  ({ many }) => ({
-    sources: many(sources),
-  }),
-)
-
-export const structuredSources = pgTable('structured_sources', {
-  ...id,
-  tablesMetadata: jsonb('tables_metadata').$type<TableMetadata[]>(),
-  queryExamples: jsonb('query_examples').$type<QueryExample[]>(),
   sourceId: text('source_id')
     .notNull()
     .unique()
     .references(() => sources.id, { onDelete: 'cascade' }),
+  fileId: text('file_id').references(() => files.id),
+
   ...timestamps,
 })
 
-export const structuredSourcesRelations = relations(
-  structuredSources,
+export const fileSourcesRelations = relations(fileSources, ({ one }) => ({
+  source: one(sources, {
+    fields: [fileSources.sourceId],
+    references: [sources.id],
+  }),
+  file: one(files, {
+    fields: [fileSources.fileId],
+    references: [files.id],
+  }),
+}))
+
+export const textSources = pgTable('text_sources', {
+  ...id,
+  text: text('text').notNull(),
+
+  sourceId: text('source_id')
+    .notNull()
+    .unique()
+    .references(() => sources.id, { onDelete: 'cascade' }),
+
+  ...timestamps,
+})
+
+export const textSourcesRelations = relations(textSources, ({ one }) => ({
+  source: one(sources, {
+    fields: [textSources.sourceId],
+    references: [sources.id],
+  }),
+}))
+
+export const questionAnswerSources = pgTable('question_answer_sources', {
+  ...id,
+  questions: jsonb('questions').notNull().$type<string[]>(),
+  answer: text('answer').notNull(),
+
+  sourceId: text('source_id')
+    .notNull()
+    .unique()
+    .references(() => sources.id, { onDelete: 'cascade' }),
+
+  ...timestamps,
+})
+
+export const questionAnswerSourcesRelations = relations(
+  questionAnswerSources,
   ({ one }) => ({
     source: one(sources, {
-      fields: [structuredSources.sourceId],
+      fields: [questionAnswerSources.sourceId],
       references: [sources.id],
     }),
   }),
 )
 
-export const agents = pgTable('agents', {
+export const websiteSources = pgTable('website_sources', {
   ...id,
-  name: text('name').notNull().default('Unnamed'),
-  published: boolean('published').notNull().default(false),
+  url: text('url').notNull(),
+  // TODO: implement settings
 
-  // embaddingModel: text('embadding_model'), // "text-embedding-3-small"
-  // llmModel: text('llm_model'), // "gpt-4o-mini"
-
-  // chuckLimit: integer('chuck_limit'), // 10
-
-  // variables: jsonb('variables').$type<string[]>(), // Create variables to dynamically insert values into your prompt
-  // tools: jsonb('tools').$type<any[]>(), // Define tools to use in your prompt
-
-  // reasoningEffort: text('reasoning_effort'), // "low", "medium", "high"
-  // temperature: real('temperature'), // 1.00
-  // topP: real('top_p'), // 1.00
-  // maxTokens: integer('max_tokens'), // 10000
-
-  // systemMessage: text('system_message'), // Describe desired model behavior (tone, tool usage, response style)
-  // promptMessages: jsonb('prompt_messages').$type<PromptMessage[]>(), // Enter task specifics. use {{template variables}} for dynamic inputs
-
-  // storeLogs: boolean('store_logs').default(false), // Whether to store logs for later retrieval. Logs are visible to your organization.
-
-  ownerId: text('owner_id').references(() => users.id), // Personal account id
-  organizationId: text('organization_id').references(() => organizations.id), // Organization id
+  sourceId: text('source_id')
+    .notNull()
+    .unique()
+    .references(() => sources.id, { onDelete: 'cascade' }),
 
   ...timestamps,
 })
 
-export const agentsRelations = relations(agents, ({ one, many }) => ({
-  user: one(users, {
-    fields: [agents.ownerId],
-    references: [users.id],
+export const websiteSourcesRelations = relations(websiteSources, ({ one }) => ({
+  source: one(sources, {
+    fields: [websiteSources.sourceId],
+    references: [sources.id],
   }),
-  organization: one(organizations, {
-    fields: [agents.organizationId],
-    references: [organizations.id],
+}))
+
+export const databaseSources = pgTable('database_sources', {
+  ...id,
+  dialect: text('dialect').notNull().$type<DatabaseSourceDialect>(),
+  tablesMetadata: jsonb('tables_metadata')
+    .notNull()
+    .$type<DatabaseSourceTableMetadata[]>(),
+  queryExamples: jsonb('query_examples')
+    .notNull()
+    .$type<DatabaseSourceQueryExample[]>(),
+
+  sourceId: text('source_id')
+    .notNull()
+    .unique()
+    .references(() => sources.id, { onDelete: 'cascade' }),
+  fileId: text('file_id').references(() => files.id),
+  connectionId: text('connection_id').references(() => connections.id),
+
+  ...timestamps,
+})
+
+export const databaseSourcesRelations = relations(
+  databaseSources,
+  ({ one }) => ({
+    source: one(sources, {
+      fields: [databaseSources.sourceId],
+      references: [sources.id],
+    }),
+    file: one(files, {
+      fields: [databaseSources.fileId],
+      references: [files.id],
+    }),
+    connection: one(connections, {
+      fields: [databaseSources.connectionId],
+      references: [connections.id],
+    }),
   }),
-  teams: many(teamsToAgents),
-  sources: many(agentsToSources),
+)
+
+export const connections = pgTable('connections', {
+  ...id,
+  app: text('app').notNull().$type<ConnectionApp>(),
+  name: text('name').notNull().default('Unnamed'),
+  payload: encryptedJson('payload').$type<ConnectionPayload>(),
+
+  ownerUserId: text('owner_user_id').references(() => users.id),
+  ownerOrganizationId: text('owner_organization_id').references(
+    () => organizations.id,
+  ),
+
+  ...timestamps,
+})
+
+export const connectionsRelations = relations(connections, ({ many }) => ({
+  databaseSources: many(databaseSources),
+}))
+
+export const agents = pgTable('agents', {
+  ...id,
+  name: text('name').notNull().default('Unnamed'),
+  slug: text('slug').unique(),
+  logo: text('logo'),
+  description: text('description'),
+  tags: text('tags').array(),
+  published: boolean('published').notNull().default(false),
+  // TODO: implement settings
+
+  ownerUserId: text('owner_user_id').references(() => users.id),
+  ownerOrganizationId: text('owner_organization_id').references(
+    () => organizations.id,
+  ),
+
+  ...timestamps,
+})
+
+export const agentsRelations = relations(agents, ({ many }) => ({
   conversations: many(conversations),
 }))
 
 export const conversations = pgTable('conversations', {
   ...id,
   title: text('title').notNull().default('Untitled'),
-
-  ownerId: text('owner_id').references(() => users.id),
-  teamId: text('team_id').references(() => teams.id),
+  // TODO: implement settings
 
   agentId: text('agent_id').references(() => agents.id),
+
+  ownerUserId: text('owner_user_id').references(() => users.id),
+  ownerTeamId: text('owner_team_id').references(() => teams.id),
 
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
@@ -310,63 +382,98 @@ export const files = pgTable('files', {
   scope: text('scope').notNull().$type<FileScope>(),
   metadata: jsonb('metadata').$type<FileMetadata>(),
 
-  ownerId: text('owner_id').references(() => users.id), // Personal account id
-  organizationId: text('organization_id').references(() => organizations.id), // Organization id
+  ownerUserId: text('owner_user_id').references(() => users.id),
+  ownerOrganizationId: text('owner_organization_id').references(
+    () => organizations.id,
+  ),
 
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
 
-export const filesRelations = relations(files, ({ one }) => ({
-  user: one(users, {
-    fields: [files.ownerId],
-    references: [users.id],
-  }),
-  organization: one(organizations, {
-    fields: [files.organizationId],
-    references: [organizations.id],
-  }),
+export const filesRelations = relations(files, ({ many }) => ({
+  fileSources: many(fileSources),
+  databaseSources: many(databaseSources),
 }))
 
-export const conversationExplorerTree = pgTable('conversation_explorer_tree', {
+export const sourceExplorerNodes = pgTable('source_explorer_nodes', {
   ...id,
   name: text('name'),
-  explorerType: text('explorer_type')
-    .notNull()
-    .default('private')
-    .$type<ConversationExplorerType>(),
-  shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
 
-  ownerId: text('owner_id').references(() => users.id),
-  teamId: text('team_id').references(() => teams.id),
-
-  agentId: text('agent_id').references(() => agents.id),
-  conversationId: text('conversation_id').references(() => conversations.id, {
+  sourceId: text('source_id').references(() => sources.id, {
     onDelete: 'cascade',
   }),
   parentId: text('parent_id'),
 
+  ownerUserId: text('owner_user_id').references(() => users.id),
+  ownerOrganizationId: text('owner_organization_id').references(
+    () => organizations.id,
+  ),
+
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
 
-export const conversationExplorerTreeRelations = relations(
-  conversationExplorerTree,
+export const sourceExplorerNodesRelations = relations(
+  sourceExplorerNodes,
+  ({ one, many }) => ({
+    source: one(sources, {
+      fields: [sourceExplorerNodes.sourceId],
+      references: [sources.id],
+    }),
+    parent: one(sourceExplorerNodes, {
+      fields: [sourceExplorerNodes.parentId],
+      references: [sourceExplorerNodes.id],
+      relationName: 'parent',
+    }),
+    children: many(sourceExplorerNodes, {
+      relationName: 'parent',
+    }),
+  }),
+)
+
+export const conversationExplorerNodes = pgTable(
+  'conversation_explorer_nodes',
+  {
+    ...id,
+    name: text('name'),
+    visibility: text('visibility')
+      .notNull()
+      .default('private')
+      .$type<ConversationExplorerNodeVisibility>(),
+    shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
+
+    agentId: text('agent_id').references(() => agents.id),
+    conversationId: text('conversation_id').references(() => conversations.id, {
+      onDelete: 'cascade',
+    }),
+    parentId: text('parent_id'),
+
+    ownerUserId: text('owner_user_id').references(() => users.id),
+    ownerTeamId: text('owner_team_id').references(() => teams.id),
+
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    ...timestamps,
+  },
+)
+
+export const conversationExplorerNodesRelations = relations(
+  conversationExplorerNodes,
   ({ one, many }) => ({
     agent: one(agents, {
-      fields: [conversationExplorerTree.agentId],
+      fields: [conversationExplorerNodes.agentId],
       references: [agents.id],
     }),
     conversation: one(conversations, {
-      fields: [conversationExplorerTree.conversationId],
+      fields: [conversationExplorerNodes.conversationId],
       references: [conversations.id],
     }),
-    parent: one(conversationExplorerTree, {
-      fields: [conversationExplorerTree.parentId],
-      references: [conversationExplorerTree.id],
+    parent: one(conversationExplorerNodes, {
+      fields: [conversationExplorerNodes.parentId],
+      references: [conversationExplorerNodes.id],
       relationName: 'parent',
     }),
-    children: many(conversationExplorerTree, {
+    children: many(conversationExplorerNodes, {
       relationName: 'parent',
     }),
   }),

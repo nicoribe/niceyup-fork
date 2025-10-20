@@ -1,76 +1,30 @@
-import { getParentsInConversationExplorerTree } from '@/actions/conversation-explorer-tree'
-import { authenticatedUser } from '@/lib/auth/server'
-import type { Chat, ChatParams, OrganizationTeamParams } from '@/lib/types'
+import type { Chat, ChatParams } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { Appearance } from '../../_components/appearance'
-import { ExplorerTreePath } from './explorer-tree-path'
-import { OpenChats } from './open-chats'
+
+type Params = ChatParams
 
 export async function Tabbar({
-  organizationSlug,
-  teamId,
-  agentId,
-  chatId,
+  params,
   chat,
 }: {
-  organizationSlug: OrganizationTeamParams['organizationSlug']
-  teamId: OrganizationTeamParams['teamId']
-  agentId: string
-  chatId: ChatParams['chatId']
+  params: Params
   chat: Chat | null
 }) {
-  const {
-    user: { id: userId },
-  } = await authenticatedUser()
-
-  const explorerType = (() => {
-    if (chat) {
-      if (chat.teamId) {
-        return 'team'
-      }
-
-      if (chat.ownerId !== userId) {
-        return 'shared'
-      }
-    }
-
-    return 'private'
-  })()
-
-  const pathInExplorer = chat
-    ? await getParentsInConversationExplorerTree(
-        { organizationSlug, teamId, agentId },
-        { explorerType, conversationId: chat.id },
-      )
-    : []
-
   return (
-    <>
-      <OpenChats
-        chat={chat}
-        explorerType={explorerType}
-        pathInExplorer={pathInExplorer}
+    <div className="flex flex-row items-center bg-background">
+      <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-auto px-2 py-1">
+        <span className="whitespace-nowrap font-medium text-sm">
+          {params.chatId === 'new' ? 'New Chat' : chat?.title}
+        </span>
+      </div>
+
+      <Separator
+        orientation="vertical"
+        className="data-[orientation=vertical]:h-full"
       />
 
-      <Separator />
-
-      <div className="flex flex-row items-center bg-background">
-        <div className="no-scrollbar flex flex-1 flex-row items-center gap-1 overflow-x-auto py-1">
-          {(chatId === 'new' || chat) && (
-            <ExplorerTreePath
-              explorerType={explorerType}
-              pathInExplorer={pathInExplorer}
-            />
-          )}
-        </div>
-
-        <Separator
-          orientation="vertical"
-          className="data-[orientation=vertical]:h-full"
-        />
-
-        <Appearance />
-      </div>
-    </>
+      <Appearance />
+    </div>
   )
 }

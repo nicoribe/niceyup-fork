@@ -32,7 +32,7 @@ export const getConversationQueryKey = (
   {
     conversationId,
   }: { conversationId: GetConversationPathParams['conversationId'] },
-  params?: GetConversationQueryParams,
+  params: GetConversationQueryParams,
 ) =>
   [
     {
@@ -50,7 +50,7 @@ export function getConversationQueryOptions(
     params,
   }: {
     conversationId: GetConversationPathParams['conversationId']
-    params?: GetConversationQueryParams
+    params: GetConversationQueryParams
   },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
@@ -68,7 +68,7 @@ export function getConversationQueryOptions(
     GetConversationQueryResponse,
     typeof queryKey
   >({
-    enabled: !!conversationId,
+    enabled: !!(conversationId && params),
     queryKey,
     queryFn: async ({ signal }) => {
       config.signal = signal
@@ -91,7 +91,7 @@ export function useGetConversation<
     params,
   }: {
     conversationId: GetConversationPathParams['conversationId']
-    params?: GetConversationQueryParams
+    params: GetConversationQueryParams
   },
   options: {
     query?: Partial<

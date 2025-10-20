@@ -39,7 +39,7 @@ export async function streamAnswerMessage(
   }: {
     conversationId: StreamAnswerMessagePathParams['conversationId']
     messageId: StreamAnswerMessagePathParams['messageId']
-    params?: StreamAnswerMessageQueryParams
+    params: StreamAnswerMessageQueryParams
   },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {

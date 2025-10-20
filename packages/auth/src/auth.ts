@@ -1,5 +1,6 @@
 import { cache } from '@workspace/cache'
 import { db, generateId } from '@workspace/db'
+import { agents } from '@workspace/db/schema'
 import { sendEmailResetPassword, sendVerificationEmail } from '@workspace/email'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
@@ -62,6 +63,22 @@ const config = {
     },
     delete: async (key: string) => {
       await cache.del(key)
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // TODO: Remove this once we have a way to create an agent for the user
+          await db.insert(agents).values({
+            name: 'Assistant',
+            slug: 'assistant',
+            description: 'Your personal assistant',
+            tags: ['OpenAI'],
+            ownerUserId: user.id,
+          })
+        },
+      },
     },
   },
   plugins: [

@@ -2,21 +2,23 @@ import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '../db'
 import { conversations } from '../schema'
 
-export async function getConversation({
-  conversationId,
-}: { conversationId: string }) {
+type ConversationParams = {
+  conversationId: string
+}
+
+export async function getConversation(params: ConversationParams) {
   const [conversation] = await db
     .select({
       id: conversations.id,
       title: conversations.title,
-      teamId: conversations.teamId,
-      ownerId: conversations.ownerId,
       agentId: conversations.agentId,
+      ownerUserId: conversations.ownerUserId,
+      ownerTeamId: conversations.ownerTeamId,
     })
     .from(conversations)
     .where(
       and(
-        eq(conversations.id, conversationId),
+        eq(conversations.id, params.conversationId),
         isNull(conversations.deletedAt),
       ),
     )

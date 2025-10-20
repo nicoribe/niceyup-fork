@@ -15,8 +15,11 @@ export type ListSourcesQueryParams = {
 }
 
 export const sourcesTypeEnum = {
+  file: 'file',
   text: 'text',
-  structured: 'structured',
+  'question-answer': 'question-answer',
+  website: 'website',
+  database: 'database',
 } as const
 
 export type SourcesTypeEnum =
@@ -42,10 +45,6 @@ export type ListSources200 = {
      * @type string
      */
     type: SourcesTypeEnum
-    /**
-     * @type string
-     */
-    databaseConnectionId: string | null
   }[]
 }
 

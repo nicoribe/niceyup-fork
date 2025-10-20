@@ -34,6 +34,22 @@ export type ListAgents200 = {
      * @type string
      */
     name: string
+    /**
+     * @type string
+     */
+    slug: string | null
+    /**
+     * @type string
+     */
+    logo: string | null
+    /**
+     * @type string
+     */
+    description: string | null
+    /**
+     * @type array
+     */
+    tags: string[] | null
   }[]
 }
 

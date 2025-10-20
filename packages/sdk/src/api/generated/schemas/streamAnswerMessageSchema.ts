@@ -25,13 +25,12 @@ export const streamAnswerMessagePathParamsSchema = z.object({
 
 export type StreamAnswerMessagePathParamsSchema = StreamAnswerMessagePathParams
 
-export const streamAnswerMessageQueryParamsSchema = z
-  .object({
-    organizationId: z.string().optional(),
-    organizationSlug: z.string().optional(),
-    teamId: z.string().optional(),
-  })
-  .optional() as unknown as ToZod<StreamAnswerMessageQueryParams>
+export const streamAnswerMessageQueryParamsSchema = z.object({
+  organizationId: z.string().optional(),
+  organizationSlug: z.string().optional(),
+  teamId: z.string().optional(),
+  agentId: z.string(),
+}) as unknown as ToZod<StreamAnswerMessageQueryParams>
 
 export type StreamAnswerMessageQueryParamsSchema =
   StreamAnswerMessageQueryParams

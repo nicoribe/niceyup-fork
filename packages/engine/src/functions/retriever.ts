@@ -30,53 +30,47 @@ export async function retrieveSources({
     return documents
   })
 
-  const unstructedDocuments = []
+  const sources = []
 
-  const uniqueStructuredDocuments = new Map<
-    string,
-    (typeof documents)[number]
-  >()
+  const uniqueDatabaseSources = new Map<string, (typeof documents)[number]>()
 
-  for (const document of documents) {
-    if (document.sourceType === 'structured') {
-      if (!uniqueStructuredDocuments.has(document.sourceId)) {
-        uniqueStructuredDocuments.set(document.sourceId, document)
+  for (const source of documents) {
+    if (source.sourceType === 'database') {
+      if (!uniqueDatabaseSources.has(source.sourceId)) {
+        uniqueDatabaseSources.set(source.sourceId, source)
       }
     } else {
-      unstructedDocuments.push(document)
+      sources.push(source)
     }
   }
 
-  const structuredDocuments = Array.from(uniqueStructuredDocuments.values())
+  const databaseSources = Array.from(uniqueDatabaseSources.values())
 
-  const structuredDocumentsContent = await Promise.all(
-    structuredDocuments.map(async (document) => {
-      const structuredContent = await retrieveStructuredSourceTablesMetadata({
+  const databaseSourcesContent = await Promise.all(
+    databaseSources.map(async (source) => {
+      const structuredContent = await retrieveDatabaseSourceTablesMetadata({
         namespace,
         question,
-        sourceId: document.sourceId,
+        sourceId: source.sourceId,
       })
 
-      return `<source id="${document.sourceId}" type="structured">${structuredContent}</source>`
+      return `<source id="${source.sourceId}" type="database">${structuredContent}</source>`
     }),
   )
 
-  const unstructedDocumentsContent = unstructedDocuments.map(
-    (document) =>
-      `<source id="${document.sourceId}" type="${document.sourceType}">${document.data.content}</source>`,
+  const sourcesContent = sources.map(
+    (source) =>
+      `<source id="${source.sourceId}" type="${source.sourceType}">${source.data.content}</source>`,
   )
 
-  const documentsContent = [
-    ...structuredDocumentsContent,
-    ...unstructedDocumentsContent,
-  ]
+  sourcesContent.push(...databaseSourcesContent)
 
-  logger.warn('Output', { output: { documentsContent } })
+  logger.warn('Output', { output: { sourcesContent } })
 
-  return documentsContent
+  return sourcesContent
 }
 
-export async function retrieveStructuredSourceTablesMetadata({
+export async function retrieveDatabaseSourceTablesMetadata({
   namespace,
   question,
   sourceId,
@@ -88,7 +82,7 @@ export async function retrieveStructuredSourceTablesMetadata({
         [
           vectorStoreQuery({
             namespace,
-            collection: 'tables-metadata',
+            collection: 'database-source-tables-metadata',
             sourceId,
             query: question,
             topK: 10,
@@ -96,7 +90,7 @@ export async function retrieveStructuredSourceTablesMetadata({
 
           vectorStoreQuery({
             namespace,
-            collection: 'query-examples',
+            collection: 'database-source-query-examples',
             sourceId,
             query: question,
             topK: 10,
@@ -184,7 +178,7 @@ export async function retrieveStructuredSourceTablesMetadata({
   return content
 }
 
-export async function retrieveStructuredSourceProperNouns({
+export async function retrieveDatabaseSourceProperNouns({
   namespace,
   sourceId,
   tableName,
@@ -201,7 +195,7 @@ export async function retrieveStructuredSourceProperNouns({
 
   const relevantProperNouns = await vectorStoreQuery({
     namespace,
-    collection: 'proper-nouns',
+    collection: 'database-source-proper-nouns',
     sourceId,
     query: search,
     filter: `key = '${key}'`,

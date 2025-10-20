@@ -19,7 +19,7 @@ export const aiAgentTask = schemaTask({
     maxAttempts: 1,
   },
   schema: z.object({
-    ownerId: z.string(),
+    ownerUserId: z.string(),
     question: z.string(),
   }),
   run: async (payload, { signal }) => {
@@ -28,7 +28,7 @@ export const aiAgentTask = schemaTask({
     const streamingResult = streamText({
       model: openai('gpt-5'),
       tools: {
-        get_information: GetInformationTool({ namespace: payload.ownerId }),
+        get_information: GetInformationTool({ namespace: payload.ownerUserId }),
       },
       stopWhen: stepCountIs(5),
       messages: templatePromptAnswer({ question: payload.question }),

@@ -5,7 +5,7 @@ import { filesLoader } from '../../functions/document-loaders'
 export const runDocumentLoadersTask = schemaTask({
   id: 'run-document-loaders',
   schema: z.object({
-    ownerId: z.string(),
+    ownerUserId: z.string(),
   }),
   run: async (payload) => {
     logger.warn('Payload', { payload })

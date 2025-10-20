@@ -5,21 +5,16 @@ import type {
   AIMessageStatus,
 } from '@workspace/ai/types'
 
-export type SourceType = 'text' | 'structured'
+export type SourceType =
+  | 'file'
+  | 'text'
+  | 'question-answer'
+  | 'website'
+  | 'database'
 
-export type DatabaseDialect = 'postgresql' | 'mysql' | 'sqlite'
+export type DatabaseSourceDialect = 'postgresql' | 'mysql' | 'sqlite'
 
-export type DatabaseConnection = {
-  host?: string
-  port?: string
-  user?: string
-  password?: string
-  database?: string
-  schema?: string // for PostgreSQL
-  filePath?: string // for SQLite
-}
-
-export type TableMetadata = {
+export type DatabaseSourceTableMetadata = {
   name: string
   meta?: {
     description?: string
@@ -36,15 +31,14 @@ export type TableMetadata = {
   }[]
 }
 
-export type QueryExample = {
+export type DatabaseSourceQueryExample = {
   input: string
   query: string
 }
 
-export type PromptMessage = {
-  role: 'user' | 'assistant'
-  content: string
-}
+export type ConnectionApp = string // TODO: add type
+
+export type ConnectionPayload = Record<string, any> // TODO: add type
 
 export type MessageStatus = AIMessageStatus
 
@@ -60,8 +54,9 @@ export type FileScope = 'public' | 'conversations' | 'sources'
 
 export type FileMetadata = {
   authorId?: string
+  agentId?: string
   conversationId?: string | null
   sourceId?: string
 }
 
-export type ConversationExplorerType = 'private' | 'shared' | 'team'
+export type ConversationExplorerNodeVisibility = 'private' | 'shared' | 'team'

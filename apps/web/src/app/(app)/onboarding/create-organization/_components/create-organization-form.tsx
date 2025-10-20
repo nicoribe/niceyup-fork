@@ -15,7 +15,7 @@ import {
 import { Input } from '@workspace/ui/components/input'
 import { stripSpecialCharacters, validateSlug } from '@workspace/utils'
 import { Loader2 } from 'lucide-react'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -62,7 +62,8 @@ export function CreateOrganizationForm({ modal }: CreateOrganizationFormProps) {
         router.back()
       }
 
-      redirect(`/orgs/${data.slug}`)
+      // Fix: The router is not updated immediately
+      setTimeout(() => router.push(`/orgs/${data.slug}`), 300)
     }
 
     if (error) {

@@ -1,7 +1,11 @@
 'use client'
 
 import { env } from '@/lib/env'
-import type { Message } from '@/lib/types'
+import type {
+  ChatParams,
+  MessageNode,
+  OrganizationTeamParams,
+} from '@/lib/types'
 import type { MessageRole } from '@/lib/types'
 import { Action, Actions } from '@workspace/ui/components/actions'
 import {
@@ -17,10 +21,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from '@workspace/ui/components/conversation'
-import {
-  Message as UIMessage,
-  MessageContent as UIMessageContent,
-} from '@workspace/ui/components/message'
+import { Message, MessageContent } from '@workspace/ui/components/message'
 import {
   PromptInput,
   PromptInputButton,
@@ -49,6 +50,7 @@ import {
   Loader,
   LoaderCircle,
   type LucideIcon,
+  Paperclip,
   PencilIcon,
   RefreshCcwIcon,
   ShareIcon,
@@ -58,14 +60,18 @@ import {
   X,
   XCircle,
 } from 'lucide-react'
-import { PlusIcon } from 'lucide-react'
+import { useParams } from 'next/navigation'
 import * as React from 'react'
 import { toast } from 'sonner'
 import { useStickToBottomContext } from 'use-stick-to-bottom'
-import { type MessageProps, isMessageStream, useChat } from '../_hooks/use-chat'
+import { type ChatMessageNode, isStream, useChat } from '../_hooks/use-chat'
 import { useChatAssistantMessageRealtime } from '../_hooks/use-chat-message-realtime'
 
-type ChatContextType = { authorId?: string } & ReturnType<typeof useChat>
+type Params = OrganizationTeamParams & { agentId: string } & ChatParams
+
+type ChatContextType = { params: Params; authorId?: string } & ReturnType<
+  typeof useChat
+>
 
 const ChatContext = React.createContext<ChatContextType | undefined>(undefined)
 
@@ -80,17 +86,26 @@ export function useChatContext(): ChatContextType {
 }
 
 export function ChatProvider({
+  params,
   authorId,
   initialMessages,
   children,
 }: {
+  params: Params
   authorId?: string
-  initialMessages?: Message[]
+  initialMessages?: MessageNode[]
   children: React.ReactNode
 }) {
-  const chatHook = useChat({ initialMessages })
+  const chatHook = useChat({
+    params,
+    initialMessages,
+    // explorerNode: {
+    //   visibility: 'private',
+    //   folderId: null,
+    // },
+  })
 
-  const contextValue: ChatContextType = { authorId, ...chatHook }
+  const contextValue: ChatContextType = { params, authorId, ...chatHook }
 
   return (
     <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>
@@ -112,7 +127,7 @@ export function ChatPromptInput({
       })
 
       if (error) {
-        toast.error('Error uploading files, please try again')
+        toast.error(error.message)
         return
       }
 
@@ -278,7 +293,7 @@ export function ChatPromptInput({
       <PromptInputToolbar>
         <PromptInputTools>
           <PromptInputButton onClick={openFileDialog} disabled={uploading}>
-            <PlusIcon size={16} />
+            <Paperclip size={16} />
           </PromptInputButton>
         </PromptInputTools>
 
@@ -296,22 +311,22 @@ export function ChatPromptInput({
 }
 
 export function ChatConversation() {
-  const { messages, getMessageById } = useChatContext()
+  const { messages, getMessageNodeById } = useChatContext()
 
   return (
     <Conversation>
       <ConversationContent className="mx-auto max-w-3xl">
         {messages.map((message) => {
-          const parentMessage = message?.isBranch
-            ? getMessageById(message.parentId)
+          const parentNode = message?.isBranch
+            ? getMessageNodeById(message.parentId)
             : undefined
 
-          if (parentMessage) {
+          if (parentNode) {
             return (
               <ChatMessageBranch
                 key={message.id}
                 message={message}
-                parentMessage={parentMessage}
+                parentMessage={parentNode}
               />
             )
           }
@@ -338,25 +353,25 @@ function ChatMessageBranch({
   message,
   parentMessage,
 }: {
-  message: MessageProps
-  parentMessage: MessageProps
+  message: ChatMessageNode
+  parentMessage: ChatMessageNode
 }) {
-  const { getMessageById, handleBranchChange } = useChatContext()
+  const { getMessageNodeById, handleBranchChange } = useChatContext()
 
   return (
     <Branch
       key={message.id}
       defaultBranch={parentMessage.children?.indexOf(message.id)}
       onBranchChange={async (branchIndex) => {
-        const targetMessageId = parentMessage.children?.at(branchIndex)
+        const targetNodeId = parentMessage.children?.at(branchIndex)
 
-        if (!targetMessageId) {
+        if (!targetNodeId) {
           return
         }
 
         await handleBranchChange({
-          previousMessageId: message.id,
-          targetMessageId,
+          previousNodeId: message.id,
+          targetNodeId,
           role: message.role,
         })
       }}
@@ -367,10 +382,10 @@ function ChatMessageBranch({
             return <ChatMessage key={id} message={message} />
           }
 
-          // Message is already loaded
-          const branchMessage = getMessageById(id)
-          if (branchMessage) {
-            return <ChatMessage key={id} message={branchMessage} />
+          // Message node is already loaded
+          const branchMessageNode = getMessageNodeById(id)
+          if (branchMessageNode) {
+            return <ChatMessage key={id} message={branchMessageNode} />
           }
 
           return <ChatLoadingMessage key={id} role={message.role} />
@@ -383,9 +398,9 @@ function ChatMessageBranch({
 function ChatMessage({
   message,
 }: {
-  message: MessageProps
+  message: ChatMessageNode
 }) {
-  if (isMessageStream(message)) {
+  if (isStream(message)) {
     return <ChatMessageContentStream message={message} />
   }
 
@@ -395,21 +410,26 @@ function ChatMessage({
 function ChatMessageContentStream({
   message: initialMessage,
 }: {
-  message: MessageProps
+  message: ChatMessageNode
 }) {
+  const { organizationSlug, teamId, agentId, chatId } = useParams<Params>()
+
   const { authorId, setPromptInputStatus } = useChatContext()
 
-  const { message: messageStream, error } = useChatAssistantMessageRealtime({
-    messageId: initialMessage.id,
-  })
+  const { message: messageNodeStream, error } = useChatAssistantMessageRealtime(
+    {
+      params: { organizationSlug, teamId, agentId, chatId },
+      messageId: initialMessage.id,
+    },
+  )
 
   const { scrollToBottom } = useStickToBottomContext()
 
-  const message = { ...initialMessage, ...messageStream }
+  const messageNode = { ...initialMessage, ...messageNodeStream }
 
   React.useEffect(() => {
     if (authorId && authorId === initialMessage.metadata?.authorId) {
-      switch (message.status) {
+      switch (messageNode.status) {
         case 'queued':
           setPromptInputStatus('submitted')
           break
@@ -426,40 +446,40 @@ function ChatMessageContentStream({
       }
     }
 
-    if (messageStream) {
+    if (messageNodeStream) {
       scrollToBottom({ preserveScrollPosition: true })
     }
-  }, [message])
+  }, [messageNode])
 
   if (error) {
     return (
-      <UIMessage from={message.role}>
-        <UIMessageContent>
+      <Message from={messageNode.role}>
+        <MessageContent>
           <div className="flex flex-row items-center gap-2">
             <XCircle className="size-4 shrink-0 text-destructive" />
-            {messageStream
-              ? message.role === 'assistant'
+            {messageNodeStream
+              ? messageNode.role === 'assistant'
                 ? 'An error occurred while generating the response.'
                 : 'An error occurred while loading the message.'
               : 'An error occurred while retrieving the message.'}
           </div>
-          {messageStream && <ChatErrorResponse errorMessage={error} />}
-        </UIMessageContent>
-      </UIMessage>
+          {messageNodeStream && <ChatErrorResponse errorMessage={error} />}
+        </MessageContent>
+      </Message>
     )
   }
 
-  if (message.status === 'queued') {
+  if (messageNode.status === 'queued') {
     return (
-      <UIMessage from={message.role}>
-        <UIMessageContent>
+      <Message from={messageNode.role}>
+        <MessageContent>
           <LoaderCircle className="size-4 shrink-0 animate-spin" />
-        </UIMessageContent>
-      </UIMessage>
+        </MessageContent>
+      </Message>
     )
   }
 
-  return <ChatMessageContent message={message} />
+  return <ChatMessageContent message={messageNode} />
 }
 
 type ItemAction = {
@@ -472,7 +492,7 @@ type ItemAction = {
 function ChatMessageContent({
   message,
 }: {
-  message: MessageProps
+  message: ChatMessageNode
 }) {
   const { authorId, regenerate } = useChatContext()
 
@@ -559,11 +579,11 @@ function ChatMessageContent({
     return listActions
   }, [message.role, message.id, textPart?.text])
 
-  const isStreaming = isMessageStream(message)
+  const isStreaming = isStream(message)
   const isFailed = message.status === 'failed'
 
   return (
-    <UIMessage
+    <Message
       className={cn(
         'gap-1 py-0.5',
         'group flex flex-col',
@@ -571,9 +591,9 @@ function ChatMessageContent({
       )}
       from={message.role}
     >
-      <UIMessageContent
+      <MessageContent
         className={cn(
-          message.role === 'assistant' && 'px-0 py-0',
+          message.role === 'assistant' && 'rounded-none px-0 py-0',
           message.authorId &&
             authorId !== message.authorId &&
             'group-[.is-user]:bg-secondary',
@@ -665,7 +685,7 @@ function ChatMessageContent({
         {isFailed && message.metadata?.error && (
           <ChatErrorResponse errorMessage={message.metadata?.error} />
         )}
-      </UIMessageContent>
+      </MessageContent>
 
       {!!filesParts.length && (
         <div
@@ -742,7 +762,7 @@ function ChatMessageContent({
           </BranchSelector>
         )}
       </Actions>
-    </UIMessage>
+    </Message>
   )
 }
 
@@ -756,8 +776,8 @@ function ChatErrorResponse({ errorMessage }: { errorMessage?: unknown }) {
 
 function ChatLoadingMessage({ role }: { role: MessageRole }) {
   return (
-    <UIMessage from={role}>
-      <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
+    <Message from={role}>
+      <MessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
         <Skeleton className="w-35" />
         {role === 'assistant' && (
           <>
@@ -765,8 +785,8 @@ function ChatLoadingMessage({ role }: { role: MessageRole }) {
             <Skeleton className="w-50" />
           </>
         )}
-      </UIMessageContent>
-    </UIMessage>
+      </MessageContent>
+    </Message>
   )
 }
 
@@ -781,26 +801,26 @@ function ChatLoadingMessages() {
 
   // return (
   //   <>
-  //     <UIMessage from={isUser ? 'assistant' : 'user'}>
-  //       <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
+  //     <Message from={isUser ? 'assistant' : 'user'}>
+  //       <MessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
   //         <Skeleton className="w-40" />
   //         <Skeleton className="w-70" />
   //         <Skeleton className="w-50" />
-  //       </UIMessageContent>
-  //     </UIMessage>
-  //     <UIMessage from={isUser ? 'user' : 'assistant'}>
-  //       <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
+  //       </MessageContent>
+  //     </Message>
+  //     <Message from={isUser ? 'user' : 'assistant'}>
+  //       <MessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
   //         <Skeleton className="w-25" />
   //         <Skeleton className="w-40" />
-  //       </UIMessageContent>
-  //     </UIMessage>
-  //     <UIMessage from={isUser ? 'assistant' : 'user'}>
-  //       <UIMessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
+  //       </MessageContent>
+  //     </Message>
+  //     <Message from={isUser ? 'assistant' : 'user'}>
+  //       <MessageContent className="*:h-5 *:opacity-5 *:group-[.is-assistant]:bg-primary *:group-[.is-user]:bg-secondary">
   //         <Skeleton className="w-40" />
   //         <Skeleton className="w-30" />
   //         <Skeleton className="w-60" />
-  //       </UIMessageContent>
-  //     </UIMessage>
+  //       </MessageContent>
+  //     </Message>
   //   </>
   // )
 

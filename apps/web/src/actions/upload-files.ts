@@ -13,7 +13,7 @@ type GenerateUploadSignatureParams = (
       | { scope: 'public' }
       | {
           scope: 'conversations'
-          metadata: { conversationId: string | null }
+          metadata: { agentId: string; conversationId: string | null }
         }
     ))
   | ({

@@ -1,15 +1,19 @@
 import { vectorStore } from '@workspace/vector-store'
-import type { SingleOrMultiple, SourceType, TableMetadata } from '../lib/types'
+import type {
+  DatabaseSourceTableMetadata,
+  SingleOrMultiple,
+  SourceType,
+} from '../lib/types'
 import { generateEmbeddings } from './embeddings'
 import { deterministicUuid } from './utils'
 
 type VectorStoreCollection =
   | 'sources'
-  | 'tables-metadata'
-  | 'proper-nouns'
-  | 'query-examples'
+  | 'database-source-tables-metadata'
+  | 'database-source-proper-nouns'
+  | 'database-source-query-examples'
 
-type VectorStoreSourceCollectionUpsertParams = {
+type VectorStoreSourcesCollectionUpsertParams = {
   collection: 'sources'
   sourceId: string
   sourceType: SourceType
@@ -19,22 +23,22 @@ type VectorStoreSourceCollectionUpsertParams = {
   }>
 }
 
-type VectorStoreTablesMetadataCollectionUpsertParams = {
-  collection: 'tables-metadata'
+type VectorStoreDatabaseSourceTablesMetadataCollectionUpsertParams = {
+  collection: 'database-source-tables-metadata'
   sourceId: string
-  sourceType: 'structured'
+  sourceType: 'database'
   data: SingleOrMultiple<{
     content: string
     metadata: {
-      tableMetadata: TableMetadata
+      tableMetadata: DatabaseSourceTableMetadata
     }
   }>
 }
 
-type VectorStoreProperNounsCollectionUpsertParams = {
-  collection: 'proper-nouns'
+type VectorStoreDatabaseSourceProperNounsCollectionUpsertParams = {
+  collection: 'database-source-proper-nouns'
   sourceId: string
-  sourceType: 'structured'
+  sourceType: 'database'
   data: SingleOrMultiple<{
     content: string
     metadata: {
@@ -43,10 +47,10 @@ type VectorStoreProperNounsCollectionUpsertParams = {
   }>
 }
 
-type VectorStoreQueryExamplesCollectionUpsertParams = {
-  collection: 'query-examples'
+type VectorStoreDatabaseSourceQueryExamplesCollectionUpsertParams = {
+  collection: 'database-source-query-examples'
   sourceId: string
-  sourceType: 'structured'
+  sourceType: 'database'
   data: SingleOrMultiple<{
     content: string
     metadata?: never
@@ -56,10 +60,10 @@ type VectorStoreQueryExamplesCollectionUpsertParams = {
 type VectorStoreUpsertParams = {
   namespace: string
 } & (
-  | VectorStoreSourceCollectionUpsertParams
-  | VectorStoreTablesMetadataCollectionUpsertParams
-  | VectorStoreProperNounsCollectionUpsertParams
-  | VectorStoreQueryExamplesCollectionUpsertParams
+  | VectorStoreSourcesCollectionUpsertParams
+  | VectorStoreDatabaseSourceTablesMetadataCollectionUpsertParams
+  | VectorStoreDatabaseSourceProperNounsCollectionUpsertParams
+  | VectorStoreDatabaseSourceQueryExamplesCollectionUpsertParams
 )
 
 export async function vectorStoreUpsert(params: VectorStoreUpsertParams) {
@@ -104,7 +108,7 @@ type VectorStoreQueryParams<T> = {
   topK?: number
 }
 
-type VectorStoreSourceCollectionQueryResult = {
+type VectorStoreSourcesCollectionQueryResult = {
   collection: 'sources'
   sourceId: string
   sourceType: SourceType
@@ -114,22 +118,22 @@ type VectorStoreSourceCollectionQueryResult = {
   }
 }
 
-type VectorStoreTablesMetadataCollectionQueryResult = {
-  collection: 'tables-metadata'
+type VectorStoreDatabaseSourceTablesMetadataCollectionQueryResult = {
+  collection: 'database-source-tables-metadata'
   sourceId: string
-  sourceType: 'structured'
+  sourceType: 'database'
   data: {
     content: string
     metadata: {
-      tableMetadata: TableMetadata
+      tableMetadata: DatabaseSourceTableMetadata
     }
   }
 }
 
-type VectorStoreProperNounsCollectionQueryResult = {
-  collection: 'proper-nouns'
+type VectorStoreDatabaseSourceProperNounsCollectionQueryResult = {
+  collection: 'database-source-proper-nouns'
   sourceId: string
-  sourceType: 'structured'
+  sourceType: 'database'
   data: {
     content: string
     metadata: {
@@ -138,10 +142,10 @@ type VectorStoreProperNounsCollectionQueryResult = {
   }
 }
 
-type VectorStoreQueryExamplesCollectionQueryResult = {
-  collection: 'query-examples'
+type VectorStoreDatabaseSourceQueryExamplesCollectionQueryResult = {
+  collection: 'database-source-query-examples'
   sourceId: string
-  sourceType: 'structured'
+  sourceType: 'database'
   data: {
     content: string
     metadata?: never
@@ -149,10 +153,10 @@ type VectorStoreQueryExamplesCollectionQueryResult = {
 }
 
 type VectorStoreQueryResult = {
-  sources: VectorStoreSourceCollectionQueryResult
-  'tables-metadata': VectorStoreTablesMetadataCollectionQueryResult
-  'proper-nouns': VectorStoreProperNounsCollectionQueryResult
-  'query-examples': VectorStoreQueryExamplesCollectionQueryResult
+  sources: VectorStoreSourcesCollectionQueryResult
+  'database-source-tables-metadata': VectorStoreDatabaseSourceTablesMetadataCollectionQueryResult
+  'database-source-proper-nouns': VectorStoreDatabaseSourceProperNounsCollectionQueryResult
+  'database-source-query-examples': VectorStoreDatabaseSourceQueryExamplesCollectionQueryResult
 }
 
 export async function vectorStoreQuery<T extends VectorStoreCollection>(

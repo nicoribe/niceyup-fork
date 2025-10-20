@@ -25,6 +25,10 @@ export async function listAgents(app: FastifyTypedInstance) {
                 z.object({
                   id: z.string(),
                   name: z.string(),
+                  slug: z.string().nullable(),
+                  logo: z.string().nullable(),
+                  description: z.string().nullable(),
+                  tags: z.array(z.string()).nullable(),
                 }),
               ),
             })

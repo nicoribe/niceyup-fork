@@ -33,7 +33,7 @@ export async function getConversation(
     params,
   }: {
     conversationId: GetConversationPathParams['conversationId']
-    params?: GetConversationQueryParams
+    params: GetConversationQueryParams
   },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {

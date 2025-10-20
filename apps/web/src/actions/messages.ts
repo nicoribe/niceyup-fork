@@ -1,12 +1,12 @@
 'use server'
 
 import { env } from '@/lib/env'
-import type { Message, OrganizationTeamParams } from '@/lib/types'
+import type { MessageNode, OrganizationTeamParams } from '@/lib/types'
 import { createStreamableValue } from '@workspace/ai/rsc'
 import { consumeStream } from '@workspace/utils'
 import { cookies } from 'next/headers'
 
-type ContextMessageParams = OrganizationTeamParams
+type ContextMessageParams = OrganizationTeamParams & { agentId: string }
 
 type StreamAnswerMessageParams = {
   conversationId: string
@@ -26,19 +26,20 @@ export async function streamAnswerMessage(
     let isDone = false
 
     try {
-      const params = new URLSearchParams({
+      const searchParams = new URLSearchParams({
         organizationSlug: context.organizationSlug,
         teamId: context.teamId,
+        agentId: context.agentId,
       })
 
       const url = new URL(
-        `${env.NEXT_PUBLIC_API_URL}/api/conversations/${conversationId}/messages/${messageId}/stream-answer?${params}`,
+        `${env.NEXT_PUBLIC_API_URL}/api/conversations/${conversationId}/messages/${messageId}/stream-answer?${searchParams}`,
       )
 
+      const cookie = (await cookies()).toString()
+
       const response = await fetch(url, {
-        headers: {
-          cookie: (await cookies()).toString(),
-        },
+        headers: { cookie },
       })
 
       if (!response.body) {
@@ -51,7 +52,7 @@ export async function streamAnswerMessage(
         return
       }
 
-      await consumeStream<Message>({
+      await consumeStream<MessageNode>({
         stream: reader,
         onChunk: (data) => {
           if (!isDone) {

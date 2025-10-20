@@ -23,6 +23,10 @@ export type GetConversationQueryParams = {
    * @type string | undefined
    */
   teamId?: string
+  /**
+   * @type string
+   */
+  agentId: string
 }
 
 /**
@@ -41,18 +45,6 @@ export type GetConversation200 = {
      * @type string
      */
     title: string
-    /**
-     * @type string
-     */
-    teamId: string | null
-    /**
-     * @type string
-     */
-    ownerId: string | null
-    /**
-     * @type string
-     */
-    agentId: string | null
   }
 }
 

@@ -1,5 +1,5 @@
+import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '../db'
-import { and, eq, isNull, sql } from '../lib/orm'
 import type { FileBucket, FileMetadata, FileScope } from '../lib/types'
 import { files } from '../schema'
 
@@ -10,37 +10,31 @@ type CreateFileParams = {
   bucket: FileBucket
   scope: FileScope
   metadata?: FileMetadata
-} & (
-  | {
-      ownerId: string
-      organizationId?: never
-    }
-  | {
-      ownerId?: never
-      organizationId: string
-    }
-)
+  owner:
+    | {
+        userId: string
+        organizationId?: never
+      }
+    | {
+        userId?: never
+        organizationId: string
+      }
+}
 
-export async function createFile({
-  fileName,
-  fileMimeType,
-  fileUri,
-  bucket,
-  scope,
-  metadata,
-  ownerId,
-  organizationId,
-}: CreateFileParams) {
-  const ownerTypeCondition = ownerId ? { ownerId } : { organizationId }
+export async function createFile(params: CreateFileParams) {
+  const ownerTypeCondition = params.owner.organizationId
+    ? { ownerOrganizationId: params.owner.organizationId }
+    : { ownerUserId: params.owner.userId }
 
   const [file] = await db
     .insert(files)
     .values({
-      fileName,
-      fileMimeType,
-      fileUri,
-      bucket,
-      scope,
+      fileName: params.fileName,
+      fileMimeType: params.fileMimeType,
+      fileUri: params.fileUri,
+      bucket: params.bucket,
+      scope: params.scope,
+      metadata: params.metadata,
       ...ownerTypeCondition,
     })
     .returning({
@@ -50,23 +44,19 @@ export async function createFile({
       fileUri: files.fileUri,
       bucket: files.bucket,
       scope: files.scope,
+      metadata: files.metadata,
     })
-
-  if (file && metadata) {
-    await db
-      .update(files)
-      .set({
-        metadata: sql`COALESCE(${files.metadata}, '{}'::jsonb) || ${JSON.stringify(metadata)}::jsonb`,
-      })
-      .where(eq(files.id, file.id))
-  }
 
   return file || null
 }
 
-export async function deleteFile({ fileId }: { fileId: string }) {
+type DeleteFileParams = {
+  fileId: string
+}
+
+export async function deleteFile(params: DeleteFileParams) {
   await db
     .update(files)
     .set({ deletedAt: new Date() })
-    .where(and(eq(files.id, fileId), isNull(files.deletedAt)))
+    .where(and(eq(files.id, params.fileId), isNull(files.deletedAt)))
 }

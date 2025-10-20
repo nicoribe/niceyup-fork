@@ -24,13 +24,12 @@ export const getConversationPathParamsSchema = z.object({
 
 export type GetConversationPathParamsSchema = GetConversationPathParams
 
-export const getConversationQueryParamsSchema = z
-  .object({
-    organizationId: z.string().optional(),
-    organizationSlug: z.string().optional(),
-    teamId: z.string().optional(),
-  })
-  .optional() as unknown as ToZod<GetConversationQueryParams>
+export const getConversationQueryParamsSchema = z.object({
+  organizationId: z.string().optional(),
+  organizationSlug: z.string().optional(),
+  teamId: z.string().optional(),
+  agentId: z.string(),
+}) as unknown as ToZod<GetConversationQueryParams>
 
 export type GetConversationQueryParamsSchema = GetConversationQueryParams
 
@@ -42,9 +41,6 @@ export const getConversation200Schema = z
     conversation: z.object({
       id: z.string(),
       title: z.string(),
-      teamId: z.string().nullable(),
-      ownerId: z.string().nullable(),
-      agentId: z.string().nullable(),
     }),
   })
   .describe('Success') as unknown as ToZod<GetConversation200>

@@ -1,11 +1,7 @@
 import { AbortTaskRunError, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
 import { and, eq } from '@workspace/db/orm'
-import {
-  databaseConnections,
-  sources,
-  structuredSources,
-} from '@workspace/db/schema'
+import { connections, databaseSources } from '@workspace/db/schema'
 import { z } from 'zod'
 import { python } from '../python'
 
@@ -15,47 +11,31 @@ export const runDbReplicationTask = schemaTask({
     sourceId: z.string(),
   }),
   run: async (payload) => {
-    const [source] = await db
+    const [databaseSource] = await db
       .select()
-      .from(sources)
-      .where(
-        and(eq(sources.id, payload.sourceId), eq(sources.type, 'structured')),
-      )
+      .from(databaseSources)
+      .where(and(eq(databaseSources.sourceId, payload.sourceId)))
       .limit(1)
 
-    if (!source) {
-      throw new AbortTaskRunError('Source not found')
+    if (!databaseSource) {
+      throw new AbortTaskRunError('Database source not found')
     }
 
-    if (!source.databaseConnectionId) {
-      throw new AbortTaskRunError('Database connection not found for source')
+    if (!databaseSource.connectionId) {
+      throw new AbortTaskRunError('Connection not found for database source')
     }
 
     const [connection] = await db
       .select()
-      .from(databaseConnections)
-      .where(eq(databaseConnections.id, source.databaseConnectionId))
+      .from(connections)
+      .where(eq(connections.id, databaseSource.connectionId))
       .limit(1)
 
     if (!connection) {
-      throw new AbortTaskRunError('Database connection not found')
+      throw new AbortTaskRunError('Connection not found')
     }
 
-    if (!connection.dialect) {
-      throw new AbortTaskRunError('Database dialect not found')
-    }
-
-    const [structuredSource] = await db
-      .select()
-      .from(structuredSources)
-      .where(eq(structuredSources.sourceId, payload.sourceId))
-      .limit(1)
-
-    if (!structuredSource) {
-      throw new AbortTaskRunError('Structured source not found')
-    }
-
-    const tablesMetadata = structuredSource.tablesMetadata?.map((t) => ({
+    const tablesMetadata = databaseSource.tablesMetadata?.map((t) => ({
       name: t.name,
       columns: t.columns.map((c) => ({ name: c.name })),
     }))
@@ -63,8 +43,8 @@ export const runDbReplicationTask = schemaTask({
     const result = await python.runDbReplication(
       {
         source_id: payload.sourceId,
-        dialect: connection.dialect,
-        file_path: connection.payload?.filePath,
+        dialect: databaseSource.dialect,
+        // file_path: databaseSource.file.fileUri, TODO: Add file path
         tables_metadata: tablesMetadata,
       },
       {

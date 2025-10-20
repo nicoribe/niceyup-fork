@@ -1,7 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { conversationPubSub } from '@/http/realtime/conversation-pub-sub'
+import { conversationPubSub } from '@/http/realtime/pub-sub/conversation-pub-sub'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
@@ -23,6 +23,7 @@ export async function realtimeMessages(app: FastifyTypedInstance) {
           organizationId: z.string().optional(),
           organizationSlug: z.string().optional(),
           teamId: z.string().optional(),
+          agentId: z.string(),
         }),
         response: withDefaultErrorResponses({
           200: z.unknown().describe('Success'),
@@ -36,7 +37,8 @@ export async function realtimeMessages(app: FastifyTypedInstance) {
 
       const { conversationId } = request.params
 
-      const { organizationId, organizationSlug, teamId } = request.query
+      const { organizationId, organizationSlug, teamId, agentId } =
+        request.query
 
       const context = {
         userId,
@@ -48,6 +50,7 @@ export async function realtimeMessages(app: FastifyTypedInstance) {
       }
 
       const conversation = await queries.context.getConversation(context, {
+        agentId,
         conversationId,
       })
 

@@ -1,7 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { conversationPubSub } from '@/http/realtime/conversation-pub-sub'
+import { conversationPubSub } from '@/http/realtime/pub-sub/conversation-pub-sub'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import {
@@ -58,6 +58,7 @@ export async function resendQuestionMessage(app: FastifyTypedInstance) {
           organizationId: z.string().nullish(),
           organizationSlug: z.string().nullish(),
           teamId: z.string().nullish(),
+          agentId: z.string(),
           parentMessageId: z.string(),
           message: z.object({
             parts: z.array(promptMessagePartSchema).nonempty(),
@@ -85,6 +86,7 @@ export async function resendQuestionMessage(app: FastifyTypedInstance) {
         organizationId,
         organizationSlug,
         teamId,
+        agentId,
         parentMessageId,
         message,
       } = request.body
@@ -99,6 +101,7 @@ export async function resendQuestionMessage(app: FastifyTypedInstance) {
       }
 
       const conversation = await queries.context.getConversation(context, {
+        agentId,
         conversationId,
       })
 

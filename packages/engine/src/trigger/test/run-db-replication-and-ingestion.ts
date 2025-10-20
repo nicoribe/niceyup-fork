@@ -1,11 +1,7 @@
 import { AbortTaskRunError, logger, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
 import { eq } from '@workspace/db/orm'
-import {
-  databaseConnections,
-  sources,
-  structuredSources,
-} from '@workspace/db/schema'
+import { connections, databaseSources, sources } from '@workspace/db/schema'
 import { z } from 'zod'
 import { getDbSchemaTask } from '../get-db-schema'
 import { runDbReplicationTask } from '../run-db-replication'
@@ -14,48 +10,42 @@ import { runIngestionTask } from '../run-ingestion'
 export const runDbReplicationAndIngestionTask = schemaTask({
   id: 'run-db-replication-and-ingestion',
   schema: z.object({
-    ownerId: z.string(),
-    databaseConnection: z.object({
-      dialect: z.enum(['postgresql', 'mysql']),
-      host: z.string(),
-      port: z.string(),
-      user: z.string(),
-      password: z.string(),
-      database: z.string(),
-      schema: z.string().optional(),
+    ownerUserId: z.string(),
+    connection: z.object({
+      app: z.enum(['postgresql', 'mysql']),
+      payload: z.object({
+        host: z.string(),
+        port: z.string(),
+        user: z.string(),
+        password: z.string(),
+        database: z.string(),
+        schema: z.string().optional(),
+      }),
     }),
   }),
   run: async (payload) => {
     const sourceId = await logger.trace('Create Source', async () => {
       return await db.transaction(async (tx) => {
-        const [createDatabaseConnection] = await tx
-          .insert(databaseConnections)
+        const [createConnection] = await tx
+          .insert(connections)
           .values({
-            name: '(Test) Database Connection',
-            dialect: payload.databaseConnection.dialect,
-            payload: {
-              host: payload.databaseConnection.host,
-              port: payload.databaseConnection.port,
-              user: payload.databaseConnection.user,
-              password: payload.databaseConnection.password,
-              database: payload.databaseConnection.database,
-              schema: payload.databaseConnection.schema,
-            },
-            ownerId: payload.ownerId,
+            name: '(Test) PostgreSQL Connection',
+            app: payload.connection.app,
+            payload: payload.connection.payload,
+            ownerUserId: payload.ownerUserId,
           })
           .returning()
 
-        if (!createDatabaseConnection) {
-          throw new AbortTaskRunError('Failed to create database connection')
+        if (!createConnection) {
+          throw new AbortTaskRunError('Failed to create connection')
         }
 
         const [createSource] = await tx
           .insert(sources)
           .values({
-            name: '(Test) Structured Source',
-            type: 'structured',
-            databaseConnectionId: createDatabaseConnection.id,
-            ownerId: payload.ownerId,
+            name: '(Test) Database Source',
+            type: 'database',
+            ownerUserId: payload.ownerUserId,
           })
           .returning()
 
@@ -63,17 +53,19 @@ export const runDbReplicationAndIngestionTask = schemaTask({
           throw new AbortTaskRunError('Failed to create source')
         }
 
-        const [createStructuredSource] = await tx
-          .insert(structuredSources)
+        const [createDatabaseSource] = await tx
+          .insert(databaseSources)
           .values({
-            sourceId: createSource.id,
+            dialect: payload.connection.app,
             tablesMetadata: [],
             queryExamples: [],
+            sourceId: createSource.id,
+            connectionId: createConnection.id,
           })
           .returning()
 
-        if (!createStructuredSource) {
-          throw new AbortTaskRunError('Failed to create structured source')
+        if (!createDatabaseSource) {
+          throw new AbortTaskRunError('Failed to create database source')
         }
 
         return createSource.id
@@ -83,13 +75,13 @@ export const runDbReplicationAndIngestionTask = schemaTask({
     await logger.trace('Get Database Schema', async () => {
       const result = await getDbSchemaTask.triggerAndWait({ sourceId }).unwrap()
 
-      await logger.trace('Update Structured Source', async () => {
+      await logger.trace('Update Database Source', async () => {
         await db
-          .update(structuredSources)
+          .update(databaseSources)
           .set({
             tablesMetadata: result,
           })
-          .where(eq(structuredSources.sourceId, sourceId))
+          .where(eq(databaseSources.sourceId, sourceId))
       })
     })
 

@@ -1,19 +1,22 @@
 import { logger } from '@trigger.dev/sdk'
 import { generateText } from '@workspace/ai'
-import type { QueryExample, TableMetadata } from '../lib/types'
+import type {
+  DatabaseSourceQueryExample,
+  DatabaseSourceTableMetadata,
+} from '../lib/types'
 import { getDbProperNounsTask } from '../trigger/get-db-proper-nouns'
 import { languageModel } from './models'
-import { experimental_templatePromptSummarizeStructuredSource } from './prompts'
+import { experimental_templatePromptSummarizeDatabaseSource } from './prompts'
 import { vectorStoreUpsert } from './vector-store'
 
-export async function ingestStructuredSource({
+export async function ingestDatabaseSource({
   namespace,
   sourceId,
   tablesMetadata,
 }: {
   namespace: string
   sourceId: string
-  tablesMetadata: TableMetadata[]
+  tablesMetadata: DatabaseSourceTableMetadata[]
 }) {
   const documents = []
 
@@ -47,19 +50,19 @@ export async function ingestStructuredSource({
     namespace,
     collection: 'sources',
     sourceId,
-    sourceType: 'structured',
+    sourceType: 'database',
     data: documents,
   })
 }
 
-export async function ingestStructuredSourceTablesMetadata({
+export async function ingestDatabaseSourceTablesMetadata({
   namespace,
   sourceId,
   tablesMetadata,
 }: {
   namespace: string
   sourceId: string
-  tablesMetadata: TableMetadata[]
+  tablesMetadata: DatabaseSourceTableMetadata[]
 }) {
   const documents = []
 
@@ -98,14 +101,14 @@ export async function ingestStructuredSourceTablesMetadata({
 
   await vectorStoreUpsert({
     namespace,
-    collection: 'tables-metadata',
+    collection: 'database-source-tables-metadata',
     sourceId,
-    sourceType: 'structured',
+    sourceType: 'database',
     data: documents,
   })
 }
 
-export async function ingestStructuredSourceProperNouns({
+export async function ingestDatabaseSourceProperNouns({
   namespace,
   sourceId,
 }: {
@@ -137,21 +140,21 @@ export async function ingestStructuredSourceProperNouns({
 
   await vectorStoreUpsert({
     namespace,
-    collection: 'proper-nouns',
+    collection: 'database-source-proper-nouns',
     sourceId,
-    sourceType: 'structured',
+    sourceType: 'database',
     data: documents,
   })
 }
 
-export async function ingestStructuredSourceQueryExamples({
+export async function ingestDatabaseSourceQueryExamples({
   namespace,
   sourceId,
   queryExamples,
 }: {
   namespace: string
   sourceId: string
-  queryExamples: QueryExample[]
+  queryExamples: DatabaseSourceQueryExample[]
 }) {
   const documents = []
 
@@ -169,24 +172,24 @@ export async function ingestStructuredSourceQueryExamples({
 
   await vectorStoreUpsert({
     namespace,
-    collection: 'query-examples',
+    collection: 'database-source-query-examples',
     sourceId,
-    sourceType: 'structured',
+    sourceType: 'database',
     data: documents,
   })
 }
 
 /**
- * Experimental. Do not use this function in production. Use {@link ingestStructuredSource} instead.
+ * Experimental. Do not use this function in production. Use {@link ingestDatabaseSource} instead.
  */
-export async function experimental_ingestStructuredSource({
+export async function experimental_ingestDatabaseSource({
   namespace,
   sourceId,
   tablesMetadata,
 }: {
   namespace: string
   sourceId: string
-  tablesMetadata: TableMetadata[]
+  tablesMetadata: DatabaseSourceTableMetadata[]
 }) {
   const tablesContent = []
 
@@ -214,7 +217,7 @@ export async function experimental_ingestStructuredSource({
 
   const generatedContent = await generateText({
     model: languageModel,
-    messages: experimental_templatePromptSummarizeStructuredSource({
+    messages: experimental_templatePromptSummarizeDatabaseSource({
       content: tablesContent.join('\n-\n'),
     }),
   })
@@ -229,7 +232,7 @@ export async function experimental_ingestStructuredSource({
     namespace,
     collection: 'sources',
     sourceId,
-    sourceType: 'structured',
+    sourceType: 'database',
     data: document,
   })
 }
