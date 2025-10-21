@@ -302,7 +302,7 @@ export async function uploadFileToStorage(params: UploadFileToStorageParams) {
   const createdFile = await queries.createFile({
     fileName: params.file.filename,
     fileMimeType: params.file.mimetype,
-    fileUri: filePath,
+    filePath,
     bucket: params.data.bucket,
     scope: params.data.scope,
     metadata: params.data.metadata,

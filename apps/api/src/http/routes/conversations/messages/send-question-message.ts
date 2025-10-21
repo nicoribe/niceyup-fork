@@ -20,7 +20,7 @@ import {
   conversations,
   messages,
 } from '@workspace/db/schema'
-import { answerMessageTask } from '@workspace/engine/trigger/answer-message'
+import { answerMessageTask } from '@workspace/engine/tasks/answer-message'
 import { z } from 'zod'
 
 const textPartSchema = z.object({

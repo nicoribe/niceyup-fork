@@ -30,11 +30,9 @@ export const getDbProperNounsTask = schemaTask({
       }))
       .filter((t) => t.columns.length)
 
-    const result = await python.getDbProperNouns({
+    return await python.getDbProperNouns({
       source_id: payload.sourceId,
       tables_metadata: tablesMetadata,
     })
-
-    return result
   },
 })

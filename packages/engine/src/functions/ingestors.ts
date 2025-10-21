@@ -4,10 +4,134 @@ import type {
   DatabaseSourceQueryExample,
   DatabaseSourceTableMetadata,
 } from '../lib/types'
-import { getDbProperNounsTask } from '../trigger/get-db-proper-nouns'
+import { getDbProperNounsTask } from '../tasks/get-db-proper-nouns'
+import { filesLoader } from './loaders'
 import { languageModel } from './models'
 import { experimental_templatePromptSummarizeDatabaseSource } from './prompts'
+import { documentSplitter } from './splitters'
 import { vectorStoreUpsert } from './vector-store'
+
+export async function ingestFileSource({
+  namespace,
+  sourceId,
+  filePath,
+  chunkSize,
+  chunkOverlap,
+}: {
+  namespace: string
+  sourceId: string
+  filePath: string
+  chunkSize: number | null
+  chunkOverlap: number | null
+}) {
+  const loadedDocuments = await logger.trace('Load File', async () => {
+    const loadedDocuments = await filesLoader({ paths: [filePath] })
+
+    logger.warn('Loaded Documents', { loadedDocuments })
+
+    return loadedDocuments
+  })
+
+  const splitDocuments = await logger.trace('Split Documents', async () => {
+    logger.warn('Setting chunk size and overlap', {
+      chunkSize,
+      chunkOverlap,
+    })
+
+    const splitDocuments = await documentSplitter({
+      documents: loadedDocuments,
+      chunkSize,
+      chunkOverlap,
+    })
+
+    logger.warn('Split Documents', { splitDocuments })
+
+    return splitDocuments
+  })
+
+  const documents = splitDocuments.map((document) => ({
+    content: document.pageContent,
+    metadata: {
+      documentMetadata: document.metadata,
+    },
+  }))
+
+  logger.warn('Documents', { documents })
+
+  await vectorStoreUpsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'file',
+    data: documents,
+  })
+}
+
+export async function ingestTextSource({
+  namespace,
+  sourceId,
+}: {
+  namespace: string
+  sourceId: string
+}) {
+  const documents = [{ content: 'Empty' }]
+
+  // TODO: Implement logic to ingest text source
+
+  logger.warn('Documents', { documents })
+
+  await vectorStoreUpsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'text',
+    data: documents,
+  })
+}
+
+export async function ingestQuestionAnswerSource({
+  namespace,
+  sourceId,
+}: {
+  namespace: string
+  sourceId: string
+}) {
+  const documents = [{ content: 'Empty' }]
+
+  // TODO: Implement logic to ingest question answer source
+
+  logger.warn('Documents', { documents })
+
+  await vectorStoreUpsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'question-answer',
+    data: documents,
+  })
+}
+
+export async function ingestWebsiteSource({
+  namespace,
+  sourceId,
+}: {
+  namespace: string
+  sourceId: string
+}) {
+  const documents = [{ content: 'Empty' }]
+
+  // TODO: Implement logic to ingest website source
+
+  logger.warn('Documents', { documents })
+
+  await vectorStoreUpsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'website',
+    data: documents,
+  })
+}
 
 export async function ingestDatabaseSource({
   namespace,

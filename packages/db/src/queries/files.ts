@@ -6,7 +6,7 @@ import { files } from '../schema'
 type CreateFileParams = {
   fileName: string
   fileMimeType: string
-  fileUri: string
+  filePath: string
   bucket: FileBucket
   scope: FileScope
   metadata?: FileMetadata
@@ -31,7 +31,7 @@ export async function createFile(params: CreateFileParams) {
     .values({
       fileName: params.fileName,
       fileMimeType: params.fileMimeType,
-      fileUri: params.fileUri,
+      filePath: params.filePath,
       bucket: params.bucket,
       scope: params.scope,
       metadata: params.metadata,
@@ -41,7 +41,7 @@ export async function createFile(params: CreateFileParams) {
       id: files.id,
       fileName: files.fileName,
       fileMimeType: files.fileMimeType,
-      fileUri: files.fileUri,
+      filePath: files.filePath,
       bucket: files.bucket,
       scope: files.scope,
       metadata: files.metadata,

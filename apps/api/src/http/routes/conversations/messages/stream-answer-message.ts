@@ -6,7 +6,7 @@ import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
 import { runs } from '@workspace/engine'
-import type { STREAMS } from '@workspace/engine/trigger/answer-message'
+import type { STREAMS } from '@workspace/engine/tasks/answer-message'
 import { z } from 'zod'
 
 export async function streamAnswerMessage(app: FastifyTypedInstance) {

@@ -7,54 +7,64 @@ import type {
 import { generateEmbeddings } from './embeddings'
 import { deterministicUuid } from './utils'
 
-type VectorStoreCollection =
+export type VectorStoreCollection =
   | 'sources'
   | 'database-source-tables-metadata'
   | 'database-source-proper-nouns'
   | 'database-source-query-examples'
 
+export type VectorStoreSourcesDocument = {
+  content: string
+  metadata?: {
+    documentMetadata?: Record<string, any>
+  }
+}
+
+export type VectorStoreDatabaseSourceTablesMetadataDocument = {
+  content: string
+  metadata: {
+    tableMetadata: DatabaseSourceTableMetadata
+  }
+}
+
+export type VectorStoreDatabaseSourceProperNounsDocument = {
+  content: string
+  metadata: {
+    key: string
+  }
+}
+
+export type VectorStoreDatabaseSourceQueryExamplesDocument = {
+  content: string
+  metadata?: never
+}
+
 type VectorStoreSourcesCollectionUpsertParams = {
   collection: 'sources'
   sourceId: string
   sourceType: SourceType
-  data: SingleOrMultiple<{
-    content: string
-    metadata?: never
-  }>
+  data: SingleOrMultiple<VectorStoreSourcesDocument>
 }
 
 type VectorStoreDatabaseSourceTablesMetadataCollectionUpsertParams = {
   collection: 'database-source-tables-metadata'
   sourceId: string
   sourceType: 'database'
-  data: SingleOrMultiple<{
-    content: string
-    metadata: {
-      tableMetadata: DatabaseSourceTableMetadata
-    }
-  }>
+  data: SingleOrMultiple<VectorStoreDatabaseSourceTablesMetadataDocument>
 }
 
 type VectorStoreDatabaseSourceProperNounsCollectionUpsertParams = {
   collection: 'database-source-proper-nouns'
   sourceId: string
   sourceType: 'database'
-  data: SingleOrMultiple<{
-    content: string
-    metadata: {
-      key: string
-    }
-  }>
+  data: SingleOrMultiple<VectorStoreDatabaseSourceProperNounsDocument>
 }
 
 type VectorStoreDatabaseSourceQueryExamplesCollectionUpsertParams = {
   collection: 'database-source-query-examples'
   sourceId: string
   sourceType: 'database'
-  data: SingleOrMultiple<{
-    content: string
-    metadata?: never
-  }>
+  data: SingleOrMultiple<VectorStoreDatabaseSourceQueryExamplesDocument>
 }
 
 type VectorStoreUpsertParams = {
@@ -112,44 +122,28 @@ type VectorStoreSourcesCollectionQueryResult = {
   collection: 'sources'
   sourceId: string
   sourceType: SourceType
-  data: {
-    content: string
-    metadata?: never
-  }
+  data: VectorStoreSourcesDocument
 }
 
 type VectorStoreDatabaseSourceTablesMetadataCollectionQueryResult = {
   collection: 'database-source-tables-metadata'
   sourceId: string
   sourceType: 'database'
-  data: {
-    content: string
-    metadata: {
-      tableMetadata: DatabaseSourceTableMetadata
-    }
-  }
+  data: VectorStoreDatabaseSourceTablesMetadataDocument
 }
 
 type VectorStoreDatabaseSourceProperNounsCollectionQueryResult = {
   collection: 'database-source-proper-nouns'
   sourceId: string
   sourceType: 'database'
-  data: {
-    content: string
-    metadata: {
-      key: string
-    }
-  }
+  data: VectorStoreDatabaseSourceProperNounsDocument
 }
 
 type VectorStoreDatabaseSourceQueryExamplesCollectionQueryResult = {
   collection: 'database-source-query-examples'
   sourceId: string
   sourceType: 'database'
-  data: {
-    content: string
-    metadata?: never
-  }
+  data: VectorStoreDatabaseSourceQueryExamplesDocument
 }
 
 type VectorStoreQueryResult = {

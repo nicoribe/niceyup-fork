@@ -15,7 +15,7 @@ import { db } from '@workspace/db'
 import { and, eq, isNull, sql } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
 import { messages } from '@workspace/db/schema'
-import { answerMessageTask } from '@workspace/engine/trigger/answer-message'
+import { answerMessageTask } from '@workspace/engine/tasks/answer-message'
 import { z } from 'zod'
 
 const messageSchema = z.object({

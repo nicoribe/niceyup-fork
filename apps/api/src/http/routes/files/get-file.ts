@@ -33,7 +33,7 @@ export async function getFile(app: FastifyTypedInstance) {
                 id: z.string(),
                 fileName: z.string(),
                 fileMimeType: z.string(),
-                fileUri: z.string(),
+                filePath: z.string(),
                 bucket: z.enum(['default', 'engine']),
                 scope: z.enum(['public', 'conversations', 'sources']),
                 url: z.string(),
@@ -73,12 +73,12 @@ export async function getFile(app: FastifyTypedInstance) {
         })
       }
 
-      let url = new URL(file.fileUri, env.STORAGE_URL).toString()
+      let url = new URL(file.filePath, env.STORAGE_URL).toString()
 
       if (file.bucket === 'engine') {
         const command = new GetObjectCommand({
           Bucket: env.S3_ENGINE_BUCKET,
-          Key: file.fileUri,
+          Key: file.filePath,
         })
 
         url = await getSignedUrl(s3Client, command, { expiresIn: expires })

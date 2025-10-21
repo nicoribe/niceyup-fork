@@ -34,7 +34,7 @@ export const sources = pgTable('sources', {
   name: text('name').notNull().default('Unnamed'),
   type: text('type').notNull().$type<SourceType>(),
 
-  chuckSize: integer('chuck_size'),
+  chunkSize: integer('chunk_size'),
   chunkOverlap: integer('chunk_overlap'),
 
   ownerUserId: text('owner_user_id').references(() => users.id),
@@ -377,7 +377,7 @@ export const files = pgTable('files', {
   ...id,
   fileName: text('file_name').notNull(),
   fileMimeType: text('file_mime_type').notNull(),
-  fileUri: text('file_uri').notNull(),
+  filePath: text('file_path').notNull(),
   bucket: text('bucket').notNull().$type<FileBucket>(),
   scope: text('scope').notNull().$type<FileScope>(),
   metadata: jsonb('metadata').$type<FileMetadata>(),

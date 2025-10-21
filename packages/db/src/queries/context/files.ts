@@ -50,7 +50,7 @@ export async function getFile(
       id: files.id,
       fileName: files.fileName,
       fileMimeType: files.fileMimeType,
-      fileUri: files.fileUri,
+      filePath: files.filePath,
       bucket: files.bucket,
       scope: files.scope,
       metadata: files.metadata,

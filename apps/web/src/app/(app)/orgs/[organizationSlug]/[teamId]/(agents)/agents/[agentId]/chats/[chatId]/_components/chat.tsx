@@ -141,7 +141,7 @@ export function ChatPromptInput({
             id: file.id,
             name: file.fileName,
             type: file.fileMimeType,
-            url: new URL(file.fileUri, env.NEXT_PUBLIC_STORAGE_URL).toString(),
+            url: new URL(file.filePath, env.NEXT_PUBLIC_STORAGE_URL).toString(),
           }
         }
       }

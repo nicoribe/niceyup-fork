@@ -11,7 +11,10 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@langchain/community": "^0.3.57",
+    "@langchain/classic": "1.0.0",
+    "@langchain/community": "1.0.0",
+    "@langchain/core": "1.0.1",
+    "@langchain/textsplitters": "1.0.0",
     "@trigger.dev/core": "4.0.4",
     "@trigger.dev/python": "4.0.4",
     "@trigger.dev/sdk": "4.0.4",
@@ -21,9 +24,13 @@
     "@workspace/env": "workspace:*",
     "@workspace/storage": "workspace:*",
     "@workspace/vector-store": "workspace:*",
-    "langchain": "^0.3.36",
-    "pdfjs-dist": "^5.4.296",
+    "d3-dsv": "2",
+    "langchain": "1.0.1",
+    "mammoth": "1.11.0",
+    "officeparser": "5.2.1",
+    "pdfjs-dist": "5.4.296",
     "uuid": "^13.0.0",
+    "word-extractor": "1.0.4",
     "zod": "^4.1.8"
   },
   "devDependencies": {
@@ -33,7 +40,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./trigger/*": "./src/trigger/*.ts",
+    "./tasks/*": "./src/tasks/*.ts",
     "./types": "./src/lib/types.ts",
     "./env": "./src/lib/env.ts"
   }

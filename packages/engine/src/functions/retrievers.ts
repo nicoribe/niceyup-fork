@@ -8,7 +8,6 @@ import {
   templatePromptQueryEnhancementWithProperNouns,
   templatePromptWriteQuery,
 } from './prompts'
-import { createSchema } from './utils'
 import { vectorStoreQuery } from './vector-store'
 
 export async function retrieveSources({
@@ -108,7 +107,33 @@ export async function retrieveDatabaseSourceTablesMetadata({
 
       const tables = tablesMetadata.map((t) => t.name)
 
-      const schema = createSchema(tablesMetadata)
+      const schema = await logger.trace('Create Schema', async () => {
+        const lines = []
+
+        for (const table of tablesMetadata) {
+          let tableLine = `CREATE TABLE "${table.name}" (\n`
+
+          const columnsLine = []
+
+          for (const column of table.columns) {
+            let referenceLine = ''
+
+            if (column.foreign_table && column.foreign_column) {
+              referenceLine = ` REFERENCES "${column.foreign_table}" ("${column.foreign_column}")`
+            }
+
+            columnsLine.push(
+              `  "${column.name}" ${column.data_type}${referenceLine}`,
+            )
+          }
+
+          tableLine += `${columnsLine.join(',\n')}\n)\n`
+
+          lines.push(tableLine)
+        }
+
+        return lines.join('\n')
+      })
 
       const queryExamples = relevantQueryExamples
         .map((q) => q.data.content)

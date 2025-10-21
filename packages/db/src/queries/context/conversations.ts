@@ -1,4 +1,4 @@
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, desc, eq, isNull } from 'drizzle-orm'
 import { db } from '../../db'
 import { conversations } from '../../schema'
 import { getAgent } from './agents'
@@ -49,6 +49,7 @@ export async function listConversations(
         isNull(conversations.deletedAt),
       ),
     )
+    .orderBy(desc(conversations.updatedAt))
 
   return listConversations
 }

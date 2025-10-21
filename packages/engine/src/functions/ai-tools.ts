@@ -1,7 +1,10 @@
 import { logger } from '@trigger.dev/sdk'
 import { tool } from '@workspace/ai'
 import { z } from 'zod'
-import { retrieveDatabaseSourceProperNouns, retrieveSources } from './retriever'
+import {
+  retrieveDatabaseSourceProperNouns,
+  retrieveSources,
+} from './retrievers'
 
 export function GetInformationTool({ namespace }: { namespace: string }) {
   return tool({

@@ -49,7 +49,7 @@ export type UploadFile200 = {
     /**
      * @type string
      */
-    fileUri: string
+    filePath: string
     /**
      * @type string
      */

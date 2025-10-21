@@ -18,9 +18,15 @@ export default defineConfig({
       randomize: true,
     },
   },
-  dirs: ['./src/trigger'],
+  dirs: ['./src/tasks'],
   build: {
-    external: ['pdfjs-dist'],
+    external: [
+      'pdfjs-dist',
+      'mammoth',
+      'word-extractor',
+      'officeparser',
+      'd3-dsv',
+    ],
     extensions: [
       pythonExtension({
         devPythonBinaryPath: './python/.venv/bin/python',

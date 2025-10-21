@@ -2,10 +2,10 @@ import os
 import uuid
 import duckdb
 
-from sqlalchemy import create_engine, inspect, Engine
 from typing import List, Optional, TypedDict
+from sqlalchemy import create_engine, inspect, Engine
 
-from utils import tmp_dir
+from storage_provider import StorageProvider
 
 class ColumnMetadata(TypedDict):
     name: str
@@ -38,19 +38,10 @@ class DatabaseClient:
         self.schema = schema
         self.file_path = file_path
 
-        self._uuid = str(uuid.uuid4())
-        self.tmp_dir = tmp_dir()
         self.conn: Optional[duckdb.DuckDBPyConnection] = None
 
-    def _make_tmp_db_path(self) -> None:
-        if not os.path.exists(self.tmp_dir):
-            os.makedirs(self.tmp_dir)
-
-    def _tmp_file_path(self) -> str:
-        return os.path.join(self.tmp_dir, self.file_path)
-
-    def _tmp_db_path(self) -> str:
-        return os.path.join(self.tmp_dir, self._uuid + ".db")
+        self._uuid = str(uuid.uuid4())
+        self._storage = StorageProvider()
 
     def uri(self) -> str:
         return f"duckdb:///{self._tmp_db_path()}"
@@ -73,25 +64,32 @@ class DatabaseClient:
         inspector = inspect(engine)
 
         tables_metadata_dict = {}
+        
         for table_name in inspector.get_table_names(schema=self.schema):
             columns = inspector.get_columns(table_name)
             foreign_keys = inspector.get_foreign_keys(table_name)
+
             tables_metadata_dict[table_name] = {
                 "name": table_name,
                 "columns": [],
             }
+
             for col in columns:
                 column_name = col['name']
                 data_type = str(col['type'])
+
                 fk = next((fk for fk in foreign_keys if column_name in fk['constrained_columns']), None)
+
                 foreign_table = fk['referred_table'] if fk else None
                 foreign_column = fk['referred_columns'][0] if fk else None
+
                 tables_metadata_dict[table_name]["columns"].append({
                     "name": column_name,
                     "data_type": data_type,
                     "foreign_table": foreign_table,
                     "foreign_column": foreign_column,
                 })
+
         tables_metadata = list(tables_metadata_dict.values())
 
         engine.dispose()
@@ -111,6 +109,7 @@ class DatabaseClient:
             return
 
         self._make_tmp_db_path()
+
         self.conn = duckdb.connect(database=self._tmp_db_path())
 
         if self.dialect == "sqlite":
@@ -132,3 +131,22 @@ class DatabaseClient:
         if self.conn is not None:
             self.conn.close()
             self.conn = None
+
+    # ---------------- #
+    #  Helper methods  #
+    # ---------------- #
+
+    def _make_tmp_db_path(self) -> None:
+        if not os.path.exists(self._storage.tmp_dir):
+            os.makedirs(self._storage.tmp_dir)
+
+    def _tmp_file_path(self) -> str:
+        tmp_file_path = os.path.join(self._storage.tmp_dir, self.file_path)
+
+        if not os.path.exists(tmp_file_path):
+            self._storage.download_tmp_file(self.file_path)
+
+        return tmp_file_path
+
+    def _tmp_db_path(self) -> str:
+        return os.path.join(self._storage.tmp_dir, self._uuid + ".db")

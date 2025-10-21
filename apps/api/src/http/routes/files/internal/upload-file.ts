@@ -30,7 +30,7 @@ export async function uploadFile(app: FastifyTypedInstance) {
                 id: z.string(),
                 fileName: z.string(),
                 fileMimeType: z.string(),
-                fileUri: z.string(),
+                filePath: z.string(),
                 bucket: z.enum(['default', 'engine']),
                 scope: z.enum(['public', 'conversations', 'sources']),
               }),

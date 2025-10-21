@@ -7,8 +7,8 @@ import { getDbSchemaTask } from '../get-db-schema'
 import { runDbReplicationTask } from '../run-db-replication'
 import { runIngestionTask } from '../run-ingestion'
 
-export const runDbReplicationAndIngestionTask = schemaTask({
-  id: 'run-db-replication-and-ingestion',
+export const runDbReplicatorAndIngestorTask = schemaTask({
+  id: 'run-db-replicator-and-ingestor',
   schema: z.object({
     ownerUserId: z.string(),
     connection: z.object({

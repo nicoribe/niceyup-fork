@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import type { ToZod } from '@kubb/plugin-zod/utils'
+import { z } from 'zod'
 import type {
-  GetFilePathParams,
-  GetFileQueryParams,
   GetFile200,
   GetFile400,
   GetFile401,
@@ -13,10 +13,10 @@ import type {
   GetFile404,
   GetFile429,
   GetFile500,
+  GetFilePathParams,
+  GetFileQueryParams,
   GetFileQueryResponse,
 } from '../types/GetFile'
-import type { ToZod } from '@kubb/plugin-zod/utils'
-import { z } from 'zod'
 
 export const getFilePathParamsSchema = z.object({
   fileId: z.string(),
@@ -42,7 +42,7 @@ export const getFile200Schema = z
       id: z.string(),
       fileName: z.string(),
       fileMimeType: z.string(),
-      fileUri: z.string(),
+      filePath: z.string(),
       bucket: z.enum(['default', 'engine']),
       scope: z.enum(['public', 'conversations', 'sources']),
       url: z.string(),
