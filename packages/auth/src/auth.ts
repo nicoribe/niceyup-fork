@@ -1,7 +1,7 @@
 import { cache } from '@workspace/cache'
 import { db, generateId } from '@workspace/db'
 import { agents } from '@workspace/db/schema'
-import { sendEmailResetPassword, sendVerificationEmail } from '@workspace/email'
+import { sendPasswordResetEmail, sendVerificationEmail } from '@workspace/email'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
@@ -19,7 +19,7 @@ const config = {
   }),
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await sendVerificationEmail({ email: user.email, url })
+      await sendVerificationEmail({ user, url })
     },
     sendOnSignUp: true,
     sendOnSignIn: true,
@@ -29,7 +29,7 @@ const config = {
     enabled: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmailResetPassword({ email: user.email, url })
+      await sendPasswordResetEmail({ user, url })
     },
   },
   socialProviders: {
@@ -70,9 +70,11 @@ const config = {
       create: {
         after: async (user) => {
           // TODO: Remove this once we have a way to create an agent for the user
+          const unique = Math.random().toString(36).substring(2, 8)
+
           await db.insert(agents).values({
             name: 'Assistant',
-            slug: 'assistant',
+            slug: `assistant-${unique}`,
             description: 'Your personal assistant',
             tags: ['OpenAI'],
             ownerUserId: user.id,

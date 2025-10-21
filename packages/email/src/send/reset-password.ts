@@ -1,22 +1,23 @@
+import { ResetPassword } from '../emails/reset-password'
+import { env } from '../lib/env'
+import type { User } from '../lib/types'
 import { resend } from '../resend'
 
-export async function sendEmailResetPassword({
-  email,
+export async function sendPasswordResetEmail({
+  user,
   url,
 }: {
-  email: string
+  user: User
   url: string
 }) {
-  const { data, error } = await resend.emails.send({
-    from: 'Davy Jones <davy@resend.dev>',
-    to: [email],
+  const { error } = await resend.emails.send({
+    from: env.RESEND_FROM_EMAIL,
+    to: [user.email],
     subject: 'Reset your password',
-    text: `Click the link to reset your password: ${url}`,
+    react: ResetPassword({ user, url }),
   })
 
   if (error) {
     console.error({ error })
-  } else {
-    console.log({ data })
   }
 }
