@@ -6,7 +6,7 @@ import { Img } from '@react-email/components'
 export function Logo() {
   return (
     <Img
-      src="https://niceyup.com/light-logo.png"
+      src="https://assets.niceyup.com/logo-light.png"
       width="48"
       height="48"
       alt="Niceyup Logo"
