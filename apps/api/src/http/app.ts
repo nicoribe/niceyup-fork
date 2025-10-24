@@ -1,11 +1,11 @@
 import { env } from '@/lib/env'
 import { fastifyRealtime } from '@/lib/realtime'
+import { fastifyScalar } from '@/lib/scalar'
 import { fastifyCors } from '@fastify/cors'
 import { fastifyMultipart } from '@fastify/multipart'
 import { fastifyRedis } from '@fastify/redis'
 import { fastifySwagger } from '@fastify/swagger'
 import { fastifyWebsocket } from '@fastify/websocket'
-import fastifyScalar from '@scalar/fastify-api-reference'
 import { cache } from '@workspace/cache'
 import { fastify } from 'fastify'
 import {
