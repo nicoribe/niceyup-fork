@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: new URL(env.STORAGE_URL).hostname,
       },
+      {
+        protocol: 'https',
+        hostname: 'assets.niceyup.com',
+      },
     ],
   },
   async redirects() {

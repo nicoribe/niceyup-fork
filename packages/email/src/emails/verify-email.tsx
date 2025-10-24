@@ -33,7 +33,7 @@ export function VerifyEmail({
       <Tailwind>
         <Body className="mx-auto my-auto bg-white px-2 font-sans">
           <Preview>Verify your email address for Niceyup</Preview>
-          <Container className="mx-auto my-10 max-w-md rounded border border-black/30 border-solid p-5">
+          <Container className="mx-auto my-10 max-w-lg rounded border border-black/30 border-solid p-5">
             <Section className="mt-8">
               <Logo />
             </Section>

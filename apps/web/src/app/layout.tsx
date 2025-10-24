@@ -1,30 +1,10 @@
 import { Providers } from '@/components/providers'
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
 import '@workspace/ui/globals.css'
+import { fontVariables } from '@/lib/fonts'
+import { generateMeta } from '@/lib/generate-meta'
 
-const fontSans = Geist({
-  subsets: ['latin'],
-  variable: '--font-sans',
-})
-
-const fontMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-})
-
-export const metadata: Metadata = {
-  title: {
-    default: 'Niceyup',
-    template: '%s | Niceyup',
-  },
-  icons: {
-    icon: [
-      { url: '/logo-light.png', media: '(prefers-color-scheme: light)' },
-      { url: '/logo-dark.png', media: '(prefers-color-scheme: dark)' },
-    ],
-  },
-}
+export const metadata: Metadata = generateMeta()
 
 export default async function RootLayout({
   children,
@@ -33,9 +13,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
-      >
+      <body className={fontVariables}>
         <Providers>{children}</Providers>
       </body>
     </html>
