@@ -1,5 +1,5 @@
-import type { WebSocket } from '@fastify/websocket'
 import type { AIMessage } from '@workspace/ai/types'
+import { WebSocket } from 'ws'
 
 export const socketsByChannel = new Map<string, Set<WebSocket>>()
 

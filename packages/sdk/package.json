@@ -11,9 +11,9 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.75.2",
+    "@tanstack/react-query": "5.90.5",
     "@workspace/env": "workspace:*",
-    "zod": "^4.1.8"
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "@kubb/cli": "^3.10.5",

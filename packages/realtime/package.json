@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/ai",
+  "name": "@workspace/realtime",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -8,24 +8,25 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@ai-sdk/gateway": "2.0.0",
-    "@ai-sdk/openai": "2.0.53",
-    "@ai-sdk/rsc": "1.0.77",
+    "@workspace/ai": "workspace:*",
+    "@workspace/cache": "workspace:*",
+    "@workspace/engine": "workspace:*",
     "@workspace/env": "workspace:*",
-    "ai": "5.0.77",
-    "zod": "4.1.12"
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/ws": "^8.5.10",
     "@workspace/tsconfig": "workspace:*",
     "typescript": "^5.7.3"
   },
   "exports": {
     ".": "./src/index.ts",
-    "./rsc": "./src/rsc.ts",
-    "./providers": "./src/providers.ts",
-    "./schemas": "./src/lib/schemas.ts",
-    "./types": "./src/lib/types.ts",
+    "./pubsub": "./src/pubsub/index.ts",
+    "./stream": "./src/stream/index.ts",
+    "./stream/rsc": "./src/stream/rsc.ts",
+    "./hooks": "./src/hooks/index.ts",
     "./env": "./src/lib/env.ts"
   }
 }

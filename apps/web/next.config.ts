@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
     '@workspace/cache',
     '@workspace/db',
     '@workspace/env',
+    '@workspace/realtime',
     '@workspace/sdk',
     '@workspace/ui',
     '@workspace/utils',

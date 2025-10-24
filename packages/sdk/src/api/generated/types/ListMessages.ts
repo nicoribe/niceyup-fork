@@ -39,7 +39,7 @@ export type ListMessagesQueryParams = {
 
 export const messagesStatusEnum = {
   queued: 'queued',
-  in_progress: 'in_progress',
+  processing: 'processing',
   finished: 'finished',
   stopped: 'stopped',
   failed: 'failed',

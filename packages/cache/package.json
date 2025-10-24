@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@workspace/env": "workspace:*",
-    "ioredis": "^5.8.0"
+    "ioredis": "5.8.0"
   },
   "devDependencies": {
     "@types/node": "^20",

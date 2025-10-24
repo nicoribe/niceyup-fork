@@ -1,7 +1,6 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { conversationPubSub } from '@/http/realtime/pub-sub/conversation-pub-sub'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import {
@@ -16,6 +15,7 @@ import { and, eq, isNull, sql } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
 import { messages } from '@workspace/db/schema'
 import { answerMessageTask } from '@workspace/engine/tasks/answer-message'
+import { conversationPubSub } from '@workspace/realtime/pubsub'
 import { z } from 'zod'
 
 const messageSchema = z.object({

@@ -31,7 +31,7 @@
     "pdfjs-dist": "5.4.296",
     "uuid": "^13.0.0",
     "word-extractor": "1.0.4",
-    "zod": "^4.1.8"
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "@types/node": "^20",

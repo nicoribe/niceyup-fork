@@ -1,22 +1,23 @@
 'use client'
 
-import { env } from '@/lib/env'
-import type {
-  ChatParams,
-  MessageNode,
-  OrganizationTeamParams,
-} from '@/lib/types'
 import * as React from 'react'
+import { env } from '../lib/env'
+import type { AIMessageNode } from '../lib/types'
 
-type Params = OrganizationTeamParams & { agentId: string } & ChatParams
+type ContextParams = {
+  organizationSlug: 'my-account' | '$id'
+  teamId: '~' | '$id'
+  agentId: string
+  chatId: 'new' | '$id'
+}
 
 type UseChatRealtimeParams = {
-  params: Params
+  params: ContextParams
 }
 
 export function useChatRealtime({ params }: UseChatRealtimeParams) {
   const [error, setError] = React.useState<string>()
-  const [messages, setMessages] = React.useState<MessageNode[]>([])
+  const [messages, setMessages] = React.useState<AIMessageNode[]>([])
 
   React.useEffect(() => {
     if (
@@ -52,7 +53,7 @@ export function useChatRealtime({ params }: UseChatRealtimeParams) {
 
       websocket.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data) as MessageNode[]
+          const data = JSON.parse(event.data) as AIMessageNode[]
 
           setMessages(data)
         } catch {
@@ -69,5 +70,5 @@ export function useChatRealtime({ params }: UseChatRealtimeParams) {
     }
   }, [params.organizationSlug, params.teamId, params.agentId, params.chatId])
 
-  return { messages, setMessages, error }
+  return { messages, error }
 }

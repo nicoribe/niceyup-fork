@@ -12,11 +12,11 @@ import type {
   PromptInputStatus,
   PromptMessagePart,
 } from '@/lib/types'
+import { useChatRealtime } from '@workspace/realtime/hooks'
 import type { ScrollToBottom } from '@workspace/ui/components/conversation'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { toast } from 'sonner'
-import { useChatRealtime } from './use-chat-realtime'
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
@@ -35,10 +35,7 @@ function hasMultipleChildren(parentNode: MessageNode) {
 }
 
 export function isStream(message: Message) {
-  return Boolean(
-    (message.status === 'queued' || message.status === 'in_progress') &&
-      message.role === 'assistant',
-  )
+  return Boolean(message.status === 'queued' || message.status === 'processing')
 }
 
 // Memoized message index for O(1) lookups
@@ -295,8 +292,9 @@ export function useChat({
     })
   }
 
-  const { messages: messageNodesRealtime, error: errorRealtime } =
-    useChatRealtime({ params })
+  const { messages: messagesRealtime, error: errorRealtime } = useChatRealtime({
+    params,
+  })
 
   React.useEffect(() => {
     if (errorRealtime) {
@@ -305,10 +303,10 @@ export function useChat({
   }, [errorRealtime])
 
   React.useEffect(() => {
-    if (messageNodesRealtime.length) {
-      upsertLoadedMessageNodes(messageNodesRealtime)
+    if (messagesRealtime.length) {
+      upsertLoadedMessageNodes(messagesRealtime)
     }
-  }, [messageNodesRealtime])
+  }, [messagesRealtime])
 
   // Memoized message node index
   const messageNodeIndex = React.useMemo(

@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/**/*.{ts,tsx}'],
+  entry: ['src/**/*.ts'],
   splitting: false,
   sourcemap: true,
   clean: true,
@@ -12,6 +12,7 @@ export default defineConfig({
     '@workspace/db',
     '@workspace/engine',
     '@workspace/env',
+    '@workspace/realtime',
     '@workspace/storage',
     '@workspace/utils',
   ],

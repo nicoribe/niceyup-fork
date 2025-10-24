@@ -12,7 +12,7 @@ export type ResendQuestionMessagePathParams = {
 
 export const questionMessageStatusEnum2 = {
   queued: 'queued',
-  in_progress: 'in_progress',
+  processing: 'processing',
   finished: 'finished',
   stopped: 'stopped',
   failed: 'failed',
@@ -174,7 +174,7 @@ export type PartsStateEnum40 =
 
 export const answerMessageStatusEnum2 = {
   queued: 'queued',
-  in_progress: 'in_progress',
+  processing: 'processing',
   finished: 'finished',
   stopped: 'stopped',
   failed: 'failed',

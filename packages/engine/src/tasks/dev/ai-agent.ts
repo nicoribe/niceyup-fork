@@ -5,10 +5,9 @@ import {
   metadata,
   schemaTask,
 } from '@trigger.dev/sdk'
-import { stepCountIs, streamText } from '@workspace/ai'
+import { readUIMessageStream, stepCountIs, streamText } from '@workspace/ai'
 import { openai } from '@workspace/ai/providers'
 import type { AIMessage } from '@workspace/ai/types'
-import { readAIMessageStream } from '@workspace/ai/utils'
 import { z } from 'zod'
 import { GetInformationTool } from '../../functions/ai-tools'
 import { templatePromptAnswer } from '../../functions/prompts'
@@ -40,14 +39,20 @@ export const aiAgentTask = schemaTask({
 
     let message = {
       id: randomUUID(),
-      status: 'in_progress',
+      status: 'processing',
       role: 'assistant',
       parts: [],
     } as AIMessage
 
     const stream = await metadata.stream(
       'message-delta',
-      readAIMessageStream({ message, stream: streamingResult as any }),
+      readUIMessageStream<AIMessage>({
+        message,
+        stream: streamingResult.toUIMessageStream<AIMessage>({
+          sendReasoning: true,
+          sendSources: true,
+        }),
+      }),
     )
 
     for await (const chunk of stream) {

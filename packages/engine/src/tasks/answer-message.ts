@@ -1,27 +1,16 @@
-import {
-  AbortTaskRunError,
-  logger,
-  metadata,
-  schemaTask,
-} from '@trigger.dev/sdk'
-import {
-  convertToModelMessages,
-  stepCountIs,
-  streamText,
-  validateUIMessages,
-} from '@workspace/ai'
+import { AbortTaskRunError, logger, schemaTask } from '@trigger.dev/sdk'
+import { convertToModelMessages, validateUIMessages } from '@workspace/ai'
 import { openai } from '@workspace/ai/providers'
 import type { AIMessage } from '@workspace/ai/types'
-import { readAIMessageStream } from '@workspace/ai/utils'
 import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
+import {
+  type StreamEventKey,
+  streamAIAssistant,
+} from '../functions/stream-ai-assistant'
 
 export type STREAMS = {
-  [K in 'message-start' | 'message-delta' | 'message-end']: AIMessage
-}
-
-async function* toStream(message: AIMessage) {
-  yield message
+  [K in StreamEventKey]: AIMessage
 }
 
 export const answerMessageTask = schemaTask({
@@ -61,87 +50,50 @@ export const answerMessageTask = schemaTask({
 
     const messages = convertToModelMessages(validatedMessages)
 
-    let error: unknown
-
-    await queries.updateMessage({
-      messageId: payload.answerMessageId,
-      status: 'in_progress',
-    })
-
-    const streamingResult = streamText({
+    const streamingResult = await streamAIAssistant({
       model: openai('gpt-5'),
       tools: {
         image_generation: openai.tools.imageGeneration(),
       },
-      stopWhen: stepCountIs(5),
       messages,
-      abortSignal: signal,
-      onError: (event) => {
-        error = event.error
+      signal,
+      messageId: payload.answerMessageId,
+      onStart: async ({ message }) => {
+        await queries.updateMessage({
+          messageId: message.id,
+          status: message.status,
+        })
+      },
+      onFinish: async ({ message }) => {
+        await queries.updateMessage({
+          messageId: message.id,
+          status: message.status,
+          parts: message.parts,
+          metadata: message.metadata,
+        })
+
+        logger.warn('AI assistant finished', { message })
+      },
+      onFailed: async ({ message, error }) => {
+        await queries.updateMessage({
+          messageId: message.id,
+          status: message.status,
+          parts: message.parts,
+          metadata: message.metadata,
+        })
+
+        logger.error('AI assistant failed', { message, error })
+      },
+      onError: async ({ error }) => {
+        await queries.updateMessage({
+          messageId: payload.answerMessageId,
+          status: 'failed',
+        })
+
+        throw error
       },
     })
 
-    let message = {
-      id: payload.answerMessageId,
-      status: 'in_progress',
-      role: 'assistant',
-      parts: [],
-    } as AIMessage
-
-    await metadata.stream('message-start', toStream(message))
-
-    const stream = await metadata.stream(
-      'message-delta',
-      readAIMessageStream({ message, stream: streamingResult as any }),
-    )
-
-    for await (const chunk of stream) {
-      message = chunk
-    }
-
-    if (error) {
-      message.status = 'failed'
-      message.metadata = {
-        ...message.metadata,
-        error: error instanceof Error ? error.message : String(error),
-      }
-
-      await queries.updateMessage({
-        messageId: message.id,
-        status: message.status,
-        parts: message.parts,
-        metadata: message.metadata,
-      })
-
-      await metadata.stream('message-end', toStream(message))
-
-      logger.error('Error streaming result', {
-        error,
-        message,
-        streamingResult,
-      })
-
-      throw new AbortTaskRunError(
-        error instanceof Error ? error.message : String(error),
-      )
-    }
-
-    message.status = signal.aborted ? 'stopped' : 'finished'
-
-    await queries.updateMessage({
-      messageId: message.id,
-      status: message.status,
-      parts: message.parts,
-      metadata: message.metadata,
-    })
-
-    await metadata.stream('message-end', toStream(message))
-
-    logger.warn('Streaming result', {
-      message,
-      streamingResult,
-    })
-
-    return { message }
+    return streamingResult
   },
 })

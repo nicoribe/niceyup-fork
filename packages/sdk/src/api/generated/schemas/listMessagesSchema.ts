@@ -45,7 +45,7 @@ export const listMessages200Schema = z
         id: z.string(),
         status: z.enum([
           'queued',
-          'in_progress',
+          'processing',
           'finished',
           'stopped',
           'failed',

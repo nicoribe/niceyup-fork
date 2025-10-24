@@ -8,9 +8,9 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.887.0",
-    "@aws-sdk/lib-storage": "^3.887.0",
-    "@aws-sdk/s3-request-presigner": "^3.887.0",
+    "@aws-sdk/client-s3": "3.887.0",
+    "@aws-sdk/lib-storage": "3.887.0",
+    "@aws-sdk/s3-request-presigner": "3.887.0",
     "@workspace/env": "workspace:*"
   },
   "devDependencies": {

@@ -8,7 +8,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@upstash/vector": "^1.2.2",
+    "@upstash/vector": "1.2.2",
     "@workspace/env": "workspace:*"
   },
   "devDependencies": {

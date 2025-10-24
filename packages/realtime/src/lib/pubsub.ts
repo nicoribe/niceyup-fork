@@ -1,12 +1,11 @@
-import type { FastifyRedis } from '@fastify/redis'
-import type { WebSocket } from '@fastify/websocket'
 import type { Redis } from '@workspace/cache'
-import { handleMessageSocket, socketsByChannel } from '../socket-manager'
+import type { WebSocket } from 'ws'
+import { handleMessageSocket, socketsByChannel } from './socket'
 
 let publisher: Redis
 let subscriber: Redis
 
-export function startPubSubManager({ redis }: { redis: FastifyRedis }) {
+export function initializePubSub({ redis }: { redis: Redis }) {
   if (!publisher) {
     publisher = redis
   }
@@ -17,7 +16,7 @@ export function startPubSubManager({ redis }: { redis: FastifyRedis }) {
   }
 }
 
-export class PubSubManager<Channel extends string> {
+export class PubSub<Channel extends string> {
   subscribeToChannel({
     channel,
     socket,

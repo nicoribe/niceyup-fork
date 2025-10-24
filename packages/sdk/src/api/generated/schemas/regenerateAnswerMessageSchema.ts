@@ -32,13 +32,7 @@ export const regenerateAnswerMessage200Schema = z
   .object({
     answerMessage: z.object({
       id: z.string(),
-      status: z.enum([
-        'queued',
-        'in_progress',
-        'finished',
-        'stopped',
-        'failed',
-      ]),
+      status: z.enum(['queued', 'processing', 'finished', 'stopped', 'failed']),
       role: z.enum(['system', 'user', 'assistant']),
       parts: z
         .array(

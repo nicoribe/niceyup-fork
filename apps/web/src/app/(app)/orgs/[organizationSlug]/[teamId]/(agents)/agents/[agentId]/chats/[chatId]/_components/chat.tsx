@@ -1,5 +1,6 @@
 'use client'
 
+import { streamAnswerMessage } from '@/actions/messages'
 import { env } from '@/lib/env'
 import type {
   ChatParams,
@@ -7,6 +8,7 @@ import type {
   OrganizationTeamParams,
 } from '@/lib/types'
 import type { MessageRole } from '@/lib/types'
+import { useChatMessageRealtime } from '@workspace/realtime/hooks'
 import { Action, Actions } from '@workspace/ui/components/actions'
 import {
   Branch,
@@ -65,7 +67,6 @@ import * as React from 'react'
 import { toast } from 'sonner'
 import { useStickToBottomContext } from 'use-stick-to-bottom'
 import { type ChatMessageNode, isStream, useChat } from '../_hooks/use-chat'
-import { useChatAssistantMessageRealtime } from '../_hooks/use-chat-message-realtime'
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
@@ -400,7 +401,7 @@ function ChatMessage({
 }: {
   message: ChatMessageNode
 }) {
-  if (isStream(message)) {
+  if (message.role === 'assistant' && isStream(message)) {
     return <ChatMessageContentStream message={message} />
   }
 
@@ -416,16 +417,16 @@ function ChatMessageContentStream({
 
   const { authorId, setPromptInputStatus } = useChatContext()
 
-  const { message: messageNodeStream, error } = useChatAssistantMessageRealtime(
-    {
+  const { message: messageRealtime, error: errorRealtime } =
+    useChatMessageRealtime({
       params: { organizationSlug, teamId, agentId, chatId },
       messageId: initialMessage.id,
-    },
-  )
+      streamMessageAction: streamAnswerMessage,
+    })
 
   const { scrollToBottom } = useStickToBottomContext()
 
-  const messageNode = { ...initialMessage, ...messageNodeStream }
+  const messageNode = { ...initialMessage, ...messageRealtime }
 
   React.useEffect(() => {
     if (authorId && authorId === initialMessage.metadata?.authorId) {
@@ -433,7 +434,7 @@ function ChatMessageContentStream({
         case 'queued':
           setPromptInputStatus('submitted')
           break
-        case 'in_progress':
+        case 'processing':
           setPromptInputStatus('streaming')
           break
         case 'stopped':
@@ -446,24 +447,26 @@ function ChatMessageContentStream({
       }
     }
 
-    if (messageNodeStream) {
+    if (messageRealtime) {
       scrollToBottom({ preserveScrollPosition: true })
     }
   }, [messageNode])
 
-  if (error) {
+  if (errorRealtime) {
     return (
       <Message from={messageNode.role}>
         <MessageContent>
           <div className="flex flex-row items-center gap-2">
             <XCircle className="size-4 shrink-0 text-destructive" />
-            {messageNodeStream
+            {messageRealtime
               ? messageNode.role === 'assistant'
                 ? 'An error occurred while generating the response.'
                 : 'An error occurred while loading the message.'
               : 'An error occurred while retrieving the message.'}
           </div>
-          {messageNodeStream && <ChatErrorResponse errorMessage={error} />}
+          {messageRealtime && (
+            <ChatErrorResponse errorMessage={errorRealtime} />
+          )}
         </MessageContent>
       </Message>
     )
@@ -512,7 +515,7 @@ function ChatMessageContent({
 
   // Check if the message is not empty
   const messageNotEmpty = React.useMemo(() => {
-    if (message.status === 'queued' || message.status === 'in_progress') {
+    if (message.status === 'queued' || message.status === 'processing') {
       return Boolean(textPart?.text)
     }
 

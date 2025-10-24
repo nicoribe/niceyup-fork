@@ -3,9 +3,8 @@
  * Do not edit manually.
  */
 
-import type { ToZod } from '@kubb/plugin-zod/utils'
-import { z } from 'zod'
 import type {
+  UploadFileHeaderParams,
   UploadFile200,
   UploadFile400,
   UploadFile401,
@@ -13,9 +12,10 @@ import type {
   UploadFile404,
   UploadFile429,
   UploadFile500,
-  UploadFileHeaderParams,
   UploadFileMutationResponse,
 } from '../types/UploadFile'
+import type { ToZod } from '@kubb/plugin-zod/utils'
+import { z } from 'zod'
 
 export const uploadFileHeaderParamsSchema = z.object({
   'x-upload-signature': z.string(),

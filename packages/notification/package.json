@@ -8,8 +8,8 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@novu/api": "^1.6.0",
-    "@novu/react": "^3.9.1",
+    "@novu/api": "1.7.1",
+    "@novu/react": "3.10.1",
     "@workspace/env": "workspace:*"
   },
   "devDependencies": {

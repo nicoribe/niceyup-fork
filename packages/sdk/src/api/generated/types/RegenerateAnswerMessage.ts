@@ -12,7 +12,7 @@ export type RegenerateAnswerMessagePathParams = {
 
 export const answerMessageStatusEnum3 = {
   queued: 'queued',
-  in_progress: 'in_progress',
+  processing: 'processing',
   finished: 'finished',
   stopped: 'stopped',
   failed: 'failed',

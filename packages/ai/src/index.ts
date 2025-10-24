@@ -6,9 +6,13 @@ export {
   experimental_generateImage,
   embed,
   embedMany,
+  type LanguageModel,
+  type ToolSet,
   tool,
   stepCountIs,
   Output,
+  type ModelMessage,
   convertToModelMessages,
   validateUIMessages,
+  readUIMessageStream,
 } from 'ai'

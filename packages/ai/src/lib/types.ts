@@ -13,7 +13,7 @@ export type AIMessageRole = 'system' | 'user' | 'assistant'
 
 export type AIMessageStatus =
   | 'queued'
-  | 'in_progress'
+  | 'processing'
   | 'finished'
   | 'stopped'
   | 'failed'

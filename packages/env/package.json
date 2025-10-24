@@ -8,8 +8,8 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@t3-oss/env-nextjs": "^0.13.6",
-    "zod": "^3.24.2"
+    "@t3-oss/env-nextjs": "0.13.6",
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "@types/node": "^20",

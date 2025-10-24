@@ -12,7 +12,7 @@
     "@workspace/env": "workspace:*",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "resend": "^4.8.0"
+    "resend": "6.2.2"
   },
   "devDependencies": {
     "@types/node": "^20",

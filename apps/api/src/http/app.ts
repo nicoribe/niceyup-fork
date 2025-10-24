@@ -1,4 +1,5 @@
 import { env } from '@/lib/env'
+import { fastifyRealtime } from '@/lib/realtime'
 import { fastifyCors } from '@fastify/cors'
 import { fastifyMultipart } from '@fastify/multipart'
 import { fastifyRedis } from '@fastify/redis'
@@ -15,7 +16,6 @@ import {
 } from 'fastify-type-provider-zod'
 import { version } from '../../package.json'
 import { errorHandler, errorHandlerWebsocket } from './errors/error-handler'
-import { fastifyRealtime } from './realtime'
 import { routes } from './routes'
 
 export const app = fastify({
