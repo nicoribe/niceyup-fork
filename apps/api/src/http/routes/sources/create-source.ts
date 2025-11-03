@@ -14,7 +14,6 @@ import {
   sources,
   textSources,
 } from '@workspace/db/schema'
-import { runIngestionTask } from '@workspace/engine/tasks/run-ingestion'
 import { z } from 'zod'
 
 const textSourceSchema = z.object({
@@ -266,11 +265,11 @@ export async function createSource(app: FastifyTypedInstance) {
         },
       )
 
-      if (type === 'text' || type === 'question-answer') {
-        await runIngestionTask.trigger({
-          sourceId: source.id,
-        })
-      }
+      // if (type === 'text' || type === 'question-answer') {
+      //   await runIngestionTask.trigger({
+      //     sourceId: source.id,
+      //   })
+      // }
 
       return reply.status(201).send({
         sourceId: source.id,

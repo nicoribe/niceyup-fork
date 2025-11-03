@@ -15,7 +15,6 @@ import {
   sourceExplorerNodes,
   sources,
 } from '@workspace/db/schema'
-import { runIngestionTask } from '@workspace/engine/tasks/run-ingestion'
 import { z } from 'zod'
 
 export async function uploadFilesSource(app: FastifyTypedInstance) {
@@ -279,15 +278,15 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
         })
       }
 
-      if (sourceType === 'file') {
-        await runIngestionTask.batchTrigger(
-          uploadedFiles
-            .filter((file) => file.status === 'success')
-            .map((file) => ({
-              payload: { sourceId: file.source.sourceId },
-            })),
-        )
-      }
+      // if (sourceType === 'file') {
+      //   await runIngestionTask.batchTrigger(
+      //     uploadedFiles
+      //       .filter((file) => file.status === 'success')
+      //       .map((file) => ({
+      //         payload: { sourceId: file.source.sourceId },
+      //       })),
+      //   )
+      // }
 
       return { files: uploadedFiles }
     },
