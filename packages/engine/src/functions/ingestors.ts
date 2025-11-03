@@ -1,5 +1,6 @@
 import { logger } from '@trigger.dev/sdk'
 import { generateText } from '@workspace/ai'
+import { vectorStore } from '@workspace/vector-store'
 import type {
   DatabaseSourceQueryExample,
   DatabaseSourceTableMetadata,
@@ -9,7 +10,72 @@ import { filesLoader } from './loaders'
 import { languageModel } from './models'
 import { experimental_templatePromptSummarizeDatabaseSource } from './prompts'
 import { documentSplitter } from './splitters'
-import { vectorStoreUpsert } from './vector-store'
+
+export async function ingestTextSource({
+  namespace,
+  sourceId,
+}: {
+  namespace: string
+  sourceId: string
+}) {
+  const documents = [{ content: 'Empty' }]
+
+  // TODO: Implement logic to ingest text source
+
+  logger.warn('Documents', { documents })
+
+  await vectorStore.upsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'text',
+    data: documents,
+  })
+}
+
+export async function ingestQuestionAnswerSource({
+  namespace,
+  sourceId,
+}: {
+  namespace: string
+  sourceId: string
+}) {
+  const documents = [{ content: 'Empty' }]
+
+  // TODO: Implement logic to ingest question answer source
+
+  logger.warn('Documents', { documents })
+
+  await vectorStore.upsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'question-answer',
+    data: documents,
+  })
+}
+
+export async function ingestWebsiteSource({
+  namespace,
+  sourceId,
+}: {
+  namespace: string
+  sourceId: string
+}) {
+  const documents = [{ content: 'Empty' }]
+
+  // TODO: Implement logic to ingest website source
+
+  logger.warn('Documents', { documents })
+
+  await vectorStore.upsert({
+    namespace,
+    collection: 'sources',
+    sourceId,
+    sourceType: 'website',
+    data: documents,
+  })
+}
 
 export async function ingestFileSource({
   namespace,
@@ -58,77 +124,11 @@ export async function ingestFileSource({
 
   logger.warn('Documents', { documents })
 
-  await vectorStoreUpsert({
+  await vectorStore.upsert({
     namespace,
     collection: 'sources',
     sourceId,
     sourceType: 'file',
-    data: documents,
-  })
-}
-
-export async function ingestTextSource({
-  namespace,
-  sourceId,
-}: {
-  namespace: string
-  sourceId: string
-}) {
-  const documents = [{ content: 'Empty' }]
-
-  // TODO: Implement logic to ingest text source
-
-  logger.warn('Documents', { documents })
-
-  await vectorStoreUpsert({
-    namespace,
-    collection: 'sources',
-    sourceId,
-    sourceType: 'text',
-    data: documents,
-  })
-}
-
-export async function ingestQuestionAnswerSource({
-  namespace,
-  sourceId,
-}: {
-  namespace: string
-  sourceId: string
-}) {
-  const documents = [{ content: 'Empty' }]
-
-  // TODO: Implement logic to ingest question answer source
-
-  logger.warn('Documents', { documents })
-
-  await vectorStoreUpsert({
-    namespace,
-    collection: 'sources',
-    sourceId,
-    sourceType: 'question-answer',
-    data: documents,
-  })
-}
-
-export async function ingestWebsiteSource({
-  namespace,
-  sourceId,
-}: {
-  namespace: string
-  sourceId: string
-}) {
-  const documents = [{ content: 'Empty' }]
-
-  // TODO: Implement logic to ingest website source
-
-  logger.warn('Documents', { documents })
-
-  await vectorStoreUpsert({
-    namespace,
-    collection: 'sources',
-    sourceId,
-    sourceType: 'website',
     data: documents,
   })
 }
@@ -170,7 +170,7 @@ export async function ingestDatabaseSource({
 
   logger.warn('Documents', { documents })
 
-  await vectorStoreUpsert({
+  await vectorStore.upsert({
     namespace,
     collection: 'sources',
     sourceId,
@@ -223,7 +223,7 @@ export async function ingestDatabaseSourceTablesMetadata({
 
   logger.warn('Documents', { documents })
 
-  await vectorStoreUpsert({
+  await vectorStore.upsert({
     namespace,
     collection: 'database-source-tables-metadata',
     sourceId,
@@ -262,7 +262,7 @@ export async function ingestDatabaseSourceProperNouns({
 
   logger.warn('Documents', { documents })
 
-  await vectorStoreUpsert({
+  await vectorStore.upsert({
     namespace,
     collection: 'database-source-proper-nouns',
     sourceId,
@@ -294,7 +294,7 @@ export async function ingestDatabaseSourceQueryExamples({
 
   logger.warn('Documents', { documents })
 
-  await vectorStoreUpsert({
+  await vectorStore.upsert({
     namespace,
     collection: 'database-source-query-examples',
     sourceId,
@@ -352,7 +352,7 @@ export async function experimental_ingestDatabaseSource({
 
   logger.warn('Document', { document })
 
-  await vectorStoreUpsert({
+  await vectorStore.upsert({
     namespace,
     collection: 'sources',
     sourceId,

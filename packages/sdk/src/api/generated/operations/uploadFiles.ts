@@ -6,44 +6,44 @@
 import fetch from '../../../client/fetch'
 import type { RequestConfig, ResponseErrorConfig } from '../../../client/fetch'
 import type {
-  UploadFileMutationResponse,
-  UploadFileHeaderParams,
-  UploadFile400,
-  UploadFile401,
-  UploadFile403,
-  UploadFile404,
-  UploadFile429,
-  UploadFile500,
-} from '../types/UploadFile'
+  UploadFilesMutationResponse,
+  UploadFilesHeaderParams,
+  UploadFiles400,
+  UploadFiles401,
+  UploadFiles403,
+  UploadFiles404,
+  UploadFiles429,
+  UploadFiles500,
+} from '../types/UploadFiles'
 
-function getUploadFileUrl() {
+function getUploadFilesUrl() {
   return `/files` as const
 }
 
 /**
- * @description Upload File
+ * @description Upload files
  * {@link /files}
  */
-export async function uploadFile(
-  { headers }: { headers: UploadFileHeaderParams },
+export async function uploadFiles(
+  { headers }: { headers: UploadFilesHeaderParams },
   config: Partial<RequestConfig> & { client?: typeof fetch } = {},
 ) {
   const { client: request = fetch, ...requestConfig } = config
 
   const res = await request<
-    UploadFileMutationResponse,
+    UploadFilesMutationResponse,
     ResponseErrorConfig<
-      | UploadFile400
-      | UploadFile401
-      | UploadFile403
-      | UploadFile404
-      | UploadFile429
-      | UploadFile500
+      | UploadFiles400
+      | UploadFiles401
+      | UploadFiles403
+      | UploadFiles404
+      | UploadFiles429
+      | UploadFiles500
     >,
     unknown
   >({
     method: 'POST',
-    url: getUploadFileUrl().toString(),
+    url: getUploadFilesUrl().toString(),
     ...requestConfig,
     headers: { ...headers, ...requestConfig.headers },
   })

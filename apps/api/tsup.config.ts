@@ -15,5 +15,6 @@ export default defineConfig({
     '@workspace/realtime',
     '@workspace/storage',
     '@workspace/utils',
+    '@workspace/vector-store',
   ],
 })

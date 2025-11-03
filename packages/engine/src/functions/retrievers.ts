@@ -1,5 +1,6 @@
 import { logger } from '@trigger.dev/sdk'
 import { Output, generateText, stepCountIs } from '@workspace/ai'
+import { vectorStore } from '@workspace/vector-store'
 import { z } from 'zod'
 import { python } from '../python'
 import { SearchProperNounsTool } from './ai-tools'
@@ -8,7 +9,6 @@ import {
   templatePromptQueryEnhancementWithProperNouns,
   templatePromptWriteQuery,
 } from './prompts'
-import { vectorStoreQuery } from './vector-store'
 
 export async function retrieveSources({
   namespace,
@@ -17,7 +17,7 @@ export async function retrieveSources({
   logger.warn('Input', { input: { namespace, question } })
 
   const documents = await logger.trace('Retrieve Documents', async () => {
-    const documents = await vectorStoreQuery({
+    const documents = await vectorStore.query({
       namespace,
       collection: 'sources',
       query: question,
@@ -79,7 +79,7 @@ export async function retrieveDatabaseSourceTablesMetadata({
     async () => {
       const [relevantTablesMetadata, relevantQueryExamples] = await Promise.all(
         [
-          vectorStoreQuery({
+          vectorStore.query({
             namespace,
             collection: 'database-source-tables-metadata',
             sourceId,
@@ -87,7 +87,7 @@ export async function retrieveDatabaseSourceTablesMetadata({
             topK: 10,
           }),
 
-          vectorStoreQuery({
+          vectorStore.query({
             namespace,
             collection: 'database-source-query-examples',
             sourceId,
@@ -218,7 +218,7 @@ export async function retrieveDatabaseSourceProperNouns({
 }) {
   const key = `"${tableName}"."${columnName}"`
 
-  const relevantProperNouns = await vectorStoreQuery({
+  const relevantProperNouns = await vectorStore.query({
     namespace,
     collection: 'database-source-proper-nouns',
     sourceId,

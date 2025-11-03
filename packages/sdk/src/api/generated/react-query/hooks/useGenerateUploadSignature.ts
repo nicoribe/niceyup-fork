@@ -31,7 +31,7 @@ export type GenerateUploadSignatureMutationKey = ReturnType<
 >
 
 /**
- * @description Generate Upload Signature
+ * @description Generate upload signature
  * {@link /files/signature}
  */
 export function useGenerateUploadSignature<TContext>(
@@ -47,8 +47,8 @@ export function useGenerateUploadSignature<TContext>(
         | GenerateUploadSignature500
       >,
       {
-        data: GenerateUploadSignatureMutationRequest
         headers: GenerateUploadSignatureHeaderParams
+        data?: GenerateUploadSignatureMutationRequest
       },
       TContext
     > & { client?: QueryClient }
@@ -73,14 +73,14 @@ export function useGenerateUploadSignature<TContext>(
       | GenerateUploadSignature500
     >,
     {
-      data: GenerateUploadSignatureMutationRequest
       headers: GenerateUploadSignatureHeaderParams
+      data?: GenerateUploadSignatureMutationRequest
     },
     TContext
   >(
     {
-      mutationFn: async ({ data, headers }) => {
-        return generateUploadSignature({ data, headers }, config)
+      mutationFn: async ({ headers, data }) => {
+        return generateUploadSignature({ headers, data }, config)
       },
       mutationKey,
       ...mutationOptions,

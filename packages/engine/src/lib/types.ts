@@ -1,8 +1,8 @@
 export type SourceType =
-  | 'file'
   | 'text'
   | 'question-answer'
   | 'website'
+  | 'file'
   | 'database'
 
 export type DatabaseSourceColumnMetadata = {

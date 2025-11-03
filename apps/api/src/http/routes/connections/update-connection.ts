@@ -1,0 +1,71 @@
+import { BadRequestError } from '@/http/errors/bad-request-error'
+import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { authenticate } from '@/http/middlewares/authenticate'
+import { getOrganizationIdentifier } from '@/lib/utils'
+import type { FastifyTypedInstance } from '@/types/fastify'
+import { db } from '@workspace/db'
+import { eq } from '@workspace/db/orm'
+import { queries } from '@workspace/db/queries'
+import { connections } from '@workspace/db/schema'
+import { z } from 'zod'
+
+export async function updateConnection(app: FastifyTypedInstance) {
+  app.register(authenticate).patch(
+    '/connections/:connectionId',
+    {
+      schema: {
+        tags: ['Connections'],
+        description: 'Update a connection',
+        operationId: 'updateConnection',
+        params: z.object({
+          connectionId: z.string(),
+        }),
+        body: z.object({
+          organizationId: z.string().nullish(),
+          organizationSlug: z.string().nullish(),
+          name: z.string(),
+        }),
+        response: withDefaultErrorResponses({
+          204: z.null().describe('Success'),
+        }),
+      },
+    },
+    async (request, reply) => {
+      const {
+        user: { id: userId },
+      } = request.authSession
+
+      const { connectionId } = request.params
+
+      const { organizationId, organizationSlug, name } = request.body
+
+      const context = {
+        userId,
+        ...getOrganizationIdentifier({
+          organizationId,
+          organizationSlug,
+        }),
+      }
+
+      const connection = await queries.context.getConnection(context, {
+        connectionId,
+      })
+
+      if (!connection) {
+        throw new BadRequestError({
+          code: 'CONNECTION_NOT_FOUND',
+          message: 'Connection not found or you don’t have access',
+        })
+      }
+
+      // TODO: implement app validation
+
+      await db
+        .update(connections)
+        .set({ name })
+        .where(eq(connections.id, connectionId))
+
+      return reply.status(204).send()
+    },
+  )
+}

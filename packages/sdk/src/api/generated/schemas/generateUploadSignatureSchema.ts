@@ -19,7 +19,7 @@ import type { ToZod } from '@kubb/plugin-zod/utils'
 import { z } from 'zod'
 
 export const generateUploadSignatureHeaderParamsSchema = z.object({
-  'x-api-key': z.string(),
+  'x-app-secret-key': z.string(),
 }) as unknown as ToZod<GenerateUploadSignatureHeaderParams>
 
 export type GenerateUploadSignatureHeaderParamsSchema =
@@ -132,21 +132,9 @@ export type GenerateUploadSignature500Schema = GenerateUploadSignature500
 export const generateUploadSignatureMutationRequestSchema = z.object({
   organizationId: z.string().nullable().nullish(),
   organizationSlug: z.string().nullable().nullish(),
-  teamId: z.string().nullable().nullish(),
-  bucket: z.enum(['default', 'engine']).default('default'),
-  scope: z.enum(['public', 'conversations', 'sources']),
-  metadata: z
-    .union([
-      z.object({
-        agentId: z.string().optional(),
-        conversationId: z.string().nullable().nullish(),
-      }),
-      z.object({
-        sourceId: z.string().optional(),
-      }),
-    ])
-    .optional(),
   accept: z.string().default('*'),
+  maxFiles: z.number().min(0).default(1),
+  maxSize: z.number().min(0).default(15728640),
   expires: z.number().min(0).default(300),
 }) as unknown as ToZod<GenerateUploadSignatureMutationRequest>
 

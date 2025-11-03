@@ -16,7 +16,7 @@ export async function getHeaders() {
 
     const headersCookies = (await serverHeaders()).get('cookie')
 
-    return { ...headers, Cookie: headersCookies }
+    return { ...headers, Cookie: headersCookies || '' }
   }
 
   return headers

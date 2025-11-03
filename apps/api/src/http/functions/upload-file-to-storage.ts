@@ -5,172 +5,26 @@ import { UnauthorizedError } from '@/http/errors/unauthorized-error'
 import { env } from '@/lib/env'
 import type { MultipartFile } from '@fastify/multipart'
 import { queries } from '@workspace/db/queries'
-import { DeleteObjectCommand, Upload, s3Client } from '@workspace/storage'
+import type { FileMetadata } from '@workspace/db/types'
+import { storage } from '@workspace/storage'
 import { sign, verify } from 'jsonwebtoken'
 
 export type FileBucket = 'default' | 'engine'
 
 export type FileScope = 'public' | 'conversations' | 'sources'
 
-export type FileMetadata = {
-  authorId?: string
-  agentId?: string
-  conversationId?: string | null
-  sourceId?: string
-}
-
-const BucketScope = {
-  default: ['public', 'conversations'],
-  engine: ['sources'],
-}
-
-type ContextValidateFileDataForUploadParams = {
-  userId: string
-} & (
+export type FileBucketScope =
   | {
-      organizationId?: string | null
-      organizationSlug?: never
+      bucket: 'default'
+      scope: 'public' | 'conversations'
     }
   | {
-      organizationId?: never
-      organizationSlug?: string | null
-    }
-) & {
-    teamId?: string | null
-  }
-
-type ValidateFileDataForUploadParams = {
-  bucket: FileBucket
-  scope: FileScope
-  metadata?: Omit<FileMetadata, 'authorId'>
-}
-
-export async function validateFileDataForUpload(
-  context: ContextValidateFileDataForUploadParams,
-  params: ValidateFileDataForUploadParams,
-) {
-  if (!BucketScope[params.bucket].includes(params.scope)) {
-    throw new BadRequestError({
-      code: 'INVALID_BUCKET_SCOPE',
-      message: 'Invalid bucket scope',
-    })
-  }
-
-  const ctx: {
-    userId: string
-    organizationId?: string
-  } = {
-    userId: context.userId,
-  }
-
-  if (context.organizationId || context.organizationSlug) {
-    let organization = null
-
-    if (context.organizationId) {
-      organization = await queries.context.getOrganization(
-        { userId: context.userId },
-        { organizationId: context.organizationId },
-      )
+      bucket: 'engine'
+      scope: 'sources'
     }
 
-    if (context.organizationSlug) {
-      organization = await queries.context.getOrganization(
-        { userId: context.userId },
-        { organizationSlug: context.organizationSlug },
-      )
-    }
-
-    if (!organization) {
-      throw new BadRequestError({
-        code: 'ORGANIZATION_NOT_FOUND',
-        message: 'Organization not found',
-      })
-    }
-
-    ctx.organizationId = organization.id
-  }
-
-  const fileMetadata: FileMetadata = {
-    authorId: ctx.userId,
-  }
-
-  if (params.bucket === 'engine' && params.scope === 'sources') {
-    if (!params.metadata?.sourceId) {
-      throw new BadRequestError({
-        code: 'SOURCE_REQUIRED',
-        message: 'Source is required',
-      })
-    }
-
-    const source = await queries.context.getSource(ctx, {
-      sourceId: params.metadata.sourceId,
-    })
-
-    if (!source) {
-      throw new BadRequestError({
-        code: 'SOURCE_NOT_FOUND',
-        message: 'Source not found or you don’t have access',
-      })
-    }
-
-    fileMetadata.sourceId = params.metadata.sourceId
-  }
-
-  if (params.bucket === 'default' && params.scope === 'conversations') {
-    if (!params.metadata?.agentId) {
-      throw new BadRequestError({
-        code: 'AGENT_REQUIRED',
-        message: 'Agent is required',
-      })
-    }
-
-    if (params.metadata.conversationId) {
-      const conversation = await queries.context.getConversation(ctx, {
-        agentId: params.metadata.agentId,
-        conversationId: params.metadata.conversationId,
-      })
-
-      if (!conversation) {
-        throw new BadRequestError({
-          code: 'CONVERSATION_NOT_FOUND',
-          message: 'Conversation not found or you don’t have access',
-        })
-      }
-
-      fileMetadata.agentId = params.metadata.agentId
-      fileMetadata.conversationId = params.metadata.conversationId
-    } else {
-      const agent = await queries.context.getAgent(ctx, {
-        agentId: params.metadata.agentId,
-      })
-
-      if (!agent) {
-        throw new BadRequestError({
-          code: 'AGENT_NOT_FOUND',
-          message: 'Agent not found or you don’t have access',
-        })
-      }
-
-      fileMetadata.agentId = agent.id
-    }
-  }
-
-  const ownerTypeCondition = ctx.organizationId
-    ? { organizationId: ctx.organizationId }
-    : { userId: ctx.userId }
-
-  return {
-    bucket: params.bucket,
-    scope: params.scope,
-    metadata: fileMetadata,
-    owner: ownerTypeCondition,
-  }
-}
-
-type FileData = {
-  bucket: FileBucket
-  scope: FileScope
-  metadata: FileMetadata
+export type FileData = FileBucketScope & {
+  metadata?: FileMetadata
   owner:
     | {
         userId: string
@@ -182,35 +36,51 @@ type FileData = {
       }
 }
 
-type FileUploadPayload = {
-  data: FileData
-  accept: string
+const BucketScope = {
+  default: ['public', 'conversations'],
+  engine: ['sources'],
 }
 
-type GenerateSignatureForUploadParams = {
-  payload: FileUploadPayload
+type FileUploadPayload<T> = T & {
+  data: FileData
+  accept?: string
+}
+
+type GenerateSignatureForUploadParams<T> = {
+  key?: string | null
+  payload: FileUploadPayload<T>
   expires: number
 }
 
-export function generateSignatureForUpload(
-  params: GenerateSignatureForUploadParams,
+export function generateSignatureForUpload<T>(
+  params: GenerateSignatureForUploadParams<T>,
 ) {
-  const signature = sign(params.payload, env.UPLOAD_SECRET, {
-    expiresIn: params.expires,
-  })
+  const signature = sign(
+    params.payload,
+    `${params.key ? `${params.key}:` : ''}${env.UPLOAD_SECRET}`,
+    {
+      expiresIn: params.expires,
+    },
+  )
 
   return signature
 }
 
 type VerifySignatureForUploadParams = {
+  key?: string | null
   signature: string
 }
 
-export function verifySignatureForUpload(
+export function verifySignatureForUpload<T>(
   params: VerifySignatureForUploadParams,
 ) {
   try {
-    return verify(params.signature, env.UPLOAD_SECRET) as FileUploadPayload
+    const payload = verify(
+      params.signature,
+      `${params.key ? `${params.key}:` : ''}${env.UPLOAD_SECRET}`,
+    ) as FileUploadPayload<T>
+
+    return payload
   } catch {
     throw new UnauthorizedError({
       code: 'INVALID_UPLOAD_SIGNATURE',
@@ -229,8 +99,8 @@ export async function validatedFileForUpload(
 ) {
   if (!params.file.filename) {
     throw new BadRequestError({
-      code: 'FILE_NOT_FOUND',
-      message: 'File not found in the request',
+      code: 'FILE_NAME_NOT_FOUND',
+      message: 'File name not found',
     })
   }
 
@@ -287,33 +157,27 @@ export async function uploadFileToStorage(params: UploadFileToStorageParams) {
 
   const filePath = `${params.data.scope}/${uniqueFileName}${fileExtension}`
 
-  const upload = new Upload({
-    client: s3Client,
-    params: {
-      Bucket: s3Bucket,
-      Key: filePath,
-      Body: params.file.file,
-      ContentType: params.file.mimetype,
-    },
+  const { fileSize } = await storage.upload({
+    bucket: s3Bucket,
+    key: filePath,
+    body: params.file.file,
+    contentType: params.file.mimetype,
   })
-
-  await upload.done()
 
   const createdFile = await queries.createFile({
     fileName: params.file.filename,
     fileMimeType: params.file.mimetype,
+    fileSize,
     filePath,
-    bucket: params.data.bucket,
-    scope: params.data.scope,
-    metadata: params.data.metadata,
-    owner: params.data.owner,
+    ...params.data,
   })
 
   if (!createdFile) {
     // Delete the file from S3 if it was not created
-    await s3Client.send(
-      new DeleteObjectCommand({ Bucket: s3Bucket, Key: filePath }),
-    )
+    await storage.delete({
+      bucket: s3Bucket,
+      key: filePath,
+    })
 
     throw new BadRequestError({
       code: 'FILE_NOT_CREATED',

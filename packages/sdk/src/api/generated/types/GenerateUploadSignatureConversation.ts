@@ -3,68 +3,20 @@
  * Do not edit manually.
  */
 
-export type UploadFileHeaderParams = {
-  /**
-   * @type string
-   */
-  'x-upload-signature': string
-}
-
-export const fileBucketEnum = {
-  default: 'default',
-  engine: 'engine',
-} as const
-
-export type FileBucketEnum =
-  (typeof fileBucketEnum)[keyof typeof fileBucketEnum]
-
-export const fileScopeEnum = {
-  public: 'public',
-  conversations: 'conversations',
-  sources: 'sources',
-} as const
-
-export type FileScopeEnum = (typeof fileScopeEnum)[keyof typeof fileScopeEnum]
-
 /**
  * @description Success
  */
-export type UploadFile200 = {
+export type GenerateUploadSignatureConversation200 = {
   /**
-   * @type object
+   * @type string
    */
-  file: {
-    /**
-     * @type string
-     */
-    id: string
-    /**
-     * @type string
-     */
-    fileName: string
-    /**
-     * @type string
-     */
-    fileMimeType: string
-    /**
-     * @type string
-     */
-    filePath: string
-    /**
-     * @type string
-     */
-    bucket: FileBucketEnum
-    /**
-     * @type string
-     */
-    scope: FileScopeEnum
-  }
+  signature: string
 }
 
 /**
  * @description Bad Request. Usually due to missing parameters, or invalid parameters.
  */
-export type UploadFile400 = {
+export type GenerateUploadSignatureConversation400 = {
   /**
    * @type string
    */
@@ -97,7 +49,7 @@ export type UploadFile400 = {
 /**
  * @description Unauthorized. Due to missing or invalid authentication.
  */
-export type UploadFile401 = {
+export type GenerateUploadSignatureConversation401 = {
   /**
    * @type string
    */
@@ -111,7 +63,7 @@ export type UploadFile401 = {
 /**
  * @description Forbidden. You do not have permission to access this resource or to perform this action.
  */
-export type UploadFile403 = {
+export type GenerateUploadSignatureConversation403 = {
   /**
    * @type string
    */
@@ -121,7 +73,7 @@ export type UploadFile403 = {
 /**
  * @description Not Found. The requested resource was not found.
  */
-export type UploadFile404 = {
+export type GenerateUploadSignatureConversation404 = {
   /**
    * @type string
    */
@@ -131,7 +83,7 @@ export type UploadFile404 = {
 /**
  * @description Too Many Requests. You have exceeded the rate limit. Try again later.
  */
-export type UploadFile429 = {
+export type GenerateUploadSignatureConversation429 = {
   /**
    * @type string
    */
@@ -141,7 +93,7 @@ export type UploadFile429 = {
 /**
  * @description Internal Server Error. This is a problem with the server that you cannot fix.
  */
-export type UploadFile500 = {
+export type GenerateUploadSignatureConversation500 = {
   /**
    * @type string
    */
@@ -152,16 +104,40 @@ export type UploadFile500 = {
   message: string
 }
 
-export type UploadFileMutationResponse = UploadFile200
+export type GenerateUploadSignatureConversationMutationRequest = {
+  /**
+   * @type string
+   */
+  organizationId?: string | null
+  /**
+   * @type string
+   */
+  organizationSlug?: string | null
+  /**
+   * @type string
+   */
+  teamId?: string | null
+  /**
+   * @type string
+   */
+  agentId: string
+  /**
+   * @type string
+   */
+  conversationId?: string | null
+}
 
-export type UploadFileMutation = {
-  Response: UploadFile200
-  HeaderParams: UploadFileHeaderParams
+export type GenerateUploadSignatureConversationMutationResponse =
+  GenerateUploadSignatureConversation200
+
+export type GenerateUploadSignatureConversationMutation = {
+  Response: GenerateUploadSignatureConversation200
+  Request: GenerateUploadSignatureConversationMutationRequest
   Errors:
-    | UploadFile400
-    | UploadFile401
-    | UploadFile403
-    | UploadFile404
-    | UploadFile429
-    | UploadFile500
+    | GenerateUploadSignatureConversation400
+    | GenerateUploadSignatureConversation401
+    | GenerateUploadSignatureConversation403
+    | GenerateUploadSignatureConversation404
+    | GenerateUploadSignatureConversation429
+    | GenerateUploadSignatureConversation500
 }

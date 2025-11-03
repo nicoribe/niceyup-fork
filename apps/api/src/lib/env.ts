@@ -5,6 +5,7 @@ import { env as databaseEnv } from '@workspace/db/env'
 import { env as engineEnv } from '@workspace/engine/env'
 import { env as baseEnv, createEnv, z } from '@workspace/env'
 import { env as storageEnv } from '@workspace/storage/env'
+import { env as vectorStoreEnv } from '@workspace/vector-store/env'
 
 export const env = createEnv({
   extends: [
@@ -15,6 +16,7 @@ export const env = createEnv({
     databaseEnv,
     engineEnv,
     storageEnv,
+    vectorStoreEnv,
   ],
   server: {
     PORT: z.coerce.number().optional(),

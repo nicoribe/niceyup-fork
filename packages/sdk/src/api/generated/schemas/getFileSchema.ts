@@ -42,6 +42,7 @@ export const getFile200Schema = z
       id: z.string(),
       fileName: z.string(),
       fileMimeType: z.string(),
+      fileSize: z.number(),
       filePath: z.string(),
       bucket: z.enum(['default', 'engine']),
       scope: z.enum(['public', 'conversations', 'sources']),

@@ -1,0 +1,1 @@
+DROP TABLE "integration_sources" CASCADE;

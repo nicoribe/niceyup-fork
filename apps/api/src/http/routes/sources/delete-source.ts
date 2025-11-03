@@ -1,12 +1,21 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { authenticate } from '@/http/middlewares/authenticate'
+import { env } from '@/lib/env'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
 import { and, eq } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
-import { sourceExplorerNodes, sources } from '@workspace/db/schema'
+import {
+  databaseSources,
+  fileSources,
+  files,
+  sourceExplorerNodes,
+  sources,
+} from '@workspace/db/schema'
+import { storage } from '@workspace/storage'
+import { vectorStore } from '@workspace/vector-store'
 import { z } from 'zod'
 
 export async function deleteSource(app: FastifyTypedInstance) {
@@ -58,6 +67,49 @@ export async function deleteSource(app: FastifyTypedInstance) {
         })
       }
 
+      let _file = null
+
+      switch (source.type) {
+        case 'file':
+          const [fileSource] = await db
+            .select()
+            .from(fileSources)
+            .where(eq(fileSources.sourceId, sourceId))
+            .limit(1)
+
+          if (fileSource?.fileId) {
+            const [file] = await db
+              .select()
+              .from(files)
+              .where(eq(files.id, fileSource.fileId))
+              .limit(1)
+
+            if (file) {
+              _file = file
+            }
+          }
+          break
+        case 'database':
+          const [databaseSource] = await db
+            .select()
+            .from(databaseSources)
+            .where(eq(databaseSources.sourceId, sourceId))
+            .limit(1)
+
+          if (databaseSource?.fileId) {
+            const [file] = await db
+              .select()
+              .from(files)
+              .where(eq(files.id, databaseSource.fileId))
+              .limit(1)
+
+            if (file) {
+              _file = file
+            }
+          }
+          break
+      }
+
       await db.transaction(async (tx) => {
         const explorerOwnerTypeCondition = source.ownerOrganizationId
           ? eq(
@@ -83,6 +135,10 @@ export async function deleteSource(app: FastifyTypedInstance) {
           await tx
             .delete(sources)
             .where(and(eq(sources.id, sourceId), ownerTypeCondition))
+
+          if (_file) {
+            await tx.delete(files).where(eq(files.id, _file.id))
+          }
         } else {
           await tx
             .update(sourceExplorerNodes)
@@ -100,6 +156,27 @@ export async function deleteSource(app: FastifyTypedInstance) {
             .where(and(eq(sources.id, sourceId), ownerTypeCondition))
         }
       })
+
+      await Promise.all([
+        vectorStore.delete({
+          namespace: source.ownerOrganizationId || source.ownerUserId!,
+          sourceId,
+        }),
+        ...(!destroy
+          ? [
+              _file &&
+                storage.delete({
+                  bucket: env.S3_ENGINE_BUCKET,
+                  key: _file.filePath,
+                }),
+              source.type === 'database' &&
+                storage.deleteDirectory({
+                  bucket: env.S3_ENGINE_BUCKET,
+                  path: `/sources/${sourceId}/`,
+                }),
+            ]
+          : []),
+      ])
 
       return reply.status(204).send()
     },

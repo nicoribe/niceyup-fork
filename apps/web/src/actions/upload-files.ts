@@ -6,37 +6,64 @@ import type { OrganizationTeamParams } from '@/lib/types'
 
 type ContextGenerateUploadSignatureParams = OrganizationTeamParams
 
-type GenerateUploadSignatureParams = (
+export type GenerateUploadSignatureParams =
   | ({
       bucket: 'default'
     } & (
-      | { scope: 'public' }
+      | {
+          scope: 'public'
+          accept?: string
+          maxFiles?: number
+          maxSize?: number
+          expires?: number
+        }
       | {
           scope: 'conversations'
-          metadata: { agentId: string; conversationId: string | null }
+          agentId: string
+          conversationId?: string | null
         }
     ))
   | ({
       bucket: 'engine'
     } & {
       scope: 'sources'
-      metadata: { sourceId: string }
+      sourceType?: 'file' | 'database'
+      explorerNode?: { folderId?: string | null }
     })
-) & {
-  accept: string
-  expires: number
-}
 
 export async function generateUploadSignature(
   context: ContextGenerateUploadSignatureParams,
   params: GenerateUploadSignatureParams,
 ) {
-  const { data, error } = await sdk.generateUploadSignature({
-    data: { ...context, ...params },
-    headers: {
-      'x-api-key': env.API_KEY,
-    },
-  })
+  const { data, error } =
+    params.scope === 'sources'
+      ? await sdk.generateUploadSignatureSource({
+          data: {
+            ...context,
+            sourceType: params.sourceType,
+            explorerNode: params.explorerNode,
+          },
+        })
+      : params.scope === 'conversations'
+        ? await sdk.generateUploadSignatureConversation({
+            data: {
+              ...context,
+              agentId: params.agentId,
+              conversationId: params.conversationId,
+            },
+          })
+        : await sdk.generateUploadSignature({
+            data: {
+              ...context,
+              accept: params.accept,
+              maxFiles: params.maxFiles,
+              maxSize: params.maxSize,
+              expires: params.expires,
+            },
+            headers: {
+              'x-app-secret-key': env.APP_SECRET_KEY,
+            },
+          })
 
   if (error) {
     return { error: { ...error } }

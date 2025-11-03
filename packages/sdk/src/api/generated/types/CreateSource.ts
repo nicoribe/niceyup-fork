@@ -12,9 +12,9 @@ export type CreateSource200 = {
    */
   sourceId: string
   /**
-   * @type object | undefined
+   * @type object
    */
-  explorerNode?: {
+  explorerNode: {
     /**
      * @type string
      */
@@ -114,11 +114,9 @@ export type CreateSource500 = {
 }
 
 export const createSourceMutationRequestTypeEnum = {
-  file: 'file',
   text: 'text',
   'question-answer': 'question-answer',
   website: 'website',
-  database: 'database',
 } as const
 
 export type CreateSourceMutationRequestTypeEnum =

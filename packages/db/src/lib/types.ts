@@ -6,10 +6,10 @@ import type {
 } from '@workspace/ai/types'
 
 export type SourceType =
-  | 'file'
   | 'text'
   | 'question-answer'
   | 'website'
+  | 'file'
   | 'database'
 
 export type DatabaseSourceDialect = 'postgresql' | 'mysql' | 'sqlite'
@@ -54,8 +54,8 @@ export type FileScope = 'public' | 'conversations' | 'sources'
 
 export type FileMetadata = {
   authorId?: string
-  agentId?: string
-  conversationId?: string | null
+  // agentIds?: string[]
+  // conversationIds?: string[]
   sourceId?: string
 }
 

@@ -132,18 +132,20 @@ export function ChatPromptInput({
         return
       }
 
-      for (const file of data.files) {
-        const existingFile = addedFiles.find(
-          (existingFile) => existingFile.file.name === file.fileName,
-        )
+      for (let i = 0; i < data.files.length; i++) {
+        const file = data.files[i]
+        const existingFile = addedFiles[i]
 
-        if (existingFile) {
-          existingFile.file = {
-            id: file.id,
-            name: file.fileName,
-            type: file.fileMimeType,
-            url: new URL(file.filePath, env.NEXT_PUBLIC_STORAGE_URL).toString(),
-          }
+        if (!file || file.status === 'error' || !existingFile) {
+          continue
+        }
+
+        existingFile.file = {
+          id: file.id,
+          name: file.fileName,
+          type: file.fileMimeType,
+          size: file.fileSize,
+          url: new URL(file.filePath, env.NEXT_PUBLIC_STORAGE_URL).toString(),
         }
       }
 
@@ -169,10 +171,11 @@ export function ChatPromptInput({
       getInputProps,
     },
   ] = useFileUpload({
-    accept: 'application/pdf,image/*,video/*,audio/*',
+    accept:
+      'application/pdf, text/plain, image/jpeg, image/png, image/gif, image/webp',
     multiple: true,
     maxFiles: 10,
-    maxSize: 15 * 1024 * 1024, // 15 MB
+    maxSize: 100 * 1024 * 1024, // 100 MB
     onFilesAdded,
   })
 

@@ -1,32 +1,38 @@
 'use client'
 
-import { generateUploadSignature } from '@/actions/upload-files'
-import type { sdk } from '@/lib/sdk'
+import {
+  type GenerateUploadSignatureParams,
+  generateUploadSignature,
+} from '@/actions/upload-files'
 import type { OrganizationTeamParams } from '@/lib/types'
 import * as React from 'react'
 
-type ParametersGenerateUploadSignature = Parameters<
-  typeof generateUploadSignature
->[1]
-
-type UploadedFile = NonNullable<
-  Awaited<ReturnType<typeof sdk.uploadFile>>['data']
->['file']
-
-type ReturnUploadFiles = {
-  data: { files: UploadedFile[] }
-  error: Awaited<ReturnType<typeof sdk.uploadFile>>['error']
-}
+type UploadedFile =
+  | {
+      status: 'success'
+      id: string
+      fileName: string
+      fileMimeType: string
+      fileSize: number
+      filePath: string
+      [key: string]: any
+    }
+  | {
+      status: 'error'
+      error: {
+        code: string
+        message: string
+      }
+      fileName: string
+    }
 
 export function useUploadFiles(
   { organizationSlug, teamId }: OrganizationTeamParams,
-  params: ParametersGenerateUploadSignature,
+  params: GenerateUploadSignatureParams,
 ) {
   const [uploading, setUploading] = React.useState(false)
 
-  const uploadFiles = async ({
-    files: filesToUpload,
-  }: { files: File[] }): Promise<ReturnUploadFiles> => {
+  const uploadFiles = async ({ files: filesToUpload }: { files: File[] }) => {
     const files: UploadedFile[] = []
 
     try {
@@ -38,14 +44,22 @@ export function useUploadFiles(
       )
 
       if (error) {
-        return { data: { files }, error }
+        return { data: null, error }
+      }
+
+      let baseUrl = '/api/files'
+
+      if (params.scope === 'conversations') {
+        baseUrl = '/api/conversations/files'
+      } else if (params.scope === 'sources') {
+        baseUrl = '/api/sources/files'
       }
 
       for (const file of filesToUpload) {
         const formData = new FormData()
-        formData.append('file', file as File)
+        formData.set('file', file as File)
 
-        const response = await fetch('/api/files', {
+        const response = await fetch(baseUrl, {
           method: 'POST',
           headers: {
             'x-upload-signature': data.signature,
@@ -56,16 +70,25 @@ export function useUploadFiles(
         const result = await response.json()
 
         if (!response.ok) {
-          return { data: { files }, error: result }
-        }
+          files.push({
+            status: 'error' as const,
+            error: {
+              code: 'FAILED_TO_UPLOAD_FILE',
+              message: 'Failed to upload file',
+            },
+            fileName: file.name,
+          })
+        } else {
+          const [file] = result.files
 
-        files.push(result.file)
+          files.push(file)
+        }
       }
 
       return { data: { files }, error: null }
     } catch {
       return {
-        data: { files },
+        data: null,
         error: { message: 'Error uploading files, please try again' },
       }
     } finally {

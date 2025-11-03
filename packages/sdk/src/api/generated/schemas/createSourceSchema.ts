@@ -23,11 +23,9 @@ import { z } from 'zod'
 export const createSource200Schema = z
   .object({
     sourceId: z.string(),
-    explorerNode: z
-      .object({
-        itemId: z.string(),
-      })
-      .optional(),
+    explorerNode: z.object({
+      itemId: z.string(),
+    }),
   })
   .describe('Success') as unknown as ToZod<CreateSource200>
 
@@ -130,7 +128,7 @@ export const createSourceMutationRequestSchema = z.object({
   organizationId: z.string().nullable().nullish(),
   organizationSlug: z.string().nullable().nullish(),
   name: z.string(),
-  type: z.enum(['file', 'text', 'question-answer', 'website', 'database']),
+  type: z.enum(['text', 'question-answer', 'website']),
   explorerNode: z
     .object({
       folderId: z.string().nullable().nullish(),

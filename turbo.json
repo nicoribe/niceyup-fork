@@ -42,8 +42,8 @@
   },
   "globalEnv": [
     "APP_ENV",
+    "APP_SECRET_KEY",
     "API_URL",
-    "API_KEY",
     "WEB_URL",
     "STORAGE_URL",
     "ENCRYPTION_KEY",

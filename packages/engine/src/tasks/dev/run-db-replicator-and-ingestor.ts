@@ -26,6 +26,19 @@ export const runDbReplicatorAndIngestorTask = schemaTask({
   run: async (payload) => {
     const sourceId = await logger.trace('Create Source', async () => {
       return await db.transaction(async (tx) => {
+        const [createSource] = await tx
+          .insert(sources)
+          .values({
+            name: '(Test) Database Source',
+            type: 'database',
+            ownerUserId: payload.ownerUserId,
+          })
+          .returning()
+
+        if (!createSource) {
+          throw new AbortTaskRunError('Failed to create source')
+        }
+
         const [createConnection] = await tx
           .insert(connections)
           .values({
@@ -40,25 +53,10 @@ export const runDbReplicatorAndIngestorTask = schemaTask({
           throw new AbortTaskRunError('Failed to create connection')
         }
 
-        const [createSource] = await tx
-          .insert(sources)
-          .values({
-            name: '(Test) Database Source',
-            type: 'database',
-            ownerUserId: payload.ownerUserId,
-          })
-          .returning()
-
-        if (!createSource) {
-          throw new AbortTaskRunError('Failed to create source')
-        }
-
         const [createDatabaseSource] = await tx
           .insert(databaseSources)
           .values({
             dialect: payload.connection.app,
-            tablesMetadata: [],
-            queryExamples: [],
             sourceId: createSource.id,
             connectionId: createConnection.id,
           })

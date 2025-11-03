@@ -710,12 +710,8 @@ export function useChat({
     {
       bucket: 'default',
       scope: 'conversations',
-      metadata: {
-        agentId: params.agentId,
-        conversationId: params.chatId !== 'new' ? params.chatId : null,
-      },
-      accept: 'application/pdf,image/*,video/*,audio/*',
-      expires: 5 * 60, // 5 minutes
+      agentId: params.agentId,
+      conversationId: params.chatId !== 'new' ? params.chatId : null,
     },
   )
 

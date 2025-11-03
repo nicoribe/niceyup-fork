@@ -2,6 +2,8 @@ export type { CreateSourceMutationKey } from './useCreateSource'
 export type { DeleteConversationMutationKey } from './useDeleteConversation'
 export type { DeleteSourceMutationKey } from './useDeleteSource'
 export type { GenerateUploadSignatureMutationKey } from './useGenerateUploadSignature'
+export type { GenerateUploadSignatureConversationMutationKey } from './useGenerateUploadSignatureConversation'
+export type { GenerateUploadSignatureSourceMutationKey } from './useGenerateUploadSignatureSource'
 export type { GetAgentQueryKey } from './useGetAgent'
 export type { GetConnectionQueryKey } from './useGetConnection'
 export type { GetConversationQueryKey } from './useGetConversation'
@@ -20,7 +22,9 @@ export type { SendQuestionMessageMutationKey } from './useSendQuestionMessage'
 export type { StreamAnswerMessageQueryKey } from './useStreamAnswerMessage'
 export type { UpdateConversationMutationKey } from './useUpdateConversation'
 export type { UpdateSourceMutationKey } from './useUpdateSource'
-export type { UploadFileMutationKey } from './useUploadFile'
+export type { UploadFilesMutationKey } from './useUploadFiles'
+export type { UploadFilesConversationMutationKey } from './useUploadFilesConversation'
+export type { UploadFilesSourceMutationKey } from './useUploadFilesSource'
 export { createSourceMutationKey, useCreateSource } from './useCreateSource'
 export {
   deleteConversationMutationKey,
@@ -31,6 +35,14 @@ export {
   generateUploadSignatureMutationKey,
   useGenerateUploadSignature,
 } from './useGenerateUploadSignature'
+export {
+  generateUploadSignatureConversationMutationKey,
+  useGenerateUploadSignatureConversation,
+} from './useGenerateUploadSignatureConversation'
+export {
+  generateUploadSignatureSourceMutationKey,
+  useGenerateUploadSignatureSource,
+} from './useGenerateUploadSignatureSource'
 export {
   getAgentQueryKey,
   getAgentQueryOptions,
@@ -105,4 +117,12 @@ export {
   useUpdateConversation,
 } from './useUpdateConversation'
 export { updateSourceMutationKey, useUpdateSource } from './useUpdateSource'
-export { uploadFileMutationKey, useUploadFile } from './useUploadFile'
+export { uploadFilesMutationKey, useUploadFiles } from './useUploadFiles'
+export {
+  uploadFilesConversationMutationKey,
+  useUploadFilesConversation,
+} from './useUploadFilesConversation'
+export {
+  uploadFilesSourceMutationKey,
+  useUploadFilesSource,
+} from './useUploadFilesSource'

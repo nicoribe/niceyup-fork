@@ -110,6 +110,8 @@ export async function getConnection(
         app: connections.app,
         name: connections.name,
         payload: connections.payload,
+        ownerUserId: connections.ownerUserId,
+        ownerOrganizationId: connections.ownerOrganizationId,
       })
       .from(connections)
       .where(
@@ -145,6 +147,8 @@ export async function getConnection(
         app: connections.app,
         name: connections.name,
         payload: connections.payload,
+        ownerUserId: connections.ownerUserId,
+        ownerOrganizationId: connections.ownerOrganizationId,
       })
       .from(connections)
       .where(

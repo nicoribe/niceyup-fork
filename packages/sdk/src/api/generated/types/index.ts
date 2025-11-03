@@ -48,12 +48,35 @@ export type {
   GenerateUploadSignature404,
   GenerateUploadSignature429,
   GenerateUploadSignature500,
-  GenerateUploadSignatureMutationRequestBucketEnum,
-  GenerateUploadSignatureMutationRequestScopeEnum,
   GenerateUploadSignatureMutationRequest,
   GenerateUploadSignatureMutationResponse,
   GenerateUploadSignatureMutation,
 } from './GenerateUploadSignature'
+export type {
+  GenerateUploadSignatureConversation200,
+  GenerateUploadSignatureConversation400,
+  GenerateUploadSignatureConversation401,
+  GenerateUploadSignatureConversation403,
+  GenerateUploadSignatureConversation404,
+  GenerateUploadSignatureConversation429,
+  GenerateUploadSignatureConversation500,
+  GenerateUploadSignatureConversationMutationRequest,
+  GenerateUploadSignatureConversationMutationResponse,
+  GenerateUploadSignatureConversationMutation,
+} from './GenerateUploadSignatureConversation'
+export type {
+  GenerateUploadSignatureSource200,
+  GenerateUploadSignatureSource400,
+  GenerateUploadSignatureSource401,
+  GenerateUploadSignatureSource403,
+  GenerateUploadSignatureSource404,
+  GenerateUploadSignatureSource429,
+  GenerateUploadSignatureSource500,
+  GenerateUploadSignatureSourceMutationRequestSourceTypeEnum,
+  GenerateUploadSignatureSourceMutationRequest,
+  GenerateUploadSignatureSourceMutationResponse,
+  GenerateUploadSignatureSourceMutation,
+} from './GenerateUploadSignatureSource'
 export type {
   GetAgentPathParams,
   GetAgentQueryParams,
@@ -96,8 +119,8 @@ export type {
 export type {
   GetFilePathParams,
   GetFileQueryParams,
-  FileBucketEnum2,
-  FileScopeEnum2,
+  FileBucketEnum,
+  FileScopeEnum,
   GetFile200,
   GetFile400,
   GetFile401,
@@ -424,27 +447,52 @@ export type {
   UpdateSourceMutation,
 } from './UpdateSource'
 export type {
-  UploadFileHeaderParams,
-  FileBucketEnum,
-  FileScopeEnum,
-  UploadFile200,
-  UploadFile400,
-  UploadFile401,
-  UploadFile403,
-  UploadFile404,
-  UploadFile429,
-  UploadFile500,
-  UploadFileMutationResponse,
-  UploadFileMutation,
-} from './UploadFile'
+  UploadFilesHeaderParams,
+  FilesStatusEnum,
+  FilesStatusEnum2,
+  UploadFiles200,
+  UploadFiles400,
+  UploadFiles401,
+  UploadFiles403,
+  UploadFiles404,
+  UploadFiles429,
+  UploadFiles500,
+  UploadFilesMutationResponse,
+  UploadFilesMutation,
+} from './UploadFiles'
+export type {
+  UploadFilesConversationHeaderParams,
+  FilesStatusEnum5,
+  FilesStatusEnum6,
+  UploadFilesConversation200,
+  UploadFilesConversation400,
+  UploadFilesConversation401,
+  UploadFilesConversation403,
+  UploadFilesConversation404,
+  UploadFilesConversation429,
+  UploadFilesConversation500,
+  UploadFilesConversationMutationResponse,
+  UploadFilesConversationMutation,
+} from './UploadFilesConversation'
+export type {
+  UploadFilesSourceHeaderParams,
+  FilesStatusEnum3,
+  FilesStatusEnum4,
+  UploadFilesSource200,
+  UploadFilesSource400,
+  UploadFilesSource401,
+  UploadFilesSource403,
+  UploadFilesSource404,
+  UploadFilesSource429,
+  UploadFilesSource500,
+  UploadFilesSourceMutationResponse,
+  UploadFilesSourceMutation,
+} from './UploadFilesSource'
 export { createSourceMutationRequestTypeEnum } from './CreateSource'
 export { deleteConversation204Enum } from './DeleteConversation'
 export { deleteSource204Enum } from './DeleteSource'
-export {
-  generateUploadSignatureMutationRequestBucketEnum,
-  generateUploadSignatureMutationRequestScopeEnum,
-} from './GenerateUploadSignature'
-export { fileBucketEnum2, fileScopeEnum2 } from './GetFile'
+export { generateUploadSignatureSourceMutationRequestSourceTypeEnum } from './GenerateUploadSignatureSource'
+export { fileBucketEnum, fileScopeEnum } from './GetFile'
 export { sourceTypeEnum } from './GetSource'
 export {
   messagesStatusEnum,
@@ -594,4 +642,6 @@ export {
 } from './SendQuestionMessage'
 export { updateConversation204Enum } from './UpdateConversation'
 export { updateSource204Enum } from './UpdateSource'
-export { fileBucketEnum, fileScopeEnum } from './UploadFile'
+export { filesStatusEnum, filesStatusEnum2 } from './UploadFiles'
+export { filesStatusEnum5, filesStatusEnum6 } from './UploadFilesConversation'
+export { filesStatusEnum3, filesStatusEnum4 } from './UploadFilesSource'

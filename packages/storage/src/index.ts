@@ -1,4 +1,14 @@
+import { del, deleteDirectory } from './commands/delete'
+import { signedUrl } from './commands/signed-url'
+import { upload } from './commands/upload'
+import { s3Client } from './s3-client'
+
+export const storage = {
+  upload,
+  delete: del,
+  deleteDirectory,
+  signedUrl,
+  s3Client,
+}
+
 export * from './s3-client'
-export { Upload } from '@aws-sdk/lib-storage'
-export { GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
-export { getSignedUrl } from '@aws-sdk/s3-request-presigner'

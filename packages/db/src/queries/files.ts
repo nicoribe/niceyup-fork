@@ -1,4 +1,3 @@
-import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '../db'
 import type { FileBucket, FileMetadata, FileScope } from '../lib/types'
 import { files } from '../schema'
@@ -6,6 +5,7 @@ import { files } from '../schema'
 type CreateFileParams = {
   fileName: string
   fileMimeType: string
+  fileSize: number
   filePath: string
   bucket: FileBucket
   scope: FileScope
@@ -31,6 +31,7 @@ export async function createFile(params: CreateFileParams) {
     .values({
       fileName: params.fileName,
       fileMimeType: params.fileMimeType,
+      fileSize: params.fileSize,
       filePath: params.filePath,
       bucket: params.bucket,
       scope: params.scope,
@@ -41,6 +42,7 @@ export async function createFile(params: CreateFileParams) {
       id: files.id,
       fileName: files.fileName,
       fileMimeType: files.fileMimeType,
+      fileSize: files.fileSize,
       filePath: files.filePath,
       bucket: files.bucket,
       scope: files.scope,
@@ -48,15 +50,4 @@ export async function createFile(params: CreateFileParams) {
     })
 
   return file || null
-}
-
-type DeleteFileParams = {
-  fileId: string
-}
-
-export async function deleteFile(params: DeleteFileParams) {
-  await db
-    .update(files)
-    .set({ deletedAt: new Date() })
-    .where(and(eq(files.id, params.fileId), isNull(files.deletedAt)))
 }

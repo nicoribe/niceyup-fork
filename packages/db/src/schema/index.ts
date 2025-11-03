@@ -47,35 +47,12 @@ export const sources = pgTable('sources', {
 })
 
 export const sourcesRelations = relations(sources, ({ one, many }) => ({
-  fileSource: one(fileSources),
   textSource: one(textSources),
   questionAnswerSource: one(questionAnswerSources),
   websiteSource: one(websiteSources),
+  fileSource: one(fileSources),
   databaseSource: one(databaseSources),
   agents: many(agentsToSources),
-}))
-
-export const fileSources = pgTable('file_sources', {
-  ...id,
-
-  sourceId: text('source_id')
-    .notNull()
-    .unique()
-    .references(() => sources.id, { onDelete: 'cascade' }),
-  fileId: text('file_id').references(() => files.id),
-
-  ...timestamps,
-})
-
-export const fileSourcesRelations = relations(fileSources, ({ one }) => ({
-  source: one(sources, {
-    fields: [fileSources.sourceId],
-    references: [sources.id],
-  }),
-  file: one(files, {
-    fields: [fileSources.fileId],
-    references: [files.id],
-  }),
 }))
 
 export const textSources = pgTable('text_sources', {
@@ -140,15 +117,35 @@ export const websiteSourcesRelations = relations(websiteSources, ({ one }) => ({
   }),
 }))
 
+export const fileSources = pgTable('file_sources', {
+  ...id,
+
+  sourceId: text('source_id')
+    .notNull()
+    .unique()
+    .references(() => sources.id, { onDelete: 'cascade' }),
+  fileId: text('file_id').references(() => files.id),
+
+  ...timestamps,
+})
+
+export const fileSourcesRelations = relations(fileSources, ({ one }) => ({
+  source: one(sources, {
+    fields: [fileSources.sourceId],
+    references: [sources.id],
+  }),
+  file: one(files, {
+    fields: [fileSources.fileId],
+    references: [files.id],
+  }),
+}))
+
 export const databaseSources = pgTable('database_sources', {
   ...id,
   dialect: text('dialect').notNull().$type<DatabaseSourceDialect>(),
-  tablesMetadata: jsonb('tables_metadata')
-    .notNull()
-    .$type<DatabaseSourceTableMetadata[]>(),
-  queryExamples: jsonb('query_examples')
-    .notNull()
-    .$type<DatabaseSourceQueryExample[]>(),
+  tablesMetadata:
+    jsonb('tables_metadata').$type<DatabaseSourceTableMetadata[]>(),
+  queryExamples: jsonb('query_examples').$type<DatabaseSourceQueryExample[]>(),
 
   sourceId: text('source_id')
     .notNull()
@@ -377,6 +374,7 @@ export const files = pgTable('files', {
   ...id,
   fileName: text('file_name').notNull(),
   fileMimeType: text('file_mime_type').notNull(),
+  fileSize: integer('file_size').notNull(),
   filePath: text('file_path').notNull(),
   bucket: text('bucket').notNull().$type<FileBucket>(),
   scope: text('scope').notNull().$type<FileScope>(),
@@ -387,7 +385,6 @@ export const files = pgTable('files', {
     () => organizations.id,
   ),
 
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
 })
 
@@ -399,6 +396,7 @@ export const filesRelations = relations(files, ({ many }) => ({
 export const sourceExplorerNodes = pgTable('source_explorer_nodes', {
   ...id,
   name: text('name'),
+  sourceType: text('source_type'),
 
   sourceId: text('source_id').references(() => sources.id, {
     onDelete: 'cascade',

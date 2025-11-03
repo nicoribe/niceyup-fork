@@ -1,16 +1,16 @@
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { UnauthorizedError } from '@/http/errors/unauthorized-error'
-import {
-  generateSignatureForUpload,
-  validateFileDataForUpload,
-} from '@/http/functions/upload-file-to-storage'
+import { generateSignatureForUpload } from '@/http/functions/upload-file-to-storage'
 import { authenticate } from '@/http/middlewares/authenticate'
 import { env } from '@/lib/env'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
+import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
 
 const DEFAULT_ACCEPT = '*'
+const DEFAULT_MAX_FILES = 1
+const DEFAULT_MAX_SIZE = 15 * 1024 * 1024 // 15 MB
 const DEFAULT_EXPIRES = 5 * 60 // 5 minutes
 
 export async function generateUploadSignature(app: FastifyTypedInstance) {
@@ -18,30 +18,18 @@ export async function generateUploadSignature(app: FastifyTypedInstance) {
     '/files/signature',
     {
       schema: {
-        tags: ['[Internal] Files'],
-        description: 'Generate Upload Signature',
+        tags: ['Files'],
+        description: 'Generate upload signature',
         operationId: 'generateUploadSignature',
         headers: z.object({
-          'x-api-key': z.string(),
+          'x-app-secret-key': z.string(),
         }),
         body: z.object({
           organizationId: z.string().nullish(),
           organizationSlug: z.string().nullish(),
-          teamId: z.string().nullish(),
-          bucket: z.enum(['default', 'engine']).default('default'),
-          scope: z.enum(['public', 'conversations', 'sources']),
-          metadata: z
-            .union([
-              z.object({
-                agentId: z.string().optional(),
-                conversationId: z.string().nullish(),
-              }),
-              z.object({
-                sourceId: z.string().optional(),
-              }),
-            ])
-            .optional(),
           accept: z.string().default(DEFAULT_ACCEPT),
+          maxFiles: z.number().positive().default(DEFAULT_MAX_FILES),
+          maxSize: z.number().positive().default(DEFAULT_MAX_SIZE),
           expires: z.number().positive().default(DEFAULT_EXPIRES),
         }),
         response: withDefaultErrorResponses({
@@ -54,12 +42,12 @@ export async function generateUploadSignature(app: FastifyTypedInstance) {
       },
     },
     async (request) => {
-      const { 'x-api-key': apiKey } = request.headers
+      const { 'x-app-secret-key': appSecretKey } = request.headers
 
-      if (apiKey !== env.API_KEY) {
+      if (appSecretKey !== env.APP_SECRET_KEY) {
         throw new UnauthorizedError({
-          code: 'INVALID_API_KEY',
-          message: 'Invalid API key',
+          code: 'INVALID_SECRET_KEY',
+          message: 'Invalid secret key',
         })
       }
 
@@ -70,11 +58,9 @@ export async function generateUploadSignature(app: FastifyTypedInstance) {
       const {
         organizationId,
         organizationSlug,
-        teamId,
-        bucket,
-        scope,
-        metadata,
         accept,
+        maxFiles,
+        maxSize,
         expires,
       } = request.body
 
@@ -83,18 +69,34 @@ export async function generateUploadSignature(app: FastifyTypedInstance) {
         ...getOrganizationIdentifier({
           organizationId,
           organizationSlug,
-          teamId,
         }),
       }
 
-      const fileData = await validateFileDataForUpload(context, {
-        bucket,
-        scope,
-        metadata,
-      })
+      const orgId =
+        context.organizationId || context.organizationSlug
+          ? context.organizationId ||
+            (await queries.getOrganizationIdBySlug({
+              organizationSlug: context.organizationSlug,
+            }))
+          : null
 
       const signature = generateSignatureForUpload({
-        payload: { data: fileData, accept },
+        key: 'public',
+        payload: {
+          data: {
+            bucket: 'default',
+            scope: 'public',
+            metadata: {
+              authorId: context.userId,
+            },
+            owner: orgId
+              ? { organizationId: orgId }
+              : { userId: context.userId },
+          },
+          accept,
+          maxFiles,
+          maxSize,
+        },
         expires,
       })
 

@@ -31,8 +31,8 @@ export async function consumeStream<T>({
         }
         try {
           onChunk(JSON.parse(part) as T)
-        } catch (err) {
-          onError?.(err, part)
+        } catch (error) {
+          onError?.(error, part)
         }
       }
     }
@@ -41,8 +41,8 @@ export async function consumeStream<T>({
   if (buf.trim()) {
     try {
       onChunk(JSON.parse(buf) as T)
-    } catch (err) {
-      onError?.(err, buf)
+    } catch (error) {
+      onError?.(error, buf)
     }
   }
 }

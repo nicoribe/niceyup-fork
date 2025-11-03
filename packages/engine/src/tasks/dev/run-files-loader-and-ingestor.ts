@@ -1,37 +1,84 @@
-import { logger, schemaTask } from '@trigger.dev/sdk'
+import { AbortTaskRunError, logger, schemaTask } from '@trigger.dev/sdk'
+import { db } from '@workspace/db'
+import { fileSources, files, sources } from '@workspace/db/schema'
 import { z } from 'zod'
-import { filesLoader } from '../../functions/loaders'
-import { documentSplitter } from '../../functions/splitters'
+import { runIngestionTask } from '../run-ingestion'
 
 export const runFilesLoaderAndIngestorTask = schemaTask({
   id: 'run-files-loader-and-ingestor',
   schema: z.object({
     ownerUserId: z.string(),
+    source: z.object({
+      chunkSize: z.number(),
+      chunkOverlap: z.number(),
+    }),
   }),
   run: async (payload) => {
-    logger.warn('Payload', { payload })
+    const listFiles: {
+      name: string
+      mimeType: string
+      size: number
+      path: string
+    }[] = []
 
-    const filePaths = [
-      './tmp/.niceyup-engine/test/test_document_rag.csv',
-      './tmp/.niceyup-engine/test/test_document_rag.doc',
-      './tmp/.niceyup-engine/test/test_document_rag.docx',
-      './tmp/.niceyup-engine/test/test_document_rag.json',
-      './tmp/.niceyup-engine/test/test_document_rag.jsonl',
-      './tmp/.niceyup-engine/test/test_document_rag.pdf',
-      './tmp/.niceyup-engine/test/test_document_rag.pptx',
-    ]
+    for (const file of listFiles) {
+      const sourceId = await logger.trace('Create Source', async () => {
+        return await db.transaction(async (tx) => {
+          const [createSource] = await tx
+            .insert(sources)
+            .values({
+              name: '(Test) File Source',
+              type: 'file',
+              chunkSize: payload.source.chunkSize,
+              chunkOverlap: payload.source.chunkOverlap,
+              ownerUserId: payload.ownerUserId,
+            })
+            .returning()
 
-    const loadedDocuments = await filesLoader({ paths: filePaths })
+          if (!createSource) {
+            throw new AbortTaskRunError('Failed to create source')
+          }
 
-    logger.warn('Loaded Documents', { loadedDocuments })
+          const [createFile] = await tx
+            .insert(files)
+            .values({
+              fileName: file.name,
+              fileMimeType: file.mimeType,
+              fileSize: file.size,
+              filePath: file.path,
+              bucket: 'engine',
+              scope: 'sources',
+              metadata: {
+                sourceId: createSource.id,
+              },
+              ownerUserId: payload.ownerUserId,
+            })
+            .returning()
 
-    const splitDocuments = await documentSplitter({
-      documents: loadedDocuments,
-      chunkSize: 2500,
-      chunkOverlap: 100,
-    })
+          if (!createFile) {
+            throw new AbortTaskRunError('Failed to create file')
+          }
 
-    logger.warn('Split Documents', { splitDocuments })
+          const [createFileSource] = await tx
+            .insert(fileSources)
+            .values({
+              sourceId: createSource.id,
+              fileId: createFile.id,
+            })
+            .returning()
+
+          if (!createFileSource) {
+            throw new AbortTaskRunError('Failed to create file source')
+          }
+
+          return createSource.id
+        })
+      })
+
+      await logger.trace('Run Ingestion', async () => {
+        await runIngestionTask.triggerAndWait({ sourceId })
+      })
+    }
 
     return {
       status: 'success',

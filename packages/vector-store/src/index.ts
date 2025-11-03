@@ -1,7 +1,9 @@
-import { Index } from '@upstash/vector'
-import { env } from './lib/env'
+import { del } from './commands/delete'
+import { query } from './commands/query'
+import { upsert } from './commands/upsert'
 
-export const vectorStore = new Index({
-  url: env.UPSTASH_VECTOR_REST_URL,
-  token: env.UPSTASH_VECTOR_REST_TOKEN,
-})
+export const vectorStore = {
+  upsert,
+  query,
+  delete: del,
+}

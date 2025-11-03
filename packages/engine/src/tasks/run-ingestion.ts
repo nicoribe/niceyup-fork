@@ -45,44 +45,6 @@ export const runIngestionTask = schemaTask({
     }
 
     switch (source.type) {
-      case 'file':
-        await logger.trace('Ingest File Source', async () => {
-          const [fileSource] = await db
-            .select()
-            .from(fileSources)
-            .where(eq(fileSources.sourceId, payload.sourceId))
-            .limit(1)
-
-          if (!fileSource) {
-            throw new AbortTaskRunError('File source not found')
-          }
-
-          if (!fileSource.fileId) {
-            throw new AbortTaskRunError('File not found for file source')
-          }
-
-          const [file] = await db
-            .select()
-            .from(files)
-            .where(eq(files.id, fileSource.fileId))
-            .limit(1)
-
-          if (!file) {
-            throw new AbortTaskRunError('File not found')
-          }
-
-          await logger.trace('Ingest File Source', async () => {
-            await ingestFileSource({
-              namespace,
-              sourceId: payload.sourceId,
-              filePath: file.filePath,
-              chunkSize: source.chunkSize,
-              chunkOverlap: source.chunkOverlap,
-            })
-          })
-        })
-        break
-
       case 'text':
         await logger.trace('Ingest Text Source', async () => {
           const [textSource] = await db
@@ -141,6 +103,44 @@ export const runIngestionTask = schemaTask({
             await ingestWebsiteSource({
               namespace,
               sourceId: payload.sourceId,
+            })
+          })
+        })
+        break
+
+      case 'file':
+        await logger.trace('Ingest File Source', async () => {
+          const [fileSource] = await db
+            .select()
+            .from(fileSources)
+            .where(eq(fileSources.sourceId, payload.sourceId))
+            .limit(1)
+
+          if (!fileSource) {
+            throw new AbortTaskRunError('File source not found')
+          }
+
+          if (!fileSource.fileId) {
+            throw new AbortTaskRunError('File not found for file source')
+          }
+
+          const [file] = await db
+            .select()
+            .from(files)
+            .where(eq(files.id, fileSource.fileId))
+            .limit(1)
+
+          if (!file) {
+            throw new AbortTaskRunError('File not found')
+          }
+
+          await logger.trace('Ingest File Source', async () => {
+            await ingestFileSource({
+              namespace,
+              sourceId: payload.sourceId,
+              filePath: file.filePath,
+              chunkSize: source.chunkSize,
+              chunkOverlap: source.chunkOverlap,
             })
           })
         })

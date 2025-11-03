@@ -1,0 +1,91 @@
+import { BadRequestError } from '@/http/errors/bad-request-error'
+import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { authenticate } from '@/http/middlewares/authenticate'
+import { getOrganizationIdentifier } from '@/lib/utils'
+import type { FastifyTypedInstance } from '@/types/fastify'
+import { queries } from '@workspace/db/queries'
+import { getDbSchemaTask } from '@workspace/engine/tasks/get-db-schema'
+import { z } from 'zod'
+
+export async function getDatabaseSchema(app: FastifyTypedInstance) {
+  app.register(authenticate).get(
+    '/sources/:sourceId/database/schema',
+    {
+      schema: {
+        tags: ['Sources'],
+        description: 'Get database schema',
+        operationId: 'getDatabaseSchema',
+        params: z.object({
+          sourceId: z.string(),
+        }),
+        querystring: z.object({
+          organizationId: z.string().optional(),
+          organizationSlug: z.string().optional(),
+        }),
+        response: withDefaultErrorResponses({
+          200: z
+            .object({
+              tablesMetadata: z.array(
+                z.object({
+                  name: z.string(),
+                  columns: z.array(
+                    z.object({
+                      name: z.string(),
+                      data_type: z.string(),
+                      foreign_table: z.string().optional(),
+                      foreign_column: z.string().optional(),
+                    }),
+                  ),
+                }),
+              ),
+            })
+            .describe('Success'),
+        }),
+      },
+    },
+    async (request) => {
+      const {
+        user: { id: userId },
+      } = request.authSession
+
+      const { sourceId } = request.params
+
+      const { organizationId, organizationSlug } = request.query
+
+      const context = {
+        userId,
+        ...getOrganizationIdentifier({
+          organizationId,
+          organizationSlug,
+        }),
+      }
+
+      const source = await queries.context.getSource(context, { sourceId })
+
+      if (!source) {
+        throw new BadRequestError({
+          code: 'SOURCE_NOT_FOUND',
+          message: 'Source not found or you don’t have access',
+        })
+      }
+
+      if (source.type !== 'database') {
+        throw new BadRequestError({
+          code: 'SOURCE_NOT_A_DATABASE',
+          message: 'Source is not a database',
+        })
+      }
+
+      const result = await getDbSchemaTask.triggerAndWait({ sourceId })
+
+      if (!result.ok) {
+        throw new BadRequestError({
+          code: 'GET_DATABASE_SCHEMA_FAILED',
+          message: 'Failed to get database schema',
+        })
+      }
+
+      return { tablesMetadata: result.output }
+    },
+  )
+}

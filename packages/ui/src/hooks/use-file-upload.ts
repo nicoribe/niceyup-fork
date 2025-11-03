@@ -4,7 +4,7 @@ import * as React from 'react'
 
 export type FileMetadata = {
   name: string
-  size?: number
+  size: number
   type: string
   url: string
   id: string

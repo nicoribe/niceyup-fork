@@ -7,7 +7,7 @@ export type GenerateUploadSignatureHeaderParams = {
   /**
    * @type string
    */
-  'x-api-key': string
+  'x-app-secret-key': string
 }
 
 /**
@@ -111,23 +111,6 @@ export type GenerateUploadSignature500 = {
   message: string
 }
 
-export const generateUploadSignatureMutationRequestBucketEnum = {
-  default: 'default',
-  engine: 'engine',
-} as const
-
-export type GenerateUploadSignatureMutationRequestBucketEnum =
-  (typeof generateUploadSignatureMutationRequestBucketEnum)[keyof typeof generateUploadSignatureMutationRequestBucketEnum]
-
-export const generateUploadSignatureMutationRequestScopeEnum = {
-  public: 'public',
-  conversations: 'conversations',
-  sources: 'sources',
-} as const
-
-export type GenerateUploadSignatureMutationRequestScopeEnum =
-  (typeof generateUploadSignatureMutationRequestScopeEnum)[keyof typeof generateUploadSignatureMutationRequestScopeEnum]
-
 export type GenerateUploadSignatureMutationRequest = {
   /**
    * @type string
@@ -138,40 +121,22 @@ export type GenerateUploadSignatureMutationRequest = {
    */
   organizationSlug?: string | null
   /**
-   * @type string
-   */
-  teamId?: string | null
-  /**
-   * @default "default"
-   * @type string | undefined
-   */
-  bucket?: GenerateUploadSignatureMutationRequestBucketEnum
-  /**
-   * @type string
-   */
-  scope: GenerateUploadSignatureMutationRequestScopeEnum
-  metadata?:
-    | {
-        /**
-         * @type string | undefined
-         */
-        agentId?: string
-        /**
-         * @type string
-         */
-        conversationId?: string | null
-      }
-    | {
-        /**
-         * @type string | undefined
-         */
-        sourceId?: string
-      }
-  /**
    * @default "*"
    * @type string | undefined
    */
   accept?: string
+  /**
+   * @minLength 0
+   * @default 1
+   * @type number | undefined
+   */
+  maxFiles?: number
+  /**
+   * @minLength 0
+   * @default 15728640
+   * @type number | undefined
+   */
+  maxSize?: number
   /**
    * @minLength 0
    * @default 300

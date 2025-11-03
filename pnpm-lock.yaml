@@ -74,6 +74,9 @@ importers:
       '@workspace/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@workspace/vector-store':
+        specifier: workspace:*
+        version: link:../../packages/vector-store
       fastify:
         specifier: 5.3.3
         version: 5.3.3
@@ -404,14 +407,14 @@ importers:
         specifier: 1.0.0
         version: 1.0.0(@langchain/core@1.0.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.52.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.0.1(@opentelemetry/api@1.9.0))(openai@6.6.0(ws@8.18.3)(zod@4.1.12)))
       '@trigger.dev/core':
-        specifier: 4.0.4
-        version: 4.0.4
+        specifier: 4.0.6
+        version: 4.0.6
       '@trigger.dev/python':
-        specifier: 4.0.4
-        version: 4.0.4(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.4(ai@5.0.77(zod@4.1.12))(zod@4.1.12))
+        specifier: 4.0.6
+        version: 4.0.6(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.6(ai@5.0.77(zod@4.1.12))(zod@4.1.12))
       '@trigger.dev/sdk':
-        specifier: 4.0.4
-        version: 4.0.4(ai@5.0.77(zod@4.1.12))(zod@4.1.12)
+        specifier: 4.0.6
+        version: 4.0.6(ai@5.0.77(zod@4.1.12))(zod@4.1.12)
       '@workspace/ai':
         specifier: workspace:*
         version: link:../ai
@@ -445,9 +448,6 @@ importers:
       pdfjs-dist:
         specifier: 5.4.296
         version: 5.4.296
-      uuid:
-        specifier: ^13.0.0
-        version: 13.0.0
       word-extractor:
         specifier: 1.0.4
         version: 1.0.4
@@ -743,9 +743,18 @@ importers:
       '@upstash/vector':
         specifier: 1.2.2
         version: 1.2.2
+      '@workspace/ai':
+        specifier: workspace:*
+        version: link:../ai
+      '@workspace/db':
+        specifier: workspace:*
+        version: link:../db
       '@workspace/env':
         specifier: workspace:*
         version: link:../env
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
     devDependencies:
       '@types/node':
         specifier: ^20
@@ -1143,6 +1152,9 @@ packages:
 
   '@electric-sql/client@1.0.0-beta.1':
     resolution: {integrity: sha512-Ei9jN3pDoGzc+a/bGqnB5ajb52IvSv7/n2btuyzUlcOHIR2kM9fqtYTJXPwZYKLkGZlHWlpHgWyRtrinkP2nHg==}
+
+  '@electric-sql/client@1.0.14':
+    resolution: {integrity: sha512-LtPAfeMxXRiYS0hyDQ5hue2PjljUiK9stvzsVyVb4nwxWQxfOWTSF42bHTs/o5i3x1T4kAQ7mwHpxa4A+f8X7Q==}
 
   '@emnapi/runtime@1.4.5':
     resolution: {integrity: sha512-++LApOtY0pEEz1zrd9vy1/zXVaVJJ/EbAF3u0fXIzPJEDtnITsBGbbK0EkM72amhl/R5b+5xx0Y/QhcVOpuulg==}
@@ -2227,6 +2239,9 @@ packages:
 
   '@mermaid-js/parser@0.6.2':
     resolution: {integrity: sha512-+PO02uGF6L6Cs0Bw8RpGhikVvMWEysfAyl27qTlroUB8jSWr1lL0Sf6zi78ZxlSnmgSY2AMMKVgghnN9jTtwkQ==}
+
+  '@microsoft/fetch-event-source@2.0.1':
+    resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==}
 
   '@motionone/animation@10.18.0':
     resolution: {integrity: sha512-9z2p5GFGCm0gBsZbi8rVMOAJCtw1WqBTIPw3ozk06gDvZInBPIsQcHgYogEJ4yuHJ+akuW8g1SEIOpTOvYs8hw==}
@@ -4293,19 +4308,19 @@ packages:
     resolution: {integrity: sha512-n8XPKzotMAHtZTcChdAcddCKoDhKp5ZXDU2U3tnLbIL1LAtWxvKW56fzuFBmf6e69wb9rrFL+xyOsf5YIoH/rg==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/core@4.0.4':
-    resolution: {integrity: sha512-c5myttkNhqaqvLlEz3ttE1qEsULlD6ILBge5FAfEtMv9HVS/pNlgvMKrdFMefaGO/bE4HoxrNGdJsY683Kq32w==}
+  '@trigger.dev/core@4.0.6':
+    resolution: {integrity: sha512-V4w0Wmvw4fst0dbQ7LjmYuaWyLVlwNcLc6f2EB39XqoS7PVQGfRm6KCFWc0sG5x9xa/RBpusXcwmRK0C5QgW9g==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/python@4.0.4':
-    resolution: {integrity: sha512-46eYZZtvMsd+kahHlysOABDip2aLtyQHnR9PK+NqL7UDaKj9Rj67tG5Qb9UWgolc4W4tIDpBBedipexmJaJhtA==}
+  '@trigger.dev/python@4.0.6':
+    resolution: {integrity: sha512-vzTSrqLbp/AGhIRH+VVsw7MNe4lmBXuKGeHk+nzYEh0klkQGal9a5WDC8GnZstoHMuXyxNmsln+LkxmXfmVTEQ==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
-      '@trigger.dev/build': ^4.0.4
-      '@trigger.dev/sdk': ^4.0.4
+      '@trigger.dev/build': ^4.0.6
+      '@trigger.dev/sdk': ^4.0.6
 
-  '@trigger.dev/sdk@4.0.4':
-    resolution: {integrity: sha512-54krRw9SN1CGm5u17JBzu0hNzRf1u37jKbSFFngPJjUOltOgi/owey5+KNu1rGthabhOBK2VKzvKEd4sn08RCA==}
+  '@trigger.dev/sdk@4.0.6':
+    resolution: {integrity: sha512-jf10/JLoU2Xl8lH5CNM1220PyUHSJiRWfheZBvPh9bu8u0/AvhhJMKqeo3gQyuFjV1xd3BKrMeMULaq2Uy2olQ==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       ai: ^4.2.0 || ^5.0.0
@@ -9413,6 +9428,12 @@ snapshots:
     optionalDependencies:
       '@rollup/rollup-darwin-arm64': 4.41.1
 
+  '@electric-sql/client@1.0.14':
+    dependencies:
+      '@microsoft/fetch-event-source': 2.0.1
+    optionalDependencies:
+      '@rollup/rollup-darwin-arm64': 4.41.1
+
   '@emnapi/runtime@1.4.5':
     dependencies:
       tslib: 2.8.1
@@ -10165,6 +10186,8 @@ snapshots:
   '@mermaid-js/parser@0.6.2':
     dependencies:
       langium: 3.3.1
+
+  '@microsoft/fetch-event-source@2.0.1': {}
 
   '@motionone/animation@10.18.0':
     dependencies:
@@ -12540,10 +12563,10 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/core@4.0.4':
+  '@trigger.dev/core@4.0.6':
     dependencies:
       '@bugsnag/cuid': 3.2.1
-      '@electric-sql/client': 1.0.0-beta.1
+      '@electric-sql/client': 1.0.14
       '@google-cloud/precise-date': 4.0.0
       '@jsonhero/path': 1.0.21
       '@opentelemetry/api': 1.9.0
@@ -12579,22 +12602,22 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/python@4.0.4(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.4(ai@5.0.77(zod@4.1.12))(zod@4.1.12))':
+  '@trigger.dev/python@4.0.6(@trigger.dev/build@4.0.0-v4-beta.23(typescript@5.7.3))(@trigger.dev/sdk@4.0.6(ai@5.0.77(zod@4.1.12))(zod@4.1.12))':
     dependencies:
       '@trigger.dev/build': 4.0.0-v4-beta.23(typescript@5.7.3)
-      '@trigger.dev/core': 4.0.4
-      '@trigger.dev/sdk': 4.0.4(ai@5.0.77(zod@4.1.12))(zod@4.1.12)
+      '@trigger.dev/core': 4.0.6
+      '@trigger.dev/sdk': 4.0.6(ai@5.0.77(zod@4.1.12))(zod@4.1.12)
       tinyexec: 0.3.2
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.0.4(ai@5.0.77(zod@4.1.12))(zod@4.1.12)':
+  '@trigger.dev/sdk@4.0.6(ai@5.0.77(zod@4.1.12))(zod@4.1.12)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
-      '@trigger.dev/core': 4.0.4
+      '@trigger.dev/core': 4.0.6
       chalk: 5.4.1
       cronstrue: 2.59.0
       debug: 4.4.0

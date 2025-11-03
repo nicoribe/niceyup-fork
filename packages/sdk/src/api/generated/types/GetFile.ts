@@ -30,22 +30,21 @@ export type GetFileQueryParams = {
   expires?: number
 }
 
-export const fileBucketEnum2 = {
+export const fileBucketEnum = {
   default: 'default',
   engine: 'engine',
 } as const
 
-export type FileBucketEnum2 =
-  (typeof fileBucketEnum2)[keyof typeof fileBucketEnum2]
+export type FileBucketEnum =
+  (typeof fileBucketEnum)[keyof typeof fileBucketEnum]
 
-export const fileScopeEnum2 = {
+export const fileScopeEnum = {
   public: 'public',
   conversations: 'conversations',
   sources: 'sources',
 } as const
 
-export type FileScopeEnum2 =
-  (typeof fileScopeEnum2)[keyof typeof fileScopeEnum2]
+export type FileScopeEnum = (typeof fileScopeEnum)[keyof typeof fileScopeEnum]
 
 /**
  * @description Success
@@ -68,17 +67,21 @@ export type GetFile200 = {
      */
     fileMimeType: string
     /**
+     * @type number
+     */
+    fileSize: number
+    /**
      * @type string
      */
     filePath: string
     /**
      * @type string
      */
-    bucket: FileBucketEnum2
+    bucket: FileBucketEnum
     /**
      * @type string
      */
-    scope: FileScopeEnum2
+    scope: FileScopeEnum
     /**
      * @type string
      */

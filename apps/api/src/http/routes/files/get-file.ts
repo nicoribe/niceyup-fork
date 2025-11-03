@@ -4,7 +4,7 @@ import { env } from '@/lib/env'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
-import { GetObjectCommand, getSignedUrl, s3Client } from '@workspace/storage'
+import { storage } from '@workspace/storage'
 import { z } from 'zod'
 
 const DEFAULT_EXPIRES = 5 * 60 // 5 minutes
@@ -33,6 +33,7 @@ export async function getFile(app: FastifyTypedInstance) {
                 id: z.string(),
                 fileName: z.string(),
                 fileMimeType: z.string(),
+                fileSize: z.number(),
                 filePath: z.string(),
                 bucket: z.enum(['default', 'engine']),
                 scope: z.enum(['public', 'conversations', 'sources']),
@@ -73,15 +74,16 @@ export async function getFile(app: FastifyTypedInstance) {
         })
       }
 
-      let url = new URL(file.filePath, env.STORAGE_URL).toString()
+      let url: string
 
       if (file.bucket === 'engine') {
-        const command = new GetObjectCommand({
-          Bucket: env.S3_ENGINE_BUCKET,
-          Key: file.filePath,
+        url = await storage.signedUrl({
+          bucket: env.S3_ENGINE_BUCKET,
+          key: file.filePath,
+          expires,
         })
-
-        url = await getSignedUrl(s3Client, command, { expiresIn: expires })
+      } else {
+        url = new URL(file.filePath, env.STORAGE_URL).toString()
       }
 
       return { file: { ...file, url } }

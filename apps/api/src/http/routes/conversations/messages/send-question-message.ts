@@ -1,6 +1,6 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { generateTitleFromUserMessage } from '@/http/functions/ai'
+import { generateTitleFromUserMessage } from '@/http/functions/generate-title-from-user-message'
 import { authenticate } from '@/http/middlewares/authenticate'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'

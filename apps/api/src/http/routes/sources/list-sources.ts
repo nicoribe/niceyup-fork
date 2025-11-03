@@ -25,10 +25,10 @@ export async function listSources(app: FastifyTypedInstance) {
                   id: z.string(),
                   name: z.string(),
                   type: z.enum([
-                    'file',
                     'text',
                     'question-answer',
                     'website',
+                    'file',
                     'database',
                   ]),
                 }),

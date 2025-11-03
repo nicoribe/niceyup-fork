@@ -2,6 +2,8 @@ export type { CreateSourceMutationKey } from './react-query/hooks/useCreateSourc
 export type { DeleteConversationMutationKey } from './react-query/hooks/useDeleteConversation'
 export type { DeleteSourceMutationKey } from './react-query/hooks/useDeleteSource'
 export type { GenerateUploadSignatureMutationKey } from './react-query/hooks/useGenerateUploadSignature'
+export type { GenerateUploadSignatureConversationMutationKey } from './react-query/hooks/useGenerateUploadSignatureConversation'
+export type { GenerateUploadSignatureSourceMutationKey } from './react-query/hooks/useGenerateUploadSignatureSource'
 export type { GetAgentQueryKey } from './react-query/hooks/useGetAgent'
 export type { GetConnectionQueryKey } from './react-query/hooks/useGetConnection'
 export type { GetConversationQueryKey } from './react-query/hooks/useGetConversation'
@@ -20,7 +22,9 @@ export type { SendQuestionMessageMutationKey } from './react-query/hooks/useSend
 export type { StreamAnswerMessageQueryKey } from './react-query/hooks/useStreamAnswerMessage'
 export type { UpdateConversationMutationKey } from './react-query/hooks/useUpdateConversation'
 export type { UpdateSourceMutationKey } from './react-query/hooks/useUpdateSource'
-export type { UploadFileMutationKey } from './react-query/hooks/useUploadFile'
+export type { UploadFilesMutationKey } from './react-query/hooks/useUploadFiles'
+export type { UploadFilesConversationMutationKey } from './react-query/hooks/useUploadFilesConversation'
+export type { UploadFilesSourceMutationKey } from './react-query/hooks/useUploadFilesSource'
 export type {
   CreateSource200Schema,
   CreateSource400Schema,
@@ -57,6 +61,17 @@ export type {
   DeleteSourceMutationResponseSchema,
 } from './schemas/deleteSourceSchema'
 export type {
+  GenerateUploadSignatureConversation200Schema,
+  GenerateUploadSignatureConversation400Schema,
+  GenerateUploadSignatureConversation401Schema,
+  GenerateUploadSignatureConversation403Schema,
+  GenerateUploadSignatureConversation404Schema,
+  GenerateUploadSignatureConversation429Schema,
+  GenerateUploadSignatureConversation500Schema,
+  GenerateUploadSignatureConversationMutationRequestSchema,
+  GenerateUploadSignatureConversationMutationResponseSchema,
+} from './schemas/generateUploadSignatureConversationSchema'
+export type {
   GenerateUploadSignatureHeaderParamsSchema,
   GenerateUploadSignature200Schema,
   GenerateUploadSignature400Schema,
@@ -68,6 +83,17 @@ export type {
   GenerateUploadSignatureMutationRequestSchema,
   GenerateUploadSignatureMutationResponseSchema,
 } from './schemas/generateUploadSignatureSchema'
+export type {
+  GenerateUploadSignatureSource200Schema,
+  GenerateUploadSignatureSource400Schema,
+  GenerateUploadSignatureSource401Schema,
+  GenerateUploadSignatureSource403Schema,
+  GenerateUploadSignatureSource404Schema,
+  GenerateUploadSignatureSource429Schema,
+  GenerateUploadSignatureSource500Schema,
+  GenerateUploadSignatureSourceMutationRequestSchema,
+  GenerateUploadSignatureSourceMutationResponseSchema,
+} from './schemas/generateUploadSignatureSourceSchema'
 export type {
   GetAgentPathParamsSchema,
   GetAgentQueryParamsSchema,
@@ -277,16 +303,38 @@ export type {
   UpdateSourceMutationResponseSchema,
 } from './schemas/updateSourceSchema'
 export type {
-  UploadFileHeaderParamsSchema,
-  UploadFile200Schema,
-  UploadFile400Schema,
-  UploadFile401Schema,
-  UploadFile403Schema,
-  UploadFile404Schema,
-  UploadFile429Schema,
-  UploadFile500Schema,
-  UploadFileMutationResponseSchema,
-} from './schemas/uploadFileSchema'
+  UploadFilesConversationHeaderParamsSchema,
+  UploadFilesConversation200Schema,
+  UploadFilesConversation400Schema,
+  UploadFilesConversation401Schema,
+  UploadFilesConversation403Schema,
+  UploadFilesConversation404Schema,
+  UploadFilesConversation429Schema,
+  UploadFilesConversation500Schema,
+  UploadFilesConversationMutationResponseSchema,
+} from './schemas/uploadFilesConversationSchema'
+export type {
+  UploadFilesHeaderParamsSchema,
+  UploadFiles200Schema,
+  UploadFiles400Schema,
+  UploadFiles401Schema,
+  UploadFiles403Schema,
+  UploadFiles404Schema,
+  UploadFiles429Schema,
+  UploadFiles500Schema,
+  UploadFilesMutationResponseSchema,
+} from './schemas/uploadFilesSchema'
+export type {
+  UploadFilesSourceHeaderParamsSchema,
+  UploadFilesSource200Schema,
+  UploadFilesSource400Schema,
+  UploadFilesSource401Schema,
+  UploadFilesSource403Schema,
+  UploadFilesSource404Schema,
+  UploadFilesSource429Schema,
+  UploadFilesSource500Schema,
+  UploadFilesSourceMutationResponseSchema,
+} from './schemas/uploadFilesSourceSchema'
 export type {
   CreateSource200,
   CreateSource400,
@@ -337,12 +385,35 @@ export type {
   GenerateUploadSignature404,
   GenerateUploadSignature429,
   GenerateUploadSignature500,
-  GenerateUploadSignatureMutationRequestBucketEnum,
-  GenerateUploadSignatureMutationRequestScopeEnum,
   GenerateUploadSignatureMutationRequest,
   GenerateUploadSignatureMutationResponse,
   GenerateUploadSignatureMutation,
 } from './types/GenerateUploadSignature'
+export type {
+  GenerateUploadSignatureConversation200,
+  GenerateUploadSignatureConversation400,
+  GenerateUploadSignatureConversation401,
+  GenerateUploadSignatureConversation403,
+  GenerateUploadSignatureConversation404,
+  GenerateUploadSignatureConversation429,
+  GenerateUploadSignatureConversation500,
+  GenerateUploadSignatureConversationMutationRequest,
+  GenerateUploadSignatureConversationMutationResponse,
+  GenerateUploadSignatureConversationMutation,
+} from './types/GenerateUploadSignatureConversation'
+export type {
+  GenerateUploadSignatureSource200,
+  GenerateUploadSignatureSource400,
+  GenerateUploadSignatureSource401,
+  GenerateUploadSignatureSource403,
+  GenerateUploadSignatureSource404,
+  GenerateUploadSignatureSource429,
+  GenerateUploadSignatureSource500,
+  GenerateUploadSignatureSourceMutationRequestSourceTypeEnum,
+  GenerateUploadSignatureSourceMutationRequest,
+  GenerateUploadSignatureSourceMutationResponse,
+  GenerateUploadSignatureSourceMutation,
+} from './types/GenerateUploadSignatureSource'
 export type {
   GetAgentPathParams,
   GetAgentQueryParams,
@@ -385,8 +456,8 @@ export type {
 export type {
   GetFilePathParams,
   GetFileQueryParams,
-  FileBucketEnum2,
-  FileScopeEnum2,
+  FileBucketEnum,
+  FileScopeEnum,
   GetFile200,
   GetFile400,
   GetFile401,
@@ -713,23 +784,53 @@ export type {
   UpdateSourceMutation,
 } from './types/UpdateSource'
 export type {
-  UploadFileHeaderParams,
-  FileBucketEnum,
-  FileScopeEnum,
-  UploadFile200,
-  UploadFile400,
-  UploadFile401,
-  UploadFile403,
-  UploadFile404,
-  UploadFile429,
-  UploadFile500,
-  UploadFileMutationResponse,
-  UploadFileMutation,
-} from './types/UploadFile'
+  UploadFilesHeaderParams,
+  FilesStatusEnum,
+  FilesStatusEnum2,
+  UploadFiles200,
+  UploadFiles400,
+  UploadFiles401,
+  UploadFiles403,
+  UploadFiles404,
+  UploadFiles429,
+  UploadFiles500,
+  UploadFilesMutationResponse,
+  UploadFilesMutation,
+} from './types/UploadFiles'
+export type {
+  UploadFilesConversationHeaderParams,
+  FilesStatusEnum5,
+  FilesStatusEnum6,
+  UploadFilesConversation200,
+  UploadFilesConversation400,
+  UploadFilesConversation401,
+  UploadFilesConversation403,
+  UploadFilesConversation404,
+  UploadFilesConversation429,
+  UploadFilesConversation500,
+  UploadFilesConversationMutationResponse,
+  UploadFilesConversationMutation,
+} from './types/UploadFilesConversation'
+export type {
+  UploadFilesSourceHeaderParams,
+  FilesStatusEnum3,
+  FilesStatusEnum4,
+  UploadFilesSource200,
+  UploadFilesSource400,
+  UploadFilesSource401,
+  UploadFilesSource403,
+  UploadFilesSource404,
+  UploadFilesSource429,
+  UploadFilesSource500,
+  UploadFilesSourceMutationResponse,
+  UploadFilesSourceMutation,
+} from './types/UploadFilesSource'
 export { createSource } from './operations/createSource'
 export { deleteConversation } from './operations/deleteConversation'
 export { deleteSource } from './operations/deleteSource'
 export { generateUploadSignature } from './operations/generateUploadSignature'
+export { generateUploadSignatureConversation } from './operations/generateUploadSignatureConversation'
+export { generateUploadSignatureSource } from './operations/generateUploadSignatureSource'
 export { getAgent } from './operations/getAgent'
 export { getConnection } from './operations/getConnection'
 export { getConversation } from './operations/getConversation'
@@ -748,7 +849,9 @@ export { sendQuestionMessage } from './operations/sendQuestionMessage'
 export { streamAnswerMessage } from './operations/streamAnswerMessage'
 export { updateConversation } from './operations/updateConversation'
 export { updateSource } from './operations/updateSource'
-export { uploadFile } from './operations/uploadFile'
+export { uploadFiles } from './operations/uploadFiles'
+export { uploadFilesConversation } from './operations/uploadFilesConversation'
+export { uploadFilesSource } from './operations/uploadFilesSource'
 export {
   createSourceMutationKey,
   useCreateSource,
@@ -765,6 +868,14 @@ export {
   generateUploadSignatureMutationKey,
   useGenerateUploadSignature,
 } from './react-query/hooks/useGenerateUploadSignature'
+export {
+  generateUploadSignatureConversationMutationKey,
+  useGenerateUploadSignatureConversation,
+} from './react-query/hooks/useGenerateUploadSignatureConversation'
+export {
+  generateUploadSignatureSourceMutationKey,
+  useGenerateUploadSignatureSource,
+} from './react-query/hooks/useGenerateUploadSignatureSource'
 export {
   getAgentQueryKey,
   getAgentQueryOptions,
@@ -851,9 +962,17 @@ export {
   useUpdateSource,
 } from './react-query/hooks/useUpdateSource'
 export {
-  uploadFileMutationKey,
-  useUploadFile,
-} from './react-query/hooks/useUploadFile'
+  uploadFilesMutationKey,
+  useUploadFiles,
+} from './react-query/hooks/useUploadFiles'
+export {
+  uploadFilesConversationMutationKey,
+  useUploadFilesConversation,
+} from './react-query/hooks/useUploadFilesConversation'
+export {
+  uploadFilesSourceMutationKey,
+  useUploadFilesSource,
+} from './react-query/hooks/useUploadFilesSource'
 export {
   createSource200Schema,
   createSource400Schema,
@@ -890,6 +1009,17 @@ export {
   deleteSourceMutationResponseSchema,
 } from './schemas/deleteSourceSchema'
 export {
+  generateUploadSignatureConversation200Schema,
+  generateUploadSignatureConversation400Schema,
+  generateUploadSignatureConversation401Schema,
+  generateUploadSignatureConversation403Schema,
+  generateUploadSignatureConversation404Schema,
+  generateUploadSignatureConversation429Schema,
+  generateUploadSignatureConversation500Schema,
+  generateUploadSignatureConversationMutationRequestSchema,
+  generateUploadSignatureConversationMutationResponseSchema,
+} from './schemas/generateUploadSignatureConversationSchema'
+export {
   generateUploadSignatureHeaderParamsSchema,
   generateUploadSignature200Schema,
   generateUploadSignature400Schema,
@@ -901,6 +1031,17 @@ export {
   generateUploadSignatureMutationRequestSchema,
   generateUploadSignatureMutationResponseSchema,
 } from './schemas/generateUploadSignatureSchema'
+export {
+  generateUploadSignatureSource200Schema,
+  generateUploadSignatureSource400Schema,
+  generateUploadSignatureSource401Schema,
+  generateUploadSignatureSource403Schema,
+  generateUploadSignatureSource404Schema,
+  generateUploadSignatureSource429Schema,
+  generateUploadSignatureSource500Schema,
+  generateUploadSignatureSourceMutationRequestSchema,
+  generateUploadSignatureSourceMutationResponseSchema,
+} from './schemas/generateUploadSignatureSourceSchema'
 export {
   getAgentPathParamsSchema,
   getAgentQueryParamsSchema,
@@ -1110,24 +1251,43 @@ export {
   updateSourceMutationResponseSchema,
 } from './schemas/updateSourceSchema'
 export {
-  uploadFileHeaderParamsSchema,
-  uploadFile200Schema,
-  uploadFile400Schema,
-  uploadFile401Schema,
-  uploadFile403Schema,
-  uploadFile404Schema,
-  uploadFile429Schema,
-  uploadFile500Schema,
-  uploadFileMutationResponseSchema,
-} from './schemas/uploadFileSchema'
+  uploadFilesConversationHeaderParamsSchema,
+  uploadFilesConversation200Schema,
+  uploadFilesConversation400Schema,
+  uploadFilesConversation401Schema,
+  uploadFilesConversation403Schema,
+  uploadFilesConversation404Schema,
+  uploadFilesConversation429Schema,
+  uploadFilesConversation500Schema,
+  uploadFilesConversationMutationResponseSchema,
+} from './schemas/uploadFilesConversationSchema'
+export {
+  uploadFilesHeaderParamsSchema,
+  uploadFiles200Schema,
+  uploadFiles400Schema,
+  uploadFiles401Schema,
+  uploadFiles403Schema,
+  uploadFiles404Schema,
+  uploadFiles429Schema,
+  uploadFiles500Schema,
+  uploadFilesMutationResponseSchema,
+} from './schemas/uploadFilesSchema'
+export {
+  uploadFilesSourceHeaderParamsSchema,
+  uploadFilesSource200Schema,
+  uploadFilesSource400Schema,
+  uploadFilesSource401Schema,
+  uploadFilesSource403Schema,
+  uploadFilesSource404Schema,
+  uploadFilesSource429Schema,
+  uploadFilesSource500Schema,
+  uploadFilesSourceMutationResponseSchema,
+} from './schemas/uploadFilesSourceSchema'
 export { createSourceMutationRequestTypeEnum } from './types/CreateSource'
 export { deleteConversation204Enum } from './types/DeleteConversation'
 export { deleteSource204Enum } from './types/DeleteSource'
-export {
-  generateUploadSignatureMutationRequestBucketEnum,
-  generateUploadSignatureMutationRequestScopeEnum,
-} from './types/GenerateUploadSignature'
-export { fileBucketEnum2, fileScopeEnum2 } from './types/GetFile'
+export { generateUploadSignatureSourceMutationRequestSourceTypeEnum } from './types/GenerateUploadSignatureSource'
+export { fileBucketEnum, fileScopeEnum } from './types/GetFile'
 export { sourceTypeEnum } from './types/GetSource'
 export {
   messagesStatusEnum,
@@ -1277,4 +1437,9 @@ export {
 } from './types/SendQuestionMessage'
 export { updateConversation204Enum } from './types/UpdateConversation'
 export { updateSource204Enum } from './types/UpdateSource'
-export { fileBucketEnum, fileScopeEnum } from './types/UploadFile'
+export { filesStatusEnum, filesStatusEnum2 } from './types/UploadFiles'
+export {
+  filesStatusEnum5,
+  filesStatusEnum6,
+} from './types/UploadFilesConversation'
+export { filesStatusEnum3, filesStatusEnum4 } from './types/UploadFilesSource'

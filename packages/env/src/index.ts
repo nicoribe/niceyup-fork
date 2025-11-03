@@ -7,16 +7,16 @@ const env = createEnv({
     APP_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
-    API_URL: z.string().url(),
-    API_KEY: z.string(),
-    WEB_URL: z.string().url(),
-    STORAGE_URL: z.string().url(),
+    APP_SECRET_KEY: z.string(),
+    API_URL: z.url(),
+    WEB_URL: z.url(),
+    STORAGE_URL: z.url(),
   },
   runtimeEnv: {
     LOGGER: process.env.LOGGER,
     APP_ENV: process.env.APP_ENV,
+    APP_SECRET_KEY: process.env.APP_SECRET_KEY,
     API_URL: process.env.API_URL,
-    API_KEY: process.env.API_KEY,
     WEB_URL: process.env.WEB_URL,
     STORAGE_URL: process.env.STORAGE_URL,
   },
