@@ -5,7 +5,7 @@ import { env as baseEnv } from '@workspace/env'
 export const env = createEnv({
   extends: [baseEnv, cacheEnv],
   shared: {
-    NEXT_PUBLIC_WEBSOCKET_URL: z.string().url(),
+    NEXT_PUBLIC_WEBSOCKET_URL: z.url(),
   },
   runtimeEnv: {
     NEXT_PUBLIC_WEBSOCKET_URL: process.env.NEXT_PUBLIC_WEBSOCKET_URL,

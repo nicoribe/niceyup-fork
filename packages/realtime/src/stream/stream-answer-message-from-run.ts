@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
-import { runs } from '@workspace/engine'
 import type { STREAMS } from '@workspace/engine/tasks/answer-message'
+import { runs } from '@workspace/engine/trigger'
 import type { AIMessageNode } from '../lib/types'
 
 export function streamAnswerMessageFromRun({

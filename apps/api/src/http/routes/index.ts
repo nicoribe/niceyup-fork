@@ -25,6 +25,7 @@ import { uploadFiles } from './files/upload-files'
 import { health } from './health'
 import { getProfile } from './profile/get-profile'
 import { createSource } from './sources/create-source'
+import { getDatabaseSchema } from './sources/database/get-schema'
 import { deleteSource } from './sources/delete-source'
 import { generateUploadSignatureSource } from './sources/files/generate-upload-signature'
 import { uploadFilesSource } from './sources/files/upload-files'
@@ -52,6 +53,7 @@ export async function routes(app: FastifyTypedInstance) {
   app.register(createSource)
   app.register(updateSource)
   app.register(deleteSource)
+  app.register(getDatabaseSchema)
 
   app.register(listConversations)
   app.register(getConversation)

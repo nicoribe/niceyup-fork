@@ -1,7 +1,7 @@
 import { python } from '@trigger.dev/python'
-import { env } from '../lib/env'
-import { pyArgs, pyPath, pyStreamingResult } from '../lib/python'
-import { tmpDir } from '../lib/utils'
+import { env } from '../../lib/env'
+import { pyArgs, pyPath, pyStreamingResult } from '../../lib/python'
+import { tmpDir } from '../../lib/utils'
 
 type ExecuteQueryToolArgs = {
   source_id: string

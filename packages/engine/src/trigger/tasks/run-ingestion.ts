@@ -20,7 +20,7 @@ import {
   ingestQuestionAnswerSource,
   ingestTextSource,
   ingestWebsiteSource,
-} from '../functions/ingestors'
+} from '../../functions/ingestors'
 
 export const runIngestionTask = schemaTask({
   id: 'run-ingestion',

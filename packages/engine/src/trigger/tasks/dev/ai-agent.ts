@@ -9,8 +9,8 @@ import { readUIMessageStream, stepCountIs, streamText } from '@workspace/ai'
 import { openai } from '@workspace/ai/providers'
 import type { AIMessage } from '@workspace/ai/types'
 import { z } from 'zod'
-import { GetInformationTool } from '../../functions/ai-tools'
-import { templatePromptAnswer } from '../../functions/prompts'
+import { GetInformationTool } from '../../../functions/ai-tools'
+import { templatePromptAnswer } from '../../../functions/prompts'
 
 export const aiAgentTask = schemaTask({
   id: 'ai-agent',

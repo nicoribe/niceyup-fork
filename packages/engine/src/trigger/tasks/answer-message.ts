@@ -7,7 +7,7 @@ import { z } from 'zod'
 import {
   type StreamEventKey,
   streamAIAssistant,
-} from '../functions/stream-ai-assistant'
+} from '../../functions/stream-ai-assistant'
 
 export type STREAMS = {
   [K in StreamEventKey]: AIMessage

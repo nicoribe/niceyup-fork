@@ -1,5 +1,6 @@
 import { env } from '@/lib/env'
 import { fastifyRealtime } from '@/lib/realtime'
+import { transformSwaggerSchema } from '@/lib/transform-swagger-schema'
 import { fastifyCors } from '@fastify/cors'
 import { fastifyMultipart } from '@fastify/multipart'
 import { fastifyRedis } from '@fastify/redis'
@@ -10,7 +11,6 @@ import { cache } from '@workspace/cache'
 import { fastify } from 'fastify'
 import {
   type ZodTypeProvider,
-  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod'
@@ -45,9 +45,7 @@ app.register(fastifyWebsocket, {
   errorHandler: errorHandlerWebsocket,
 })
 
-app.register(fastifyMultipart, {
-  // attachFieldsToBody: true,
-})
+app.register(fastifyMultipart)
 
 if (env.APP_ENV === 'development') {
   app.register(fastifySwagger, {
@@ -75,7 +73,7 @@ if (env.APP_ENV === 'development') {
       security: [{ apiKeyCookie: [], bearerAuth: [] }],
       servers: [{ url: `${env.API_URL}/api` }],
     },
-    transform: jsonSchemaTransform,
+    transform: transformSwaggerSchema,
   })
 
   app.register(fastifyScalar, {

@@ -39,7 +39,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./tasks/*": "./src/tasks/*.ts",
+    "./trigger": "./src/trigger/index.ts",
+    "./tasks/*": "./src/trigger/tasks/*.ts",
     "./types": "./src/lib/types.ts",
     "./env": "./src/lib/env.ts"
   }

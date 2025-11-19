@@ -43,7 +43,7 @@ export async function listMessages(app: FastifyTypedInstance) {
           teamId: z.string().optional(),
           agentId: z.string(),
           targetMessageId: z.string().optional(),
-          parentNodes: z.coerce.boolean().optional(),
+          parents: z.coerce.boolean().optional(),
         }),
         response: withDefaultErrorResponses({
           200: z
@@ -85,7 +85,7 @@ export async function listMessages(app: FastifyTypedInstance) {
         })
       }
 
-      const { targetMessageId, parentNodes } = request.query
+      const { targetMessageId, parents } = request.query
 
       const [targetMessage] = await db
         .select({
@@ -117,7 +117,7 @@ export async function listMessages(app: FastifyTypedInstance) {
       const listMessages = await queries.listMessageNodes({
         conversationId,
         targetMessageId: targetMessage.id,
-        parentNodes,
+        parentNodes: parents,
       })
 
       return { messages: listMessages }

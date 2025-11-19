@@ -27,7 +27,7 @@ export async function ChatViewWrapper({
       organizationSlug: params.organizationSlug,
       teamId: params.teamId,
       agentId: params.agentId,
-      parentNodes: true,
+      parents: true,
     },
   })
 
