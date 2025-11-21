@@ -6,6 +6,7 @@
 import fetch from '../../../client/fetch'
 import type { RequestConfig, ResponseErrorConfig } from '../../../client/fetch'
 import type {
+  UploadFilesConversationMutationRequest,
   UploadFilesConversationMutationResponse,
   UploadFilesConversationHeaderParams,
   UploadFilesConversation400,
@@ -25,11 +26,29 @@ function getUploadFilesConversationUrl() {
  * {@link /conversations/files}
  */
 export async function uploadFilesConversation(
-  { headers }: { headers: UploadFilesConversationHeaderParams },
-  config: Partial<RequestConfig> & { client?: typeof fetch } = {},
+  {
+    data,
+    headers,
+  }: {
+    data: UploadFilesConversationMutationRequest
+    headers: UploadFilesConversationHeaderParams
+  },
+  config: Partial<RequestConfig<UploadFilesConversationMutationRequest>> & {
+    client?: typeof fetch
+  } = {},
 ) {
   const { client: request = fetch, ...requestConfig } = config
 
+  const requestData = data
+  const formData = new FormData()
+  if (requestData) {
+    Object.keys(requestData).forEach((key) => {
+      const value = requestData[key as keyof typeof requestData]
+      if (typeof value === 'string' || (value as unknown) instanceof Blob) {
+        formData.append(key, value as unknown as string | Blob)
+      }
+    })
+  }
   const res = await request<
     UploadFilesConversationMutationResponse,
     ResponseErrorConfig<
@@ -40,12 +59,17 @@ export async function uploadFilesConversation(
       | UploadFilesConversation429
       | UploadFilesConversation500
     >,
-    unknown
+    UploadFilesConversationMutationRequest
   >({
     method: 'POST',
     url: getUploadFilesConversationUrl().toString(),
+    data: formData,
     ...requestConfig,
-    headers: { ...headers, ...requestConfig.headers },
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      ...headers,
+      ...requestConfig.headers,
+    },
   })
   return res
 }

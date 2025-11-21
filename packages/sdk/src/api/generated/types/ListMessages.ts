@@ -34,7 +34,7 @@ export type ListMessagesQueryParams = {
   /**
    * @type boolean | undefined
    */
-  parentNodes?: boolean
+  parents?: boolean
 }
 
 export const messagesStatusEnum = {

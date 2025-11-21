@@ -42,7 +42,7 @@ export function useCreateSource<TContext>(
         | CreateSource429
         | CreateSource500
       >,
-      { data: CreateSourceMutationRequest },
+      { data?: CreateSourceMutationRequest },
       TContext
     > & { client?: QueryClient }
     client?: Partial<RequestConfig<CreateSourceMutationRequest>> & {
@@ -64,7 +64,7 @@ export function useCreateSource<TContext>(
       | CreateSource429
       | CreateSource500
     >,
-    { data: CreateSourceMutationRequest },
+    { data?: CreateSourceMutationRequest },
     TContext
   >(
     {

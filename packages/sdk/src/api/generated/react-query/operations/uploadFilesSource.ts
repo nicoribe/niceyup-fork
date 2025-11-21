@@ -9,6 +9,7 @@ import type {
   ResponseErrorConfig,
 } from '../../../../client/fetch-react-query'
 import type {
+  UploadFilesSourceMutationRequest,
   UploadFilesSourceMutationResponse,
   UploadFilesSourceHeaderParams,
   UploadFilesSource400,
@@ -28,11 +29,29 @@ function getUploadFilesSourceUrl() {
  * {@link /sources/files}
  */
 export async function uploadFilesSource(
-  { headers }: { headers: UploadFilesSourceHeaderParams },
-  config: Partial<RequestConfig> & { client?: typeof fetch } = {},
+  {
+    data,
+    headers,
+  }: {
+    data: UploadFilesSourceMutationRequest
+    headers: UploadFilesSourceHeaderParams
+  },
+  config: Partial<RequestConfig<UploadFilesSourceMutationRequest>> & {
+    client?: typeof fetch
+  } = {},
 ) {
   const { client: request = fetch, ...requestConfig } = config
 
+  const requestData = data
+  const formData = new FormData()
+  if (requestData) {
+    Object.keys(requestData).forEach((key) => {
+      const value = requestData[key as keyof typeof requestData]
+      if (typeof value === 'string' || (value as unknown) instanceof Blob) {
+        formData.append(key, value as unknown as string | Blob)
+      }
+    })
+  }
   const res = await request<
     UploadFilesSourceMutationResponse,
     ResponseErrorConfig<
@@ -43,12 +62,17 @@ export async function uploadFilesSource(
       | UploadFilesSource429
       | UploadFilesSource500
     >,
-    unknown
+    UploadFilesSourceMutationRequest
   >({
     method: 'POST',
     url: getUploadFilesSourceUrl().toString(),
+    data: formData,
     ...requestConfig,
-    headers: { ...headers, ...requestConfig.headers },
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      ...headers,
+      ...requestConfig.headers,
+    },
   })
   return res.data
 }

@@ -28,13 +28,12 @@ export async function getMessage(
   context: ContextGetMessageParams,
   params: GetMessageParams,
 ) {
-  const conversation = await getConversation(context, {
+  const checkAccessToConversation = await getConversation(context, {
     agentId: params.agentId,
     conversationId: params.conversationId,
   })
 
-  // Check if user has access to the conversation
-  if (!conversation) {
+  if (!checkAccessToConversation) {
     return null
   }
 

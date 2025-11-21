@@ -41,7 +41,7 @@ export const getSource200Schema = z
     source: z.object({
       id: z.string(),
       name: z.string(),
-      type: z.enum(['file', 'text', 'question-answer', 'website', 'database']),
+      type: z.enum(['text', 'question-answer', 'website', 'file', 'database']),
     }),
   })
   .describe('Success') as unknown as ToZod<GetSource200>

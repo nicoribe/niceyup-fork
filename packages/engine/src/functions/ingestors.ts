@@ -1,11 +1,10 @@
-import { logger } from '@trigger.dev/sdk'
 import { generateText } from '@workspace/ai'
 import { vectorStore } from '@workspace/vector-store'
 import type {
   DatabaseSourceQueryExample,
   DatabaseSourceTableMetadata,
 } from '../lib/types'
-import { getDbProperNounsTask } from '../tasks/get-db-proper-nouns'
+import { getDbProperNounsTask } from '../trigger/tasks/get-db-proper-nouns'
 import { filesLoader } from './loaders'
 import { languageModel } from './models'
 import { experimental_templatePromptSummarizeDatabaseSource } from './prompts'
@@ -21,8 +20,6 @@ export async function ingestTextSource({
   const documents = [{ content: 'Empty' }]
 
   // TODO: Implement logic to ingest text source
-
-  logger.warn('Documents', { documents })
 
   await vectorStore.upsert({
     namespace,
@@ -44,8 +41,6 @@ export async function ingestQuestionAnswerSource({
 
   // TODO: Implement logic to ingest question answer source
 
-  logger.warn('Documents', { documents })
-
   await vectorStore.upsert({
     namespace,
     collection: 'sources',
@@ -65,8 +60,6 @@ export async function ingestWebsiteSource({
   const documents = [{ content: 'Empty' }]
 
   // TODO: Implement logic to ingest website source
-
-  logger.warn('Documents', { documents })
 
   await vectorStore.upsert({
     namespace,
@@ -90,29 +83,12 @@ export async function ingestFileSource({
   chunkSize: number | null
   chunkOverlap: number | null
 }) {
-  const loadedDocuments = await logger.trace('Load File', async () => {
-    const loadedDocuments = await filesLoader({ paths: [filePath] })
+  const loadedDocuments = await filesLoader({ paths: [filePath] })
 
-    logger.warn('Loaded Documents', { loadedDocuments })
-
-    return loadedDocuments
-  })
-
-  const splitDocuments = await logger.trace('Split Documents', async () => {
-    logger.warn('Setting chunk size and overlap', {
-      chunkSize,
-      chunkOverlap,
-    })
-
-    const splitDocuments = await documentSplitter({
-      documents: loadedDocuments,
-      chunkSize,
-      chunkOverlap,
-    })
-
-    logger.warn('Split Documents', { splitDocuments })
-
-    return splitDocuments
+  const splitDocuments = await documentSplitter({
+    documents: loadedDocuments,
+    chunkSize,
+    chunkOverlap,
   })
 
   const documents = splitDocuments.map((document) => ({
@@ -121,8 +97,6 @@ export async function ingestFileSource({
       documentMetadata: document.metadata,
     },
   }))
-
-  logger.warn('Documents', { documents })
 
   await vectorStore.upsert({
     namespace,
@@ -163,12 +137,8 @@ export async function ingestDatabaseSource({
       content += '\n'
     }
 
-    documents.push({
-      content,
-    })
+    documents.push({ content })
   }
-
-  logger.warn('Documents', { documents })
 
   await vectorStore.upsert({
     namespace,
@@ -215,13 +185,9 @@ export async function ingestDatabaseSourceTablesMetadata({
 
     documents.push({
       content,
-      metadata: {
-        tableMetadata: table,
-      },
+      metadata: { tableMetadata: table },
     })
   }
-
-  logger.warn('Documents', { documents })
 
   await vectorStore.upsert({
     namespace,
@@ -243,8 +209,6 @@ export async function ingestDatabaseSourceProperNouns({
     .triggerAndWait({ sourceId })
     .unwrap()
 
-  logger.warn('Proper Nouns', { properNouns })
-
   const documents = []
 
   for (const table of properNouns) {
@@ -252,15 +216,11 @@ export async function ingestDatabaseSourceProperNouns({
       for (const properNoun of column.proper_nouns) {
         documents.push({
           content: properNoun,
-          metadata: {
-            key: `"${table.name}"."${column.name}"`,
-          },
+          metadata: { key: `"${table.name}"."${column.name}"` },
         })
       }
     }
   }
-
-  logger.warn('Documents', { documents })
 
   await vectorStore.upsert({
     namespace,
@@ -286,13 +246,9 @@ export async function ingestDatabaseSourceQueryExamples({
     for (const queryExample of queryExamples) {
       const content = `Input: \`${queryExample.input}\`\nQuery: \`${queryExample.query}\``
 
-      documents.push({
-        content,
-      })
+      documents.push({ content })
     }
   }
-
-  logger.warn('Documents', { documents })
 
   await vectorStore.upsert({
     namespace,
@@ -346,11 +302,7 @@ export async function experimental_ingestDatabaseSource({
     }),
   })
 
-  const document = {
-    content: generatedContent.text,
-  }
-
-  logger.warn('Document', { document })
+  const document = { content: generatedContent.text }
 
   await vectorStore.upsert({
     namespace,

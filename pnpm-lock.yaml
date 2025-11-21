@@ -92,6 +92,9 @@ importers:
       pino-pretty:
         specifier: ^13.1.1
         version: 13.1.1
+      throttleit:
+        specifier: ^2.1.0
+        version: 2.1.0
       zod:
         specifier: 4.1.12
         version: 4.1.12
@@ -427,6 +430,9 @@ importers:
       '@workspace/env':
         specifier: workspace:*
         version: link:../env
+      '@workspace/realtime':
+        specifier: workspace:*
+        version: link:../realtime
       '@workspace/storage':
         specifier: workspace:*
         version: link:../storage
@@ -514,12 +520,12 @@ importers:
       '@workspace/cache':
         specifier: workspace:*
         version: link:../cache
-      '@workspace/engine':
-        specifier: workspace:*
-        version: link:../engine
       '@workspace/env':
         specifier: workspace:*
         version: link:../env
+      resumable-stream:
+        specifier: ^2.2.8
+        version: 2.2.8
       ws:
         specifier: ^8.16.0
         version: 8.18.3
@@ -7630,6 +7636,9 @@ packages:
     resolution: {integrity: sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==}
     engines: {node: '>=8'}
 
+  resumable-stream@2.2.8:
+    resolution: {integrity: sha512-F9+SLKw/a/p7hRjy2CNwzT66UIlY7aY4D3Sg9xwuZMA7nxVQrVPXCWU27qIGcO4jlauL0T3XkCN2218qi6ugTw==}
+
   ret@0.5.0:
     resolution: {integrity: sha512-I1XxrZSQ+oErkRR4jYbAyEEu2I0avBvvMM5JN+6EBprOGRCs63ENqZ3vjavq8fBw2+62G5LF5XelKwuJpcvcxw==}
     engines: {node: '>=10'}
@@ -8113,6 +8122,10 @@ packages:
 
   thread-stream@3.1.0:
     resolution: {integrity: sha512-OqyPZ9u96VohAyMfJykzmivOrY2wfMSf3C5TtFJVgN+Hm6aj+voFhlK+kZEIv2FBh1X6Xp3DlnCOfEQ3B2J86A==}
+
+  throttleit@2.1.0:
+    resolution: {integrity: sha512-nt6AMGKW1p/70DF/hGBdJB57B8Tspmbp5gfJ8ilhLnt7kkr2ye7hzD6NVG8GGErk2HWF34igrL2CXmNIkzKqKw==}
+    engines: {node: '>=18'}
 
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
@@ -16463,6 +16476,8 @@ snapshots:
       onetime: 5.1.2
       signal-exit: 3.0.7
 
+  resumable-stream@2.2.8: {}
+
   ret@0.5.0: {}
 
   retry-axios@2.6.0(axios@1.12.2(debug@4.4.0)):
@@ -17033,6 +17048,8 @@ snapshots:
   thread-stream@3.1.0:
     dependencies:
       real-require: 0.2.0
+
+  throttleit@2.1.0: {}
 
   through@2.3.8: {}
 

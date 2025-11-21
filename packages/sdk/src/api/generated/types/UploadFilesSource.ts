@@ -193,10 +193,18 @@ export type UploadFilesSource500 = {
   message: string
 }
 
+export type UploadFilesSourceMutationRequest = {
+  /**
+   * @type string, binary
+   */
+  file: Blob
+}
+
 export type UploadFilesSourceMutationResponse = UploadFilesSource200
 
 export type UploadFilesSourceMutation = {
   Response: UploadFilesSource200
+  Request: UploadFilesSourceMutationRequest
   HeaderParams: UploadFilesSourceHeaderParams
   Errors:
     | UploadFilesSource400

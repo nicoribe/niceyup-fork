@@ -36,10 +36,10 @@ export const listSources200Schema = z
         id: z.string(),
         name: z.string(),
         type: z.enum([
-          'file',
           'text',
           'question-answer',
           'website',
+          'file',
           'database',
         ]),
       }),

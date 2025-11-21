@@ -25,7 +25,7 @@ function getCreateSourceUrl() {
  * {@link /sources}
  */
 export async function createSource(
-  { data }: { data: CreateSourceMutationRequest },
+  { data }: { data?: CreateSourceMutationRequest },
   config: Partial<RequestConfig<CreateSourceMutationRequest>> & {
     client?: typeof fetch
   } = {},

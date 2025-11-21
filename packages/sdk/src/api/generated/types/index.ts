@@ -1,4 +1,16 @@
 export type {
+  CreateConnection200,
+  CreateConnection400,
+  CreateConnection401,
+  CreateConnection403,
+  CreateConnection404,
+  CreateConnection429,
+  CreateConnection500,
+  CreateConnectionMutationRequest,
+  CreateConnectionMutationResponse,
+  CreateConnectionMutation,
+} from './CreateConnection'
+export type {
   CreateSource200,
   CreateSource400,
   CreateSource401,
@@ -6,11 +18,29 @@ export type {
   CreateSource404,
   CreateSource429,
   CreateSource500,
+  CreateSourceMutationRequestTypeEnum2,
+  CreateSourceMutationRequestTypeEnum3,
+  CreateSourceMutationRequestTypeEnum4,
+  CreateSourceMutationRequestDialectEnum,
   CreateSourceMutationRequestTypeEnum,
   CreateSourceMutationRequest,
   CreateSourceMutationResponse,
   CreateSourceMutation,
 } from './CreateSource'
+export type {
+  DeleteConnectionPathParams,
+  DeleteConnection204Enum,
+  DeleteConnection204,
+  DeleteConnection400,
+  DeleteConnection401,
+  DeleteConnection403,
+  DeleteConnection404,
+  DeleteConnection429,
+  DeleteConnection500,
+  DeleteConnectionMutationRequest,
+  DeleteConnectionMutationResponse,
+  DeleteConnectionMutation,
+} from './DeleteConnection'
 export type {
   DeleteConversationPathParams,
   DeleteConversation204Enum,
@@ -116,6 +146,19 @@ export type {
   GetConversationQueryResponse,
   GetConversationQuery,
 } from './GetConversation'
+export type {
+  GetDatabaseSchemaPathParams,
+  GetDatabaseSchemaQueryParams,
+  GetDatabaseSchema200,
+  GetDatabaseSchema400,
+  GetDatabaseSchema401,
+  GetDatabaseSchema403,
+  GetDatabaseSchema404,
+  GetDatabaseSchema429,
+  GetDatabaseSchema500,
+  GetDatabaseSchemaQueryResponse,
+  GetDatabaseSchemaQuery,
+} from './GetDatabaseSchema'
 export type {
   GetFilePathParams,
   GetFileQueryParams,
@@ -252,9 +295,9 @@ export type {
   ListSourcesQuery,
 } from './ListSources'
 export type {
-  RegenerateAnswerMessagePathParams,
-  AnswerMessageStatusEnum3,
-  AnswerMessageRoleEnum3,
+  RegenerateMessagePathParams,
+  AssistantMessageStatusEnum3,
+  AssistantMessageRoleEnum3,
   PartsTypeEnum55,
   PartsStateEnum51,
   PartsTypeEnum56,
@@ -275,21 +318,21 @@ export type {
   PartsStateEnum58,
   PartsStateEnum59,
   PartsStateEnum60,
-  RegenerateAnswerMessage200,
-  RegenerateAnswerMessage400,
-  RegenerateAnswerMessage401,
-  RegenerateAnswerMessage403,
-  RegenerateAnswerMessage404,
-  RegenerateAnswerMessage429,
-  RegenerateAnswerMessage500,
-  RegenerateAnswerMessageMutationRequest,
-  RegenerateAnswerMessageMutationResponse,
-  RegenerateAnswerMessageMutation,
-} from './RegenerateAnswerMessage'
+  RegenerateMessage200,
+  RegenerateMessage400,
+  RegenerateMessage401,
+  RegenerateMessage403,
+  RegenerateMessage404,
+  RegenerateMessage429,
+  RegenerateMessage500,
+  RegenerateMessageMutationRequest,
+  RegenerateMessageMutationResponse,
+  RegenerateMessageMutation,
+} from './RegenerateMessage'
 export type {
-  ResendQuestionMessagePathParams,
-  QuestionMessageStatusEnum2,
-  QuestionMessageRoleEnum2,
+  ResendMessagePathParams,
+  UserMessageStatusEnum2,
+  UserMessageRoleEnum2,
   PartsTypeEnum33,
   PartsStateEnum31,
   PartsTypeEnum34,
@@ -310,8 +353,8 @@ export type {
   PartsStateEnum38,
   PartsStateEnum39,
   PartsStateEnum40,
-  AnswerMessageStatusEnum2,
-  AnswerMessageRoleEnum2,
+  AssistantMessageStatusEnum2,
+  AssistantMessageRoleEnum2,
   PartsTypeEnum43,
   PartsStateEnum41,
   PartsTypeEnum44,
@@ -332,23 +375,23 @@ export type {
   PartsStateEnum48,
   PartsStateEnum49,
   PartsStateEnum50,
-  ResendQuestionMessage200,
-  ResendQuestionMessage400,
-  ResendQuestionMessage401,
-  ResendQuestionMessage403,
-  ResendQuestionMessage404,
-  ResendQuestionMessage429,
-  ResendQuestionMessage500,
+  ResendMessage200,
+  ResendMessage400,
+  ResendMessage401,
+  ResendMessage403,
+  ResendMessage404,
+  ResendMessage429,
+  ResendMessage500,
   PartsTypeEnum53,
   PartsTypeEnum54,
-  ResendQuestionMessageMutationRequest,
-  ResendQuestionMessageMutationResponse,
-  ResendQuestionMessageMutation,
-} from './ResendQuestionMessage'
+  ResendMessageMutationRequest,
+  ResendMessageMutationResponse,
+  ResendMessageMutation,
+} from './ResendMessage'
 export type {
-  SendQuestionMessagePathParams,
-  QuestionMessageStatusEnum,
-  QuestionMessageRoleEnum,
+  SendMessagePathParams,
+  UserMessageStatusEnum,
+  UserMessageRoleEnum,
   PartsTypeEnum11,
   PartsStateEnum11,
   PartsTypeEnum12,
@@ -369,8 +412,8 @@ export type {
   PartsStateEnum18,
   PartsStateEnum19,
   PartsStateEnum20,
-  AnswerMessageStatusEnum,
-  AnswerMessageRoleEnum,
+  AssistantMessageStatusEnum,
+  AssistantMessageRoleEnum,
   PartsTypeEnum21,
   PartsStateEnum21,
   PartsTypeEnum22,
@@ -391,33 +434,61 @@ export type {
   PartsStateEnum28,
   PartsStateEnum29,
   PartsStateEnum30,
-  SendQuestionMessage200,
-  SendQuestionMessage400,
-  SendQuestionMessage401,
-  SendQuestionMessage403,
-  SendQuestionMessage404,
-  SendQuestionMessage429,
-  SendQuestionMessage500,
+  SendMessage200,
+  SendMessage400,
+  SendMessage401,
+  SendMessage403,
+  SendMessage404,
+  SendMessage429,
+  SendMessage500,
   PartsTypeEnum31,
   PartsTypeEnum32,
   ExplorerNodeVisibilityEnum,
-  SendQuestionMessageMutationRequest,
-  SendQuestionMessageMutationResponse,
-  SendQuestionMessageMutation,
-} from './SendQuestionMessage'
+  SendMessageMutationRequest,
+  SendMessageMutationResponse,
+  SendMessageMutation,
+} from './SendMessage'
 export type {
-  StreamAnswerMessagePathParams,
-  StreamAnswerMessageQueryParams,
-  StreamAnswerMessage200,
-  StreamAnswerMessage400,
-  StreamAnswerMessage401,
-  StreamAnswerMessage403,
-  StreamAnswerMessage404,
-  StreamAnswerMessage429,
-  StreamAnswerMessage500,
-  StreamAnswerMessageQueryResponse,
-  StreamAnswerMessageQuery,
-} from './StreamAnswerMessage'
+  StopMessagePathParams,
+  StopMessageQueryParams,
+  StopMessage204Enum,
+  StopMessage204,
+  StopMessage400,
+  StopMessage401,
+  StopMessage403,
+  StopMessage404,
+  StopMessage429,
+  StopMessage500,
+  StopMessageMutationResponse,
+  StopMessageMutation,
+} from './StopMessage'
+export type {
+  StreamMessagePathParams,
+  StreamMessageQueryParams,
+  StreamMessage200,
+  StreamMessage400,
+  StreamMessage401,
+  StreamMessage403,
+  StreamMessage404,
+  StreamMessage429,
+  StreamMessage500,
+  StreamMessageQueryResponse,
+  StreamMessageQuery,
+} from './StreamMessage'
+export type {
+  UpdateConnectionPathParams,
+  UpdateConnection204Enum,
+  UpdateConnection204,
+  UpdateConnection400,
+  UpdateConnection401,
+  UpdateConnection403,
+  UpdateConnection404,
+  UpdateConnection429,
+  UpdateConnection500,
+  UpdateConnectionMutationRequest,
+  UpdateConnectionMutationResponse,
+  UpdateConnectionMutation,
+} from './UpdateConnection'
 export type {
   UpdateConversationPathParams,
   UpdateConversation204Enum,
@@ -457,6 +528,7 @@ export type {
   UploadFiles404,
   UploadFiles429,
   UploadFiles500,
+  UploadFilesMutationRequest,
   UploadFilesMutationResponse,
   UploadFilesMutation,
 } from './UploadFiles'
@@ -471,6 +543,7 @@ export type {
   UploadFilesConversation404,
   UploadFilesConversation429,
   UploadFilesConversation500,
+  UploadFilesConversationMutationRequest,
   UploadFilesConversationMutationResponse,
   UploadFilesConversationMutation,
 } from './UploadFilesConversation'
@@ -485,10 +558,18 @@ export type {
   UploadFilesSource404,
   UploadFilesSource429,
   UploadFilesSource500,
+  UploadFilesSourceMutationRequest,
   UploadFilesSourceMutationResponse,
   UploadFilesSourceMutation,
 } from './UploadFilesSource'
-export { createSourceMutationRequestTypeEnum } from './CreateSource'
+export {
+  createSourceMutationRequestTypeEnum2,
+  createSourceMutationRequestTypeEnum3,
+  createSourceMutationRequestTypeEnum4,
+  createSourceMutationRequestDialectEnum,
+  createSourceMutationRequestTypeEnum,
+} from './CreateSource'
+export { deleteConnection204Enum } from './DeleteConnection'
 export { deleteConversation204Enum } from './DeleteConversation'
 export { deleteSource204Enum } from './DeleteSource'
 export { generateUploadSignatureSourceMutationRequestSourceTypeEnum } from './GenerateUploadSignatureSource'
@@ -520,8 +601,8 @@ export {
 } from './ListMessages'
 export { sourcesTypeEnum } from './ListSources'
 export {
-  answerMessageStatusEnum3,
-  answerMessageRoleEnum3,
+  assistantMessageStatusEnum3,
+  assistantMessageRoleEnum3,
   partsTypeEnum55,
   partsStateEnum51,
   partsTypeEnum56,
@@ -542,10 +623,10 @@ export {
   partsStateEnum58,
   partsStateEnum59,
   partsStateEnum60,
-} from './RegenerateAnswerMessage'
+} from './RegenerateMessage'
 export {
-  questionMessageStatusEnum2,
-  questionMessageRoleEnum2,
+  userMessageStatusEnum2,
+  userMessageRoleEnum2,
   partsTypeEnum33,
   partsStateEnum31,
   partsTypeEnum34,
@@ -566,8 +647,8 @@ export {
   partsStateEnum38,
   partsStateEnum39,
   partsStateEnum40,
-  answerMessageStatusEnum2,
-  answerMessageRoleEnum2,
+  assistantMessageStatusEnum2,
+  assistantMessageRoleEnum2,
   partsTypeEnum43,
   partsStateEnum41,
   partsTypeEnum44,
@@ -590,10 +671,10 @@ export {
   partsStateEnum50,
   partsTypeEnum53,
   partsTypeEnum54,
-} from './ResendQuestionMessage'
+} from './ResendMessage'
 export {
-  questionMessageStatusEnum,
-  questionMessageRoleEnum,
+  userMessageStatusEnum,
+  userMessageRoleEnum,
   partsTypeEnum11,
   partsStateEnum11,
   partsTypeEnum12,
@@ -614,8 +695,8 @@ export {
   partsStateEnum18,
   partsStateEnum19,
   partsStateEnum20,
-  answerMessageStatusEnum,
-  answerMessageRoleEnum,
+  assistantMessageStatusEnum,
+  assistantMessageRoleEnum,
   partsTypeEnum21,
   partsStateEnum21,
   partsTypeEnum22,
@@ -639,7 +720,9 @@ export {
   partsTypeEnum31,
   partsTypeEnum32,
   explorerNodeVisibilityEnum,
-} from './SendQuestionMessage'
+} from './SendMessage'
+export { stopMessage204Enum } from './StopMessage'
+export { updateConnection204Enum } from './UpdateConnection'
 export { updateConversation204Enum } from './UpdateConversation'
 export { updateSource204Enum } from './UpdateSource'
 export { filesStatusEnum, filesStatusEnum2 } from './UploadFiles'

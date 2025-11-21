@@ -1,0 +1,177 @@
+import { BadRequestError } from '@/http/errors/bad-request-error'
+import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { sendUserMessageToAssistant } from '@/http/functions/ai-assistant'
+import { authenticate } from '@/http/middlewares/authenticate'
+import { getOrganizationIdentifier } from '@/lib/utils'
+import type { FastifyTypedInstance } from '@/types/fastify'
+import {
+  aiMessageMetadataSchema,
+  aiMessagePartSchema,
+  aiMessageRoleSchema,
+  aiMessageStatusSchema,
+} from '@workspace/ai/schemas'
+import { db } from '@workspace/db'
+import { and, eq, isNull } from '@workspace/db/orm'
+import { queries } from '@workspace/db/queries'
+import { messages } from '@workspace/db/schema'
+import { conversationPubSub } from '@workspace/realtime/pubsub'
+import { z } from 'zod'
+
+const messageSchema = z.object({
+  id: z.string(),
+  status: aiMessageStatusSchema,
+  role: aiMessageRoleSchema,
+  parts: z.array(aiMessagePartSchema).nullable(),
+  metadata: aiMessageMetadataSchema.nullable(),
+  authorId: z.string().nullish(),
+  parentId: z.string().nullish(),
+  children: z.array(z.string()).optional(),
+})
+
+export async function regenerateMessage(app: FastifyTypedInstance) {
+  app.register(authenticate).post(
+    '/conversations/:conversationId/messages/regenerate',
+    {
+      schema: {
+        tags: ['Conversations'],
+        description: 'Regenerate assistant message',
+        operationId: 'regenerateMessage',
+        params: z.object({
+          conversationId: z.string(),
+        }),
+        body: z.object({
+          organizationId: z.string().nullish(),
+          organizationSlug: z.string().nullish(),
+          teamId: z.string().nullish(),
+          agentId: z.string(),
+          parentMessageId: z.string(),
+        }),
+        response: withDefaultErrorResponses({
+          200: z
+            .object({
+              assistantMessage: messageSchema,
+            })
+            .describe('Success'),
+        }),
+      },
+    },
+    async (request) => {
+      const {
+        user: { id: userId },
+      } = request.authSession
+
+      const { conversationId } = request.params
+
+      const {
+        organizationId,
+        organizationSlug,
+        teamId,
+        agentId,
+        parentMessageId,
+      } = request.body
+
+      const context = {
+        userId,
+        ...getOrganizationIdentifier({
+          organizationId,
+          organizationSlug,
+          teamId,
+        }),
+      }
+
+      const conversation = await queries.context.getConversation(context, {
+        agentId,
+        conversationId,
+      })
+
+      if (!conversation) {
+        throw new BadRequestError({
+          code: 'CONVERSATION_NOT_FOUND',
+          message: 'Conversation not found or you don’t have access',
+        })
+      }
+
+      const [parentMessage] = await db
+        .select({
+          id: messages.id,
+          parts: messages.parts,
+        })
+        .from(messages)
+        .where(
+          and(
+            eq(messages.conversationId, conversationId),
+            eq(messages.id, parentMessageId),
+            isNull(messages.deletedAt),
+          ),
+        )
+        .limit(1)
+
+      if (!parentMessage) {
+        throw new BadRequestError({
+          code: 'PARENT_MESSAGE_NOT_FOUND',
+          message: 'Parent message not found',
+        })
+      }
+
+      const { assistantMessage } = await db.transaction(async (tx) => {
+        const [assistantMessage] = await tx
+          .insert(messages)
+          .values({
+            conversationId,
+            status: 'queued',
+            role: 'assistant',
+            parts: [],
+            metadata: {
+              authorId: userId,
+            },
+            parentId: parentMessage.id,
+          })
+          .returning({
+            id: messages.id,
+            status: messages.status,
+            role: messages.role,
+            parts: messages.parts,
+            metadata: messages.metadata,
+            authorId: messages.authorId,
+            parentId: messages.parentId,
+          })
+
+        if (!assistantMessage) {
+          throw new BadRequestError({
+            code: 'ASSISTANT_MESSAGE_NOT_CREATED',
+            message: 'Assistant message not created',
+          })
+        }
+
+        return {
+          assistantMessage: { ...assistantMessage, children: [] },
+        }
+      })
+
+      // TODO: Make this dynamic based on the agent's configuration
+      const contextMessages = true
+      const maxContextMessages = 10
+
+      sendUserMessageToAssistant({
+        namespace: 'namespace',
+        conversationId,
+        userMessage: {
+          id: parentMessage.id,
+          parts: parentMessage.parts || [],
+        },
+        assistantMessage,
+        agentConfiguration: {
+          contextMessages,
+          maxContextMessages,
+        },
+      })
+
+      conversationPubSub.publish({
+        channel: `conversations:${conversationId}:updated`,
+        messages: [assistantMessage],
+      })
+
+      return { assistantMessage }
+    },
+  )
+}

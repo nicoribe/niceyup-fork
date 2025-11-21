@@ -1,8 +1,8 @@
 'use client'
 
 import { type StreamableValue, readStreamableValue } from '@workspace/ai/rsc'
+import type { AIMessage } from '@workspace/ai/types'
 import * as React from 'react'
-import type { AIMessageNode } from '../lib/types'
 
 type ContextParams = {
   organizationSlug: 'my-account' | '$id'
@@ -14,7 +14,10 @@ type ContextParams = {
 type StreamMessageActionParams = (
   context: ContextParams,
   params: { conversationId: string; messageId: string },
-) => Promise<StreamableValue<any, any>>
+) => Promise<
+  | { data: StreamableValue<AIMessage, unknown>; error?: never }
+  | { data?: never; error: { code: string; message: string } }
+>
 
 type UseChatMessageRealtimeParams = {
   params: ContextParams
@@ -30,19 +33,21 @@ export function useChatMessageRealtime({
   disable,
 }: UseChatMessageRealtimeParams) {
   const [error, setError] = React.useState<string>()
-  const [message, setMessage] = React.useState<AIMessageNode>()
+  const [message, setMessage] = React.useState<AIMessage>()
 
   async function startStreaming() {
     try {
-      const streamableValue = await streamMessageAction(params, {
+      const { data, error } = await streamMessageAction(params, {
         conversationId: params.chatId,
         messageId,
       })
 
-      for await (const messageDelta of readStreamableValue<AIMessageNode>(
-        streamableValue,
-      )) {
-        setMessage(messageDelta)
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      for await (const message of readStreamableValue<AIMessage>(data)) {
+        setMessage(message)
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error))

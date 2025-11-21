@@ -1,6 +1,6 @@
 'use client'
 
-import { streamAnswerMessage } from '@/actions/messages'
+import { streamMessage } from '@/actions/messages'
 import { env } from '@/lib/env'
 import type {
   ChatParams,
@@ -420,16 +420,17 @@ function ChatMessageContentStream({
 
   const { authorId, setPromptInputStatus } = useChatContext()
 
-  const { message: messageRealtime, error: errorRealtime } =
-    useChatMessageRealtime({
+  const { message: messageStream, error: errorStream } = useChatMessageRealtime(
+    {
       params: { organizationSlug, teamId, agentId, chatId },
       messageId: initialMessage.id,
-      streamMessageAction: streamAnswerMessage,
-    })
+      streamMessageAction: streamMessage,
+    },
+  )
 
   const { scrollToBottom } = useStickToBottomContext()
 
-  const messageNode = { ...initialMessage, ...messageRealtime }
+  const messageNode = { ...initialMessage, ...messageStream }
 
   React.useEffect(() => {
     if (authorId && authorId === initialMessage.metadata?.authorId) {
@@ -450,26 +451,24 @@ function ChatMessageContentStream({
       }
     }
 
-    if (messageRealtime) {
+    if (messageStream) {
       scrollToBottom({ preserveScrollPosition: true })
     }
   }, [messageNode])
 
-  if (errorRealtime) {
+  if (errorStream) {
     return (
       <Message from={messageNode.role}>
         <MessageContent>
           <div className="flex flex-row items-center gap-2">
             <XCircle className="size-4 shrink-0 text-destructive" />
-            {messageRealtime
+            {messageStream
               ? messageNode.role === 'assistant'
                 ? 'An error occurred while generating the response.'
                 : 'An error occurred while loading the message.'
               : 'An error occurred while retrieving the message.'}
           </div>
-          {messageRealtime && (
-            <ChatErrorResponse errorMessage={errorRealtime} />
-          )}
+          {messageStream && <ChatErrorResponse errorMessage={errorStream} />}
         </MessageContent>
       </Message>
     )
@@ -500,7 +499,7 @@ function ChatMessageContent({
 }: {
   message: ChatMessageNode
 }) {
-  const { authorId, regenerate } = useChatContext()
+  const { authorId, regenerateMessage } = useChatContext()
 
   // Messages from the system are not displayed
   if (message.role !== 'user' && message.role !== 'assistant') {
@@ -567,7 +566,7 @@ function ChatMessageContent({
             icon: RefreshCcwIcon,
             label: 'Retry',
             onClick: async () => {
-              await regenerate({ messageId: message.id })
+              await regenerateMessage({ messageId: message.id })
             },
           },
         ],

@@ -78,10 +78,11 @@ export async function getConversation(
   context: ContextGetConversationParams,
   params: GetConversationParams,
 ) {
-  // Check if user has access to the agent
-  const agent = await getAgent(context, { agentId: params.agentId })
+  const checkAccessToAgent = await getAgent(context, {
+    agentId: params.agentId,
+  })
 
-  if (!agent) {
+  if (!checkAccessToAgent) {
     return null
   }
 

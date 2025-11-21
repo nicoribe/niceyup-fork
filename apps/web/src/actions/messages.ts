@@ -1,38 +1,115 @@
 'use server'
 
+import { authenticatedUser } from '@/lib/auth/server'
+import { resumableStreamContext } from '@/lib/resumable-stream'
 import type { OrganizationTeamParams } from '@/lib/types'
-import { streamAnswerMessageFromAPI } from '@workspace/realtime/stream/rsc'
-import { cookies } from 'next/headers'
+import { createStreamableValue } from '@workspace/ai/rsc'
+import type { AIMessage } from '@workspace/ai/types'
+import { queries } from '@workspace/db/queries'
+import { JsonLinesTransformStream } from '@workspace/realtime/stream'
 
 type ContextMessageParams = OrganizationTeamParams & { agentId: string }
 
-type StreamAnswerMessageParams = {
+type GetMessageParams = {
   conversationId: string
   messageId: string
 }
 
-export async function streamAnswerMessage(
+export async function getMessage(
   context: ContextMessageParams,
-  { conversationId, messageId }: StreamAnswerMessageParams,
+  { conversationId, messageId }: GetMessageParams,
 ) {
-  const cookie = (await cookies()).toString()
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
 
-  const stream = streamAnswerMessageFromAPI(
-    {
-      conversationId,
-      messageId,
-      params: {
-        organizationSlug: context.organizationSlug,
-        teamId: context.teamId,
-        agentId: context.agentId,
-      },
-    },
-    {
-      headers: {
-        Cookie: cookie,
-      },
-    },
-  )
+  const ctx = {
+    userId,
+    organizationSlug:
+      context.organizationSlug !== 'my-account'
+        ? context.organizationSlug
+        : null,
+    teamId: context.teamId !== '~' ? context.teamId : null,
+  }
 
-  return stream
+  const message = await queries.context.getMessage(ctx, {
+    agentId: context.agentId,
+    conversationId,
+    messageId,
+  })
+
+  return message
+}
+
+type StreamMessageParams = {
+  conversationId: string
+  messageId: string
+}
+
+export async function streamMessage(
+  context: ContextMessageParams,
+  { conversationId, messageId }: StreamMessageParams,
+) {
+  const message = await getMessage(context, { conversationId, messageId })
+
+  if (!message) {
+    return {
+      error: {
+        code: 'MESSAGE_NOT_FOUND',
+        message: 'Message not found or you don’t have access',
+      },
+    }
+  }
+
+  if (message.role !== 'assistant') {
+    return {
+      error: {
+        code: 'MESSAGE_NOT_STREAMABLE',
+        message: 'Message is not streamable',
+      },
+    }
+  }
+
+  if (message.status !== 'queued' && message.status !== 'processing') {
+    return {
+      error: {
+        code: 'MESSAGE_NOT_STREAMING',
+        message: 'Message is not streaming',
+      },
+    }
+  }
+
+  const stream = await resumableStreamContext.resumeExistingStream(messageId)
+
+  if (!stream) {
+    return {
+      error: {
+        code: 'STREAM_NOT_FOUND',
+        message: 'Stream not found',
+      },
+    }
+  }
+
+  const streamable = createStreamableValue<AIMessage, unknown>()
+
+  const startStreaming = async () => {
+    const reader = stream
+      .pipeThrough(new JsonLinesTransformStream<AIMessage>())
+      .getReader()
+
+    while (true) {
+      const { done, value } = await reader.read()
+
+      if (done) {
+        streamable.done()
+        break
+      }
+
+      streamable.update(value)
+    }
+  }
+
+  startStreaming()
+
+  return { data: streamable.value }
 }

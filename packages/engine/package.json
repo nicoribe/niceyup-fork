@@ -22,6 +22,7 @@
     "@workspace/cache": "workspace:*",
     "@workspace/db": "workspace:*",
     "@workspace/env": "workspace:*",
+    "@workspace/realtime": "workspace:*",
     "@workspace/storage": "workspace:*",
     "@workspace/vector-store": "workspace:*",
     "d3-dsv": "2",

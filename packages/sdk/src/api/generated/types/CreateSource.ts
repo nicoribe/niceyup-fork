@@ -113,16 +113,96 @@ export type CreateSource500 = {
   message: string
 }
 
+export const createSourceMutationRequestTypeEnum2 = {
+  text: 'text',
+} as const
+
+export type CreateSourceMutationRequestTypeEnum2 =
+  (typeof createSourceMutationRequestTypeEnum2)[keyof typeof createSourceMutationRequestTypeEnum2]
+
+export const createSourceMutationRequestTypeEnum3 = {
+  'question-answer': 'question-answer',
+} as const
+
+export type CreateSourceMutationRequestTypeEnum3 =
+  (typeof createSourceMutationRequestTypeEnum3)[keyof typeof createSourceMutationRequestTypeEnum3]
+
+export const createSourceMutationRequestTypeEnum4 = {
+  database: 'database',
+} as const
+
+export type CreateSourceMutationRequestTypeEnum4 =
+  (typeof createSourceMutationRequestTypeEnum4)[keyof typeof createSourceMutationRequestTypeEnum4]
+
+export const createSourceMutationRequestDialectEnum = {
+  postgresql: 'postgresql',
+  mysql: 'mysql',
+} as const
+
+export type CreateSourceMutationRequestDialectEnum =
+  (typeof createSourceMutationRequestDialectEnum)[keyof typeof createSourceMutationRequestDialectEnum]
+
 export const createSourceMutationRequestTypeEnum = {
   text: 'text',
   'question-answer': 'question-answer',
-  website: 'website',
+  database: 'database',
 } as const
 
 export type CreateSourceMutationRequestTypeEnum =
   (typeof createSourceMutationRequestTypeEnum)[keyof typeof createSourceMutationRequestTypeEnum]
 
-export type CreateSourceMutationRequest = {
+export type CreateSourceMutationRequest = (
+  | {
+      /**
+       * @type string
+       */
+      type: CreateSourceMutationRequestTypeEnum2
+      /**
+       * @type string
+       */
+      name: string
+      /**
+       * @type string
+       */
+      text: string
+    }
+  | {
+      /**
+       * @type string
+       */
+      type: CreateSourceMutationRequestTypeEnum3
+      /**
+       * @type string
+       */
+      name: string
+      /**
+       * @type array
+       */
+      questions: string[]
+      /**
+       * @type string
+       */
+      answer: string
+    }
+  | {
+      /**
+       * @type string
+       */
+      type: CreateSourceMutationRequestTypeEnum4
+      /**
+       * @type string
+       */
+      name: string
+      /**
+       * @type string
+       */
+      dialect: CreateSourceMutationRequestDialectEnum
+      /**
+       * @type string
+       */
+      connectionId: string
+    }
+) & {
   /**
    * @type string
    */
@@ -131,10 +211,6 @@ export type CreateSourceMutationRequest = {
    * @type string
    */
   organizationSlug?: string | null
-  /**
-   * @type string
-   */
-  name: string
   /**
    * @type string
    */

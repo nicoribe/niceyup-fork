@@ -4,7 +4,8 @@ import { authenticate } from '@/http/middlewares/authenticate'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
-import { getDbSchemaTask } from '@workspace/engine/tasks/get-db-schema'
+import type { getDbSchemaTask } from '@workspace/engine/tasks/get-db-schema'
+import { tasks } from '@workspace/engine/trigger'
 import { z } from 'zod'
 
 export async function getDatabaseSchema(app: FastifyTypedInstance) {
@@ -76,7 +77,10 @@ export async function getDatabaseSchema(app: FastifyTypedInstance) {
         })
       }
 
-      const result = await getDbSchemaTask.triggerAndWait({ sourceId })
+      const result = await tasks.triggerAndWait<typeof getDbSchemaTask>(
+        'get-db-schema',
+        { sourceId },
+      )
 
       if (!result.ok) {
         throw new BadRequestError({

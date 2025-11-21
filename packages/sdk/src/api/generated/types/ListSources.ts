@@ -15,10 +15,10 @@ export type ListSourcesQueryParams = {
 }
 
 export const sourcesTypeEnum = {
-  file: 'file',
   text: 'text',
   'question-answer': 'question-answer',
   website: 'website',
+  file: 'file',
   database: 'database',
 } as const
 

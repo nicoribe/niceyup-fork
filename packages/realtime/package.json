@@ -10,8 +10,8 @@
   "dependencies": {
     "@workspace/ai": "workspace:*",
     "@workspace/cache": "workspace:*",
-    "@workspace/engine": "workspace:*",
     "@workspace/env": "workspace:*",
+    "resumable-stream": "^2.2.8",
     "ws": "^8.16.0"
   },
   "devDependencies": {
@@ -25,7 +25,6 @@
     ".": "./src/index.ts",
     "./pubsub": "./src/pubsub/index.ts",
     "./stream": "./src/stream/index.ts",
-    "./stream/rsc": "./src/stream/rsc.ts",
     "./hooks": "./src/hooks/index.ts",
     "./env": "./src/lib/env.ts"
   }

@@ -1,4 +1,15 @@
 export type {
+  CreateConnection200Schema,
+  CreateConnection400Schema,
+  CreateConnection401Schema,
+  CreateConnection403Schema,
+  CreateConnection404Schema,
+  CreateConnection429Schema,
+  CreateConnection500Schema,
+  CreateConnectionMutationRequestSchema,
+  CreateConnectionMutationResponseSchema,
+} from './createConnectionSchema'
+export type {
   CreateSource200Schema,
   CreateSource400Schema,
   CreateSource401Schema,
@@ -9,6 +20,18 @@ export type {
   CreateSourceMutationRequestSchema,
   CreateSourceMutationResponseSchema,
 } from './createSourceSchema'
+export type {
+  DeleteConnectionPathParamsSchema,
+  DeleteConnection204Schema,
+  DeleteConnection400Schema,
+  DeleteConnection401Schema,
+  DeleteConnection403Schema,
+  DeleteConnection404Schema,
+  DeleteConnection429Schema,
+  DeleteConnection500Schema,
+  DeleteConnectionMutationRequestSchema,
+  DeleteConnectionMutationResponseSchema,
+} from './deleteConnectionSchema'
 export type {
   DeleteConversationPathParamsSchema,
   DeleteConversation204Schema,
@@ -103,6 +126,18 @@ export type {
   GetConversation500Schema,
   GetConversationQueryResponseSchema,
 } from './getConversationSchema'
+export type {
+  GetDatabaseSchemaPathParamsSchema,
+  GetDatabaseSchemaQueryParamsSchema,
+  GetDatabaseSchema200Schema,
+  GetDatabaseSchema400Schema,
+  GetDatabaseSchema401Schema,
+  GetDatabaseSchema403Schema,
+  GetDatabaseSchema404Schema,
+  GetDatabaseSchema429Schema,
+  GetDatabaseSchema500Schema,
+  GetDatabaseSchemaQueryResponseSchema,
+} from './getDatabaseSchemaSchema'
 export type {
   GetFilePathParamsSchema,
   GetFileQueryParamsSchema,
@@ -204,53 +239,77 @@ export type {
   ListSourcesQueryResponseSchema,
 } from './listSourcesSchema'
 export type {
-  RegenerateAnswerMessagePathParamsSchema,
-  RegenerateAnswerMessage200Schema,
-  RegenerateAnswerMessage400Schema,
-  RegenerateAnswerMessage401Schema,
-  RegenerateAnswerMessage403Schema,
-  RegenerateAnswerMessage404Schema,
-  RegenerateAnswerMessage429Schema,
-  RegenerateAnswerMessage500Schema,
-  RegenerateAnswerMessageMutationRequestSchema,
-  RegenerateAnswerMessageMutationResponseSchema,
-} from './regenerateAnswerMessageSchema'
+  RegenerateMessagePathParamsSchema,
+  RegenerateMessage200Schema,
+  RegenerateMessage400Schema,
+  RegenerateMessage401Schema,
+  RegenerateMessage403Schema,
+  RegenerateMessage404Schema,
+  RegenerateMessage429Schema,
+  RegenerateMessage500Schema,
+  RegenerateMessageMutationRequestSchema,
+  RegenerateMessageMutationResponseSchema,
+} from './regenerateMessageSchema'
 export type {
-  ResendQuestionMessagePathParamsSchema,
-  ResendQuestionMessage200Schema,
-  ResendQuestionMessage400Schema,
-  ResendQuestionMessage401Schema,
-  ResendQuestionMessage403Schema,
-  ResendQuestionMessage404Schema,
-  ResendQuestionMessage429Schema,
-  ResendQuestionMessage500Schema,
-  ResendQuestionMessageMutationRequestSchema,
-  ResendQuestionMessageMutationResponseSchema,
-} from './resendQuestionMessageSchema'
+  ResendMessagePathParamsSchema,
+  ResendMessage200Schema,
+  ResendMessage400Schema,
+  ResendMessage401Schema,
+  ResendMessage403Schema,
+  ResendMessage404Schema,
+  ResendMessage429Schema,
+  ResendMessage500Schema,
+  ResendMessageMutationRequestSchema,
+  ResendMessageMutationResponseSchema,
+} from './resendMessageSchema'
 export type {
-  SendQuestionMessagePathParamsSchema,
-  SendQuestionMessage200Schema,
-  SendQuestionMessage400Schema,
-  SendQuestionMessage401Schema,
-  SendQuestionMessage403Schema,
-  SendQuestionMessage404Schema,
-  SendQuestionMessage429Schema,
-  SendQuestionMessage500Schema,
-  SendQuestionMessageMutationRequestSchema,
-  SendQuestionMessageMutationResponseSchema,
-} from './sendQuestionMessageSchema'
+  SendMessagePathParamsSchema,
+  SendMessage200Schema,
+  SendMessage400Schema,
+  SendMessage401Schema,
+  SendMessage403Schema,
+  SendMessage404Schema,
+  SendMessage429Schema,
+  SendMessage500Schema,
+  SendMessageMutationRequestSchema,
+  SendMessageMutationResponseSchema,
+} from './sendMessageSchema'
 export type {
-  StreamAnswerMessagePathParamsSchema,
-  StreamAnswerMessageQueryParamsSchema,
-  StreamAnswerMessage200Schema,
-  StreamAnswerMessage400Schema,
-  StreamAnswerMessage401Schema,
-  StreamAnswerMessage403Schema,
-  StreamAnswerMessage404Schema,
-  StreamAnswerMessage429Schema,
-  StreamAnswerMessage500Schema,
-  StreamAnswerMessageQueryResponseSchema,
-} from './streamAnswerMessageSchema'
+  StopMessagePathParamsSchema,
+  StopMessageQueryParamsSchema,
+  StopMessage204Schema,
+  StopMessage400Schema,
+  StopMessage401Schema,
+  StopMessage403Schema,
+  StopMessage404Schema,
+  StopMessage429Schema,
+  StopMessage500Schema,
+  StopMessageMutationResponseSchema,
+} from './stopMessageSchema'
+export type {
+  StreamMessagePathParamsSchema,
+  StreamMessageQueryParamsSchema,
+  StreamMessage200Schema,
+  StreamMessage400Schema,
+  StreamMessage401Schema,
+  StreamMessage403Schema,
+  StreamMessage404Schema,
+  StreamMessage429Schema,
+  StreamMessage500Schema,
+  StreamMessageQueryResponseSchema,
+} from './streamMessageSchema'
+export type {
+  UpdateConnectionPathParamsSchema,
+  UpdateConnection204Schema,
+  UpdateConnection400Schema,
+  UpdateConnection401Schema,
+  UpdateConnection403Schema,
+  UpdateConnection404Schema,
+  UpdateConnection429Schema,
+  UpdateConnection500Schema,
+  UpdateConnectionMutationRequestSchema,
+  UpdateConnectionMutationResponseSchema,
+} from './updateConnectionSchema'
 export type {
   UpdateConversationPathParamsSchema,
   UpdateConversation204Schema,
@@ -284,6 +343,7 @@ export type {
   UploadFilesConversation404Schema,
   UploadFilesConversation429Schema,
   UploadFilesConversation500Schema,
+  UploadFilesConversationMutationRequestSchema,
   UploadFilesConversationMutationResponseSchema,
 } from './uploadFilesConversationSchema'
 export type {
@@ -295,6 +355,7 @@ export type {
   UploadFiles404Schema,
   UploadFiles429Schema,
   UploadFiles500Schema,
+  UploadFilesMutationRequestSchema,
   UploadFilesMutationResponseSchema,
 } from './uploadFilesSchema'
 export type {
@@ -306,8 +367,20 @@ export type {
   UploadFilesSource404Schema,
   UploadFilesSource429Schema,
   UploadFilesSource500Schema,
+  UploadFilesSourceMutationRequestSchema,
   UploadFilesSourceMutationResponseSchema,
 } from './uploadFilesSourceSchema'
+export {
+  createConnection200Schema,
+  createConnection400Schema,
+  createConnection401Schema,
+  createConnection403Schema,
+  createConnection404Schema,
+  createConnection429Schema,
+  createConnection500Schema,
+  createConnectionMutationRequestSchema,
+  createConnectionMutationResponseSchema,
+} from './createConnectionSchema'
 export {
   createSource200Schema,
   createSource400Schema,
@@ -319,6 +392,18 @@ export {
   createSourceMutationRequestSchema,
   createSourceMutationResponseSchema,
 } from './createSourceSchema'
+export {
+  deleteConnectionPathParamsSchema,
+  deleteConnection204Schema,
+  deleteConnection400Schema,
+  deleteConnection401Schema,
+  deleteConnection403Schema,
+  deleteConnection404Schema,
+  deleteConnection429Schema,
+  deleteConnection500Schema,
+  deleteConnectionMutationRequestSchema,
+  deleteConnectionMutationResponseSchema,
+} from './deleteConnectionSchema'
 export {
   deleteConversationPathParamsSchema,
   deleteConversation204Schema,
@@ -413,6 +498,18 @@ export {
   getConversation500Schema,
   getConversationQueryResponseSchema,
 } from './getConversationSchema'
+export {
+  getDatabaseSchemaPathParamsSchema,
+  getDatabaseSchemaQueryParamsSchema,
+  getDatabaseSchema200Schema,
+  getDatabaseSchema400Schema,
+  getDatabaseSchema401Schema,
+  getDatabaseSchema403Schema,
+  getDatabaseSchema404Schema,
+  getDatabaseSchema429Schema,
+  getDatabaseSchema500Schema,
+  getDatabaseSchemaQueryResponseSchema,
+} from './getDatabaseSchemaSchema'
 export {
   getFilePathParamsSchema,
   getFileQueryParamsSchema,
@@ -514,53 +611,77 @@ export {
   listSourcesQueryResponseSchema,
 } from './listSourcesSchema'
 export {
-  regenerateAnswerMessagePathParamsSchema,
-  regenerateAnswerMessage200Schema,
-  regenerateAnswerMessage400Schema,
-  regenerateAnswerMessage401Schema,
-  regenerateAnswerMessage403Schema,
-  regenerateAnswerMessage404Schema,
-  regenerateAnswerMessage429Schema,
-  regenerateAnswerMessage500Schema,
-  regenerateAnswerMessageMutationRequestSchema,
-  regenerateAnswerMessageMutationResponseSchema,
-} from './regenerateAnswerMessageSchema'
+  regenerateMessagePathParamsSchema,
+  regenerateMessage200Schema,
+  regenerateMessage400Schema,
+  regenerateMessage401Schema,
+  regenerateMessage403Schema,
+  regenerateMessage404Schema,
+  regenerateMessage429Schema,
+  regenerateMessage500Schema,
+  regenerateMessageMutationRequestSchema,
+  regenerateMessageMutationResponseSchema,
+} from './regenerateMessageSchema'
 export {
-  resendQuestionMessagePathParamsSchema,
-  resendQuestionMessage200Schema,
-  resendQuestionMessage400Schema,
-  resendQuestionMessage401Schema,
-  resendQuestionMessage403Schema,
-  resendQuestionMessage404Schema,
-  resendQuestionMessage429Schema,
-  resendQuestionMessage500Schema,
-  resendQuestionMessageMutationRequestSchema,
-  resendQuestionMessageMutationResponseSchema,
-} from './resendQuestionMessageSchema'
+  resendMessagePathParamsSchema,
+  resendMessage200Schema,
+  resendMessage400Schema,
+  resendMessage401Schema,
+  resendMessage403Schema,
+  resendMessage404Schema,
+  resendMessage429Schema,
+  resendMessage500Schema,
+  resendMessageMutationRequestSchema,
+  resendMessageMutationResponseSchema,
+} from './resendMessageSchema'
 export {
-  sendQuestionMessagePathParamsSchema,
-  sendQuestionMessage200Schema,
-  sendQuestionMessage400Schema,
-  sendQuestionMessage401Schema,
-  sendQuestionMessage403Schema,
-  sendQuestionMessage404Schema,
-  sendQuestionMessage429Schema,
-  sendQuestionMessage500Schema,
-  sendQuestionMessageMutationRequestSchema,
-  sendQuestionMessageMutationResponseSchema,
-} from './sendQuestionMessageSchema'
+  sendMessagePathParamsSchema,
+  sendMessage200Schema,
+  sendMessage400Schema,
+  sendMessage401Schema,
+  sendMessage403Schema,
+  sendMessage404Schema,
+  sendMessage429Schema,
+  sendMessage500Schema,
+  sendMessageMutationRequestSchema,
+  sendMessageMutationResponseSchema,
+} from './sendMessageSchema'
 export {
-  streamAnswerMessagePathParamsSchema,
-  streamAnswerMessageQueryParamsSchema,
-  streamAnswerMessage200Schema,
-  streamAnswerMessage400Schema,
-  streamAnswerMessage401Schema,
-  streamAnswerMessage403Schema,
-  streamAnswerMessage404Schema,
-  streamAnswerMessage429Schema,
-  streamAnswerMessage500Schema,
-  streamAnswerMessageQueryResponseSchema,
-} from './streamAnswerMessageSchema'
+  stopMessagePathParamsSchema,
+  stopMessageQueryParamsSchema,
+  stopMessage204Schema,
+  stopMessage400Schema,
+  stopMessage401Schema,
+  stopMessage403Schema,
+  stopMessage404Schema,
+  stopMessage429Schema,
+  stopMessage500Schema,
+  stopMessageMutationResponseSchema,
+} from './stopMessageSchema'
+export {
+  streamMessagePathParamsSchema,
+  streamMessageQueryParamsSchema,
+  streamMessage200Schema,
+  streamMessage400Schema,
+  streamMessage401Schema,
+  streamMessage403Schema,
+  streamMessage404Schema,
+  streamMessage429Schema,
+  streamMessage500Schema,
+  streamMessageQueryResponseSchema,
+} from './streamMessageSchema'
+export {
+  updateConnectionPathParamsSchema,
+  updateConnection204Schema,
+  updateConnection400Schema,
+  updateConnection401Schema,
+  updateConnection403Schema,
+  updateConnection404Schema,
+  updateConnection429Schema,
+  updateConnection500Schema,
+  updateConnectionMutationRequestSchema,
+  updateConnectionMutationResponseSchema,
+} from './updateConnectionSchema'
 export {
   updateConversationPathParamsSchema,
   updateConversation204Schema,
@@ -594,6 +715,7 @@ export {
   uploadFilesConversation404Schema,
   uploadFilesConversation429Schema,
   uploadFilesConversation500Schema,
+  uploadFilesConversationMutationRequestSchema,
   uploadFilesConversationMutationResponseSchema,
 } from './uploadFilesConversationSchema'
 export {
@@ -605,6 +727,7 @@ export {
   uploadFiles404Schema,
   uploadFiles429Schema,
   uploadFiles500Schema,
+  uploadFilesMutationRequestSchema,
   uploadFilesMutationResponseSchema,
 } from './uploadFilesSchema'
 export {
@@ -616,5 +739,6 @@ export {
   uploadFilesSource404Schema,
   uploadFilesSource429Schema,
   uploadFilesSource500Schema,
+  uploadFilesSourceMutationRequestSchema,
   uploadFilesSourceMutationResponseSchema,
 } from './uploadFilesSourceSchema'

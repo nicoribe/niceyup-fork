@@ -1,10 +1,6 @@
 import type { UIDataTypes, UIMessage, UIMessagePart, UITools } from 'ai'
 
 export type AIMessageMetadata = {
-  triggerTask?: {
-    id: string
-    taskIdentifier: string
-  }
   authorId?: string
   error?: any
 }

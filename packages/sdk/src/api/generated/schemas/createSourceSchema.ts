@@ -124,17 +124,38 @@ export const createSource500Schema = z
 
 export type CreateSource500Schema = CreateSource500
 
-export const createSourceMutationRequestSchema = z.object({
-  organizationId: z.string().nullable().nullish(),
-  organizationSlug: z.string().nullable().nullish(),
-  name: z.string(),
-  type: z.enum(['text', 'question-answer', 'website']),
-  explorerNode: z
-    .object({
-      folderId: z.string().nullable().nullish(),
-    })
-    .optional(),
-}) as unknown as ToZod<CreateSourceMutationRequest>
+export const createSourceMutationRequestSchema = z
+  .union([
+    z.object({
+      type: z.enum(['text']),
+      name: z.string(),
+      text: z.string(),
+    }),
+    z.object({
+      type: z.enum(['question-answer']),
+      name: z.string(),
+      questions: z.array(z.string()),
+      answer: z.string(),
+    }),
+    z.object({
+      type: z.enum(['database']),
+      name: z.string(),
+      dialect: z.enum(['postgresql', 'mysql']),
+      connectionId: z.string(),
+    }),
+  ])
+  .and(
+    z.object({
+      organizationId: z.string().nullable().nullish(),
+      organizationSlug: z.string().nullable().nullish(),
+      type: z.enum(['text', 'question-answer', 'database']),
+      explorerNode: z
+        .object({
+          folderId: z.string().nullable().nullish(),
+        })
+        .optional(),
+    }),
+  ) as unknown as ToZod<CreateSourceMutationRequest>
 
 export type CreateSourceMutationRequestSchema = CreateSourceMutationRequest
 

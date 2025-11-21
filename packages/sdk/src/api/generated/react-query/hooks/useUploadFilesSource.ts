@@ -9,6 +9,7 @@ import type {
   ResponseErrorConfig,
 } from '../../../../client/fetch-react-query'
 import type {
+  UploadFilesSourceMutationRequest,
   UploadFilesSourceMutationResponse,
   UploadFilesSourceHeaderParams,
   UploadFilesSource400,
@@ -45,10 +46,15 @@ export function useUploadFilesSource<TContext>(
         | UploadFilesSource429
         | UploadFilesSource500
       >,
-      { headers: UploadFilesSourceHeaderParams },
+      {
+        data: UploadFilesSourceMutationRequest
+        headers: UploadFilesSourceHeaderParams
+      },
       TContext
     > & { client?: QueryClient }
-    client?: Partial<RequestConfig> & { client?: typeof fetch }
+    client?: Partial<RequestConfig<UploadFilesSourceMutationRequest>> & {
+      client?: typeof fetch
+    }
   } = {},
 ) {
   const { mutation = {}, client: config = {} } = options ?? {}
@@ -66,12 +72,15 @@ export function useUploadFilesSource<TContext>(
       | UploadFilesSource429
       | UploadFilesSource500
     >,
-    { headers: UploadFilesSourceHeaderParams },
+    {
+      data: UploadFilesSourceMutationRequest
+      headers: UploadFilesSourceHeaderParams
+    },
     TContext
   >(
     {
-      mutationFn: async ({ headers }) => {
-        return uploadFilesSource({ headers }, config)
+      mutationFn: async ({ data, headers }) => {
+        return uploadFilesSource({ data, headers }, config)
       },
       mutationKey,
       ...mutationOptions,

@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto'
-import { metadata } from '@trigger.dev/sdk'
 import {
   type ModelMessage,
   type ToolSet,
@@ -8,21 +7,16 @@ import {
   streamText,
 } from '@workspace/ai'
 import type { LanguageModel } from '@workspace/ai'
-import type { AIMessage } from '@workspace/ai/types'
-
-async function* toStream(message: AIMessage) {
-  yield message
-}
-
-export type StreamEventKey = 'message-start' | 'message-delta' | 'message-end'
+import type { AIMessage, AIMessageMetadata } from '@workspace/ai/types'
 
 export async function streamAIAssistant({
   model,
   tools,
-  messages,
   signal,
-  messageId,
+  originalMessage,
+  messages,
   onStart,
+  onChunk,
   onFinish,
   onFailed,
   onError,
@@ -30,9 +24,13 @@ export async function streamAIAssistant({
   model: LanguageModel
   tools?: ToolSet
   messages: ModelMessage[]
-  signal: AbortSignal
-  messageId?: string
+  signal?: AbortSignal
+  originalMessage?: {
+    id?: string
+    metadata?: AIMessageMetadata | null
+  }
   onStart?: (event: { message: AIMessage }) => Promise<void>
+  onChunk?: (event: { message: AIMessage }) => Promise<void>
   onFinish?: (event: { message: AIMessage }) => Promise<void>
   onFailed?: (event: { message: AIMessage; error: unknown }) => Promise<void>
   onError?: (event: { error: unknown }) => void
@@ -41,16 +39,14 @@ export async function streamAIAssistant({
     let error: unknown
 
     let message = {
-      id: messageId || randomUUID(),
+      id: originalMessage?.id || randomUUID(),
+      metadata: originalMessage?.metadata || {},
       status: 'processing',
       role: 'assistant',
       parts: [],
     } as AIMessage
 
-    await Promise.all([
-      onStart?.({ message }),
-      metadata.stream('message-start', toStream(message)),
-    ])
+    await onStart?.({ message })
 
     const streamingResult = streamText({
       model,
@@ -68,13 +64,15 @@ export async function streamAIAssistant({
       stream: streamingResult.toUIMessageStream<AIMessage>({
         sendReasoning: true,
         sendSources: true,
+        messageMetadata: () => {
+          return originalMessage?.metadata || {}
+        },
       }),
     })
 
-    const stream = await metadata.stream('message-delta', messageStream)
-
-    for await (const chunk of stream) {
+    for await (const chunk of messageStream) {
       message = chunk
+      await onChunk?.({ message })
     }
 
     if (error) {
@@ -84,17 +82,11 @@ export async function streamAIAssistant({
         error: error instanceof Error ? error.message : String(error),
       }
 
-      await Promise.all([
-        onFailed?.({ message, error }),
-        metadata.stream('message-end', toStream(message)),
-      ])
+      await onFailed?.({ message, error })
     } else {
-      message.status = signal.aborted ? 'stopped' : 'finished'
+      message.status = signal?.aborted ? 'stopped' : 'finished'
 
-      await Promise.all([
-        onFinish?.({ message }),
-        metadata.stream('message-end', toStream(message)),
-      ])
+      await onFinish?.({ message })
     }
 
     return streamingResult

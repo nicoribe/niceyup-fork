@@ -239,6 +239,10 @@ type RegenerateMessageParams = {
   messageId: string
 }
 
+type StopMessageParams = {
+  messageId: string
+}
+
 type UseChatParams = {
   params: Params
   initialMessages?: MessageNode[]
@@ -397,13 +401,13 @@ export function useChat({
     parts,
   }:
     | {
-        type: 'question'
+        type: 'user'
         parentNodeId?: string
         fakeNodeId: string
         parts: PromptMessagePart[]
       }
     | {
-        type: 'answer'
+        type: 'assistant'
         parentNodeId: string
         fakeNodeId: string
         parts?: never
@@ -423,8 +427,8 @@ export function useChat({
       updatedMessageNodes.push({
         id: fakeNodeId,
         status: 'queued',
-        role: type === 'question' ? 'user' : 'assistant',
-        parts: type === 'question' ? parts : [],
+        role: type,
+        parts: type === 'user' ? parts : [],
         parentId: parentNodeId,
         isPersisted: false,
       })
@@ -437,22 +441,22 @@ export function useChat({
     type,
     parentNodeId,
     fakeNodeId,
-    questionMessageNode,
-    answerMessageNode,
+    userMessageNode,
+    assistantMessageNode,
   }:
     | {
-        type: 'question'
+        type: 'user'
         parentNodeId?: string
         fakeNodeId: string
-        questionMessageNode: ChatMessageNode
-        answerMessageNode: ChatMessageNode
+        userMessageNode: ChatMessageNode
+        assistantMessageNode: ChatMessageNode
       }
     | {
-        type: 'answer'
+        type: 'assistant'
         parentNodeId: string
         fakeNodeId: string
-        questionMessageNode?: never
-        answerMessageNode: ChatMessageNode
+        userMessageNode?: never
+        assistantMessageNode: ChatMessageNode
       }) => {
     setLoadedMessageNodes((prevMessageNodes) => {
       const updatedMessageNodes = prevMessageNodes.map((messageNode) => {
@@ -461,9 +465,9 @@ export function useChat({
             ...messageNode,
             children: messageNode.children?.map((id) =>
               id === fakeNodeId
-                ? type === 'question'
-                  ? questionMessageNode.id
-                  : answerMessageNode.id
+                ? type === 'user'
+                  ? userMessageNode.id
+                  : assistantMessageNode.id
                 : id,
             ),
           }
@@ -471,7 +475,7 @@ export function useChat({
 
         if (messageNode.id === fakeNodeId) {
           return {
-            ...(type === 'question' ? questionMessageNode : answerMessageNode),
+            ...(type === 'user' ? userMessageNode : assistantMessageNode),
             parentId: messageNode.parentId, // Non-persistent parent node, kept to remain visually hierarchical
           }
         }
@@ -479,8 +483,8 @@ export function useChat({
         return messageNode
       })
 
-      if (type === 'question') {
-        updatedMessageNodes.push(answerMessageNode)
+      if (type === 'user') {
+        updatedMessageNodes.push(assistantMessageNode)
       }
 
       return updatedMessageNodes
@@ -491,7 +495,7 @@ export function useChat({
     type,
     fakeNodeId,
   }: {
-    type: 'question' | 'answer'
+    type: 'user' | 'assistant'
     fakeNodeId: string
   }) => {
     setLoadedMessageNodes((prevMessageNodes) => {
@@ -502,9 +506,9 @@ export function useChat({
             status: 'failed',
             metadata: {
               error:
-                type === 'question'
+                type === 'user'
                   ? 'Failed to send message'
-                  : 'Failed to generate answer',
+                  : 'Failed to generate assistant',
             },
           } as ChatMessageNode
         }
@@ -530,14 +534,14 @@ export function useChat({
     const parentNodeId = messageNodeChain.at(-1)?.id
     const fakeNodeId = generateFakeNodeId()
 
-    addFakeNode({ type: 'question', parentNodeId, fakeNodeId, parts })
+    addFakeNode({ type: 'user', parentNodeId, fakeNodeId, parts })
 
     refConversationScroll.current?.scrollToBottom()
 
     try {
       const persistentParentNodeId = getPersistentParentNode(parentNodeId)?.id
 
-      const { data, error } = await sdk.sendQuestionMessage({
+      const { data, error } = await sdk.sendMessage({
         conversationId: params.chatId,
         data: {
           organizationSlug: params.organizationSlug,
@@ -562,16 +566,16 @@ export function useChat({
       }
 
       replaceFakeNode({
-        type: 'question',
+        type: 'user',
         parentNodeId,
         fakeNodeId,
-        questionMessageNode: data.questionMessage as ChatMessageNode,
-        answerMessageNode: data.answerMessage as ChatMessageNode,
+        userMessageNode: data.userMessage as ChatMessageNode,
+        assistantMessageNode: data.assistantMessage as ChatMessageNode,
       })
     } catch {
       setPromptInputStatus('error')
 
-      setErrorFakeNode({ type: 'question', fakeNodeId })
+      setErrorFakeNode({ type: 'user', fakeNodeId })
     }
   }
 
@@ -596,7 +600,7 @@ export function useChat({
 
     const fakeNodeId = generateFakeNodeId()
 
-    addFakeNode({ type: 'question', parentNodeId, fakeNodeId, parts })
+    addFakeNode({ type: 'user', parentNodeId, fakeNodeId, parts })
 
     setTargetNodeId(fakeNodeId)
 
@@ -609,7 +613,7 @@ export function useChat({
         return
       }
 
-      const { data, error } = await sdk.resendQuestionMessage({
+      const { data, error } = await sdk.resendMessage({
         conversationId: params.chatId,
         data: {
           organizationSlug: params.organizationSlug,
@@ -626,22 +630,22 @@ export function useChat({
       }
 
       replaceFakeNode({
-        type: 'question',
+        type: 'user',
         parentNodeId,
         fakeNodeId,
-        questionMessageNode: data.questionMessage as ChatMessageNode,
-        answerMessageNode: data.answerMessage as ChatMessageNode,
+        userMessageNode: data.userMessage as ChatMessageNode,
+        assistantMessageNode: data.assistantMessage as ChatMessageNode,
       })
 
-      setTargetNodeId(data.questionMessage.id)
+      setTargetNodeId(data.userMessage.id)
     } catch {
       setPromptInputStatus('error')
 
-      setErrorFakeNode({ type: 'question', fakeNodeId })
+      setErrorFakeNode({ type: 'user', fakeNodeId })
     }
   }
 
-  const regenerate = async ({ messageId }: RegenerateMessageParams) => {
+  const regenerateMessage = async ({ messageId }: RegenerateMessageParams) => {
     if (
       uploading ||
       promptInputStatus === 'submitted' ||
@@ -662,7 +666,7 @@ export function useChat({
 
     const fakeNodeId = generateFakeNodeId()
 
-    addFakeNode({ type: 'answer', parentNodeId, fakeNodeId })
+    addFakeNode({ type: 'assistant', parentNodeId, fakeNodeId })
 
     setTargetNodeId(fakeNodeId)
 
@@ -675,7 +679,7 @@ export function useChat({
         return
       }
 
-      const { data, error } = await sdk.regenerateAnswerMessage({
+      const { data, error } = await sdk.regenerateMessage({
         conversationId: params.chatId,
         data: {
           organizationSlug: params.organizationSlug,
@@ -691,17 +695,17 @@ export function useChat({
       }
 
       replaceFakeNode({
-        type: 'answer',
+        type: 'assistant',
         parentNodeId,
         fakeNodeId,
-        answerMessageNode: data.answerMessage as ChatMessageNode,
+        assistantMessageNode: data.assistantMessage as ChatMessageNode,
       })
 
-      setTargetNodeId(data.answerMessage.id)
+      setTargetNodeId(data.assistantMessage.id)
     } catch {
       setPromptInputStatus('error')
 
-      setErrorFakeNode({ type: 'answer', fakeNodeId })
+      setErrorFakeNode({ type: 'assistant', fakeNodeId })
     }
   }
 
@@ -715,6 +719,24 @@ export function useChat({
     },
   )
 
+  const stopMessage = async ({ messageId }: StopMessageParams) => {
+    try {
+      const { error } = await sdk.stopMessage({
+        conversationId: params.chatId,
+        messageId,
+        params: {
+          organizationSlug: params.organizationSlug,
+          teamId: params.teamId,
+          agentId: params.agentId,
+        },
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch {}
+  }
+
   return {
     messages: messageNodeChain,
     loadingMessage,
@@ -724,7 +746,8 @@ export function useChat({
     refConversationScroll,
     sendMessage,
     resendMessage,
-    regenerate,
+    regenerateMessage,
+    stopMessage,
     promptInputStatus,
     setPromptInputStatus,
     uploading,

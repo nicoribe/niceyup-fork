@@ -15,4 +15,7 @@ export {
   convertToModelMessages,
   validateUIMessages,
   readUIMessageStream,
+  JsonToSseTransformStream,
+  parseJsonEventStream,
+  UI_MESSAGE_STREAM_HEADERS,
 } from 'ai'

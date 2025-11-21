@@ -14,10 +14,11 @@ import { getConversation } from './conversations/get-conversation'
 import { listConversations } from './conversations/list-conversations'
 import { listMessages } from './conversations/messages/list-messages'
 import { realtimeMessages } from './conversations/messages/realtime-messages'
-import { regenerateAnswerMessage } from './conversations/messages/regenerate-answer-message'
-import { resendQuestionMessage } from './conversations/messages/resend-question-message'
-import { sendQuestionMessage } from './conversations/messages/send-question-message'
-import { streamAnswerMessage } from './conversations/messages/stream-answer-message'
+import { regenerateMessage } from './conversations/messages/regenerate-message'
+import { resendMessage } from './conversations/messages/resend-message'
+import { sendMessage } from './conversations/messages/send-message'
+import { stopMessage } from './conversations/messages/stop-message'
+import { streamMessage } from './conversations/messages/stream-message'
 import { updateConversation } from './conversations/update-conversation'
 import { generateUploadSignature } from './files/generate-upload-signature'
 import { getFile } from './files/get-file'
@@ -61,10 +62,11 @@ export async function routes(app: FastifyTypedInstance) {
   app.register(deleteConversation)
   app.register(listMessages)
   app.register(realtimeMessages)
-  app.register(sendQuestionMessage)
-  app.register(resendQuestionMessage)
-  app.register(regenerateAnswerMessage)
-  app.register(streamAnswerMessage)
+  app.register(sendMessage)
+  app.register(resendMessage)
+  app.register(regenerateMessage)
+  app.register(streamMessage)
+  app.register(stopMessage)
 
   app.register(getFile)
   app.register(generateUploadSignature)

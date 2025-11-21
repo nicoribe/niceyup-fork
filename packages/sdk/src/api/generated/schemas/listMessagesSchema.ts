@@ -30,7 +30,7 @@ export const listMessagesQueryParamsSchema = z.object({
   teamId: z.string().optional(),
   agentId: z.string(),
   targetMessageId: z.string().optional(),
-  parentNodes: z.boolean().optional(),
+  parents: z.boolean().optional(),
 }) as unknown as ToZod<ListMessagesQueryParams>
 
 export type ListMessagesQueryParamsSchema = ListMessagesQueryParams

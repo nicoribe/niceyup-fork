@@ -9,6 +9,7 @@ import type {
   ResponseErrorConfig,
 } from '../../../../client/fetch-react-query'
 import type {
+  UploadFilesConversationMutationRequest,
   UploadFilesConversationMutationResponse,
   UploadFilesConversationHeaderParams,
   UploadFilesConversation400,
@@ -45,10 +46,15 @@ export function useUploadFilesConversation<TContext>(
         | UploadFilesConversation429
         | UploadFilesConversation500
       >,
-      { headers: UploadFilesConversationHeaderParams },
+      {
+        data: UploadFilesConversationMutationRequest
+        headers: UploadFilesConversationHeaderParams
+      },
       TContext
     > & { client?: QueryClient }
-    client?: Partial<RequestConfig> & { client?: typeof fetch }
+    client?: Partial<RequestConfig<UploadFilesConversationMutationRequest>> & {
+      client?: typeof fetch
+    }
   } = {},
 ) {
   const { mutation = {}, client: config = {} } = options ?? {}
@@ -66,12 +72,15 @@ export function useUploadFilesConversation<TContext>(
       | UploadFilesConversation429
       | UploadFilesConversation500
     >,
-    { headers: UploadFilesConversationHeaderParams },
+    {
+      data: UploadFilesConversationMutationRequest
+      headers: UploadFilesConversationHeaderParams
+    },
     TContext
   >(
     {
-      mutationFn: async ({ headers }) => {
-        return uploadFilesConversation({ headers }, config)
+      mutationFn: async ({ data, headers }) => {
+        return uploadFilesConversation({ data, headers }, config)
       },
       mutationKey,
       ...mutationOptions,

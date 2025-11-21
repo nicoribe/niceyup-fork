@@ -1,4 +1,6 @@
+export type { CreateConnectionMutationKey } from './useCreateConnection'
 export type { CreateSourceMutationKey } from './useCreateSource'
+export type { DeleteConnectionMutationKey } from './useDeleteConnection'
 export type { DeleteConversationMutationKey } from './useDeleteConversation'
 export type { DeleteSourceMutationKey } from './useDeleteSource'
 export type { GenerateUploadSignatureMutationKey } from './useGenerateUploadSignature'
@@ -7,6 +9,7 @@ export type { GenerateUploadSignatureSourceMutationKey } from './useGenerateUplo
 export type { GetAgentQueryKey } from './useGetAgent'
 export type { GetConnectionQueryKey } from './useGetConnection'
 export type { GetConversationQueryKey } from './useGetConversation'
+export type { GetDatabaseSchemaQueryKey } from './useGetDatabaseSchema'
 export type { GetFileQueryKey } from './useGetFile'
 export type { GetProfileQueryKey } from './useGetProfile'
 export type { GetSourceQueryKey } from './useGetSource'
@@ -16,16 +19,26 @@ export type { ListConnectionsQueryKey } from './useListConnections'
 export type { ListConversationsQueryKey } from './useListConversations'
 export type { ListMessagesQueryKey } from './useListMessages'
 export type { ListSourcesQueryKey } from './useListSources'
-export type { RegenerateAnswerMessageMutationKey } from './useRegenerateAnswerMessage'
-export type { ResendQuestionMessageMutationKey } from './useResendQuestionMessage'
-export type { SendQuestionMessageMutationKey } from './useSendQuestionMessage'
-export type { StreamAnswerMessageQueryKey } from './useStreamAnswerMessage'
+export type { RegenerateMessageMutationKey } from './useRegenerateMessage'
+export type { ResendMessageMutationKey } from './useResendMessage'
+export type { SendMessageMutationKey } from './useSendMessage'
+export type { StopMessageMutationKey } from './useStopMessage'
+export type { StreamMessageQueryKey } from './useStreamMessage'
+export type { UpdateConnectionMutationKey } from './useUpdateConnection'
 export type { UpdateConversationMutationKey } from './useUpdateConversation'
 export type { UpdateSourceMutationKey } from './useUpdateSource'
 export type { UploadFilesMutationKey } from './useUploadFiles'
 export type { UploadFilesConversationMutationKey } from './useUploadFilesConversation'
 export type { UploadFilesSourceMutationKey } from './useUploadFilesSource'
+export {
+  createConnectionMutationKey,
+  useCreateConnection,
+} from './useCreateConnection'
 export { createSourceMutationKey, useCreateSource } from './useCreateSource'
+export {
+  deleteConnectionMutationKey,
+  useDeleteConnection,
+} from './useDeleteConnection'
 export {
   deleteConversationMutationKey,
   useDeleteConversation,
@@ -58,6 +71,11 @@ export {
   getConversationQueryOptions,
   useGetConversation,
 } from './useGetConversation'
+export {
+  getDatabaseSchemaQueryKey,
+  getDatabaseSchemaQueryOptions,
+  useGetDatabaseSchema,
+} from './useGetDatabaseSchema'
 export { getFileQueryKey, getFileQueryOptions, useGetFile } from './useGetFile'
 export {
   getProfileQueryKey,
@@ -96,22 +114,21 @@ export {
   useListSources,
 } from './useListSources'
 export {
-  regenerateAnswerMessageMutationKey,
-  useRegenerateAnswerMessage,
-} from './useRegenerateAnswerMessage'
+  regenerateMessageMutationKey,
+  useRegenerateMessage,
+} from './useRegenerateMessage'
+export { resendMessageMutationKey, useResendMessage } from './useResendMessage'
+export { sendMessageMutationKey, useSendMessage } from './useSendMessage'
+export { stopMessageMutationKey, useStopMessage } from './useStopMessage'
 export {
-  resendQuestionMessageMutationKey,
-  useResendQuestionMessage,
-} from './useResendQuestionMessage'
+  streamMessageQueryKey,
+  streamMessageQueryOptions,
+  useStreamMessage,
+} from './useStreamMessage'
 export {
-  sendQuestionMessageMutationKey,
-  useSendQuestionMessage,
-} from './useSendQuestionMessage'
-export {
-  streamAnswerMessageQueryKey,
-  streamAnswerMessageQueryOptions,
-  useStreamAnswerMessage,
-} from './useStreamAnswerMessage'
+  updateConnectionMutationKey,
+  useUpdateConnection,
+} from './useUpdateConnection'
 export {
   updateConversationMutationKey,
   useUpdateConversation,

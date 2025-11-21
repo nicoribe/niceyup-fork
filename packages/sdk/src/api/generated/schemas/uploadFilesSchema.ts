@@ -12,6 +12,7 @@ import type {
   UploadFiles404,
   UploadFiles429,
   UploadFiles500,
+  UploadFilesMutationRequest,
   UploadFilesMutationResponse,
 } from '../types/UploadFiles'
 import type { ToZod } from '@kubb/plugin-zod/utils'
@@ -145,6 +146,12 @@ export const uploadFiles500Schema = z
   ) as unknown as ToZod<UploadFiles500>
 
 export type UploadFiles500Schema = UploadFiles500
+
+export const uploadFilesMutationRequestSchema = z.object({
+  file: z.instanceof(File),
+}) as unknown as ToZod<UploadFilesMutationRequest>
+
+export type UploadFilesMutationRequestSchema = UploadFilesMutationRequest
 
 export const uploadFilesMutationResponseSchema = z.lazy(
   () => uploadFiles200Schema,
