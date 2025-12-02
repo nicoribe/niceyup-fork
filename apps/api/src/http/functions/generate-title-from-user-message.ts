@@ -1,11 +1,11 @@
 import { generateText } from '@workspace/ai'
-import { openai } from '@workspace/ai/providers'
+import { gateway } from '@workspace/ai/providers'
 
 export async function generateTitleFromUserMessage({
-  message,
-}: { message: string }) {
+  userMessage,
+}: { userMessage: string }) {
   const generatedTitle = await generateText({
-    model: openai('gpt-5'),
+    model: gateway.languageModel('openai/gpt-4.1'),
     messages: [
       {
         role: 'system',
@@ -17,7 +17,7 @@ export async function generateTitleFromUserMessage({
       },
       {
         role: 'user',
-        content: message,
+        content: userMessage,
       },
     ],
   })

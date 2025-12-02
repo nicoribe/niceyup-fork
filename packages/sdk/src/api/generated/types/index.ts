@@ -450,7 +450,6 @@ export type {
 } from './SendMessage'
 export type {
   StopMessagePathParams,
-  StopMessageQueryParams,
   StopMessage204Enum,
   StopMessage204,
   StopMessage400,
@@ -459,6 +458,7 @@ export type {
   StopMessage404,
   StopMessage429,
   StopMessage500,
+  StopMessageMutationRequest,
   StopMessageMutationResponse,
   StopMessageMutation,
 } from './StopMessage'

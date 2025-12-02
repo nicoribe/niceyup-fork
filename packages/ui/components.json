@@ -16,5 +16,8 @@
     "hooks": "@workspace/ui/hooks",
     "lib": "@workspace/ui/lib",
     "ui": "@workspace/ui/components"
+  },
+  "registries": {
+    "@ai-elements": "https://registry.ai-sdk.dev/{name}.json"
   }
 }

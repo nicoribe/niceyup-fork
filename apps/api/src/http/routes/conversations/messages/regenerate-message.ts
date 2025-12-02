@@ -148,7 +148,7 @@ export async function regenerateMessage(app: FastifyTypedInstance) {
         }
       })
 
-      // TODO: Make this dynamic based on the agent's configuration
+      // TODO: make this dynamic based on the agent's configuration
       const contextMessages = true
       const maxContextMessages = 10
 

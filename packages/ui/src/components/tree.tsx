@@ -14,8 +14,8 @@ interface TreeContextValue<T = any> {
 }
 
 const TreeContext = React.createContext<TreeContextValue>({
-  indent: 20,
   currentItem: undefined,
+  indent: 20,
   tree: undefined,
 })
 
@@ -47,9 +47,9 @@ function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
   return (
     <TreeContext.Provider value={{ indent, tree }}>
       <div
+        className={cn('flex flex-col', className)}
         data-slot="tree"
         style={mergedStyle}
-        className={cn('flex flex-col', className)}
         {...otherProps}
       />
     </TreeContext.Provider>
@@ -87,14 +87,18 @@ function TreeItem<T = any>({
   const Comp = asChild ? Slot.Root : 'button'
 
   return (
-    <TreeContext.Provider value={{ indent, currentItem: item }}>
+    <TreeContext.Provider value={{ currentItem: item, indent }}>
       <Comp
-        data-slot="tree-item"
-        style={mergedStyle}
+        aria-expanded={item.isExpanded()}
         className={cn(
-          'z-10 ps-(--tree-padding) outline-hidden select-none not-last:pb-0.5 focus:z-20 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+          'z-10 select-none ps-(--tree-padding) not-last:pb-0.5 outline-hidden focus:z-20 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
           className,
         )}
+        data-drag-target={
+          typeof item.isDragTarget === 'function'
+            ? item.isDragTarget() || false
+            : undefined
+        }
         data-focus={
           typeof item.isFocused === 'function'
             ? item.isFocused() || false
@@ -105,22 +109,18 @@ function TreeItem<T = any>({
             ? item.isFolder() || false
             : undefined
         }
-        data-selected={
-          typeof item.isSelected === 'function'
-            ? item.isSelected() || false
-            : undefined
-        }
-        data-drag-target={
-          typeof item.isDragTarget === 'function'
-            ? item.isDragTarget() || false
-            : undefined
-        }
         data-search-match={
           typeof item.isMatchingSearch === 'function'
             ? item.isMatchingSearch() || false
             : undefined
         }
-        aria-expanded={item.isExpanded()}
+        data-selected={
+          typeof item.isSelected === 'function'
+            ? item.isSelected() || false
+            : undefined
+        }
+        data-slot="tree-item"
+        style={mergedStyle}
         {...otherProps}
       >
         {children}
@@ -150,15 +150,15 @@ function TreeItemLabel<T = any>({
 
   return (
     <span
-      data-slot="tree-item-label"
       className={cn(
-        'group in-focus-visible:ring-ring/50 bg-background hover:bg-accent in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground in-data-[drag-target=true]:bg-accent flex items-center gap-1 rounded-sm px-2 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-7 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-400/20! [&_svg]:pointer-events-none [&_svg]:shrink-0',
+        'flex items-center gap-1 rounded-sm bg-background in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-400/20! in-data-[selected=true]:bg-accent px-2 py-1.5 not-in-data-[folder=true]:ps-7 in-data-[selected=true]:text-accent-foreground text-sm in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 transition-colors hover:bg-accent [&_svg]:pointer-events-none [&_svg]:shrink-0',
         className,
       )}
+      data-slot="tree-item-label"
       {...props}
     >
       {item.isFolder() && (
-        <ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90" />
+        <ChevronDownIcon className="in-aria-[expanded=false]:-rotate-90 size-4 text-muted-foreground" />
       )}
       {children ||
         (typeof item.getItemName === 'function' ? item.getItemName() : null)}
@@ -182,11 +182,11 @@ function TreeDragLine({
   const dragLine = tree.getDragLineStyle()
   return (
     <div
-      style={dragLine}
       className={cn(
-        'bg-primary before:bg-background before:border-primary absolute z-30 -mt-px h-0.5 w-[unset] before:absolute before:-top-[3px] before:left-0 before:size-2 before:rounded-full before:border-2',
+        '-mt-px before:-top-[3px] absolute z-30 h-0.5 w-[unset] bg-primary before:absolute before:left-0 before:size-2 before:rounded-full before:border-2 before:border-primary before:bg-background',
         className,
       )}
+      style={dragLine}
       {...props}
     />
   )

@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: new URL(env.STORAGE_URL).hostname,
+        hostname: new URL(env.NEXT_PUBLIC_STORAGE_URL).hostname,
       },
       {
         protocol: 'https',
@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${env.API_URL}/api/:path*`,
+        destination: `${env.NEXT_PUBLIC_API_URL}/api/:path*`,
       },
     ]
   },

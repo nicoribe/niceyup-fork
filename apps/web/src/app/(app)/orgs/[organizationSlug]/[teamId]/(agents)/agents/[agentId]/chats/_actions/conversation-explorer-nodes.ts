@@ -2,17 +2,21 @@
 
 import { authenticatedUser } from '@/lib/auth/server'
 import type {
-  ConversationExplorerNodeVisibility,
+  ConversationVisibility,
   OrganizationTeamParams,
 } from '@/lib/types'
 import { db } from '@workspace/db'
-import { and, eq, inArray, isNull, sql } from '@workspace/db/orm'
+import { and, eq, inArray, isNull, notInArray, sql } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
 import {
   conversationExplorerNodes,
   conversations,
   conversationsToUsers,
 } from '@workspace/db/schema'
+import {
+  generateKeyBetween,
+  generateNKeysBetween,
+} from 'jittered-fractional-indexing'
 
 type ContextConversationExplorerNodeParams = OrganizationTeamParams & {
   agentId: string
@@ -50,7 +54,7 @@ async function checkAccessToAgent(
 }
 
 type GetItemInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   itemId: string
 }
 
@@ -86,6 +90,7 @@ export async function getItemInConversationExplorerNode(
         END
       `.as('name'),
       conversationId: conversationExplorerNodes.conversationId,
+      fractionalIndex: conversationExplorerNodes.fractionalIndex,
       children: sql<string[]>`
         (SELECT COALESCE(ARRAY_AGG(id), '{}'::text[])
          FROM ${conversationExplorerNodes} child_node
@@ -113,7 +118,7 @@ export async function getItemInConversationExplorerNode(
 }
 
 type GetChildrenWithDataInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   itemId: string
 }
 
@@ -152,6 +157,7 @@ export async function getChildrenWithDataInConversationExplorerNode(
             END
           `.as('name'),
           conversationId: conversationExplorerNodes.conversationId,
+          fractionalIndex: conversationExplorerNodes.fractionalIndex,
           children: sql<string[]>`
             (SELECT COALESCE(ARRAY_AGG(id), '{}'::text[])
              FROM ${conversationExplorerNodes} child_node
@@ -174,6 +180,9 @@ export async function getChildrenWithDataInConversationExplorerNode(
           isNull(conversationExplorerNodes.deletedAt),
         ),
       )
+      .orderBy(
+        sql`${conversationExplorerNodes.fractionalIndex} COLLATE "C" ASC`,
+      )
 
     return childrenWithData || []
   }
@@ -191,6 +200,7 @@ export async function getChildrenWithDataInConversationExplorerNode(
           END
         `.as('name'),
         conversationId: conversationExplorerNodes.conversationId,
+        fractionalIndex: conversationExplorerNodes.fractionalIndex,
         children: sql<string[]>`
           (SELECT COALESCE(ARRAY_AGG(id), '{}'::text[])
            FROM ${conversationExplorerNodes} child_node
@@ -213,12 +223,13 @@ export async function getChildrenWithDataInConversationExplorerNode(
         isNull(conversationExplorerNodes.deletedAt),
       ),
     )
+    .orderBy(sql`${conversationExplorerNodes.fractionalIndex} COLLATE "C" ASC`)
 
   return childrenWithData || []
 }
 
 type GetParentsInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
 } & (
   | {
       itemId: string
@@ -309,7 +320,7 @@ export async function getParentsInConversationExplorerNode(
 }
 
 type UpdateNameOfItemInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   name: string
 } & (
   | {
@@ -384,9 +395,10 @@ export async function updateNameOfItemInConversationExplorerNode(
 }
 
 type UpdateParentIdOfItemsInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   itemIds: string[]
   parentId: string | null
+  insertionIndex?: number | null
 }
 
 export async function updateParentIdOfItemsInConversationExplorerNode(
@@ -395,6 +407,7 @@ export async function updateParentIdOfItemsInConversationExplorerNode(
     visibility,
     itemIds,
     parentId,
+    insertionIndex,
   }: UpdateParentIdOfItemsInConversationExplorerNodeParams,
 ) {
   if (visibility === 'team' && context.teamId === '~') {
@@ -414,22 +427,62 @@ export async function updateParentIdOfItemsInConversationExplorerNode(
       ? eq(conversationExplorerNodes.ownerTeamId, context.teamId)
       : eq(conversationExplorerNodes.ownerUserId, userId)
 
-  await db
-    .update(conversationExplorerNodes)
-    .set({ parentId: parentId === 'root' ? null : parentId })
+  const siblings = await db
+    .select({
+      fractionalIndex: conversationExplorerNodes.fractionalIndex,
+    })
+    .from(conversationExplorerNodes)
     .where(
       and(
         eq(conversationExplorerNodes.visibility, visibility),
         eq(conversationExplorerNodes.agentId, context.agentId),
         ownerTypeCondition,
-        inArray(conversationExplorerNodes.id, itemIds),
+        !parentId || parentId === 'root'
+          ? isNull(conversationExplorerNodes.parentId)
+          : eq(conversationExplorerNodes.parentId, parentId),
+        notInArray(conversationExplorerNodes.id, itemIds),
         isNull(conversationExplorerNodes.deletedAt),
       ),
     )
+    .orderBy(sql`${conversationExplorerNodes.fractionalIndex} COLLATE "C" ASC`)
+    .offset(Math.max(0, (insertionIndex || 0) - 1))
+    .limit(insertionIndex ? 2 : 1)
+
+  const previousSibling = insertionIndex ? siblings[0] : null
+  const nextSibling = insertionIndex ? siblings[1] : siblings[0]
+
+  const fractionalIndexes = generateNKeysBetween(
+    previousSibling?.fractionalIndex,
+    nextSibling?.fractionalIndex,
+    itemIds.length,
+  )
+
+  await db.transaction(
+    async (tx) =>
+      await Promise.all(
+        itemIds.map((itemId, index) =>
+          tx
+            .update(conversationExplorerNodes)
+            .set({
+              parentId: parentId === 'root' ? null : parentId,
+              fractionalIndex: fractionalIndexes[index] || null,
+            })
+            .where(
+              and(
+                eq(conversationExplorerNodes.visibility, visibility),
+                eq(conversationExplorerNodes.agentId, context.agentId),
+                ownerTypeCondition,
+                eq(conversationExplorerNodes.id, itemId),
+                isNull(conversationExplorerNodes.deletedAt),
+              ),
+            ),
+        ),
+      ),
+  )
 }
 
 type CreateFolderInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   parentId: string | null
   name: string
 }
@@ -450,6 +503,35 @@ export async function createFolderInConversationExplorerNode(
     return null
   }
 
+  const explorerOwnerTypeCondition =
+    visibility === 'team'
+      ? eq(conversationExplorerNodes.ownerTeamId, context.teamId)
+      : eq(conversationExplorerNodes.ownerUserId, userId)
+
+  const [firstSibling] = await db
+    .select({
+      fractionalIndex: conversationExplorerNodes.fractionalIndex,
+    })
+    .from(conversationExplorerNodes)
+    .where(
+      and(
+        eq(conversationExplorerNodes.visibility, visibility),
+        eq(conversationExplorerNodes.agentId, context.agentId),
+        explorerOwnerTypeCondition,
+        !parentId || parentId === 'root'
+          ? isNull(conversationExplorerNodes.parentId)
+          : eq(conversationExplorerNodes.parentId, parentId),
+        isNull(conversationExplorerNodes.deletedAt),
+      ),
+    )
+    .orderBy(sql`${conversationExplorerNodes.fractionalIndex} COLLATE "C" ASC`)
+    .limit(1)
+
+  const fractionalIndex = generateKeyBetween(
+    null,
+    firstSibling?.fractionalIndex || null,
+  )
+
   const ownerTypeCondition =
     visibility === 'team'
       ? { ownerTeamId: context.teamId }
@@ -462,6 +544,7 @@ export async function createFolderInConversationExplorerNode(
       agentId: context.agentId,
       ...ownerTypeCondition,
       parentId: parentId === 'root' ? null : parentId,
+      fractionalIndex,
       name,
     })
     .returning({
@@ -472,7 +555,7 @@ export async function createFolderInConversationExplorerNode(
 }
 
 type DeleteItemInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   itemId: string
 }
 
@@ -605,7 +688,7 @@ export async function deleteItemInConversationExplorerNode(
 }
 
 type GetItemsDeletedInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
 }
 
 export async function getItemsDeletedInConversationExplorerNode(
@@ -665,7 +748,7 @@ export async function getItemsDeletedInConversationExplorerNode(
 }
 
 type RestoreItemInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   itemId: string
 }
 
@@ -735,7 +818,7 @@ export async function restoreItemInConversationExplorerNode(
 }
 
 type DestroyItemInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   itemId: string
 }
 
@@ -759,23 +842,16 @@ export async function destroyItemInConversationExplorerNode(
     return
   }
 
-  const ownerTypeCondition =
-    visibility === 'team'
-      ? sql`owner_team_id = ${context.teamId}`
-      : sql`owner_user_id = ${userId}`
-
-  console.log({
-    itemId,
-    visibility,
-    agentId: context.agentId,
-    ...ownerTypeCondition,
-  })
+  // const ownerTypeCondition =
+  //   visibility === 'team'
+  //     ? sql`owner_team_id = ${context.teamId}`
+  //     : sql`owner_user_id = ${userId}`
 
   throw new Error('Not implemented')
 }
 
 type DestroyAllItemsInConversationExplorerNodeParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
 }
 
 export async function destroyAllItemsInConversationExplorerNode(
@@ -798,16 +874,10 @@ export async function destroyAllItemsInConversationExplorerNode(
     return
   }
 
-  const ownerTypeCondition =
-    visibility === 'team'
-      ? sql`owner_team_id = ${context.teamId}`
-      : sql`owner_user_id = ${userId}`
-
-  console.log({
-    visibility,
-    agentId: context.agentId,
-    ...ownerTypeCondition,
-  })
+  // const ownerTypeCondition =
+  //   visibility === 'team'
+  //     ? sql`owner_team_id = ${context.teamId}`
+  //     : sql`owner_user_id = ${userId}`
 
   throw new Error('Not implemented')
 }

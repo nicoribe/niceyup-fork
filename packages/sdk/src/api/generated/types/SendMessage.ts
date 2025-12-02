@@ -1097,7 +1097,7 @@ export type SendMessage200 = {
     children?: string[]
   }
   /**
-   * @description Return only when the conversation is created in the explorerNode
+   * @description Return only when the conversation is created
    * @type object | undefined
    */
   explorerNode?: {
@@ -1282,7 +1282,7 @@ export type SendMessageMutationRequest = {
     metadata?: any
   }
   /**
-   * @description Used only when conversation is new
+   * @description Used only when conversation is created
    * @type object | undefined
    */
   explorerNode?: {

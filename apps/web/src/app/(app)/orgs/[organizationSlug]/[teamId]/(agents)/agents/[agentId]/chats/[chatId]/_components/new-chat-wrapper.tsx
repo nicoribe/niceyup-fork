@@ -4,7 +4,7 @@ import { NewChat } from './new-chat'
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
 export async function NewChatWrapper({ params }: { params: Params }) {
-  // TODO: Make this dynamic based on the agent's configuration
+  // TODO: make this dynamic based on the agent's configuration
   const suggestions = [
     'What are the latest trends in AI?',
     'How does machine learning work?',

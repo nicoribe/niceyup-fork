@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { env } from '../lib/env'
 import type { AIMessageNode } from '../lib/types'
 
 type ContextParams = {
@@ -41,8 +40,7 @@ export function useChatRealtime({ params }: UseChatRealtimeParams) {
       })
 
       const url = new URL(
-        `/api/conversations/${params.chatId}/messages/realtime?${searchParams}`,
-        env.NEXT_PUBLIC_WEBSOCKET_URL,
+        `/api/ws/conversations/${params.chatId}/messages/realtime?${searchParams}`,
       )
 
       websocket = new WebSocket(url)

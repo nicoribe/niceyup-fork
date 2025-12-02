@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",
-    "@headless-tree/core": "1.2.1",
-    "@headless-tree/react": "1.2.1",
+    "@headless-tree/core": "1.5.1",
+    "@headless-tree/react": "1.5.1",
     "@hookform/resolvers": "5.2.2",
     "@tanstack/react-query": "5.90.5",
     "@workspace/ai": "workspace:*",
@@ -29,6 +29,7 @@
     "@workspace/ui": "workspace:*",
     "@workspace/utils": "workspace:*",
     "cookies-next": "5.1.0",
+    "jittered-fractional-indexing": "1.0.0",
     "lucide-react": "^0.475.0",
     "next": "^15.2.3",
     "next-themes": "^0.4.4",

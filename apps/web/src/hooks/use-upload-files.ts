@@ -30,13 +30,14 @@ export function useUploadFiles(
   { organizationSlug, teamId }: OrganizationTeamParams,
   params: GenerateUploadSignatureParams,
 ) {
-  const [uploading, setUploading] = React.useState(false)
+  const [uploading, setUploading] = React.useState<string[]>([])
 
   const uploadFiles = async ({ files: filesToUpload }: { files: File[] }) => {
-    const files: UploadedFile[] = []
-
     try {
-      setUploading(true)
+      setUploading((prev) => [
+        ...prev,
+        ...filesToUpload.map((f) => `${f.name}-${f.size}`),
+      ])
 
       const { data, error } = await generateUploadSignature(
         { organizationSlug, teamId },
@@ -47,43 +48,11 @@ export function useUploadFiles(
         return { data: null, error }
       }
 
-      let baseUrl = '/api/files'
-
-      if (params.scope === 'conversations') {
-        baseUrl = '/api/conversations/files'
-      } else if (params.scope === 'sources') {
-        baseUrl = '/api/sources/files'
-      }
-
-      for (const file of filesToUpload) {
-        const formData = new FormData()
-        formData.set('file', file as File)
-
-        const response = await fetch(baseUrl, {
-          method: 'POST',
-          headers: {
-            'x-upload-signature': data.signature,
-          },
-          body: formData,
-        })
-
-        const result = await response.json()
-
-        if (!response.ok) {
-          files.push({
-            status: 'error' as const,
-            error: {
-              code: 'FAILED_TO_UPLOAD_FILE',
-              message: 'Failed to upload file',
-            },
-            fileName: file.name,
-          })
-        } else {
-          const [file] = result.files
-
-          files.push(file)
-        }
-      }
+      const files: UploadedFile[] = await Promise.all(
+        filesToUpload.map((file) =>
+          _uploadFile({ signature: data.signature, file }),
+        ),
+      )
 
       return { data: { files }, error: null }
     } catch {
@@ -92,9 +61,99 @@ export function useUploadFiles(
         error: { message: 'Error uploading files, please try again' },
       }
     } finally {
-      setUploading(false)
+      setUploading((prev) =>
+        prev.filter(
+          (fId) =>
+            !filesToUpload.map((f) => `${f.name}-${f.size}`).includes(fId),
+        ),
+      )
     }
   }
 
-  return { uploading, uploadFiles }
+  const uploadFile = async ({ file: fileToUpload }: { file: File }) => {
+    try {
+      setUploading((prev) => [
+        ...prev,
+        `${fileToUpload.name}-${fileToUpload.size}`,
+      ])
+
+      const { data, error } = await generateUploadSignature(
+        { organizationSlug, teamId },
+        params,
+      )
+
+      if (error) {
+        return { data: null, error }
+      }
+
+      const file = await _uploadFile({
+        signature: data.signature,
+        file: fileToUpload,
+      })
+
+      return { data: { file }, error: null }
+    } catch {
+      return {
+        data: null,
+        error: { message: 'Error uploading file, please try again' },
+      }
+    } finally {
+      setUploading((prev) =>
+        prev.filter(
+          (fId) => fId !== `${fileToUpload.name}-${fileToUpload.size}`,
+        ),
+      )
+    }
+  }
+
+  const _uploadFile = async ({
+    signature,
+    file,
+  }: { signature: string; file: File }): Promise<UploadedFile> => {
+    try {
+      let url = '/api/files'
+
+      if (params.scope === 'conversations') {
+        url = '/api/conversations/files'
+      } else if (params.scope === 'sources') {
+        url = '/api/sources/files'
+      }
+
+      const formData = new FormData()
+      formData.set('file', file as File)
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'x-upload-signature': signature,
+        },
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error()
+      }
+
+      const [uploadedFile] = result.files
+
+      return uploadedFile
+    } catch {
+      return {
+        status: 'error' as const,
+        error: {
+          code: 'FAILED_TO_UPLOAD_FILE',
+          message: 'Failed to upload file',
+        },
+        fileName: file.name,
+      }
+    }
+  }
+
+  return {
+    uploading: Boolean(uploading.length),
+    uploadFiles,
+    uploadFile,
+  }
 }

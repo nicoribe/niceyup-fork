@@ -1,4 +1,5 @@
 import { generateText } from '@workspace/ai'
+import { gateway } from '@workspace/ai/providers'
 import { vectorStore } from '@workspace/vector-store'
 import type {
   DatabaseSourceQueryExample,
@@ -6,7 +7,6 @@ import type {
 } from '../lib/types'
 import { getDbProperNounsTask } from '../trigger/tasks/get-db-proper-nouns'
 import { filesLoader } from './loaders'
-import { languageModel } from './models'
 import { experimental_templatePromptSummarizeDatabaseSource } from './prompts'
 import { documentSplitter } from './splitters'
 
@@ -19,7 +19,7 @@ export async function ingestTextSource({
 }) {
   const documents = [{ content: 'Empty' }]
 
-  // TODO: Implement logic to ingest text source
+  // TODO: implement logic to ingest text source
 
   await vectorStore.upsert({
     namespace,
@@ -39,7 +39,7 @@ export async function ingestQuestionAnswerSource({
 }) {
   const documents = [{ content: 'Empty' }]
 
-  // TODO: Implement logic to ingest question answer source
+  // TODO: implement logic to ingest question answer source
 
   await vectorStore.upsert({
     namespace,
@@ -59,7 +59,7 @@ export async function ingestWebsiteSource({
 }) {
   const documents = [{ content: 'Empty' }]
 
-  // TODO: Implement logic to ingest website source
+  // TODO: implement logic to ingest website source
 
   await vectorStore.upsert({
     namespace,
@@ -296,7 +296,7 @@ export async function experimental_ingestDatabaseSource({
   }
 
   const generatedContent = await generateText({
-    model: languageModel,
+    model: gateway.languageModel('openai/gpt-4.1'),
     messages: experimental_templatePromptSummarizeDatabaseSource({
       content: tablesContent.join('\n-\n'),
     }),

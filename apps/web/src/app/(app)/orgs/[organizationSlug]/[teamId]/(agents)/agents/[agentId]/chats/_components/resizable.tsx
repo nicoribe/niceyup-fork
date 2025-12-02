@@ -14,18 +14,18 @@ const DEFAULT_MIN_SIZE = 220 // 220px
 const DEFAULT_MAX_SIZE = 30 // 30% of the width
 
 export function Resizable({
-  leftSidebar: leftSidebarComponent,
-  rightSidebar: rightSidebarComponent,
+  primarySidebar: primarySidebarComponent,
+  secondarySidebar: secondarySidebarComponent,
   children,
   ...props
 }: {
-  leftSidebar: React.ReactNode
-  rightSidebar: React.ReactNode
+  primarySidebar: React.ReactNode
+  secondarySidebar: React.ReactNode
   children: React.ReactNode
 } & React.ComponentProps<'div'>) {
   const { ref, width } = useComponentSize()
 
-  const { topbar, leftSidebar, rightSidebar } = useAppearance()
+  const { topbar, primarySidebar, secondarySidebar } = useAppearance()
 
   const [minSidebarSize, setMinSidebarSize] = React.useState(0)
 
@@ -47,14 +47,14 @@ export function Resizable({
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel
           defaultSize={0}
-          minSize={leftSidebar ? minSidebarSize : 0}
-          maxSize={leftSidebar ? DEFAULT_MAX_SIZE : 0}
+          minSize={primarySidebar ? minSidebarSize : 0}
+          maxSize={primarySidebar ? DEFAULT_MAX_SIZE : 0}
           className={cn(
             'flex flex-col border-r bg-background',
-            !leftSidebar && 'hidden',
+            !primarySidebar && 'hidden',
           )}
         >
-          {leftSidebarComponent}
+          {primarySidebarComponent}
         </ResizablePanel>
 
         <ResizableHandle className="w-0.1" />
@@ -65,14 +65,14 @@ export function Resizable({
 
         <ResizablePanel
           defaultSize={0}
-          minSize={rightSidebar ? minSidebarSize : 0}
-          maxSize={rightSidebar ? DEFAULT_MAX_SIZE : 0}
+          minSize={secondarySidebar ? minSidebarSize : 0}
+          maxSize={secondarySidebar ? DEFAULT_MAX_SIZE : 0}
           className={cn(
             'flex flex-col border-l bg-background',
-            !rightSidebar && 'hidden',
+            !secondarySidebar && 'hidden',
           )}
         >
-          {rightSidebarComponent}
+          {secondarySidebarComponent}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

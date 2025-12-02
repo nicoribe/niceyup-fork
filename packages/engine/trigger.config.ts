@@ -18,7 +18,7 @@ export default defineConfig({
       randomize: true,
     },
   },
-  dirs: ['./src/tasks'],
+  dirs: ['./src/trigger/tasks'],
   build: {
     external: [
       'pdfjs-dist',

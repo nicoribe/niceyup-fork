@@ -1,6 +1,10 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { sendUserMessageToAssistant } from '@/http/functions/ai-assistant'
+import {
+  createConversationExplorerNodeItem,
+  getConversationExplorerNodeFolder,
+} from '@/http/functions/explorer-nodes/conversation-explorer-nodes'
 import { generateTitleFromUserMessage } from '@/http/functions/generate-title-from-user-message'
 import { authenticate } from '@/http/middlewares/authenticate'
 import { getOrganizationIdentifier } from '@/lib/utils'
@@ -15,11 +19,7 @@ import type { AIMessageMetadata } from '@workspace/ai/types'
 import { db } from '@workspace/db'
 import { and, desc, eq, isNull } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
-import {
-  conversationExplorerNodes,
-  conversations,
-  messages,
-} from '@workspace/db/schema'
+import { conversations, messages } from '@workspace/db/schema'
 import { conversationPubSub } from '@workspace/realtime/pubsub'
 import { z } from 'zod'
 
@@ -75,7 +75,7 @@ export async function sendMessage(app: FastifyTypedInstance) {
               folderId: z.string().nullish(),
             })
             .optional()
-            .describe('Used only when conversation is new'),
+            .describe('Used only when conversation is created'),
         }),
         response: withDefaultErrorResponses({
           200: z
@@ -88,9 +88,7 @@ export async function sendMessage(app: FastifyTypedInstance) {
                   itemId: z.string(),
                 })
                 .optional()
-                .describe(
-                  'Return only when the conversation is created in the explorerNode',
-                ),
+                .describe('Return only when the conversation is created'),
             })
             .describe('Success'),
         }),
@@ -122,6 +120,19 @@ export async function sendMessage(app: FastifyTypedInstance) {
         }),
       }
 
+      if (explorerNode?.visibility === 'team' && !context.teamId) {
+        throw new BadRequestError({
+          code: 'TEAM_ID_REQUIRED',
+          message:
+            'Team is required when the explorer node visibility is set to "team"',
+        })
+      }
+
+      const ownerTypeCondition =
+        explorerNode?.visibility === 'team'
+          ? { ownerTeamId: context.teamId! }
+          : { ownerUserId: userId }
+
       if (conversationId === 'new') {
         const checkAccessToAgent = await queries.context.getAgent(context, {
           agentId,
@@ -134,33 +145,14 @@ export async function sendMessage(app: FastifyTypedInstance) {
           })
         }
 
-        if (explorerNode?.visibility) {
-          if (explorerNode.visibility === 'team' && teamId === '~') {
-            throw new BadRequestError({
-              code: 'TEAM_NOT_FOUND',
-              message: 'Team not found',
-            })
-          }
-
+        if (explorerNode) {
           if (explorerNode.folderId && explorerNode.folderId !== 'root') {
-            const [folderExplorerNode] = await db
-              .select({
-                id: conversationExplorerNodes.id,
-              })
-              .from(conversationExplorerNodes)
-              .where(
-                and(
-                  eq(conversationExplorerNodes.id, explorerNode.folderId),
-                  eq(
-                    conversationExplorerNodes.visibility,
-                    explorerNode.visibility,
-                  ),
-                  eq(conversationExplorerNodes.agentId, agentId),
-                  isNull(conversationExplorerNodes.conversationId),
-                  isNull(conversationExplorerNodes.deletedAt),
-                ),
-              )
-              .limit(1)
+            const folderExplorerNode = await getConversationExplorerNodeFolder({
+              id: explorerNode.folderId,
+              visibility: explorerNode.visibility,
+              agentId,
+              ...ownerTypeCondition,
+            })
 
             if (!folderExplorerNode) {
               throw new BadRequestError({
@@ -195,13 +187,8 @@ export async function sendMessage(app: FastifyTypedInstance) {
             let title = message.parts.find((part) => part.type === 'text')?.text
 
             if (title) {
-              title = await generateTitleFromUserMessage({ message: title })
+              title = await generateTitleFromUserMessage({ userMessage: title })
             }
-
-            const ownerTypeCondition =
-              explorerNode?.visibility === 'team'
-                ? { ownerTeamId: context.teamId }
-                : { ownerUserId: userId }
 
             const [conversation] = await tx
               .insert(conversations)
@@ -223,7 +210,7 @@ export async function sendMessage(app: FastifyTypedInstance) {
 
             _conversationId = conversation.id
 
-            // TODO: Make this dynamic based on the agent's configuration
+            // TODO: make this dynamic based on the agent's configuration
             const systemMessageText = `### Role
 - Primary Function: You are an AI agent who helps users with their inquiries, issues and requests. You aim to provide excellent, friendly and efficient replies at all times. Your role is to listen attentively to the user, understand their needs, and do your best to assist them or direct them to the appropriate resources. If a user is not clear, ask clarifying users. Make sure to end your replies with a positive note.`
 
@@ -254,25 +241,20 @@ export async function sendMessage(app: FastifyTypedInstance) {
             _parentMessageId = systemMessage.id
 
             // Create a new conversation in the explorerNode
-            if (explorerNode?.visibility) {
-              const [newItemExplorerNode] = await tx
-                .insert(conversationExplorerNodes)
-                .values({
-                  visibility: explorerNode.visibility,
+            if (explorerNode) {
+              const itemExplorerNode = await createConversationExplorerNodeItem(
+                {
                   agentId,
-                  ...ownerTypeCondition,
+                  visibility: explorerNode.visibility,
+                  parentId: explorerNode.folderId,
                   conversationId: conversation.id,
-                  parentId:
-                    explorerNode.folderId === 'root'
-                      ? null
-                      : explorerNode.folderId,
-                })
-                .returning({
-                  id: conversationExplorerNodes.id,
-                })
+                  ...ownerTypeCondition,
+                },
+                tx,
+              )
 
-              if (newItemExplorerNode) {
-                _explorerNode = { itemId: newItemExplorerNode.id }
+              if (itemExplorerNode) {
+                _explorerNode = { itemId: itemExplorerNode.id }
               }
             }
           } else {
@@ -370,7 +352,7 @@ export async function sendMessage(app: FastifyTypedInstance) {
         },
       )
 
-      // TODO: Make this dynamic based on the agent's configuration
+      // TODO: make this dynamic based on the agent's configuration
       const contextMessages = true
       const maxContextMessages = 10
 

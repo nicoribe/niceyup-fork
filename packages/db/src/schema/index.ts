@@ -402,6 +402,7 @@ export const sourceExplorerNodes = pgTable('source_explorer_nodes', {
     onDelete: 'cascade',
   }),
   parentId: text('parent_id'),
+  fractionalIndex: text('fractional_index'),
 
   ownerUserId: text('owner_user_id').references(() => users.id),
   ownerOrganizationId: text('owner_organization_id').references(
@@ -446,6 +447,7 @@ export const conversationExplorerNodes = pgTable(
       onDelete: 'cascade',
     }),
     parentId: text('parent_id'),
+    fractionalIndex: text('fractional_index'),
 
     ownerUserId: text('owner_user_id').references(() => users.id),
     ownerTeamId: text('owner_team_id').references(() => teams.id),

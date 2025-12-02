@@ -69,7 +69,7 @@ const config = {
     user: {
       create: {
         after: async (user) => {
-          // TODO: Remove this once we have a way to create an agent for the user
+          // TODO: remove this once we have a way to create an agent for the user
           const unique = Math.random().toString(36).substring(2, 8)
 
           await db.insert(agents).values({

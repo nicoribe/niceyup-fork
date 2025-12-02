@@ -3,16 +3,25 @@ import {
   type ModelMessage,
   type ToolSet,
   readUIMessageStream,
-  stepCountIs,
   streamText,
 } from '@workspace/ai'
-import type { LanguageModel } from '@workspace/ai'
 import type { AIMessage, AIMessageMetadata } from '@workspace/ai/types'
 
-export async function streamAIAssistant({
+type StreamTextParams<
+  TOOLS extends ToolSet,
+  OUTPUT = never,
+  PARTIAL_OUTPUT = never,
+> = Parameters<typeof streamText<TOOLS, OUTPUT, PARTIAL_OUTPUT>>[0]
+
+export async function streamAIAssistant<
+  TOOLS extends ToolSet,
+  OUTPUT = never,
+  PARTIAL_OUTPUT = never,
+>({
   model,
   tools,
-  signal,
+  stopWhen,
+  abortSignal,
   originalMessage,
   messages,
   onStart,
@@ -20,11 +29,11 @@ export async function streamAIAssistant({
   onFinish,
   onFailed,
   onError,
-}: {
-  model: LanguageModel
-  tools?: ToolSet
+}: Pick<
+  StreamTextParams<TOOLS, OUTPUT, PARTIAL_OUTPUT>,
+  'model' | 'tools' | 'stopWhen' | 'abortSignal'
+> & {
   messages: ModelMessage[]
-  signal?: AbortSignal
   originalMessage?: {
     id?: string
     metadata?: AIMessageMetadata | null
@@ -51,9 +60,9 @@ export async function streamAIAssistant({
     const streamingResult = streamText({
       model,
       tools,
-      stopWhen: stepCountIs(5),
+      stopWhen,
+      abortSignal,
       messages,
-      abortSignal: signal,
       onError: (event) => {
         error = event.error
       },
@@ -62,8 +71,10 @@ export async function streamAIAssistant({
     const messageStream = readUIMessageStream<AIMessage>({
       message,
       stream: streamingResult.toUIMessageStream<AIMessage>({
+        sendStart: true,
         sendReasoning: true,
         sendSources: true,
+        sendFinish: true,
         messageMetadata: () => {
           return originalMessage?.metadata || {}
         },
@@ -84,7 +95,7 @@ export async function streamAIAssistant({
 
       await onFailed?.({ message, error })
     } else {
-      message.status = signal?.aborted ? 'stopped' : 'finished'
+      message.status = abortSignal?.aborted ? 'stopped' : 'finished'
 
       await onFinish?.({ message })
     }

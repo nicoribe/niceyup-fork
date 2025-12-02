@@ -23,6 +23,7 @@ type UseChatMessageRealtimeParams = {
   params: ContextParams
   messageId: string
   streamMessageAction: StreamMessageActionParams
+  onMessageChunk?: (message: AIMessage) => void
   disable?: boolean
 }
 
@@ -30,6 +31,7 @@ export function useChatMessageRealtime({
   params,
   messageId,
   streamMessageAction,
+  onMessageChunk,
   disable,
 }: UseChatMessageRealtimeParams) {
   const [error, setError] = React.useState<string>()
@@ -47,7 +49,10 @@ export function useChatMessageRealtime({
       }
 
       for await (const message of readStreamableValue<AIMessage>(data)) {
-        setMessage(message)
+        if (message) {
+          onMessageChunk?.(message)
+          setMessage(message)
+        }
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error))
@@ -74,6 +79,7 @@ export function useChatMessageRealtime({
     params.agentId,
     params.chatId,
     messageId,
+    disable,
   ])
 
   return { message, error }

@@ -1,6 +1,10 @@
 import { resumableStreamContext } from '@/lib/resumable-stream'
-import { convertToModelMessages, validateUIMessages } from '@workspace/ai'
-import { openai } from '@workspace/ai/providers'
+import {
+  convertToModelMessages,
+  stepCountIs,
+  validateUIMessages,
+} from '@workspace/ai'
+import { gateway, openai } from '@workspace/ai/providers'
 import type {
   AIMessage,
   AIMessageMetadata,
@@ -28,6 +32,7 @@ export async function sendUserMessageToAssistant({
     metadata?: AIMessageMetadata | null
   }
   agentConfiguration?: {
+    languageModel?: string
     contextMessages?: boolean
     maxContextMessages?: number
   }
@@ -73,12 +78,15 @@ export async function sendUserMessageToAssistant({
       }, 1000)
 
       await streamAIAssistant({
-        model: openai('gpt-5'),
+        model: gateway.languageModel(
+          agentConfiguration?.languageModel || 'openai/gpt-4.1',
+        ),
         tools: {
           image_generation: openai.tools.imageGeneration(),
           retrieve_sources: retrieveSourcesTool({ namespace }),
         },
-        signal: stopSignal.signal,
+        stopWhen: stepCountIs(5),
+        abortSignal: stopSignal.signal,
         originalMessage: assistantMessage,
         messages,
         onStart: async ({ message }) => {
@@ -103,10 +111,8 @@ export async function sendUserMessageToAssistant({
             parts: message.parts,
             metadata: message.metadata,
           })
-
-          console.log('AI assistant finished', { message })
         },
-        onFailed: async ({ message, error }) => {
+        onFailed: async ({ message }) => {
           enqueue(message)
 
           await queries.updateMessage({
@@ -115,16 +121,12 @@ export async function sendUserMessageToAssistant({
             parts: message.parts,
             metadata: message.metadata,
           })
-
-          console.log('AI assistant failed', { message, error })
         },
-        onError: async ({ error }) => {
+        onError: async () => {
           await queries.updateMessage({
             messageId: assistantMessage.id,
             status: 'failed',
           })
-
-          console.log('AI assistant error', { error })
         },
       })
 

@@ -3,22 +3,23 @@ import { persist } from 'zustand/middleware'
 
 interface AppearanceStore {
   topbar: boolean
-  leftSidebar: boolean
-  rightSidebar: boolean
+  primarySidebar: boolean
+  secondarySidebar: boolean
   setTopbar: (topbar: boolean) => void
-  setLeftSidebar: (leftSidebar: boolean) => void
-  setRightSidebar: (rightSidebar: boolean) => void
+  setPrimarySidebar: (primarySidebar: boolean) => void
+  setSecondarySidebar: (secondarySidebar: boolean) => void
 }
 
 export const useAppearance = create<AppearanceStore>()(
   persist(
     (set) => ({
       topbar: true,
-      leftSidebar: true,
-      rightSidebar: false,
+      primarySidebar: true,
+      secondarySidebar: false,
       setTopbar: (topbar) => set(() => ({ topbar })),
-      setLeftSidebar: (leftSidebar) => set(() => ({ leftSidebar })),
-      setRightSidebar: (rightSidebar) => set(() => ({ rightSidebar })),
+      setPrimarySidebar: (primarySidebar) => set(() => ({ primarySidebar })),
+      setSecondarySidebar: (secondarySidebar) =>
+        set(() => ({ secondarySidebar })),
     }),
     {
       name: 'appearance-storage',

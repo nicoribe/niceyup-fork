@@ -29,7 +29,7 @@ export function ChatView({
 
       <Separator />
 
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-4 py-2">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-2 px-4 py-2">
         <ChatPromptInput />
 
         <div className="text-center text-[11px] text-muted-foreground">

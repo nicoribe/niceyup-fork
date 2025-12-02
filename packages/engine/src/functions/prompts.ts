@@ -3,7 +3,7 @@ export function templatePromptAnswer({
 }: {
   question: string
 }) {
-  // TODO: Improve the prompt to make it more accurate.
+  // TODO: improve the prompt to make it more accurate.
 
   return [
     {
@@ -28,7 +28,7 @@ export function templatePromptWriteQuery({
   queryExamples: string
   question: string
 }) {
-  // TODO: Improve the prompt to make it more accurate.
+  // TODO: improve the prompt to make it more accurate.
 
   const dialect = 'DuckDB' as const
 
@@ -59,7 +59,7 @@ export function templatePromptQueryEnhancementWithProperNouns({
 }: {
   query: string
 }) {
-  // TODO: Improve the prompt to make it more accurate.
+  // TODO: improve the prompt to make it more accurate.
 
   return [
     {
@@ -92,7 +92,7 @@ export function experimental_templatePromptSummarizeDatabaseSource({
 }: {
   content: string
 }) {
-  // TODO: Improve the prompt to make it more accurate.
+  // TODO: improve the prompt to make it more accurate.
 
   return [
     {

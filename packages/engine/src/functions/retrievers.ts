@@ -1,11 +1,11 @@
 import { tasks } from '@trigger.dev/sdk'
 import { Output, generateText, stepCountIs } from '@workspace/ai'
+import { gateway } from '@workspace/ai/providers'
 import { vectorStore } from '@workspace/vector-store'
 import { z } from 'zod'
 import { createSchemaDDL } from '../lib/utils'
 import type { executeQueryDbTask } from '../trigger/tasks/execute-query-db'
 import { searchProperNounsTool } from './ai-tools'
-import { languageModel } from './models'
 import {
   templatePromptQueryEnhancementWithProperNouns,
   templatePromptWriteQuery,
@@ -96,12 +96,12 @@ export async function retrieveDatabaseSourceTablesMetadata({
     .join('\n')
 
   const generatedQuery = await generateText({
-    model: languageModel,
+    model: gateway.languageModel('openai/gpt-4.1'),
     messages: templatePromptWriteQuery({ schema, queryExamples, question }),
   })
 
   const generatedEnhancedQuery = await generateText({
-    model: languageModel,
+    model: gateway.languageModel('openai/gpt-4.1'),
     tools: {
       searchProperNouns: searchProperNounsTool({ namespace, sourceId }),
     },

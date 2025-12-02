@@ -276,7 +276,6 @@ export type {
 } from './sendMessageSchema'
 export type {
   StopMessagePathParamsSchema,
-  StopMessageQueryParamsSchema,
   StopMessage204Schema,
   StopMessage400Schema,
   StopMessage401Schema,
@@ -284,6 +283,7 @@ export type {
   StopMessage404Schema,
   StopMessage429Schema,
   StopMessage500Schema,
+  StopMessageMutationRequestSchema,
   StopMessageMutationResponseSchema,
 } from './stopMessageSchema'
 export type {
@@ -648,7 +648,6 @@ export {
 } from './sendMessageSchema'
 export {
   stopMessagePathParamsSchema,
-  stopMessageQueryParamsSchema,
   stopMessage204Schema,
   stopMessage400Schema,
   stopMessage401Schema,
@@ -656,6 +655,7 @@ export {
   stopMessage404Schema,
   stopMessage429Schema,
   stopMessage500Schema,
+  stopMessageMutationRequestSchema,
   stopMessageMutationResponseSchema,
 } from './stopMessageSchema'
 export {

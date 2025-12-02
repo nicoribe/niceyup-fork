@@ -42,7 +42,7 @@ export type Chat = {
   title: string
 }
 
-export type ConversationExplorerNodeVisibility = 'private' | 'shared' | 'team'
+export type ConversationVisibility = 'private' | 'shared' | 'team'
 
 export type MessageStatus = AIMessageStatus
 

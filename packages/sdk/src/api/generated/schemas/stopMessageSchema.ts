@@ -5,7 +5,6 @@
 
 import type {
   StopMessagePathParams,
-  StopMessageQueryParams,
   StopMessage204,
   StopMessage400,
   StopMessage401,
@@ -13,6 +12,7 @@ import type {
   StopMessage404,
   StopMessage429,
   StopMessage500,
+  StopMessageMutationRequest,
   StopMessageMutationResponse,
 } from '../types/StopMessage'
 import type { ToZod } from '@kubb/plugin-zod/utils'
@@ -24,15 +24,6 @@ export const stopMessagePathParamsSchema = z.object({
 }) as unknown as ToZod<StopMessagePathParams>
 
 export type StopMessagePathParamsSchema = StopMessagePathParams
-
-export const stopMessageQueryParamsSchema = z.object({
-  organizationId: z.string().optional(),
-  organizationSlug: z.string().optional(),
-  teamId: z.string().optional(),
-  agentId: z.string(),
-}) as unknown as ToZod<StopMessageQueryParams>
-
-export type StopMessageQueryParamsSchema = StopMessageQueryParams
 
 /**
  * @description Success
@@ -136,6 +127,15 @@ export const stopMessage500Schema = z
   ) as unknown as ToZod<StopMessage500>
 
 export type StopMessage500Schema = StopMessage500
+
+export const stopMessageMutationRequestSchema = z.object({
+  organizationId: z.string().nullable().nullish(),
+  organizationSlug: z.string().nullable().nullish(),
+  teamId: z.string().nullable().nullish(),
+  agentId: z.string(),
+}) as unknown as ToZod<StopMessageMutationRequest>
+
+export type StopMessageMutationRequestSchema = StopMessageMutationRequest
 
 export const stopMessageMutationResponseSchema = z.lazy(
   () => stopMessage204Schema,

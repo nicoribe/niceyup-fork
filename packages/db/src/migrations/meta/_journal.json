@@ -169,6 +169,20 @@
       "when": 1762182144057,
       "tag": "0023_messy_adam_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1764342108207,
+      "tag": "0024_giant_blazing_skull",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1764364586296,
+      "tag": "0025_dizzy_maddog",
+      "breakpoints": true
     }
   ]
 }

@@ -9,9 +9,9 @@ import type {
   ResponseErrorConfig,
 } from '../../../../client/fetch-react-query'
 import type {
+  StopMessageMutationRequest,
   StopMessageMutationResponse,
   StopMessagePathParams,
-  StopMessageQueryParams,
   StopMessage400,
   StopMessage401,
   StopMessage403,
@@ -38,16 +38,19 @@ export async function stopMessage(
   {
     conversationId,
     messageId,
-    params,
+    data,
   }: {
     conversationId: StopMessagePathParams['conversationId']
     messageId: StopMessagePathParams['messageId']
-    params: StopMessageQueryParams
+    data: StopMessageMutationRequest
   },
-  config: Partial<RequestConfig> & { client?: typeof fetch } = {},
+  config: Partial<RequestConfig<StopMessageMutationRequest>> & {
+    client?: typeof fetch
+  } = {},
 ) {
   const { client: request = fetch, ...requestConfig } = config
 
+  const requestData = data
   const res = await request<
     StopMessageMutationResponse,
     ResponseErrorConfig<
@@ -58,11 +61,11 @@ export async function stopMessage(
       | StopMessage429
       | StopMessage500
     >,
-    unknown
+    StopMessageMutationRequest
   >({
     method: 'POST',
     url: getStopMessageUrl({ conversationId, messageId }).toString(),
-    params,
+    data: requestData,
     ...requestConfig,
   })
   return res.data

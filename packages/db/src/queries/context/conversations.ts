@@ -33,7 +33,7 @@ export async function listConversations(
     return []
   }
 
-  // TODO: Check if user has access to the conversations (private, shared, team)
+  // TODO: check if user has access to the conversations (private, shared, team)
 
   const listConversations = await db
     .select({
@@ -86,7 +86,7 @@ export async function getConversation(
     return null
   }
 
-  // TODO: Check if user has access to the conversation (private, shared, team)
+  // TODO: check if user has access to the conversation (private, shared, team)
 
   const [conversation] = await db
     .select({

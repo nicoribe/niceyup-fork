@@ -1,7 +1,10 @@
 'use client'
 
 import type { ChatParams, OrganizationTeamParams } from '@/lib/types'
-import { Suggestion, Suggestions } from '@workspace/ui/components/suggestion'
+import {
+  Suggestion,
+  Suggestions,
+} from '@workspace/ui/components/ai-elements/suggestion'
 import * as React from 'react'
 import { ChatPromptInput, ChatProvider } from './chat'
 

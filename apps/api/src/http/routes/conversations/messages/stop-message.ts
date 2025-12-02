@@ -18,10 +18,10 @@ export async function stopMessage(app: FastifyTypedInstance) {
           conversationId: z.string(),
           messageId: z.string(),
         }),
-        querystring: z.object({
-          organizationId: z.string().optional(),
-          organizationSlug: z.string().optional(),
-          teamId: z.string().optional(),
+        body: z.object({
+          organizationId: z.string().nullish(),
+          organizationSlug: z.string().nullish(),
+          teamId: z.string().nullish(),
           agentId: z.string(),
         }),
         response: withDefaultErrorResponses({
@@ -36,8 +36,7 @@ export async function stopMessage(app: FastifyTypedInstance) {
 
       const { conversationId, messageId } = request.params
 
-      const { organizationId, organizationSlug, teamId, agentId } =
-        request.query
+      const { organizationId, organizationSlug, teamId, agentId } = request.body
 
       const context = {
         userId,

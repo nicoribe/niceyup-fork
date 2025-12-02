@@ -9,9 +9,9 @@ import type {
   ResponseErrorConfig,
 } from '../../../../client/fetch-react-query'
 import type {
+  StopMessageMutationRequest,
   StopMessageMutationResponse,
   StopMessagePathParams,
-  StopMessageQueryParams,
   StopMessage400,
   StopMessage401,
   StopMessage403,
@@ -49,11 +49,13 @@ export function useStopMessage<TContext>(
       {
         conversationId: StopMessagePathParams['conversationId']
         messageId: StopMessagePathParams['messageId']
-        params: StopMessageQueryParams
+        data: StopMessageMutationRequest
       },
       TContext
     > & { client?: QueryClient }
-    client?: Partial<RequestConfig> & { client?: typeof fetch }
+    client?: Partial<RequestConfig<StopMessageMutationRequest>> & {
+      client?: typeof fetch
+    }
   } = {},
 ) {
   const { mutation = {}, client: config = {} } = options ?? {}
@@ -73,13 +75,13 @@ export function useStopMessage<TContext>(
     {
       conversationId: StopMessagePathParams['conversationId']
       messageId: StopMessagePathParams['messageId']
-      params: StopMessageQueryParams
+      data: StopMessageMutationRequest
     },
     TContext
   >(
     {
-      mutationFn: async ({ conversationId, messageId, params }) => {
-        return stopMessage({ conversationId, messageId, params }, config)
+      mutationFn: async ({ conversationId, messageId, data }) => {
+        return stopMessage({ conversationId, messageId, data }, config)
       },
       mutationKey,
       ...mutationOptions,

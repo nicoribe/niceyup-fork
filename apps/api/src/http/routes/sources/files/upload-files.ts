@@ -1,6 +1,10 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import type { BaseErrorParams } from '@/http/errors/base-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import {
+  createSourceExplorerNodeItem,
+  getSourceExplorerNodeFolder,
+} from '@/http/functions/explorer-nodes/source-explorer-nodes'
 import { uploadFileToStorage } from '@/http/functions/upload-file-to-storage'
 import {
   validatedFileForUpload,
@@ -8,13 +12,8 @@ import {
 } from '@/http/functions/upload-file-to-storage'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
-import { and, eq, isNull } from '@workspace/db/orm'
-import {
-  databaseSources,
-  fileSources,
-  sourceExplorerNodes,
-  sources,
-} from '@workspace/db/schema'
+import { eq } from '@workspace/db/orm'
+import { databaseSources, fileSources, sources } from '@workspace/db/schema'
 import type { runIngestionTask } from '@workspace/engine/tasks/run-ingestion'
 import { tasks } from '@workspace/engine/trigger'
 import { z } from 'zod'
@@ -83,25 +82,15 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
         },
       })
 
-      const explorerOwnerTypeCondition = data.owner.organizationId
-        ? eq(sourceExplorerNodes.ownerOrganizationId, data.owner.organizationId)
-        : eq(sourceExplorerNodes.ownerUserId, data.owner.userId!)
+      const ownerTypeCondition = data.owner.organizationId
+        ? { ownerOrganizationId: data.owner.organizationId }
+        : { ownerUserId: data.owner.userId! }
 
       if (explorerNode.folderId && explorerNode.folderId !== 'root') {
-        const [folderExplorerNode] = await db
-          .select({
-            id: sourceExplorerNodes.id,
-          })
-          .from(sourceExplorerNodes)
-          .where(
-            and(
-              explorerOwnerTypeCondition,
-              eq(sourceExplorerNodes.id, explorerNode.folderId),
-              isNull(sourceExplorerNodes.sourceId),
-              isNull(sourceExplorerNodes.deletedAt),
-            ),
-          )
-          .limit(1)
+        const folderExplorerNode = await getSourceExplorerNodeFolder({
+          id: explorerNode.folderId,
+          ...ownerTypeCondition,
+        })
 
         if (!folderExplorerNode) {
           throw new BadRequestError({
@@ -110,10 +99,6 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
           })
         }
       }
-
-      const ownerTypeCondition = data.owner.organizationId
-        ? { ownerOrganizationId: data.owner.organizationId }
-        : { ownerUserId: data.owner.userId }
 
       const uploadedFiles = []
 
@@ -134,7 +119,7 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
                 : 'application/pdf, text/plain',
           })
 
-          const { source, newItemExplorerNode, uploadedFile } =
+          const { source, itemExplorerNode, uploadedFile } =
             await db.transaction(async (tx) => {
               const [source] = await tx
                 .insert(sources)
@@ -154,21 +139,13 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
                 })
               }
 
-              const [newItemExplorerNode] = await tx
-                .insert(sourceExplorerNodes)
-                .values({
-                  ...ownerTypeCondition,
-                  sourceId: source.id,
-                  parentId:
-                    explorerNode.folderId === 'root'
-                      ? null
-                      : explorerNode.folderId,
-                })
-                .returning({
-                  id: sourceExplorerNodes.id,
-                })
+              const itemExplorerNode = await createSourceExplorerNodeItem({
+                parentId: explorerNode.folderId,
+                sourceId: source.id,
+                ...ownerTypeCondition,
+              })
 
-              if (!newItemExplorerNode) {
+              if (!itemExplorerNode) {
                 throw new BadRequestError({
                   code: 'EXPLORER_NODE_NOT_CREATED',
                   message: 'Explorer node not created',
@@ -238,7 +215,7 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
                   .where(eq(fileSources.sourceId, source.id))
               }
 
-              return { source, newItemExplorerNode, uploadedFile }
+              return { source, itemExplorerNode, uploadedFile }
             })
 
           uploadedFiles.push({
@@ -246,7 +223,7 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
             ...uploadedFile,
             source: {
               sourceId: source.id,
-              explorerNode: { itemId: newItemExplorerNode.id },
+              explorerNode: { itemId: itemExplorerNode.id },
             },
           })
         } catch (error) {

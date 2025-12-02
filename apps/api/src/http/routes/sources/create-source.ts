@@ -1,16 +1,19 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import {
+  createSourceExplorerNodeItem,
+  getSourceExplorerNodeFolder,
+} from '@/http/functions/explorer-nodes/source-explorer-nodes'
 import { authenticate } from '@/http/middlewares/authenticate'
 import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
-import { and, eq, isNull } from '@workspace/db/orm'
+import { eq } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
 import {
   connections,
   databaseSources,
   questionAnswerSources,
-  sourceExplorerNodes,
   sources,
   textSources,
 } from '@workspace/db/schema'
@@ -107,25 +110,15 @@ export async function createSource(app: FastifyTypedInstance) {
           organizationSlug: context.organizationSlug,
         }))
 
-      if (explorerNode?.folderId && explorerNode.folderId !== 'root') {
-        const explorerOwnerTypeCondition = orgId
-          ? eq(sourceExplorerNodes.ownerOrganizationId, orgId)
-          : eq(sourceExplorerNodes.ownerUserId, userId)
+      const ownerTypeCondition = orgId
+        ? { ownerOrganizationId: orgId }
+        : { ownerUserId: userId }
 
-        const [folderExplorerNode] = await db
-          .select({
-            id: sourceExplorerNodes.id,
-          })
-          .from(sourceExplorerNodes)
-          .where(
-            and(
-              explorerOwnerTypeCondition,
-              eq(sourceExplorerNodes.id, explorerNode.folderId),
-              isNull(sourceExplorerNodes.sourceId),
-              isNull(sourceExplorerNodes.deletedAt),
-            ),
-          )
-          .limit(1)
+      if (explorerNode?.folderId && explorerNode.folderId !== 'root') {
+        const folderExplorerNode = await getSourceExplorerNodeFolder({
+          id: explorerNode.folderId,
+          ...ownerTypeCondition,
+        })
 
         if (!folderExplorerNode) {
           throw new BadRequestError({
@@ -135,137 +128,126 @@ export async function createSource(app: FastifyTypedInstance) {
         }
       }
 
-      const { source, newItemExplorerNode } = await db.transaction(
-        async (tx) => {
-          const ownerTypeCondition = orgId
-            ? { ownerOrganizationId: orgId }
-            : { ownerUserId: userId }
+      const { source, itemExplorerNode } = await db.transaction(async (tx) => {
+        const [source] = await tx
+          .insert(sources)
+          .values({
+            name,
+            type,
+            ...ownerTypeCondition,
+          })
+          .returning({
+            id: sources.id,
+          })
 
-          const [source] = await tx
-            .insert(sources)
+        if (!source) {
+          throw new BadRequestError({
+            code: 'SOURCE_NOT_CREATED',
+            message: 'Source not created',
+          })
+        }
+
+        if (type === 'question-answer') {
+          const { questions, answer } = request.body
+
+          const [questionAnswerSource] = await tx
+            .insert(questionAnswerSources)
             .values({
-              name,
-              type,
-              ...ownerTypeCondition,
-            })
-            .returning({
-              id: sources.id,
-            })
-
-          if (!source) {
-            throw new BadRequestError({
-              code: 'SOURCE_NOT_CREATED',
-              message: 'Source not created',
-            })
-          }
-
-          if (type === 'question-answer') {
-            const { questions, answer } = request.body
-
-            const [questionAnswerSource] = await tx
-              .insert(questionAnswerSources)
-              .values({
-                questions,
-                answer,
-                sourceId: source.id,
-              })
-              .returning({
-                id: questionAnswerSources.id,
-              })
-
-            if (!questionAnswerSource) {
-              throw new BadRequestError({
-                code: 'QUESTION_ANSWER_SOURCE_NOT_CREATED',
-                message: 'Question answer source not created',
-              })
-            }
-          } else if (type === 'database') {
-            const { dialect, connectionId } = request.body
-
-            const [connection] = await tx
-              .select({
-                app: connections.app,
-              })
-              .from(connections)
-              .where(eq(connections.id, connectionId))
-              .limit(1)
-
-            if (!connection) {
-              throw new BadRequestError({
-                code: 'CONNECTION_NOT_FOUND',
-                message: 'Connection not found',
-              })
-            }
-
-            if (connection.app !== 'postgresql' && connection.app !== 'mysql') {
-              throw new BadRequestError({
-                code: 'INVALID_CONNECTION_APP',
-                message: 'Invalid connection app',
-              })
-            }
-
-            const [databaseSource] = await tx
-              .insert(databaseSources)
-              .values({
-                dialect: dialect,
-                sourceId: source.id,
-                connectionId,
-              })
-              .returning({
-                id: databaseSources.id,
-              })
-
-            if (!databaseSource) {
-              throw new BadRequestError({
-                code: 'DATABASE_SOURCE_NOT_CREATED',
-                message: 'Database source not created',
-              })
-            }
-          } else {
-            const { text } = request.body
-
-            const [textSource] = await tx
-              .insert(textSources)
-              .values({
-                text,
-                sourceId: source.id,
-              })
-              .returning({
-                id: textSources.id,
-              })
-
-            if (!textSource) {
-              throw new BadRequestError({
-                code: 'TEXT_SOURCE_NOT_CREATED',
-                message: 'Text source not created',
-              })
-            }
-          }
-
-          const [newItemExplorerNode] = await tx
-            .insert(sourceExplorerNodes)
-            .values({
-              ...ownerTypeCondition,
+              questions,
+              answer,
               sourceId: source.id,
-              parentId:
-                explorerNode?.folderId === 'root'
-                  ? null
-                  : explorerNode?.folderId,
             })
             .returning({
-              id: sourceExplorerNodes.id,
+              id: questionAnswerSources.id,
             })
 
-          if (!newItemExplorerNode) {
+          if (!questionAnswerSource) {
             throw new BadRequestError({
-              code: 'EXPLORER_NODE_NOT_CREATED',
-              message: 'Explorer node not created',
+              code: 'QUESTION_ANSWER_SOURCE_NOT_CREATED',
+              message: 'Question answer source not created',
+            })
+          }
+        } else if (type === 'database') {
+          const { dialect, connectionId } = request.body
+
+          const [connection] = await tx
+            .select({
+              app: connections.app,
+            })
+            .from(connections)
+            .where(eq(connections.id, connectionId))
+            .limit(1)
+
+          if (!connection) {
+            throw new BadRequestError({
+              code: 'CONNECTION_NOT_FOUND',
+              message: 'Connection not found',
             })
           }
 
-          return { source, newItemExplorerNode }
-        },
-      )
+          if (connection.app !== 'postgresql' && connection.app !== 'mysql') {
+            throw new BadRequestError({
+              code: 'INVALID_CONNECTION_APP',
+              message: 'Invalid connection app',
+            })
+          }
+
+          const [databaseSource] = await tx
+            .insert(databaseSources)
+            .values({
+              dialect: dialect,
+              sourceId: source.id,
+              connectionId,
+            })
+            .returning({
+              id: databaseSources.id,
+            })
+
+          if (!databaseSource) {
+            throw new BadRequestError({
+              code: 'DATABASE_SOURCE_NOT_CREATED',
+              message: 'Database source not created',
+            })
+          }
+        } else {
+          const { text } = request.body
+
+          const [textSource] = await tx
+            .insert(textSources)
+            .values({
+              text,
+              sourceId: source.id,
+            })
+            .returning({
+              id: textSources.id,
+            })
+
+          if (!textSource) {
+            throw new BadRequestError({
+              code: 'TEXT_SOURCE_NOT_CREATED',
+              message: 'Text source not created',
+            })
+          }
+        }
+
+        const itemExplorerNode = await createSourceExplorerNodeItem(
+          {
+            parentId: explorerNode?.folderId,
+            sourceId: source.id,
+            ...ownerTypeCondition,
+          },
+          tx,
+        )
+
+        if (!itemExplorerNode) {
+          throw new BadRequestError({
+            code: 'EXPLORER_NODE_NOT_CREATED',
+            message: 'Explorer node not created',
+          })
+        }
+
+        return { source, itemExplorerNode }
+      })
 
       if (type === 'text' || type === 'question-answer') {
         await tasks.trigger<typeof runIngestionTask>('run-ingestion', {
@@ -275,7 +257,7 @@ export async function createSource(app: FastifyTypedInstance) {
 
       return reply.status(201).send({
         sourceId: source.id,
-        explorerNode: { itemId: newItemExplorerNode.id },
+        explorerNode: { itemId: itemExplorerNode.id },
       })
     },
   )

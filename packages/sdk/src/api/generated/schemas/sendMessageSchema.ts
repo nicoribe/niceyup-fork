@@ -300,9 +300,7 @@ export const sendMessage200Schema = z
       .object({
         itemId: z.string(),
       })
-      .describe(
-        'Return only when the conversation is created in the explorerNode',
-      )
+      .describe('Return only when the conversation is created')
       .optional(),
   })
   .describe('Success') as unknown as ToZod<SendMessage200>
@@ -432,7 +430,7 @@ export const sendMessageMutationRequestSchema = z.object({
       visibility: z.enum(['private', 'team']),
       folderId: z.string().nullable().nullish(),
     })
-    .describe('Used only when conversation is new')
+    .describe('Used only when conversation is created')
     .optional(),
 }) as unknown as ToZod<SendMessageMutationRequest>
 

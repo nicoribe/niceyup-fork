@@ -2,10 +2,11 @@
 
 import { revalidateTag } from '@/actions/revalidate'
 import { useUploadFiles } from '@/hooks/use-upload-files'
+import { env } from '@/lib/env'
 import { sdk } from '@/lib/sdk'
 import type {
+  Chat,
   ChatParams,
-  Message,
   MessageNode,
   MessageRole,
   OrganizationTeamParams,
@@ -13,30 +14,16 @@ import type {
   PromptMessagePart,
 } from '@/lib/types'
 import { useChatRealtime } from '@workspace/realtime/hooks'
-import type { ScrollToBottom } from '@workspace/ui/components/conversation'
+import type { ConversationScrollToBottom } from '@workspace/ui/components/ai-elements/conversation'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { toast } from 'sonner'
 
 type Params = OrganizationTeamParams & { agentId: string } & ChatParams
 
-export type ChatMessageNode = MessageNode & {
-  isBranch?: boolean
-  isPersisted?: boolean
-}
+export type ChatMessageNode = MessageNode & { isPersisted?: boolean }
 
-type ChatLoadingMessage = {
-  id: string
-  role: MessageRole
-}
-
-function hasMultipleChildren(parentNode: MessageNode) {
-  return Boolean(parentNode.children?.length && parentNode.children.length > 1)
-}
-
-export function isStream(message: Message) {
-  return Boolean(message.status === 'queued' || message.status === 'processing')
-}
+type ChatLoadingMessage = { id: string; role: MessageRole }
 
 // Memoized message index for O(1) lookups
 const createMessageNodeIndex = (messageNodes: ChatMessageNode[]) => {
@@ -80,16 +67,7 @@ const buildMessageNodes = (
         messageNodeIndex,
       )
 
-      const lastAncestorNode = ancestorNodes.at(-1)
-
-      const messageNode = {
-        ...targetNode,
-        isBranch: lastAncestorNode
-          ? hasMultipleChildren(lastAncestorNode)
-          : false,
-      }
-
-      return [...ancestorNodes, messageNode]
+      return [...ancestorNodes, targetNode]
     }
   }
 
@@ -100,14 +78,7 @@ const buildMessageNodes = (
     childrenIndex,
   )
 
-  const lastAncestorNode = ancestorNodes.at(-1)
-
-  const messageNode = {
-    ...targetNode,
-    isBranch: lastAncestorNode ? hasMultipleChildren(lastAncestorNode) : false,
-  }
-
-  return [...ancestorNodes, messageNode, ...descendantNodes]
+  return [...ancestorNodes, targetNode, ...descendantNodes]
 }
 
 // Build ancestor nodes chain efficiently
@@ -122,10 +93,6 @@ const buildAncestorNodes = (
     const parentNode = messageNodeIndex.get(currentNode.parentId)
     if (!parentNode) {
       break
-    }
-
-    if (ancestorNodes[0]) {
-      ancestorNodes[0].isBranch = hasMultipleChildren(parentNode)
     }
 
     ancestorNodes.unshift(parentNode)
@@ -155,10 +122,7 @@ const buildDescendantNodes = (
       break
     }
 
-    descendantNodes.push({
-      ...firstChildNode,
-      isBranch: hasMultipleChildren(firstChildNode),
-    })
+    descendantNodes.push(firstChildNode)
     currentNode = firstChildNode
   }
 
@@ -240,26 +204,28 @@ type RegenerateMessageParams = {
 }
 
 type StopMessageParams = {
-  messageId: string
+  messageId?: string
 }
 
 type UseChatParams = {
   params: Params
+  chat?: Chat | null
   initialMessages?: MessageNode[]
-  explorerNode?: {
-    visibility: 'private' | 'team'
-    folderId?: string | null
-  }
+  // selectedExplorerNode?: {
+  //   visibility: 'private' | 'team'
+  //   folderId?: string | null
+  // }
 }
 
 export function useChat({
   params,
+  chat,
   initialMessages,
-  explorerNode,
+  // selectedExplorerNode,
 }: UseChatParams) {
   const router = useRouter()
 
-  const refConversationScroll = React.useRef<ScrollToBottom | null>(null)
+  const conversationScrollRef = React.useRef<ConversationScrollToBottom>(null)
 
   const [loadedMessageNodes, setLoadedMessageNodes] = React.useState<
     ChatMessageNode[]
@@ -522,7 +488,6 @@ export function useChat({
 
   const sendMessage = async ({ parts }: SendMessageParams) => {
     if (
-      uploading ||
       promptInputStatus === 'submitted' ||
       promptInputStatus === 'streaming'
     ) {
@@ -536,7 +501,7 @@ export function useChat({
 
     addFakeNode({ type: 'user', parentNodeId, fakeNodeId, parts })
 
-    refConversationScroll.current?.scrollToBottom()
+    conversationScrollRef.current?.scrollToBottom()
 
     try {
       const persistentParentNodeId = getPersistentParentNode(parentNodeId)?.id
@@ -549,7 +514,7 @@ export function useChat({
           agentId: params.agentId,
           parentMessageId: persistentParentNodeId,
           message: { parts },
-          explorerNode,
+          // explorerNode: params.chatId === 'new' ? selectedExplorerNode : undefined,
         },
       })
 
@@ -581,7 +546,6 @@ export function useChat({
 
   const resendMessage = async ({ messageId, parts }: ResendMessageParams) => {
     if (
-      uploading ||
       promptInputStatus === 'submitted' ||
       promptInputStatus === 'streaming'
     ) {
@@ -604,7 +568,7 @@ export function useChat({
 
     setTargetNodeId(fakeNodeId)
 
-    refConversationScroll.current?.scrollToBottom()
+    conversationScrollRef.current?.scrollToBottom()
 
     try {
       const persistentParentNodeId = getPersistentParentNode(parentNodeId)?.id
@@ -647,7 +611,6 @@ export function useChat({
 
   const regenerateMessage = async ({ messageId }: RegenerateMessageParams) => {
     if (
-      uploading ||
       promptInputStatus === 'submitted' ||
       promptInputStatus === 'streaming'
     ) {
@@ -670,7 +633,7 @@ export function useChat({
 
     setTargetNodeId(fakeNodeId)
 
-    refConversationScroll.current?.scrollToBottom()
+    conversationScrollRef.current?.scrollToBottom()
 
     try {
       const persistentParentNodeId = getPersistentParentNode(parentNodeId)?.id
@@ -709,22 +672,18 @@ export function useChat({
     }
   }
 
-  const { uploading, uploadFiles } = useUploadFiles(
-    { organizationSlug: params.organizationSlug, teamId: params.teamId },
-    {
-      bucket: 'default',
-      scope: 'conversations',
-      agentId: params.agentId,
-      conversationId: params.chatId !== 'new' ? params.chatId : null,
-    },
-  )
+  const stopMessage = async ({ messageId }: StopMessageParams = {}) => {
+    const msgId = messageId || streamingMessageId
 
-  const stopMessage = async ({ messageId }: StopMessageParams) => {
+    if (!msgId) {
+      return
+    }
+
     try {
       const { error } = await sdk.stopMessage({
         conversationId: params.chatId,
-        messageId,
-        params: {
+        messageId: msgId,
+        data: {
           organizationSlug: params.organizationSlug,
           teamId: params.teamId,
           agentId: params.agentId,
@@ -737,20 +696,62 @@ export function useChat({
     } catch {}
   }
 
+  const { uploading, uploadFile: uploadFileHook } = useUploadFiles(
+    { organizationSlug: params.organizationSlug, teamId: params.teamId },
+    {
+      bucket: 'default',
+      scope: 'conversations',
+      agentId: params.agentId,
+      conversationId: params.chatId !== 'new' ? params.chatId : null,
+    },
+  )
+
+  const uploadFile = async ({ id, file }: { id: string; file: File }) => {
+    try {
+      const { data } = await uploadFileHook({ file })
+
+      if (data) {
+        if (data.file.status === 'error') {
+          return { id, error: data.file.error.message }
+        }
+
+        return {
+          id,
+          url: new URL(
+            data.file.filePath,
+            env.NEXT_PUBLIC_STORAGE_URL,
+          ).toString(),
+          uploaded: true,
+        }
+      }
+
+      throw new Error()
+    } catch {
+      return { id, error: 'Failed to upload file' }
+    }
+  }
+
+  const [streamingMessageId, setStreamingMessageId] = React.useState<
+    string | null
+  >(null)
+
   return {
+    chat,
     messages: messageNodeChain,
     loadingMessage,
     getMessageNodeById,
     updateMessageNodeById,
     handleBranchChange,
-    refConversationScroll,
     sendMessage,
     resendMessage,
     regenerateMessage,
     stopMessage,
     promptInputStatus,
     setPromptInputStatus,
+    conversationScrollRef,
     uploading,
-    uploadFiles,
+    uploadFile,
+    streamingMessageId,
+    setStreamingMessageId,
   }
 }

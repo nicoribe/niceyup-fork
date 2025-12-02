@@ -18,6 +18,6 @@ export async function sendVerificationEmail({
   })
 
   if (error) {
-    console.error({ error })
+    console.error(error)
   }
 }

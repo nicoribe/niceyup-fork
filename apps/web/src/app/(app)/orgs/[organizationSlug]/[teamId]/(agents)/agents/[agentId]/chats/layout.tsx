@@ -1,7 +1,7 @@
 import type { OrganizationTeamParams } from '@/lib/types'
-import { LeftSidebar } from './_components/left-sidebar'
+import { PrimarySidebar } from './_components/primary-sidebar'
 import { Resizable } from './_components/resizable'
-import { RightSidebar } from './_components/right-sidebar'
+import { SecondarySidebar } from './_components/secondary-sidebar'
 
 export default async function Layout({
   params,
@@ -14,10 +14,10 @@ export default async function Layout({
 
   return (
     <Resizable
-      leftSidebar={
-        <LeftSidebar params={{ organizationSlug, teamId, agentId }} />
+      primarySidebar={
+        <PrimarySidebar params={{ organizationSlug, teamId, agentId }} />
       }
-      rightSidebar={<RightSidebar />}
+      secondarySidebar={<SecondarySidebar />}
     >
       {children}
     </Resizable>

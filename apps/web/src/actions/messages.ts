@@ -70,42 +70,34 @@ export async function streamMessage(
     }
   }
 
-  if (message.status !== 'queued' && message.status !== 'processing') {
-    return {
-      error: {
-        code: 'MESSAGE_NOT_STREAMING',
-        message: 'Message is not streaming',
-      },
-    }
-  }
-
   const stream = await resumableStreamContext.resumeExistingStream(messageId)
 
-  if (!stream) {
-    return {
-      error: {
-        code: 'STREAM_NOT_FOUND',
-        message: 'Stream not found',
-      },
-    }
-  }
-
-  const streamable = createStreamableValue<AIMessage, unknown>()
+  const streamable = createStreamableValue<AIMessage, unknown>({
+    id: message.id,
+    status: message.status,
+    role: message.role,
+    parts: message.parts || [],
+    metadata: message.metadata || {},
+  })
 
   const startStreaming = async () => {
-    const reader = stream
-      .pipeThrough(new JsonLinesTransformStream<AIMessage>())
-      .getReader()
+    if (stream) {
+      const reader = stream
+        .pipeThrough(new JsonLinesTransformStream<AIMessage>())
+        .getReader()
 
-    while (true) {
-      const { done, value } = await reader.read()
+      while (true) {
+        const { done, value } = await reader.read()
 
-      if (done) {
-        streamable.done()
-        break
+        if (done) {
+          streamable.done()
+          break
+        }
+
+        streamable.update(value)
       }
-
-      streamable.update(value)
+    } else {
+      streamable.done()
     }
   }
 

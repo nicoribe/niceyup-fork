@@ -66,6 +66,38 @@ export async function getConversation(app: FastifyTypedInstance) {
         })
       }
 
+      // let visibility = null
+      // let shared = null
+
+      // if (conversation.ownerTeamId) {
+      //   visibility = 'team'
+
+      //   shared = await db
+      //     .select({
+      //       id: users.id,
+      //       name: users.name,
+      //       email: users.email,
+      //     })
+      //     .from(users)
+      //     .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
+      //     .where(eq(teamMembers.teamId, conversation.ownerTeamId))
+      // } else {
+      //   visibility = conversation.ownerUserId !== userId ? 'shared' : 'private'
+
+      //   shared = await db
+      //     .select({
+      //       id: users.id,
+      //       name: users.name,
+      //       email: users.email,
+      //     })
+      //     .from(users)
+      //     .innerJoin(
+      //       conversationsToUsers,
+      //       eq(users.id, conversationsToUsers.userId),
+      //     )
+      //     .where(eq(conversationsToUsers.conversationId, conversation.id))
+      // }
+
       return { conversation }
     },
   )

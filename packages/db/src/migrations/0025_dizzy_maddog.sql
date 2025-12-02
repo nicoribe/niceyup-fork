@@ -1,0 +1,2 @@
+ALTER TABLE "conversation_explorer_nodes" RENAME COLUMN "order_index" TO "fractional_index";--> statement-breakpoint
+ALTER TABLE "source_explorer_nodes" RENAME COLUMN "order_index" TO "fractional_index";

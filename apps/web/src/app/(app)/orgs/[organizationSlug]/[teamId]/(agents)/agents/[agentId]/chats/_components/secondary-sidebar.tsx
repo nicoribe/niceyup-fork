@@ -5,16 +5,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
-import { Settings } from 'lucide-react'
+import { Settings2Icon } from 'lucide-react'
 
-export async function RightSidebar() {
+export async function SecondarySidebar() {
   return (
     <div className="flex h-full flex-col bg-background">
-      <div className="z-20 flex flex-row items-center justify-end gap-1 p-1">
+      <div className="flex flex-row items-center justify-end gap-1 p-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="secondary" size="icon" className="size-8">
-              <Settings className="size-4" />
+              <Settings2Icon className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Settings</TooltipContent>

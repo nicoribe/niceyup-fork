@@ -8,13 +8,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
-import { Files, MessagesSquare, Plus, Search } from 'lucide-react'
+import {
+  FilesIcon,
+  MessagesSquareIcon,
+  PlusIcon,
+  SearchIcon,
+} from 'lucide-react'
 import Link from 'next/link'
-import { ItemChat } from './item-chat'
+import { PrivateChatList } from './private-chat-list'
 
 type Params = OrganizationTeamParams & { agentId: string }
 
-export async function LeftSidebar({ params }: { params: Params }) {
+export async function PrimarySidebar({ params }: { params: Params }) {
   const { data } = await sdk.listConversations(
     {
       params: {
@@ -28,11 +33,11 @@ export async function LeftSidebar({ params }: { params: Params }) {
 
   return (
     <div className="flex h-full flex-col bg-background">
-      <div className="z-20 flex flex-row items-center justify-start gap-1 p-1">
+      <div className="flex flex-row items-center justify-start gap-1 p-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="secondary" size="icon" className="size-8">
-              <MessagesSquare className="size-4" />
+              <MessagesSquareIcon className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Chats</TooltipContent>
@@ -41,7 +46,7 @@ export async function LeftSidebar({ params }: { params: Params }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="size-8">
-              <Files className="size-4" />
+              <FilesIcon className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Explorer</TooltipContent>
@@ -50,7 +55,7 @@ export async function LeftSidebar({ params }: { params: Params }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="size-8">
-              <Search className="size-4" />
+              <SearchIcon className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Search</TooltipContent>
@@ -59,32 +64,26 @@ export async function LeftSidebar({ params }: { params: Params }) {
 
       <Separator />
 
-      <div className="flex flex-1 flex-col overflow-y-auto">
-        <div className="p-2">
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link
-              href={`/orgs/${params.organizationSlug}/${params.teamId}/agents/${params.agentId}/chats/new`}
-            >
-              <Plus className="size-4" /> New chat
-            </Link>
-          </Button>
-        </div>
+      <div className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
+        <Button variant="ghost" className="w-full justify-start" asChild>
+          <Link
+            href={`/orgs/${params.organizationSlug}/${params.teamId}/agents/${params.agentId}/chats/new`}
+          >
+            <PlusIcon className="size-4" /> New chat
+          </Link>
+        </Button>
 
-        <div className="flex flex-col gap-1 p-2">
-          <Label className="ml-3 font-medium text-muted-foreground text-xs tracking-wide">
-            Chats
-          </Label>
+        <Label className="mt-2 px-2 py-1.5 text-muted-foreground text-sm">
+          Your chats
+        </Label>
 
-          {data?.conversations.map((chat) => (
-            <ItemChat key={chat.id} chat={chat} />
-          ))}
-
-          {data && !data.conversations.length && (
-            <h1 className="py-6 text-center text-muted-foreground text-xs">
-              Empty
-            </h1>
-          )}
-        </div>
+        {data?.conversations.length ? (
+          <PrivateChatList params={params} initialItems={data.conversations} />
+        ) : (
+          <h1 className="py-6 text-center text-muted-foreground text-xs">
+            Empty
+          </h1>
+        )}
       </div>
     </div>
   )
