@@ -58,6 +58,7 @@ import { InputGroup } from '@workspace/ui/components/input-group'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { Spinner } from '@workspace/ui/components/spinner'
 import {
+  AlertCircleIcon,
   CopyIcon,
   MessageSquare,
   PencilIcon,
@@ -591,25 +592,49 @@ function ChatAssistantMessageBody() {
       <ChatAssistantMessageContent />
 
       {!!parts.toolImageGenerationParts.length &&
-        parts.toolImageGenerationParts.map((part) => {
-          const toolCallId = part.toolCallId
-          const isGenerating = part.state !== 'output-available'
-          const base64 = part.output?.result
-
-          return isGenerating || !base64 ? (
-            <Skeleton key={toolCallId} className="h-[200px] w-[200px]" />
-          ) : (
-            <Image
-              key={toolCallId}
-              base64={base64}
-              uint8Array={new Uint8Array()}
-              mediaType="image/jpeg"
-              alt="Generated image"
-              className="max-h-[calc(100vh-300px)] min-h-[200px] min-w-[200px] max-w-fit rounded-lg border object-contain"
-            />
-          )
-        })}
+        parts.toolImageGenerationParts.map((part) => (
+          <ChatAssistantMessageImageGeneration
+            key={part.toolCallId}
+            part={part}
+          />
+        ))}
     </>
+  )
+}
+
+function ChatAssistantMessageImageGeneration({
+  part,
+}: { part: ToolImageGenerationPart }) {
+  const { toolCallId, state, output } = part
+
+  const isError = state === 'output-error'
+  const isGenerating = state !== 'output-available'
+  const base64 = output?.result
+
+  if (isError) {
+    return (
+      <div
+        key={toolCallId}
+        className="flex h-[200px] w-[200px] items-center justify-center rounded-lg border p-4"
+      >
+        <AlertCircleIcon className="size-4 shrink-0 text-destructive" />
+      </div>
+    )
+  }
+
+  if (isGenerating || !base64) {
+    return <Skeleton key={toolCallId} className="h-[200px] w-[200px]" />
+  }
+
+  return (
+    <Image
+      key={toolCallId}
+      base64={base64}
+      uint8Array={new Uint8Array()}
+      mediaType="image/jpeg"
+      alt="Generated image"
+      className="max-h-[calc(100vh-300px)] min-h-[200px] min-w-[200px] max-w-fit rounded-lg border object-contain"
+    />
   )
 }
 

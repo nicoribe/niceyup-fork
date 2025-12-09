@@ -1,8 +1,8 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { generateSignatureForUpload } from '@/http/functions/upload-file-to-storage'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
@@ -46,22 +46,12 @@ export async function generateUploadSignatureConversation(
         conversationId,
       } = request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-          teamId,
-        }),
-      }
-
-      const orgId =
-        context.organizationId || context.organizationSlug
-          ? context.organizationId ||
-            (await queries.getOrganizationIdBySlug({
-              organizationSlug: context.organizationSlug,
-            }))
-          : null
+        organizationId,
+        organizationSlug,
+        teamId,
+      })
 
       if (conversationId) {
         const conversation = await queries.context.getConversation(context, {
@@ -99,8 +89,8 @@ export async function generateUploadSignatureConversation(
               // agentIds: [agentId],
               // ...(conversationId ? { conversationIds: [conversationId] } : {}),
             },
-            owner: orgId
-              ? { organizationId: orgId }
+            owner: context.organizationId
+              ? { organizationId: context.organizationId }
               : { userId: context.userId },
           },
         },

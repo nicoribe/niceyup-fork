@@ -1,6 +1,11 @@
 import { AbortTaskRunError, logger, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
-import { fileSources, files, sources } from '@workspace/db/schema'
+import {
+  fileSources,
+  files,
+  sourceExplorerNodes,
+  sources,
+} from '@workspace/db/schema'
 import { z } from 'zod'
 import { runIngestionTask } from '../run-ingestion'
 
@@ -70,6 +75,11 @@ export const runFilesLoaderAndIngestorTask = schemaTask({
           if (!createFileSource) {
             throw new AbortTaskRunError('Failed to create file source')
           }
+
+          await tx.insert(sourceExplorerNodes).values({
+            sourceId: createSource.id,
+            ownerUserId: payload.ownerUserId,
+          })
 
           return createSource.id
         })

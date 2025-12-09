@@ -15,10 +15,12 @@ export type { GetProfileQueryKey } from './react-query/hooks/useGetProfile'
 export type { GetSourceQueryKey } from './react-query/hooks/useGetSource'
 export type { HealthQueryKey } from './react-query/hooks/useHealth'
 export type { ListAgentsQueryKey } from './react-query/hooks/useListAgents'
+export type { ListAgentSourcesQueryKey } from './react-query/hooks/useListAgentSources'
 export type { ListConnectionsQueryKey } from './react-query/hooks/useListConnections'
 export type { ListConversationsQueryKey } from './react-query/hooks/useListConversations'
 export type { ListMessagesQueryKey } from './react-query/hooks/useListMessages'
 export type { ListSourcesQueryKey } from './react-query/hooks/useListSources'
+export type { ManageAgentSourcesMutationKey } from './react-query/hooks/useManageAgentSources'
 export type { RegenerateMessageMutationKey } from './react-query/hooks/useRegenerateMessage'
 export type { ResendMessageMutationKey } from './react-query/hooks/useResendMessage'
 export type { SendMessageMutationKey } from './react-query/hooks/useSendMessage'
@@ -215,6 +217,18 @@ export type {
   HealthQueryResponseSchema,
 } from './schemas/healthSchema'
 export type {
+  ListAgentSourcesPathParamsSchema,
+  ListAgentSourcesQueryParamsSchema,
+  ListAgentSources200Schema,
+  ListAgentSources400Schema,
+  ListAgentSources401Schema,
+  ListAgentSources403Schema,
+  ListAgentSources404Schema,
+  ListAgentSources429Schema,
+  ListAgentSources500Schema,
+  ListAgentSourcesQueryResponseSchema,
+} from './schemas/listAgentSourcesSchema'
+export type {
   ListAgentsQueryParamsSchema,
   ListAgents200Schema,
   ListAgents400Schema,
@@ -270,6 +284,18 @@ export type {
   ListSources500Schema,
   ListSourcesQueryResponseSchema,
 } from './schemas/listSourcesSchema'
+export type {
+  ManageAgentSourcesPathParamsSchema,
+  ManageAgentSources204Schema,
+  ManageAgentSources400Schema,
+  ManageAgentSources401Schema,
+  ManageAgentSources403Schema,
+  ManageAgentSources404Schema,
+  ManageAgentSources429Schema,
+  ManageAgentSources500Schema,
+  ManageAgentSourcesMutationRequestSchema,
+  ManageAgentSourcesMutationResponseSchema,
+} from './schemas/manageAgentSourcesSchema'
 export type {
   RegenerateMessagePathParamsSchema,
   RegenerateMessage200Schema,
@@ -627,6 +653,19 @@ export type {
   ListAgentsQuery,
 } from './types/ListAgents'
 export type {
+  ListAgentSourcesPathParams,
+  ListAgentSourcesQueryParams,
+  ListAgentSources200,
+  ListAgentSources400,
+  ListAgentSources401,
+  ListAgentSources403,
+  ListAgentSources404,
+  ListAgentSources429,
+  ListAgentSources500,
+  ListAgentSourcesQueryResponse,
+  ListAgentSourcesQuery,
+} from './types/ListAgentSources'
+export type {
   ListConnectionsQueryParams,
   ListConnections200,
   ListConnections400,
@@ -698,6 +737,20 @@ export type {
   ListSourcesQueryResponse,
   ListSourcesQuery,
 } from './types/ListSources'
+export type {
+  ManageAgentSourcesPathParams,
+  ManageAgentSources204Enum,
+  ManageAgentSources204,
+  ManageAgentSources400,
+  ManageAgentSources401,
+  ManageAgentSources403,
+  ManageAgentSources404,
+  ManageAgentSources429,
+  ManageAgentSources500,
+  ManageAgentSourcesMutationRequest,
+  ManageAgentSourcesMutationResponse,
+  ManageAgentSourcesMutation,
+} from './types/ManageAgentSources'
 export type {
   RegenerateMessagePathParams,
   AssistantMessageStatusEnum3,
@@ -983,10 +1036,12 @@ export { getProfile } from './operations/getProfile'
 export { getSource } from './operations/getSource'
 export { health } from './operations/health'
 export { listAgents } from './operations/listAgents'
+export { listAgentSources } from './operations/listAgentSources'
 export { listConnections } from './operations/listConnections'
 export { listConversations } from './operations/listConversations'
 export { listMessages } from './operations/listMessages'
 export { listSources } from './operations/listSources'
+export { manageAgentSources } from './operations/manageAgentSources'
 export { regenerateMessage } from './operations/regenerateMessage'
 export { resendMessage } from './operations/resendMessage'
 export { sendMessage } from './operations/sendMessage'
@@ -1076,6 +1131,11 @@ export {
   useListAgents,
 } from './react-query/hooks/useListAgents'
 export {
+  listAgentSourcesQueryKey,
+  listAgentSourcesQueryOptions,
+  useListAgentSources,
+} from './react-query/hooks/useListAgentSources'
+export {
   listConnectionsQueryKey,
   listConnectionsQueryOptions,
   useListConnections,
@@ -1095,6 +1155,10 @@ export {
   listSourcesQueryOptions,
   useListSources,
 } from './react-query/hooks/useListSources'
+export {
+  manageAgentSourcesMutationKey,
+  useManageAgentSources,
+} from './react-query/hooks/useManageAgentSources'
 export {
   regenerateMessageMutationKey,
   useRegenerateMessage,
@@ -1325,6 +1389,18 @@ export {
   healthQueryResponseSchema,
 } from './schemas/healthSchema'
 export {
+  listAgentSourcesPathParamsSchema,
+  listAgentSourcesQueryParamsSchema,
+  listAgentSources200Schema,
+  listAgentSources400Schema,
+  listAgentSources401Schema,
+  listAgentSources403Schema,
+  listAgentSources404Schema,
+  listAgentSources429Schema,
+  listAgentSources500Schema,
+  listAgentSourcesQueryResponseSchema,
+} from './schemas/listAgentSourcesSchema'
+export {
   listAgentsQueryParamsSchema,
   listAgents200Schema,
   listAgents400Schema,
@@ -1380,6 +1456,18 @@ export {
   listSources500Schema,
   listSourcesQueryResponseSchema,
 } from './schemas/listSourcesSchema'
+export {
+  manageAgentSourcesPathParamsSchema,
+  manageAgentSources204Schema,
+  manageAgentSources400Schema,
+  manageAgentSources401Schema,
+  manageAgentSources403Schema,
+  manageAgentSources404Schema,
+  manageAgentSources429Schema,
+  manageAgentSources500Schema,
+  manageAgentSourcesMutationRequestSchema,
+  manageAgentSourcesMutationResponseSchema,
+} from './schemas/manageAgentSourcesSchema'
 export {
   regenerateMessagePathParamsSchema,
   regenerateMessage200Schema,
@@ -1550,6 +1638,7 @@ export {
   partsStateEnum10,
 } from './types/ListMessages'
 export { sourcesTypeEnum } from './types/ListSources'
+export { manageAgentSources204Enum } from './types/ManageAgentSources'
 export {
   assistantMessageStatusEnum3,
   assistantMessageRoleEnum3,

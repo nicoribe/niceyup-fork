@@ -223,6 +223,19 @@ export type {
   ListAgentsQuery,
 } from './ListAgents'
 export type {
+  ListAgentSourcesPathParams,
+  ListAgentSourcesQueryParams,
+  ListAgentSources200,
+  ListAgentSources400,
+  ListAgentSources401,
+  ListAgentSources403,
+  ListAgentSources404,
+  ListAgentSources429,
+  ListAgentSources500,
+  ListAgentSourcesQueryResponse,
+  ListAgentSourcesQuery,
+} from './ListAgentSources'
+export type {
   ListConnectionsQueryParams,
   ListConnections200,
   ListConnections400,
@@ -294,6 +307,20 @@ export type {
   ListSourcesQueryResponse,
   ListSourcesQuery,
 } from './ListSources'
+export type {
+  ManageAgentSourcesPathParams,
+  ManageAgentSources204Enum,
+  ManageAgentSources204,
+  ManageAgentSources400,
+  ManageAgentSources401,
+  ManageAgentSources403,
+  ManageAgentSources404,
+  ManageAgentSources429,
+  ManageAgentSources500,
+  ManageAgentSourcesMutationRequest,
+  ManageAgentSourcesMutationResponse,
+  ManageAgentSourcesMutation,
+} from './ManageAgentSources'
 export type {
   RegenerateMessagePathParams,
   AssistantMessageStatusEnum3,
@@ -600,6 +627,7 @@ export {
   partsStateEnum10,
 } from './ListMessages'
 export { sourcesTypeEnum } from './ListSources'
+export { manageAgentSources204Enum } from './ManageAgentSources'
 export {
   assistantMessageStatusEnum3,
   assistantMessageRoleEnum3,

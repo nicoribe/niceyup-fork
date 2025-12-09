@@ -1,10 +1,9 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
-import { queries } from '@workspace/db/queries'
 import { connections } from '@workspace/db/schema'
 import { z } from 'zod'
 
@@ -38,25 +37,17 @@ export async function createConnection(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, app, name } = request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+      })
 
       // TODO: implement app validation
 
-      const orgId =
-        context.organizationId ??
-        (await queries.getOrganizationIdBySlug({
-          organizationSlug: context.organizationSlug,
-        }))
-
-      const ownerTypeCondition = orgId
-        ? { ownerOrganizationId: orgId }
-        : { ownerUserId: userId }
+      const ownerTypeCondition = context.organizationId
+        ? { ownerOrganizationId: context.organizationId }
+        : { ownerUserId: context.userId }
 
       const [connection] = await db
         .insert(connections)

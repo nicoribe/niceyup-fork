@@ -4,12 +4,11 @@ import {
   createSourceExplorerNodeItem,
   getSourceExplorerNodeFolder,
 } from '@/http/functions/explorer-nodes/source-explorer-nodes'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
 import { eq } from '@workspace/db/orm'
-import { queries } from '@workspace/db/queries'
 import {
   connections,
   databaseSources,
@@ -96,23 +95,15 @@ export async function createSource(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, type, name, explorerNode } =
         request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+      })
 
-      const orgId =
-        context.organizationId ??
-        (await queries.getOrganizationIdBySlug({
-          organizationSlug: context.organizationSlug,
-        }))
-
-      const ownerTypeCondition = orgId
-        ? { ownerOrganizationId: orgId }
-        : { ownerUserId: userId }
+      const ownerTypeCondition = context.organizationId
+        ? { ownerOrganizationId: context.organizationId }
+        : { ownerUserId: context.userId }
 
       if (explorerNode?.folderId && explorerNode.folderId !== 'root') {
         const folderExplorerNode = await getSourceExplorerNodeFolder({

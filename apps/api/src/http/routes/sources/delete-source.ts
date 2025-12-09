@@ -1,8 +1,11 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import {
+  getNamespaceContext,
+  getOrganizationContext,
+} from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
 import { env } from '@/lib/env'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
 import { and, eq } from '@workspace/db/orm'
@@ -48,13 +51,11 @@ export async function deleteSource(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, destroy } = request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+      })
 
       const source = await queries.context.getSource(context, {
         sourceId,
@@ -116,11 +117,11 @@ export async function deleteSource(app: FastifyTypedInstance) {
               sourceExplorerNodes.ownerOrganizationId,
               source.ownerOrganizationId,
             )
-          : eq(sourceExplorerNodes.ownerUserId, source.ownerUserId!)
+          : eq(sourceExplorerNodes.ownerUserId, source.ownerUserId as string)
 
         const ownerTypeCondition = source.ownerOrganizationId
           ? eq(sources.ownerOrganizationId, source.ownerOrganizationId)
-          : eq(sources.ownerUserId, source.ownerUserId!)
+          : eq(sources.ownerUserId, source.ownerUserId as string)
 
         if (destroy) {
           await tx
@@ -159,7 +160,7 @@ export async function deleteSource(app: FastifyTypedInstance) {
 
       await Promise.all([
         vectorStore.delete({
-          namespace: source.ownerOrganizationId || source.ownerUserId!,
+          namespace: getNamespaceContext(context),
           sourceId,
         }),
         ...(!destroy

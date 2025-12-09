@@ -1,7 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
@@ -45,14 +45,12 @@ export async function getConversation(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, agentId } =
         request.query
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-          teamId,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+        teamId,
+      })
 
       const conversation = await queries.context.getConversation(context, {
         agentId,
@@ -67,12 +65,12 @@ export async function getConversation(app: FastifyTypedInstance) {
       }
 
       // let visibility = null
-      // let shared = null
+      // let sharedWith = null
 
       // if (conversation.ownerTeamId) {
       //   visibility = 'team'
 
-      //   shared = await db
+      //   sharedWith = await db
       //     .select({
       //       id: users.id,
       //       name: users.name,
@@ -84,7 +82,7 @@ export async function getConversation(app: FastifyTypedInstance) {
       // } else {
       //   visibility = conversation.ownerUserId !== userId ? 'shared' : 'private'
 
-      //   shared = await db
+      //   sharedWith = await db
       //     .select({
       //       id: users.id,
       //       name: users.name,

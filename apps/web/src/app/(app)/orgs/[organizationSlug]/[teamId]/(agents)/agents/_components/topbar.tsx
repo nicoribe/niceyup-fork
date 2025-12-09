@@ -10,14 +10,17 @@ export function Topbar({ children }: { children: React.ReactNode }) {
 
   const { topbar } = useAppearance()
 
-  return (
-    <div
-      className={cn(
-        'flex flex-col items-stretch justify-center',
-        params.chatId && { hidden: !topbar },
-      )}
-    >
-      {children}
-    </div>
-  )
+  if (params.chatId) {
+    return (
+      <div
+        className={cn('flex flex-col items-stretch justify-center', {
+          hidden: !topbar,
+        })}
+      >
+        {children}
+      </div>
+    )
+  }
+
+  return children
 }

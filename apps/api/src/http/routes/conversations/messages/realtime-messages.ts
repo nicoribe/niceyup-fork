@@ -1,7 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
 import { conversationPubSub } from '@workspace/realtime/pubsub'
@@ -40,14 +40,12 @@ export async function realtimeMessages(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, agentId } =
         request.query
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-          teamId,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+        teamId,
+      })
 
       const conversation = await queries.context.getConversation(context, {
         agentId,

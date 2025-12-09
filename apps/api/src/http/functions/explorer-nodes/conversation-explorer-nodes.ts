@@ -1,4 +1,3 @@
-import { BadRequestError } from '@/http/errors/bad-request-error'
 import type { DBTransaction } from '@workspace/db'
 import { db } from '@workspace/db'
 import { and, eq, isNull, sql } from '@workspace/db/orm'
@@ -10,33 +9,23 @@ type GetConversationExplorerNodeFolderParams = {
   id: string
   visibility: ConversationExplorerNodeVisibility
   agentId: string
-} & (
-  | { ownerTeamId: string; ownerUserId?: never }
-  | { ownerTeamId?: never; ownerUserId: string }
-)
+  ownerUserId?: string | null
+  ownerTeamId?: string | null
+}
 
 export async function getConversationExplorerNodeFolder(
   params: GetConversationExplorerNodeFolderParams,
 ) {
-  if (params.visibility === 'team' && !params.ownerTeamId) {
-    throw new BadRequestError({
-      code: 'TEAM_ID_REQUIRED',
-      message:
-        'Team is required when the explorer node visibility is set to "team"',
-    })
-  }
-
-  if (params.visibility !== 'team' && !params.ownerUserId) {
-    throw new BadRequestError({
-      code: 'USER_ID_REQUIRED',
-      message:
-        'User is required when the explorer node visibility is set to "private" or "shared"',
-    })
+  if (
+    (params.visibility !== 'team' && !params.ownerUserId) ||
+    (params.visibility === 'team' && !params.ownerTeamId)
+  ) {
+    return null
   }
 
   const ownerTypeCondition = params.ownerTeamId
     ? eq(conversationExplorerNodes.ownerTeamId, params.ownerTeamId)
-    : eq(conversationExplorerNodes.ownerUserId, params.ownerUserId!)
+    : eq(conversationExplorerNodes.ownerUserId, params.ownerUserId as string)
 
   const [folderExplorerNode] = await db
     .select({
@@ -63,34 +52,24 @@ type CreateConversationExplorerNodeItemParams = {
   agentId: string
   parentId?: string | null
   conversationId: string
-} & (
-  | { ownerTeamId: string; ownerUserId?: never }
-  | { ownerTeamId?: never; ownerUserId: string }
-)
+  ownerUserId?: string | null
+  ownerTeamId?: string | null
+}
 
 export async function createConversationExplorerNodeItem(
   params: CreateConversationExplorerNodeItemParams,
   tx?: DBTransaction,
 ) {
-  if (params.visibility === 'team' && !params.ownerTeamId) {
-    throw new BadRequestError({
-      code: 'TEAM_ID_REQUIRED',
-      message:
-        'Team is required when the explorer node visibility is set to "team"',
-    })
-  }
-
-  if (params.visibility !== 'team' && !params.ownerUserId) {
-    throw new BadRequestError({
-      code: 'USER_ID_REQUIRED',
-      message:
-        'User is required when the explorer node visibility is set to "private" or "shared"',
-    })
+  if (
+    (params.visibility !== 'team' && !params.ownerUserId) ||
+    (params.visibility === 'team' && !params.ownerTeamId)
+  ) {
+    return null
   }
 
   const ownerTypeCondition = params.ownerTeamId
     ? eq(conversationExplorerNodes.ownerTeamId, params.ownerTeamId)
-    : eq(conversationExplorerNodes.ownerUserId, params.ownerUserId!)
+    : eq(conversationExplorerNodes.ownerUserId, params.ownerUserId as string)
 
   const [firstSibling] = await (tx ?? db)
     .select({

@@ -38,11 +38,13 @@ export const runIngestionTask = schemaTask({
       throw new AbortTaskRunError('Source not found')
     }
 
-    const namespace = source.ownerOrganizationId || source.ownerUserId
-
-    if (!namespace) {
-      throw new AbortTaskRunError('Namespace not found')
+    if (!source.ownerUserId && !source.ownerOrganizationId) {
+      throw new AbortTaskRunError('Source owner not found')
     }
+
+    const namespace = source.ownerOrganizationId
+      ? `organization/${source.ownerOrganizationId}`
+      : `user/${source.ownerUserId}`
 
     switch (source.type) {
       case 'text':

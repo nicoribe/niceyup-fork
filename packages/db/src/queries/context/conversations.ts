@@ -5,18 +5,9 @@ import { getAgent } from './agents'
 
 type ContextListConversationsParams = {
   userId: string
-} & (
-  | {
-      organizationId?: string | null
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug?: string | null
-    }
-) & {
-    teamId?: string | null
-  }
+  organizationId?: string | null
+  teamId?: string | null
+}
 
 type ListConversationsParams = {
   agentId: string
@@ -26,10 +17,11 @@ export async function listConversations(
   context: ContextListConversationsParams,
   params: ListConversationsParams,
 ) {
-  // Check if user has access to the agent
-  const agent = await getAgent(context, { agentId: params.agentId })
+  const checkAccessToAgent = await getAgent(context, {
+    agentId: params.agentId,
+  })
 
-  if (!agent) {
+  if (!checkAccessToAgent) {
     return []
   }
 
@@ -56,18 +48,9 @@ export async function listConversations(
 
 type ContextGetConversationParams = {
   userId: string
-} & (
-  | {
-      organizationId?: string | null
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug?: string | null
-    }
-) & {
-    teamId?: string | null
-  }
+  organizationId?: string | null
+  teamId?: string | null
+}
 
 type GetConversationParams = {
   agentId: string

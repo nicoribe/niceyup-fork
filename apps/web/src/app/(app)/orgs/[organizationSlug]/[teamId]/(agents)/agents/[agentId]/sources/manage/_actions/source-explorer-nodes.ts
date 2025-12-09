@@ -62,6 +62,7 @@ export async function getItemInSourceExplorerNode(
           END
         `.as('name'),
       sourceId: sourceExplorerNodes.sourceId,
+      sourceType: sourceExplorerNodes.sourceType,
       fractionalIndex: sourceExplorerNodes.fractionalIndex,
       children: sql<string[]>`
           (SELECT COALESCE(ARRAY_AGG(id), '{}'::text[])
@@ -128,6 +129,7 @@ export async function getChildrenWithDataInSourceExplorerNode(
             END
           `.as('name'),
           sourceId: sourceExplorerNodes.sourceId,
+          sourceType: sourceExplorerNodes.sourceType,
           fractionalIndex: sourceExplorerNodes.fractionalIndex,
           children: sql<string[]>`
             (SELECT COALESCE(ARRAY_AGG(id), '{}'::text[])
@@ -164,6 +166,7 @@ export async function getChildrenWithDataInSourceExplorerNode(
           END
         `.as('name'),
         sourceId: sourceExplorerNodes.sourceId,
+        sourceType: sourceExplorerNodes.sourceType,
         fractionalIndex: sourceExplorerNodes.fractionalIndex,
         children: sql<string[]>`
           (SELECT COALESCE(ARRAY_AGG(id), '{}'::text[])

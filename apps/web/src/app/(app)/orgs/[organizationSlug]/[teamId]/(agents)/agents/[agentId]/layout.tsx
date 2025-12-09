@@ -61,6 +61,7 @@ export default async function Layout({
         {
           label: 'Sources',
           href: `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/sources`,
+          deep: true,
         },
         {
           label: 'Tools',

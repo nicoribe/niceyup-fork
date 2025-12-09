@@ -1,6 +1,7 @@
 'use server'
 
 import { authenticatedUser } from '@/lib/auth/server'
+import { getOrganizationContext } from '@/lib/organization-context'
 import type {
   ConversationVisibility,
   OrganizationTeamParams,
@@ -37,13 +38,10 @@ async function checkAdminAccess(
 async function checkAccessToAgent(
   context: { userId: string } & ContextConversationExplorerNodeParams,
 ) {
-  const ctx = {
-    userId: context.userId,
-    organizationSlug:
-      context.organizationSlug !== 'my-account'
-        ? context.organizationSlug
-        : null,
-    teamId: context.teamId !== '~' ? context.teamId : null,
+  const ctx = await getOrganizationContext(context)
+
+  if (!ctx) {
+    return false
   }
 
   const agent = await queries.context.getAgent(ctx, {
@@ -842,10 +840,10 @@ export async function destroyItemInConversationExplorerNode(
     return
   }
 
-  // const ownerTypeCondition =
-  //   visibility === 'team'
-  //     ? sql`owner_team_id = ${context.teamId}`
-  //     : sql`owner_user_id = ${userId}`
+  const ownerTypeCondition =
+    visibility === 'team'
+      ? sql`owner_team_id = ${context.teamId}`
+      : sql`owner_user_id = ${userId}`
 
   throw new Error('Not implemented')
 }
@@ -874,10 +872,10 @@ export async function destroyAllItemsInConversationExplorerNode(
     return
   }
 
-  // const ownerTypeCondition =
-  //   visibility === 'team'
-  //     ? sql`owner_team_id = ${context.teamId}`
-  //     : sql`owner_user_id = ${userId}`
+  const ownerTypeCondition =
+    visibility === 'team'
+      ? sql`owner_team_id = ${context.teamId}`
+      : sql`owner_user_id = ${userId}`
 
   throw new Error('Not implemented')
 }

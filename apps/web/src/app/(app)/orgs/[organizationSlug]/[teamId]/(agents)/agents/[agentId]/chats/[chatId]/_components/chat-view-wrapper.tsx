@@ -34,9 +34,7 @@ export async function ChatViewWrapper({
   if (error) {
     return (
       <div className="flex size-full flex-col items-center justify-center bg-background">
-        <div className="p-2">
-          <h1 className="text-sm">{error.message}</h1>
-        </div>
+        <p className="p-2 text-sm">{error.message}</p>
       </div>
     )
   }

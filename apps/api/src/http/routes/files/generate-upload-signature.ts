@@ -1,11 +1,10 @@
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { UnauthorizedError } from '@/http/errors/unauthorized-error'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { generateSignatureForUpload } from '@/http/functions/upload-file-to-storage'
 import { authenticate } from '@/http/middlewares/authenticate'
 import { env } from '@/lib/env'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
-import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
 
 const DEFAULT_ACCEPT = '*'
@@ -64,21 +63,11 @@ export async function generateUploadSignature(app: FastifyTypedInstance) {
         expires,
       } = request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-        }),
-      }
-
-      const orgId =
-        context.organizationId || context.organizationSlug
-          ? context.organizationId ||
-            (await queries.getOrganizationIdBySlug({
-              organizationSlug: context.organizationSlug,
-            }))
-          : null
+        organizationId,
+        organizationSlug,
+      })
 
       const signature = generateSignatureForUpload({
         key: 'public',
@@ -89,8 +78,8 @@ export async function generateUploadSignature(app: FastifyTypedInstance) {
             metadata: {
               authorId: context.userId,
             },
-            owner: orgId
-              ? { organizationId: orgId }
+            owner: context.organizationId
+              ? { organizationId: context.organizationId }
               : { userId: context.userId },
           },
           accept,

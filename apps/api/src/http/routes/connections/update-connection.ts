@@ -1,7 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
 import { eq } from '@workspace/db/orm'
@@ -39,13 +39,11 @@ export async function updateConnection(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, name } = request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+      })
 
       const connection = await queries.context.getConnection(context, {
         connectionId,

@@ -17,16 +17,16 @@ export async function SecondarySidebar() {
               <Settings2Icon className="size-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Settings</TooltipContent>
+          <TooltipContent>Configure</TooltipContent>
         </Tooltip>
       </div>
 
       <Separator />
 
       <div className="flex-1 overflow-y-auto p-2">
-        <h1 className="py-6 text-center text-muted-foreground text-xs">
+        <p className="py-6 text-center text-muted-foreground text-xs">
           Coming soon
-        </h1>
+        </p>
       </div>
     </div>
   )

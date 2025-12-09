@@ -1,4 +1,4 @@
-import { db } from '../db'
+import { type DBTransaction, db } from '../db'
 import type { FileBucket, FileMetadata, FileScope } from '../lib/types'
 import { files } from '../schema'
 
@@ -10,23 +10,12 @@ type CreateFileParams = {
   bucket: FileBucket
   scope: FileScope
   metadata?: FileMetadata
-  owner:
-    | {
-        userId: string
-        organizationId?: never
-      }
-    | {
-        userId?: never
-        organizationId: string
-      }
+  ownerUserId?: string | null
+  ownerOrganizationId?: string | null
 }
 
-export async function createFile(params: CreateFileParams) {
-  const ownerTypeCondition = params.owner.organizationId
-    ? { ownerOrganizationId: params.owner.organizationId }
-    : { ownerUserId: params.owner.userId }
-
-  const [file] = await db
+export async function createFile(params: CreateFileParams, tx?: DBTransaction) {
+  const [file] = await (tx || db)
     .insert(files)
     .values({
       fileName: params.fileName,
@@ -36,7 +25,8 @@ export async function createFile(params: CreateFileParams) {
       bucket: params.bucket,
       scope: params.scope,
       metadata: params.metadata,
-      ...ownerTypeCondition,
+      ownerUserId: params.ownerUserId,
+      ownerOrganizationId: params.ownerOrganizationId,
     })
     .returning({
       id: files.id,
@@ -47,6 +37,8 @@ export async function createFile(params: CreateFileParams) {
       bucket: files.bucket,
       scope: files.scope,
       metadata: files.metadata,
+      ownerUserId: files.ownerUserId,
+      ownerOrganizationId: files.ownerOrganizationId,
     })
 
   return file || null

@@ -1,87 +1,53 @@
 import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '../../db'
 import { sources } from '../../schema'
-import { getOrganizationIdBySlug } from '../organizations'
 import { isOrganizationMemberAdmin } from './organizations'
 
 type ContextListSourcesParams = {
   userId: string
-} & (
-  | {
-      organizationId?: string | null
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug?: string | null
-    }
-)
+  organizationId?: string | null
+}
 
 export async function listSources(context: ContextListSourcesParams) {
-  if (!context.organizationId && !context.organizationSlug) {
-    const listSources = await db
-      .select({
-        id: sources.id,
-        name: sources.name,
-        type: sources.type,
-        ownerUserId: sources.ownerUserId,
-        ownerOrganizationId: sources.ownerOrganizationId,
-      })
-      .from(sources)
-      .where(
-        and(eq(sources.ownerUserId, context.userId), isNull(sources.deletedAt)),
+  const selectQuery = db
+    .select({
+      id: sources.id,
+      name: sources.name,
+      type: sources.type,
+    })
+    .from(sources)
+
+  if (context.organizationId) {
+    const isAdmin = await isOrganizationMemberAdmin({
+      userId: context.userId,
+      organizationId: context.organizationId,
+    })
+
+    if (isAdmin) {
+      const listSources = await selectQuery.where(
+        and(
+          eq(sources.ownerOrganizationId, context.organizationId),
+          isNull(sources.deletedAt),
+        ),
       )
 
-    return listSources
-  }
+      return listSources
+    }
 
-  const orgId =
-    context.organizationId ??
-    (await getOrganizationIdBySlug({
-      organizationSlug: context.organizationSlug,
-    }))
-
-  if (!orgId) {
     return []
   }
 
-  const isAdmin = await isOrganizationMemberAdmin({
-    userId: context.userId,
-    organizationId: orgId,
-  })
+  const listSources = await selectQuery.where(
+    and(eq(sources.ownerUserId, context.userId), isNull(sources.deletedAt)),
+  )
 
-  if (isAdmin) {
-    const listSources = await db
-      .select({
-        id: sources.id,
-        name: sources.name,
-        type: sources.type,
-        ownerUserId: sources.ownerUserId,
-        ownerOrganizationId: sources.ownerOrganizationId,
-      })
-      .from(sources)
-      .where(
-        and(eq(sources.ownerOrganizationId, orgId), isNull(sources.deletedAt)),
-      )
-
-    return listSources
-  }
-
-  return []
+  return listSources
 }
 
 type ContextGetSourceParams = {
   userId: string
-} & (
-  | {
-      organizationId?: string | null
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug?: string | null
-    }
-)
+  organizationId?: string | null
+}
 
 type GetSourceParams = {
   sourceId: string
@@ -91,64 +57,48 @@ export async function getSource(
   context: ContextGetSourceParams,
   params: GetSourceParams,
 ) {
-  if (!context.organizationId && !context.organizationSlug) {
-    const [source] = await db
-      .select({
-        id: sources.id,
-        name: sources.name,
-        type: sources.type,
-        ownerUserId: sources.ownerUserId,
-        ownerOrganizationId: sources.ownerOrganizationId,
-      })
-      .from(sources)
-      .where(
-        and(
-          eq(sources.id, params.sourceId),
-          eq(sources.ownerUserId, context.userId),
-          isNull(sources.deletedAt),
-        ),
-      )
-      .limit(1)
+  const selectQuery = db
+    .select({
+      id: sources.id,
+      name: sources.name,
+      type: sources.type,
+      ownerUserId: sources.ownerUserId,
+      ownerOrganizationId: sources.ownerOrganizationId,
+    })
+    .from(sources)
 
-    return source || null
-  }
+  if (context.organizationId) {
+    const isAdmin = await isOrganizationMemberAdmin({
+      userId: context.userId,
+      organizationId: context.organizationId,
+    })
 
-  const orgId =
-    context.organizationId ??
-    (await getOrganizationIdBySlug({
-      organizationSlug: context.organizationSlug,
-    }))
+    if (isAdmin) {
+      const [source] = await selectQuery
+        .where(
+          and(
+            eq(sources.id, params.sourceId),
+            eq(sources.ownerOrganizationId, context.organizationId),
+            isNull(sources.deletedAt),
+          ),
+        )
+        .limit(1)
 
-  if (!orgId) {
+      return source || null
+    }
+
     return null
   }
 
-  const isAdmin = await isOrganizationMemberAdmin({
-    userId: context.userId,
-    organizationId: orgId,
-  })
+  const [source] = await selectQuery
+    .where(
+      and(
+        eq(sources.id, params.sourceId),
+        eq(sources.ownerUserId, context.userId),
+        isNull(sources.deletedAt),
+      ),
+    )
+    .limit(1)
 
-  if (isAdmin) {
-    const [source] = await db
-      .select({
-        id: sources.id,
-        name: sources.name,
-        type: sources.type,
-        ownerUserId: sources.ownerUserId,
-        ownerOrganizationId: sources.ownerOrganizationId,
-      })
-      .from(sources)
-      .where(
-        and(
-          eq(sources.id, params.sourceId),
-          eq(sources.ownerOrganizationId, orgId),
-          isNull(sources.deletedAt),
-        ),
-      )
-      .limit(1)
-
-    return source || null
-  }
-
-  return null
+  return source || null
 }

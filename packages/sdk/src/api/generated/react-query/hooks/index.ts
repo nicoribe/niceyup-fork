@@ -15,10 +15,12 @@ export type { GetProfileQueryKey } from './useGetProfile'
 export type { GetSourceQueryKey } from './useGetSource'
 export type { HealthQueryKey } from './useHealth'
 export type { ListAgentsQueryKey } from './useListAgents'
+export type { ListAgentSourcesQueryKey } from './useListAgentSources'
 export type { ListConnectionsQueryKey } from './useListConnections'
 export type { ListConversationsQueryKey } from './useListConversations'
 export type { ListMessagesQueryKey } from './useListMessages'
 export type { ListSourcesQueryKey } from './useListSources'
+export type { ManageAgentSourcesMutationKey } from './useManageAgentSources'
 export type { RegenerateMessageMutationKey } from './useRegenerateMessage'
 export type { ResendMessageMutationKey } from './useResendMessage'
 export type { SendMessageMutationKey } from './useSendMessage'
@@ -94,6 +96,11 @@ export {
   useListAgents,
 } from './useListAgents'
 export {
+  listAgentSourcesQueryKey,
+  listAgentSourcesQueryOptions,
+  useListAgentSources,
+} from './useListAgentSources'
+export {
   listConnectionsQueryKey,
   listConnectionsQueryOptions,
   useListConnections,
@@ -113,6 +120,10 @@ export {
   listSourcesQueryOptions,
   useListSources,
 } from './useListSources'
+export {
+  manageAgentSourcesMutationKey,
+  useManageAgentSources,
+} from './useManageAgentSources'
 export {
   regenerateMessageMutationKey,
   useRegenerateMessage,

@@ -80,9 +80,9 @@ export async function PrimarySidebar({ params }: { params: Params }) {
         {data?.conversations.length ? (
           <PrivateChatList params={params} initialItems={data.conversations} />
         ) : (
-          <h1 className="py-6 text-center text-muted-foreground text-xs">
+          <p className="py-6 text-center text-muted-foreground text-xs">
             Empty
-          </h1>
+          </p>
         )}
       </div>
     </div>

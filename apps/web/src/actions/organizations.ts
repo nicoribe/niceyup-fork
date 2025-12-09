@@ -13,7 +13,11 @@ type GetOrganizationSlugByIdParams = {
 export async function getOrganizationSlugById({
   organizationId,
 }: GetOrganizationSlugByIdParams) {
-  return await queries.getOrganizationSlugById({ organizationId })
+  const organizationSlug = await queries.getOrganizationSlugById({
+    organizationId,
+  })
+
+  return organizationSlug
 }
 
 type GetOrganizationIdBySlugParams = {
@@ -27,7 +31,11 @@ export async function getOrganizationIdBySlug({
     return null
   }
 
-  return await queries.getOrganizationIdBySlug({ organizationSlug })
+  const organizationId = await queries.getOrganizationIdBySlug({
+    organizationSlug,
+  })
+
+  return organizationId
 }
 
 type GetOrganizationParams = {

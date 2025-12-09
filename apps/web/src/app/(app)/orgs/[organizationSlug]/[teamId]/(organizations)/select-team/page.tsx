@@ -12,9 +12,5 @@ export default async function Page({
     return redirect('/orgs/my-account/~/overview')
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <h1 className="text-sm">Select a team</h1>
-    </div>
-  )
+  return <p className="text-sm">Select a team</p>
 }

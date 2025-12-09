@@ -84,7 +84,7 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
 
       const ownerTypeCondition = data.owner.organizationId
         ? { ownerOrganizationId: data.owner.organizationId }
-        : { ownerUserId: data.owner.userId! }
+        : { ownerUserId: data.owner.userId }
 
       if (explorerNode.folderId && explorerNode.folderId !== 'root') {
         const folderExplorerNode = await getSourceExplorerNodeFolder({

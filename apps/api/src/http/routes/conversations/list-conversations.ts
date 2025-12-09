@@ -1,6 +1,6 @@
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
 import { z } from 'zod'
@@ -41,14 +41,12 @@ export async function listConversations(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, agentId } =
         request.query
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-          teamId,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+        teamId,
+      })
 
       const conversations = await queries.context.listConversations(context, {
         agentId,

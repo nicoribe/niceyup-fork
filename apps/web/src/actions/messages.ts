@@ -1,6 +1,7 @@
 'use server'
 
 import { authenticatedUser } from '@/lib/auth/server'
+import { getOrganizationContext } from '@/lib/organization-context'
 import { resumableStreamContext } from '@/lib/resumable-stream'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { createStreamableValue } from '@workspace/ai/rsc'
@@ -23,13 +24,10 @@ export async function getMessage(
     user: { id: userId },
   } = await authenticatedUser()
 
-  const ctx = {
-    userId,
-    organizationSlug:
-      context.organizationSlug !== 'my-account'
-        ? context.organizationSlug
-        : null,
-    teamId: context.teamId !== '~' ? context.teamId : null,
+  const ctx = await getOrganizationContext({ userId, ...context })
+
+  if (!ctx) {
+    return null
   }
 
   const message = await queries.context.getMessage(ctx, {

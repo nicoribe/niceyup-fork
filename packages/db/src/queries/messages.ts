@@ -8,17 +8,6 @@ import type {
 } from '../lib/types'
 import { messages } from '../schema'
 
-type MessageNode = {
-  id: string
-  status: MessageStatus
-  role: MessageRole
-  parts: MessagePart[] | null
-  metadata: MessageMetadata | null
-  authorId?: string | null
-  parentId?: string | null
-  children?: string[]
-}
-
 type GetMessageParams = {
   messageId: string
 }
@@ -59,6 +48,17 @@ export async function updateMessage(params: UpdateMessageParams) {
         : undefined,
     })
     .where(and(eq(messages.id, params.messageId), isNull(messages.deletedAt)))
+}
+
+type MessageNode = {
+  id: string
+  status: MessageStatus
+  role: MessageRole
+  parts: MessagePart[] | null
+  metadata: MessageMetadata | null
+  authorId?: string | null
+  parentId?: string | null
+  children?: string[]
 }
 
 type ListMessageNodesParams = {

@@ -1,4 +1,3 @@
-import { BadRequestError } from '@/http/errors/bad-request-error'
 import type { DBTransaction } from '@workspace/db'
 import { db } from '@workspace/db'
 import { and, eq, isNull, sql } from '@workspace/db/orm'
@@ -7,24 +6,20 @@ import { generateKeyBetween } from 'jittered-fractional-indexing'
 
 type GetSourceExplorerNodeFolderParams = {
   id: string
-} & (
-  | { ownerOrganizationId: string; ownerUserId?: never }
-  | { ownerOrganizationId?: never; ownerUserId: string }
-)
+  ownerUserId?: string | null
+  ownerOrganizationId?: string | null
+}
 
 export async function getSourceExplorerNodeFolder(
   params: GetSourceExplorerNodeFolderParams,
 ) {
   if (!params.ownerOrganizationId && !params.ownerUserId) {
-    throw new BadRequestError({
-      code: 'ORGANIZATION_ID_OR_USER_ID_REQUIRED',
-      message: 'Organization id or user id is required',
-    })
+    return null
   }
 
   const ownerTypeCondition = params.ownerOrganizationId
     ? eq(sourceExplorerNodes.ownerOrganizationId, params.ownerOrganizationId)
-    : eq(sourceExplorerNodes.ownerUserId, params.ownerUserId!)
+    : eq(sourceExplorerNodes.ownerUserId, params.ownerUserId as string)
 
   const [explorerNode] = await db
     .select({
@@ -47,25 +42,21 @@ export async function getSourceExplorerNodeFolder(
 type CreateSourceExplorerNodeItemParams = {
   parentId?: string | null
   sourceId: string
-} & (
-  | { ownerOrganizationId: string; ownerUserId?: never }
-  | { ownerOrganizationId?: never; ownerUserId: string }
-)
+  ownerUserId?: string | null
+  ownerOrganizationId?: string | null
+}
 
 export async function createSourceExplorerNodeItem(
   params: CreateSourceExplorerNodeItemParams,
   tx?: DBTransaction,
 ) {
   if (!params.ownerOrganizationId && !params.ownerUserId) {
-    throw new BadRequestError({
-      code: 'ORGANIZATION_ID_OR_USER_ID_REQUIRED',
-      message: 'Organization id or user id is required',
-    })
+    return null
   }
 
   const ownerTypeCondition = params.ownerOrganizationId
     ? eq(sourceExplorerNodes.ownerOrganizationId, params.ownerOrganizationId)
-    : eq(sourceExplorerNodes.ownerUserId, params.ownerUserId!)
+    : eq(sourceExplorerNodes.ownerUserId, params.ownerUserId as string)
 
   const [firstSibling] = await (tx ?? db)
     .select({

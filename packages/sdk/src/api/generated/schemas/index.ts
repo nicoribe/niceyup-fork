@@ -183,6 +183,18 @@ export type {
   HealthQueryResponseSchema,
 } from './healthSchema'
 export type {
+  ListAgentSourcesPathParamsSchema,
+  ListAgentSourcesQueryParamsSchema,
+  ListAgentSources200Schema,
+  ListAgentSources400Schema,
+  ListAgentSources401Schema,
+  ListAgentSources403Schema,
+  ListAgentSources404Schema,
+  ListAgentSources429Schema,
+  ListAgentSources500Schema,
+  ListAgentSourcesQueryResponseSchema,
+} from './listAgentSourcesSchema'
+export type {
   ListAgentsQueryParamsSchema,
   ListAgents200Schema,
   ListAgents400Schema,
@@ -238,6 +250,18 @@ export type {
   ListSources500Schema,
   ListSourcesQueryResponseSchema,
 } from './listSourcesSchema'
+export type {
+  ManageAgentSourcesPathParamsSchema,
+  ManageAgentSources204Schema,
+  ManageAgentSources400Schema,
+  ManageAgentSources401Schema,
+  ManageAgentSources403Schema,
+  ManageAgentSources404Schema,
+  ManageAgentSources429Schema,
+  ManageAgentSources500Schema,
+  ManageAgentSourcesMutationRequestSchema,
+  ManageAgentSourcesMutationResponseSchema,
+} from './manageAgentSourcesSchema'
 export type {
   RegenerateMessagePathParamsSchema,
   RegenerateMessage200Schema,
@@ -555,6 +579,18 @@ export {
   healthQueryResponseSchema,
 } from './healthSchema'
 export {
+  listAgentSourcesPathParamsSchema,
+  listAgentSourcesQueryParamsSchema,
+  listAgentSources200Schema,
+  listAgentSources400Schema,
+  listAgentSources401Schema,
+  listAgentSources403Schema,
+  listAgentSources404Schema,
+  listAgentSources429Schema,
+  listAgentSources500Schema,
+  listAgentSourcesQueryResponseSchema,
+} from './listAgentSourcesSchema'
+export {
   listAgentsQueryParamsSchema,
   listAgents200Schema,
   listAgents400Schema,
@@ -610,6 +646,18 @@ export {
   listSources500Schema,
   listSourcesQueryResponseSchema,
 } from './listSourcesSchema'
+export {
+  manageAgentSourcesPathParamsSchema,
+  manageAgentSources204Schema,
+  manageAgentSources400Schema,
+  manageAgentSources401Schema,
+  manageAgentSources403Schema,
+  manageAgentSources404Schema,
+  manageAgentSources429Schema,
+  manageAgentSources500Schema,
+  manageAgentSourcesMutationRequestSchema,
+  manageAgentSourcesMutationResponseSchema,
+} from './manageAgentSourcesSchema'
 export {
   regenerateMessagePathParamsSchema,
   regenerateMessage200Schema,

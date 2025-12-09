@@ -1,7 +1,9 @@
 export default async function Page() {
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <h1 className="text-sm">Sources</h1>
+    <div className="rounded-lg border bg-background p-4">
+      <p className="py-24 text-center text-muted-foreground text-xs">
+        Coming soon
+      </p>
     </div>
   )
 }

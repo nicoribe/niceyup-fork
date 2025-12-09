@@ -6,8 +6,11 @@ import {
   getConversationExplorerNodeFolder,
 } from '@/http/functions/explorer-nodes/conversation-explorer-nodes'
 import { generateTitleFromUserMessage } from '@/http/functions/generate-title-from-user-message'
+import {
+  getNamespaceContext,
+  getOrganizationContext,
+} from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import {
   aiMessageMetadataSchema,
@@ -111,14 +114,12 @@ export async function sendMessage(app: FastifyTypedInstance) {
         explorerNode,
       } = request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-          teamId,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+        teamId,
+      })
 
       if (explorerNode?.visibility === 'team' && !context.teamId) {
         throw new BadRequestError({
@@ -130,8 +131,8 @@ export async function sendMessage(app: FastifyTypedInstance) {
 
       const ownerTypeCondition =
         explorerNode?.visibility === 'team'
-          ? { ownerTeamId: context.teamId! }
-          : { ownerUserId: userId }
+          ? { ownerTeamId: context.teamId }
+          : { ownerUserId: context.userId }
 
       if (conversationId === 'new') {
         const checkAccessToAgent = await queries.context.getAgent(context, {
@@ -145,22 +146,19 @@ export async function sendMessage(app: FastifyTypedInstance) {
           })
         }
 
-        if (explorerNode) {
-          if (explorerNode.folderId && explorerNode.folderId !== 'root') {
-            const folderExplorerNode = await getConversationExplorerNodeFolder({
-              id: explorerNode.folderId,
-              visibility: explorerNode.visibility,
-              agentId,
-              ...ownerTypeCondition,
-            })
+        if (explorerNode?.folderId && explorerNode.folderId !== 'root') {
+          const folderExplorerNode = await getConversationExplorerNodeFolder({
+            id: explorerNode.folderId,
+            visibility: explorerNode.visibility,
+            agentId,
+            ...ownerTypeCondition,
+          })
 
-            if (!folderExplorerNode) {
-              throw new BadRequestError({
-                code: 'FOLDER_IN_EXPLORER_NOT_FOUND',
-                message:
-                  'Folder in explorer not found or you don’t have access',
-              })
-            }
+          if (!folderExplorerNode) {
+            throw new BadRequestError({
+              code: 'FOLDER_IN_EXPLORER_NOT_FOUND',
+              message: 'Folder in explorer not found or you don’t have access',
+            })
           }
         }
       } else {
@@ -179,10 +177,11 @@ export async function sendMessage(app: FastifyTypedInstance) {
 
       let _conversationId = conversationId
       let _parentMessageId = parentMessageId
-      let _explorerNode = null
 
-      const { userMessage, assistantMessage } = await db.transaction(
-        async (tx) => {
+      const { userMessage, assistantMessage, itemExplorerNode } =
+        await db.transaction(async (tx) => {
+          let _itemExplorerNode = null
+
           if (conversationId === 'new') {
             let title = message.parts.find((part) => part.type === 'text')?.text
 
@@ -211,8 +210,9 @@ export async function sendMessage(app: FastifyTypedInstance) {
             _conversationId = conversation.id
 
             // TODO: make this dynamic based on the agent's configuration
-            const systemMessageText = `### Role
-- Primary Function: You are an AI agent who helps users with their inquiries, issues and requests. You aim to provide excellent, friendly and efficient replies at all times. Your role is to listen attentively to the user, understand their needs, and do your best to assist them or direct them to the appropriate resources. If a user is not clear, ask clarifying users. Make sure to end your replies with a positive note.`
+            const systemMessageText = `You are a helpful assistant. Check your knowledge base before answering any questions.
+Only respond to questions using information from tool calls.
+if no relevant information is found in the tool calls, respond, "Sorry, I don't know."`
 
             const [systemMessage] = await tx
               .insert(messages)
@@ -253,9 +253,7 @@ export async function sendMessage(app: FastifyTypedInstance) {
                 tx,
               )
 
-              if (itemExplorerNode) {
-                _explorerNode = { itemId: itemExplorerNode.id }
-              }
+              _itemExplorerNode = itemExplorerNode
             }
           } else {
             const [parentMessage] = await tx
@@ -343,21 +341,18 @@ export async function sendMessage(app: FastifyTypedInstance) {
           }
 
           return {
-            userMessage: {
-              ...userMessage,
-              children: [assistantMessage.id],
-            },
+            userMessage: { ...userMessage, children: [assistantMessage.id] },
             assistantMessage: { ...assistantMessage, children: [] },
+            itemExplorerNode: _itemExplorerNode,
           }
-        },
-      )
+        })
 
       // TODO: make this dynamic based on the agent's configuration
       const contextMessages = true
       const maxContextMessages = 10
 
       sendUserMessageToAssistant({
-        namespace: 'namespace',
+        namespace: getNamespaceContext(context),
         conversationId: _conversationId,
         userMessage: {
           id: userMessage.id,
@@ -379,7 +374,9 @@ export async function sendMessage(app: FastifyTypedInstance) {
         conversationId: _conversationId,
         userMessage,
         assistantMessage,
-        ...(_explorerNode ? { explorerNode: _explorerNode } : {}),
+        ...(itemExplorerNode && {
+          explorerNode: { itemId: itemExplorerNode.id },
+        }),
       }
     },
   )

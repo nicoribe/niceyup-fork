@@ -1,6 +1,8 @@
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { getAgent } from './agents/get-agent'
+import { listAgentSources } from './agents/list-agent-sources'
 import { listAgents } from './agents/list-agents'
+import { manageAgentSources } from './agents/manage-agent-sources'
 import { authRoutes } from './auth-routes'
 import { createConnection } from './connections/create-connection'
 import { deleteConnection } from './connections/delete-connection'
@@ -42,6 +44,8 @@ export async function routes(app: FastifyTypedInstance) {
 
   app.register(listAgents)
   app.register(getAgent)
+  app.register(listAgentSources)
+  app.register(manageAgentSources)
 
   app.register(listConnections)
   app.register(getConnection)

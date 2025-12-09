@@ -5,18 +5,9 @@ import { getConversation } from './conversations'
 
 type ContextGetMessageParams = {
   userId: string
-} & (
-  | {
-      organizationId?: string | null
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug?: string | null
-    }
-) & {
-    teamId?: string | null
-  }
+  organizationId?: string | null
+  teamId?: string | null
+}
 
 type GetMessageParams = {
   agentId: string

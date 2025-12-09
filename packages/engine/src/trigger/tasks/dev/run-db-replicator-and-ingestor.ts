@@ -1,7 +1,12 @@
 import { AbortTaskRunError, logger, schemaTask } from '@trigger.dev/sdk'
 import { db } from '@workspace/db'
 import { eq } from '@workspace/db/orm'
-import { connections, databaseSources, sources } from '@workspace/db/schema'
+import {
+  connections,
+  databaseSources,
+  sourceExplorerNodes,
+  sources,
+} from '@workspace/db/schema'
 import { z } from 'zod'
 import { getDbSchemaTask } from '../get-db-schema'
 import { runDbReplicationTask } from '../run-db-replication'
@@ -65,6 +70,11 @@ export const runDbReplicatorAndIngestorTask = schemaTask({
         if (!createDatabaseSource) {
           throw new AbortTaskRunError('Failed to create database source')
         }
+
+        await tx.insert(sourceExplorerNodes).values({
+          sourceId: createSource.id,
+          ownerUserId: payload.ownerUserId,
+        })
 
         return createSource.id
       })

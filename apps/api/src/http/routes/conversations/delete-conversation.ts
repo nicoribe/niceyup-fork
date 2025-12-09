@@ -1,7 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
+import { getOrganizationContext } from '@/http/functions/organization-context'
 import { authenticate } from '@/http/middlewares/authenticate'
-import { getOrganizationIdentifier } from '@/lib/utils'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
 import { and, eq } from '@workspace/db/orm'
@@ -46,14 +46,12 @@ export async function deleteConversation(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, agentId, destroy } =
         request.body
 
-      const context = {
+      const context = await getOrganizationContext({
         userId,
-        ...getOrganizationIdentifier({
-          organizationId,
-          organizationSlug,
-          teamId,
-        }),
-      }
+        organizationId,
+        organizationSlug,
+        teamId,
+      })
 
       const conversation = await queries.context.getConversation(context, {
         agentId,
@@ -94,12 +92,12 @@ export async function deleteConversation(app: FastifyTypedInstance) {
               )
             : eq(
                 conversationExplorerNodes.ownerUserId,
-                conversation.ownerUserId!,
+                conversation.ownerUserId as string,
               )
 
           const ownerTypeCondition = conversation.ownerTeamId
             ? eq(conversations.ownerTeamId, conversation.ownerTeamId)
-            : eq(conversations.ownerUserId, conversation.ownerUserId!)
+            : eq(conversations.ownerUserId, conversation.ownerUserId as string)
 
           if (destroy) {
             await tx

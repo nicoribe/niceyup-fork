@@ -169,15 +169,15 @@ export async function uploadFileToStorage(params: UploadFileToStorageParams) {
     fileMimeType: params.file.mimetype,
     fileSize,
     filePath,
-    ...params.data,
+    bucket: params.data.bucket,
+    scope: params.data.scope,
+    ownerUserId: params.data.owner.userId,
+    ownerOrganizationId: params.data.owner.organizationId,
   })
 
   if (!createdFile) {
     // Delete the file from S3 if it was not created
-    await storage.delete({
-      bucket: s3Bucket,
-      key: filePath,
-    })
+    await storage.delete({ bucket: s3Bucket, key: filePath })
 
     throw new BadRequestError({
       code: 'FILE_NOT_CREATED',
