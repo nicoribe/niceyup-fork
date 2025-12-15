@@ -7,25 +7,40 @@ export type { GenerateUploadSignatureMutationKey } from './react-query/hooks/use
 export type { GenerateUploadSignatureConversationMutationKey } from './react-query/hooks/useGenerateUploadSignatureConversation'
 export type { GenerateUploadSignatureSourceMutationKey } from './react-query/hooks/useGenerateUploadSignatureSource'
 export type { GetAgentQueryKey } from './react-query/hooks/useGetAgent'
+export type { GetAgentSuspenseQueryKey } from './react-query/hooks/useGetAgentSuspense'
 export type { GetConnectionQueryKey } from './react-query/hooks/useGetConnection'
+export type { GetConnectionSuspenseQueryKey } from './react-query/hooks/useGetConnectionSuspense'
 export type { GetConversationQueryKey } from './react-query/hooks/useGetConversation'
+export type { GetConversationSuspenseQueryKey } from './react-query/hooks/useGetConversationSuspense'
 export type { GetDatabaseSchemaQueryKey } from './react-query/hooks/useGetDatabaseSchema'
+export type { GetDatabaseSchemaSuspenseQueryKey } from './react-query/hooks/useGetDatabaseSchemaSuspense'
 export type { GetFileQueryKey } from './react-query/hooks/useGetFile'
+export type { GetFileSuspenseQueryKey } from './react-query/hooks/useGetFileSuspense'
 export type { GetProfileQueryKey } from './react-query/hooks/useGetProfile'
+export type { GetProfileSuspenseQueryKey } from './react-query/hooks/useGetProfileSuspense'
 export type { GetSourceQueryKey } from './react-query/hooks/useGetSource'
+export type { GetSourceSuspenseQueryKey } from './react-query/hooks/useGetSourceSuspense'
 export type { HealthQueryKey } from './react-query/hooks/useHealth'
+export type { HealthSuspenseQueryKey } from './react-query/hooks/useHealthSuspense'
 export type { ListAgentsQueryKey } from './react-query/hooks/useListAgents'
 export type { ListAgentSourcesQueryKey } from './react-query/hooks/useListAgentSources'
+export type { ListAgentSourcesSuspenseQueryKey } from './react-query/hooks/useListAgentSourcesSuspense'
+export type { ListAgentsSuspenseQueryKey } from './react-query/hooks/useListAgentsSuspense'
 export type { ListConnectionsQueryKey } from './react-query/hooks/useListConnections'
+export type { ListConnectionsSuspenseQueryKey } from './react-query/hooks/useListConnectionsSuspense'
 export type { ListConversationsQueryKey } from './react-query/hooks/useListConversations'
+export type { ListConversationsSuspenseQueryKey } from './react-query/hooks/useListConversationsSuspense'
 export type { ListMessagesQueryKey } from './react-query/hooks/useListMessages'
+export type { ListMessagesSuspenseQueryKey } from './react-query/hooks/useListMessagesSuspense'
 export type { ListSourcesQueryKey } from './react-query/hooks/useListSources'
+export type { ListSourcesSuspenseQueryKey } from './react-query/hooks/useListSourcesSuspense'
 export type { ManageAgentSourcesMutationKey } from './react-query/hooks/useManageAgentSources'
 export type { RegenerateMessageMutationKey } from './react-query/hooks/useRegenerateMessage'
 export type { ResendMessageMutationKey } from './react-query/hooks/useResendMessage'
 export type { SendMessageMutationKey } from './react-query/hooks/useSendMessage'
 export type { StopMessageMutationKey } from './react-query/hooks/useStopMessage'
 export type { StreamMessageQueryKey } from './react-query/hooks/useStreamMessage'
+export type { StreamMessageSuspenseQueryKey } from './react-query/hooks/useStreamMessageSuspense'
 export type { UpdateConnectionMutationKey } from './react-query/hooks/useUpdateConnection'
 export type { UpdateConversationMutationKey } from './react-query/hooks/useUpdateConversation'
 export type { UpdateSourceMutationKey } from './react-query/hooks/useUpdateSource'
@@ -1091,40 +1106,80 @@ export {
   useGetAgent,
 } from './react-query/hooks/useGetAgent'
 export {
+  getAgentSuspenseQueryKey,
+  getAgentSuspenseQueryOptions,
+  useGetAgentSuspense,
+} from './react-query/hooks/useGetAgentSuspense'
+export {
   getConnectionQueryKey,
   getConnectionQueryOptions,
   useGetConnection,
 } from './react-query/hooks/useGetConnection'
+export {
+  getConnectionSuspenseQueryKey,
+  getConnectionSuspenseQueryOptions,
+  useGetConnectionSuspense,
+} from './react-query/hooks/useGetConnectionSuspense'
 export {
   getConversationQueryKey,
   getConversationQueryOptions,
   useGetConversation,
 } from './react-query/hooks/useGetConversation'
 export {
+  getConversationSuspenseQueryKey,
+  getConversationSuspenseQueryOptions,
+  useGetConversationSuspense,
+} from './react-query/hooks/useGetConversationSuspense'
+export {
   getDatabaseSchemaQueryKey,
   getDatabaseSchemaQueryOptions,
   useGetDatabaseSchema,
 } from './react-query/hooks/useGetDatabaseSchema'
+export {
+  getDatabaseSchemaSuspenseQueryKey,
+  getDatabaseSchemaSuspenseQueryOptions,
+  useGetDatabaseSchemaSuspense,
+} from './react-query/hooks/useGetDatabaseSchemaSuspense'
 export {
   getFileQueryKey,
   getFileQueryOptions,
   useGetFile,
 } from './react-query/hooks/useGetFile'
 export {
+  getFileSuspenseQueryKey,
+  getFileSuspenseQueryOptions,
+  useGetFileSuspense,
+} from './react-query/hooks/useGetFileSuspense'
+export {
   getProfileQueryKey,
   getProfileQueryOptions,
   useGetProfile,
 } from './react-query/hooks/useGetProfile'
+export {
+  getProfileSuspenseQueryKey,
+  getProfileSuspenseQueryOptions,
+  useGetProfileSuspense,
+} from './react-query/hooks/useGetProfileSuspense'
 export {
   getSourceQueryKey,
   getSourceQueryOptions,
   useGetSource,
 } from './react-query/hooks/useGetSource'
 export {
+  getSourceSuspenseQueryKey,
+  getSourceSuspenseQueryOptions,
+  useGetSourceSuspense,
+} from './react-query/hooks/useGetSourceSuspense'
+export {
   healthQueryKey,
   healthQueryOptions,
   useHealth,
 } from './react-query/hooks/useHealth'
+export {
+  healthSuspenseQueryKey,
+  healthSuspenseQueryOptions,
+  useHealthSuspense,
+} from './react-query/hooks/useHealthSuspense'
 export {
   listAgentsQueryKey,
   listAgentsQueryOptions,
@@ -1136,25 +1191,55 @@ export {
   useListAgentSources,
 } from './react-query/hooks/useListAgentSources'
 export {
+  listAgentSourcesSuspenseQueryKey,
+  listAgentSourcesSuspenseQueryOptions,
+  useListAgentSourcesSuspense,
+} from './react-query/hooks/useListAgentSourcesSuspense'
+export {
+  listAgentsSuspenseQueryKey,
+  listAgentsSuspenseQueryOptions,
+  useListAgentsSuspense,
+} from './react-query/hooks/useListAgentsSuspense'
+export {
   listConnectionsQueryKey,
   listConnectionsQueryOptions,
   useListConnections,
 } from './react-query/hooks/useListConnections'
+export {
+  listConnectionsSuspenseQueryKey,
+  listConnectionsSuspenseQueryOptions,
+  useListConnectionsSuspense,
+} from './react-query/hooks/useListConnectionsSuspense'
 export {
   listConversationsQueryKey,
   listConversationsQueryOptions,
   useListConversations,
 } from './react-query/hooks/useListConversations'
 export {
+  listConversationsSuspenseQueryKey,
+  listConversationsSuspenseQueryOptions,
+  useListConversationsSuspense,
+} from './react-query/hooks/useListConversationsSuspense'
+export {
   listMessagesQueryKey,
   listMessagesQueryOptions,
   useListMessages,
 } from './react-query/hooks/useListMessages'
 export {
+  listMessagesSuspenseQueryKey,
+  listMessagesSuspenseQueryOptions,
+  useListMessagesSuspense,
+} from './react-query/hooks/useListMessagesSuspense'
+export {
   listSourcesQueryKey,
   listSourcesQueryOptions,
   useListSources,
 } from './react-query/hooks/useListSources'
+export {
+  listSourcesSuspenseQueryKey,
+  listSourcesSuspenseQueryOptions,
+  useListSourcesSuspense,
+} from './react-query/hooks/useListSourcesSuspense'
 export {
   manageAgentSourcesMutationKey,
   useManageAgentSources,
@@ -1180,6 +1265,11 @@ export {
   streamMessageQueryOptions,
   useStreamMessage,
 } from './react-query/hooks/useStreamMessage'
+export {
+  streamMessageSuspenseQueryKey,
+  streamMessageSuspenseQueryOptions,
+  useStreamMessageSuspense,
+} from './react-query/hooks/useStreamMessageSuspense'
 export {
   updateConnectionMutationKey,
   useUpdateConnection,

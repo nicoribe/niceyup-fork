@@ -58,7 +58,6 @@ export const config: UserConfig = {
       // parser: 'zod',
       paramsType: 'object',
       pathParamsType: 'object',
-      suspense: false,
       output: {
         path: './react-query/hooks',
       },

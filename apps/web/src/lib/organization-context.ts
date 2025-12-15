@@ -11,10 +11,10 @@ export async function getOrganizationContext({
   organizationSlug?: string | null
   teamId?: string | null
 }) {
-  const isOrganization =
-    organizationId || (organizationSlug && organizationSlug !== 'my-account')
-
-  if (isOrganization) {
+  if (
+    organizationId ||
+    (organizationSlug && organizationSlug !== 'my-account')
+  ) {
     const orgId =
       organizationId ||
       (await queries.getOrganizationIdBySlug({ organizationSlug }))

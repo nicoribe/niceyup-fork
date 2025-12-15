@@ -26,6 +26,7 @@ export async function listConversations(app: FastifyTypedInstance) {
                 z.object({
                   id: z.string(),
                   title: z.string(),
+                  updatedAt: z.date(),
                 }),
               ),
             })

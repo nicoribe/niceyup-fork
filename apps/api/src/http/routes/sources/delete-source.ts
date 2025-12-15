@@ -163,20 +163,17 @@ export async function deleteSource(app: FastifyTypedInstance) {
           namespace: getNamespaceContext(context),
           sourceId,
         }),
-        ...(!destroy
-          ? [
-              _file &&
-                storage.delete({
-                  bucket: env.S3_ENGINE_BUCKET,
-                  key: _file.filePath,
-                }),
-              source.type === 'database' &&
-                storage.deleteDirectory({
-                  bucket: env.S3_ENGINE_BUCKET,
-                  path: `/sources/${sourceId}/`,
-                }),
-            ]
-          : []),
+
+        destroy &&
+          _file &&
+          storage.delete({ bucket: env.S3_ENGINE_BUCKET, key: _file.filePath }),
+
+        destroy &&
+          source.type === 'database' &&
+          storage.deleteDirectory({
+            bucket: env.S3_ENGINE_BUCKET,
+            path: `/sources/${sourceId}/`,
+          }),
       ])
 
       return reply.status(204).send()

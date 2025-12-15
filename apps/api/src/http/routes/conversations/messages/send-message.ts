@@ -186,7 +186,11 @@ export async function sendMessage(app: FastifyTypedInstance) {
             let title = message.parts.find((part) => part.type === 'text')?.text
 
             if (title) {
-              title = await generateTitleFromUserMessage({ userMessage: title })
+              try {
+                title = await generateTitleFromUserMessage({
+                  userMessage: title,
+                })
+              } catch {}
             }
 
             const [conversation] = await tx

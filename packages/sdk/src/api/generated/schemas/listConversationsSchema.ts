@@ -35,6 +35,7 @@ export const listConversations200Schema = z
       z.object({
         id: z.string(),
         title: z.string(),
+        updatedAt: z.string().datetime(),
       }),
     ),
   })

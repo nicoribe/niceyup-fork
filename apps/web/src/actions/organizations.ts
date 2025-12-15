@@ -1,9 +1,11 @@
 'use server'
 
 import { authenticatedUser } from '@/lib/auth/server'
+import { getOrganizationContext } from '@/lib/organization-context'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { auth } from '@workspace/auth'
 import { queries } from '@workspace/db/queries'
+import { cacheTag } from 'next/cache'
 import { headers } from 'next/headers'
 
 type GetOrganizationSlugByIdParams = {
@@ -13,11 +15,7 @@ type GetOrganizationSlugByIdParams = {
 export async function getOrganizationSlugById({
   organizationId,
 }: GetOrganizationSlugByIdParams) {
-  const organizationSlug = await queries.getOrganizationSlugById({
-    organizationId,
-  })
-
-  return organizationSlug
+  return await queries.getOrganizationSlugById({ organizationId })
 }
 
 type GetOrganizationIdBySlugParams = {
@@ -31,11 +29,7 @@ export async function getOrganizationIdBySlug({
     return null
   }
 
-  const organizationId = await queries.getOrganizationIdBySlug({
-    organizationSlug,
-  })
-
-  return organizationId
+  return await queries.getOrganizationIdBySlug({ organizationSlug })
 }
 
 type GetOrganizationParams = {
@@ -108,56 +102,66 @@ export async function getMembership({ organizationSlug }: GetMembershipParams) {
 }
 
 export async function listOrganizations() {
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
-  })
+  'use cache: private'
+  cacheTag('create-organization')
+
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
+
+  const organizations = await queries.context.listOrganizations({ userId })
 
   return organizations
 }
 
 type ListOrganizationTeamsParams = {
-  organizationId?: string | null
+  organizationSlug: string | null | undefined
 }
 
 export async function listOrganizationTeams({
-  organizationId,
+  organizationSlug,
 }: ListOrganizationTeamsParams) {
-  if (!organizationId) {
+  'use cache: private'
+  cacheTag('create-team', 'update-team', 'delete-team')
+
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
+
+  const ctx = await getOrganizationContext({ userId, organizationSlug })
+
+  if (!ctx?.organizationId) {
     return []
   }
 
-  const organizationTeams = await auth.api.listOrganizationTeams({
-    query: {
-      organizationId,
-    },
-    headers: await headers(),
-  })
+  const organizationTeams = await queries.context.listOrganizationTeams(
+    { userId },
+    { organizationId: ctx.organizationId },
+  )
 
-  return organizationTeams
+  return organizationTeams.map(({ team }) => team)
 }
 
-type SetActiveOrganizationTeamParams = {
-  organizationId?: string | null
-  teamId?: string | null
-}
+type SetActiveOrganizationTeamParams =
+  | {
+      organizationId?: never
+      teamId?: never
+    }
+  | {
+      organizationId: string | null
+      teamId?: string | null
+    }
 
 export async function setActiveOrganizationTeam({
   organizationId,
   teamId,
 }: SetActiveOrganizationTeamParams = {}) {
-  const activeOrganization = await auth.api.setActiveOrganization({
-    body: {
-      organizationId: organizationId || null,
-    },
+  await auth.api.setActiveOrganization({
+    body: { organizationId: organizationId || null },
     headers: await headers(),
   })
-
-  const activeTeam = await auth.api.setActiveTeam({
-    body: {
-      teamId: teamId || null,
-    },
+  await auth.api.setActiveTeam({
+    body: { teamId: teamId || null },
     headers: await headers(),
   })
-
-  return { activeOrganization, activeTeam }
 }

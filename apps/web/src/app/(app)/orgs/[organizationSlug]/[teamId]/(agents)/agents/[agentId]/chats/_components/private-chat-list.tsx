@@ -1,6 +1,6 @@
 'use client'
 
-import { revalidateTag } from '@/actions/revalidate'
+import { updateTag } from '@/actions/cache'
 import type { Chat, OrganizationTeamParams } from '@/lib/types'
 import { ChatList, ChatListProvider } from './chat-list'
 
@@ -15,11 +15,11 @@ export function PrivateChatList({
       params={params}
       visibility="private"
       initialItems={initialItems}
-      onRenameItem={async (item) => {
-        await revalidateTag(`chat-${item.id}`)
+      onRenameItem={async () => {
+        await updateTag('update-chat')
       }}
       onDeleteItem={async () => {
-        await revalidateTag(`agent-${params.agentId}-chats`)
+        await updateTag('delete-chat')
       }}
     >
       <ChatList />

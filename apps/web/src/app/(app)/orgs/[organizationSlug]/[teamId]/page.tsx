@@ -8,7 +8,9 @@ export default async function Page({
 }>) {
   const { organizationSlug, teamId } = await params
 
-  if (organizationSlug === 'my-account') {
+  const isPersonalAccount = organizationSlug === 'my-account' && teamId === '~'
+
+  if (isPersonalAccount) {
     return redirect('/orgs/my-account/~/overview')
   }
 

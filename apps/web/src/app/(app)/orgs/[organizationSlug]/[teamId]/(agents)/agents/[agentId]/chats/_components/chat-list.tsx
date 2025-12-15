@@ -18,7 +18,7 @@ import { Spinner } from '@workspace/ui/components/spinner'
 import { cn } from '@workspace/ui/lib/utils'
 import { MoreVerticalIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import * as React from 'react'
 
 // ============================================================================
@@ -30,7 +30,16 @@ type Params = OrganizationTeamParams & { agentId: string }
 type Item = {
   id: string
   title: string
+  updatedAt?: string
   loading?: boolean
+}
+
+function sortItems(items: Item[]) {
+  return items.sort(
+    (a, b) =>
+      new Date(b.updatedAt || '').getTime() -
+      new Date(a.updatedAt || '').getTime(),
+  )
 }
 
 type ChatListContextType = {
@@ -71,7 +80,17 @@ export function ChatListProvider({
   onDeleteItem?: (item: { id: string }) => Promise<void> | void
   children: React.ReactNode
 }) {
-  const [items, setItems] = React.useState(initialItems ?? [])
+  const [items, setItems] = React.useState<Item[]>([])
+
+  React.useEffect(() => {
+    setItems((prev) => {
+      const newItems =
+        initialItems?.filter((item) => !prev.some((i) => i.id === item.id)) ||
+        []
+
+      return sortItems([...newItems, ...prev])
+    })
+  }, [initialItems])
 
   const contextValue: ChatListContextType = {
     params,
@@ -90,6 +109,7 @@ export function ChatListProvider({
 }
 
 type ChatListItemContextType = {
+  chatId: string
   item: Item
   setItem: React.Dispatch<React.SetStateAction<Item>>
   selected: boolean
@@ -137,6 +157,7 @@ export function ChatListItemProvider({
   }, [item.id, params.chatId])
 
   const contextValue: ChatListItemContextType = {
+    chatId: params.chatId,
     item,
     setItem,
     selected,
@@ -189,7 +210,11 @@ function ChatListItem() {
     })
     await onRenameItem?.({ id: item.id }, value)
 
-    setItem((prev) => ({ ...prev, loading: false }))
+    setItem((prev) => ({
+      ...prev,
+      updatedAt: new Date().toISOString(),
+      loading: false,
+    }))
   }
 
   return (
@@ -318,10 +343,18 @@ function ChatListItemActionRename({ label = 'Rename' }: { label?: string }) {
 
 function ChatListItemActionDelete({ label = 'Delete' }: { label?: string }) {
   const { params, setItems, onDeleteItem } = useChatListContext()
-  const { item, setItem } = useChatListItemContext()
+  const { chatId, item, setItem } = useChatListItemContext()
+
+  const router = useRouter()
 
   const onDelete = async () => {
     setItem((prev) => ({ ...prev, loading: true }))
+
+    if (chatId === item.id) {
+      router.push(
+        `/orgs/${params.organizationSlug}/${params.teamId}/agents/${params.agentId}/chats/new`,
+      )
+    }
 
     await sdk.deleteConversation({
       conversationId: item.id,

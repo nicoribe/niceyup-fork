@@ -16,9 +16,9 @@ export type ChatParams = {
 
 export type Organization = {
   id: string
-  slug: string
+  slug: string | null
   name: string
-  logo?: string | null | undefined
+  logo?: string | null
   metadata?: unknown
 }
 
@@ -40,6 +40,7 @@ export type Agent = {
 export type Chat = {
   id: string
   title: string
+  updatedAt?: string
 }
 
 export type ConversationVisibility = 'private' | 'shared' | 'team'

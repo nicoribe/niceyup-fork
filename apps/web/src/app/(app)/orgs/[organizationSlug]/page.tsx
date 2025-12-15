@@ -8,15 +8,17 @@ export default async function Page({
 }: Readonly<{
   params: Promise<OrganizationTeamParams>
 }>) {
+  const { organizationSlug } = await params
+
+  const isPersonalAccount = organizationSlug === 'my-account'
+
+  if (isPersonalAccount) {
+    return redirect('/orgs/my-account/~/overview')
+  }
+
   const {
     session: { activeOrganizationId, activeTeamId },
   } = await authenticatedUser()
-
-  const { organizationSlug } = await params
-
-  if (organizationSlug === 'my-account') {
-    return redirect('/orgs/my-account/~/overview')
-  }
 
   const organizationId = await getOrganizationIdBySlug({ organizationSlug })
 

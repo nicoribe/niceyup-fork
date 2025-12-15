@@ -7,25 +7,40 @@ export type { GenerateUploadSignatureMutationKey } from './useGenerateUploadSign
 export type { GenerateUploadSignatureConversationMutationKey } from './useGenerateUploadSignatureConversation'
 export type { GenerateUploadSignatureSourceMutationKey } from './useGenerateUploadSignatureSource'
 export type { GetAgentQueryKey } from './useGetAgent'
+export type { GetAgentSuspenseQueryKey } from './useGetAgentSuspense'
 export type { GetConnectionQueryKey } from './useGetConnection'
+export type { GetConnectionSuspenseQueryKey } from './useGetConnectionSuspense'
 export type { GetConversationQueryKey } from './useGetConversation'
+export type { GetConversationSuspenseQueryKey } from './useGetConversationSuspense'
 export type { GetDatabaseSchemaQueryKey } from './useGetDatabaseSchema'
+export type { GetDatabaseSchemaSuspenseQueryKey } from './useGetDatabaseSchemaSuspense'
 export type { GetFileQueryKey } from './useGetFile'
+export type { GetFileSuspenseQueryKey } from './useGetFileSuspense'
 export type { GetProfileQueryKey } from './useGetProfile'
+export type { GetProfileSuspenseQueryKey } from './useGetProfileSuspense'
 export type { GetSourceQueryKey } from './useGetSource'
+export type { GetSourceSuspenseQueryKey } from './useGetSourceSuspense'
 export type { HealthQueryKey } from './useHealth'
+export type { HealthSuspenseQueryKey } from './useHealthSuspense'
 export type { ListAgentsQueryKey } from './useListAgents'
 export type { ListAgentSourcesQueryKey } from './useListAgentSources'
+export type { ListAgentSourcesSuspenseQueryKey } from './useListAgentSourcesSuspense'
+export type { ListAgentsSuspenseQueryKey } from './useListAgentsSuspense'
 export type { ListConnectionsQueryKey } from './useListConnections'
+export type { ListConnectionsSuspenseQueryKey } from './useListConnectionsSuspense'
 export type { ListConversationsQueryKey } from './useListConversations'
+export type { ListConversationsSuspenseQueryKey } from './useListConversationsSuspense'
 export type { ListMessagesQueryKey } from './useListMessages'
+export type { ListMessagesSuspenseQueryKey } from './useListMessagesSuspense'
 export type { ListSourcesQueryKey } from './useListSources'
+export type { ListSourcesSuspenseQueryKey } from './useListSourcesSuspense'
 export type { ManageAgentSourcesMutationKey } from './useManageAgentSources'
 export type { RegenerateMessageMutationKey } from './useRegenerateMessage'
 export type { ResendMessageMutationKey } from './useResendMessage'
 export type { SendMessageMutationKey } from './useSendMessage'
 export type { StopMessageMutationKey } from './useStopMessage'
 export type { StreamMessageQueryKey } from './useStreamMessage'
+export type { StreamMessageSuspenseQueryKey } from './useStreamMessageSuspense'
 export type { UpdateConnectionMutationKey } from './useUpdateConnection'
 export type { UpdateConversationMutationKey } from './useUpdateConversation'
 export type { UpdateSourceMutationKey } from './useUpdateSource'
@@ -64,32 +79,72 @@ export {
   useGetAgent,
 } from './useGetAgent'
 export {
+  getAgentSuspenseQueryKey,
+  getAgentSuspenseQueryOptions,
+  useGetAgentSuspense,
+} from './useGetAgentSuspense'
+export {
   getConnectionQueryKey,
   getConnectionQueryOptions,
   useGetConnection,
 } from './useGetConnection'
+export {
+  getConnectionSuspenseQueryKey,
+  getConnectionSuspenseQueryOptions,
+  useGetConnectionSuspense,
+} from './useGetConnectionSuspense'
 export {
   getConversationQueryKey,
   getConversationQueryOptions,
   useGetConversation,
 } from './useGetConversation'
 export {
+  getConversationSuspenseQueryKey,
+  getConversationSuspenseQueryOptions,
+  useGetConversationSuspense,
+} from './useGetConversationSuspense'
+export {
   getDatabaseSchemaQueryKey,
   getDatabaseSchemaQueryOptions,
   useGetDatabaseSchema,
 } from './useGetDatabaseSchema'
+export {
+  getDatabaseSchemaSuspenseQueryKey,
+  getDatabaseSchemaSuspenseQueryOptions,
+  useGetDatabaseSchemaSuspense,
+} from './useGetDatabaseSchemaSuspense'
 export { getFileQueryKey, getFileQueryOptions, useGetFile } from './useGetFile'
+export {
+  getFileSuspenseQueryKey,
+  getFileSuspenseQueryOptions,
+  useGetFileSuspense,
+} from './useGetFileSuspense'
 export {
   getProfileQueryKey,
   getProfileQueryOptions,
   useGetProfile,
 } from './useGetProfile'
 export {
+  getProfileSuspenseQueryKey,
+  getProfileSuspenseQueryOptions,
+  useGetProfileSuspense,
+} from './useGetProfileSuspense'
+export {
   getSourceQueryKey,
   getSourceQueryOptions,
   useGetSource,
 } from './useGetSource'
+export {
+  getSourceSuspenseQueryKey,
+  getSourceSuspenseQueryOptions,
+  useGetSourceSuspense,
+} from './useGetSourceSuspense'
 export { healthQueryKey, healthQueryOptions, useHealth } from './useHealth'
+export {
+  healthSuspenseQueryKey,
+  healthSuspenseQueryOptions,
+  useHealthSuspense,
+} from './useHealthSuspense'
 export {
   listAgentsQueryKey,
   listAgentsQueryOptions,
@@ -101,25 +156,55 @@ export {
   useListAgentSources,
 } from './useListAgentSources'
 export {
+  listAgentSourcesSuspenseQueryKey,
+  listAgentSourcesSuspenseQueryOptions,
+  useListAgentSourcesSuspense,
+} from './useListAgentSourcesSuspense'
+export {
+  listAgentsSuspenseQueryKey,
+  listAgentsSuspenseQueryOptions,
+  useListAgentsSuspense,
+} from './useListAgentsSuspense'
+export {
   listConnectionsQueryKey,
   listConnectionsQueryOptions,
   useListConnections,
 } from './useListConnections'
+export {
+  listConnectionsSuspenseQueryKey,
+  listConnectionsSuspenseQueryOptions,
+  useListConnectionsSuspense,
+} from './useListConnectionsSuspense'
 export {
   listConversationsQueryKey,
   listConversationsQueryOptions,
   useListConversations,
 } from './useListConversations'
 export {
+  listConversationsSuspenseQueryKey,
+  listConversationsSuspenseQueryOptions,
+  useListConversationsSuspense,
+} from './useListConversationsSuspense'
+export {
   listMessagesQueryKey,
   listMessagesQueryOptions,
   useListMessages,
 } from './useListMessages'
 export {
+  listMessagesSuspenseQueryKey,
+  listMessagesSuspenseQueryOptions,
+  useListMessagesSuspense,
+} from './useListMessagesSuspense'
+export {
   listSourcesQueryKey,
   listSourcesQueryOptions,
   useListSources,
 } from './useListSources'
+export {
+  listSourcesSuspenseQueryKey,
+  listSourcesSuspenseQueryOptions,
+  useListSourcesSuspense,
+} from './useListSourcesSuspense'
 export {
   manageAgentSourcesMutationKey,
   useManageAgentSources,
@@ -136,6 +221,11 @@ export {
   streamMessageQueryOptions,
   useStreamMessage,
 } from './useStreamMessage'
+export {
+  streamMessageSuspenseQueryKey,
+  streamMessageSuspenseQueryOptions,
+  useStreamMessageSuspense,
+} from './useStreamMessageSuspense'
 export {
   updateConnectionMutationKey,
   useUpdateConnection,

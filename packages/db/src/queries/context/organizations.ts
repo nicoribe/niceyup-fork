@@ -44,6 +44,28 @@ export async function getOrganization(
   return organization || null
 }
 
+type ContextListOrganizationsParams = {
+  userId: string
+}
+
+export async function listOrganizations(
+  context: ContextListOrganizationsParams,
+) {
+  const listOrganizations = await db
+    .select({
+      id: organizations.id,
+      slug: organizations.slug,
+      name: organizations.name,
+      logo: organizations.logo,
+      metadata: organizations.metadata,
+    })
+    .from(organizations)
+    .innerJoin(members, eq(organizations.id, members.organizationId))
+    .where(eq(members.userId, context.userId))
+
+  return listOrganizations
+}
+
 type ContextGetOrganizationTeamParams = {
   userId: string
 }
@@ -99,6 +121,62 @@ export async function getOrganizationTeam(
     .limit(1)
 
   return organizationTeam || null
+}
+
+type ContextListOrganizationTeamsParams = {
+  userId: string
+}
+
+type ListOrganizationTeamsParams =
+  | {
+      organizationId: string
+      organizationSlug?: never
+    }
+  | {
+      organizationId?: never
+      organizationSlug: string
+    }
+
+export async function listOrganizationTeams(
+  context: ContextListOrganizationTeamsParams,
+  params: ListOrganizationTeamsParams,
+) {
+  const orgId =
+    params.organizationId ??
+    (await getOrganizationIdBySlug({
+      organizationSlug: params.organizationSlug,
+    }))
+
+  if (!orgId) {
+    return []
+  }
+
+  const listOrganizationTeams = await db
+    .select({
+      organization: {
+        id: organizations.id,
+        slug: organizations.slug,
+        name: organizations.name,
+        logo: organizations.logo,
+        metadata: organizations.metadata,
+      },
+      team: {
+        id: teams.id,
+        name: teams.name,
+        organizationId: teams.organizationId,
+      },
+    })
+    .from(teams)
+    .innerJoin(organizations, eq(teams.organizationId, organizations.id))
+    .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+    .where(
+      and(
+        eq(teams.organizationId, orgId),
+        eq(teamMembers.userId, context.userId),
+      ),
+    )
+
+  return listOrganizationTeams
 }
 
 type ContextGetMembershipParams = {

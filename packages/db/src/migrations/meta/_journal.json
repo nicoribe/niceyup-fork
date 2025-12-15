@@ -183,6 +183,13 @@
       "when": 1764364586296,
       "tag": "0025_dizzy_maddog",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1765465150905,
+      "tag": "0026_bouncy_senator_kelly",
+      "breakpoints": true
     }
   ]
 }

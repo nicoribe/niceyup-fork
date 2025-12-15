@@ -1,3 +1,4 @@
+import { listAgents } from '@/actions/agents'
 import {
   listOrganizationTeams,
   listOrganizations,
@@ -7,23 +8,20 @@ import { OrganizationSwitcher } from '@/components/organizations/organization-sw
 import { ProfileButton } from '@/components/organizations/profile-button'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { authenticatedUser } from '@/lib/auth/server'
-import { sdk } from '@/lib/sdk'
-import type { Agent, Team } from '@/lib/types'
+import type { Agent, OrganizationTeamParams, Team } from '@/lib/types'
 import { Separator } from '@workspace/ui/components/separator'
 import { Slash } from 'lucide-react'
 import Link from 'next/link'
 import { AgentSwitcher } from './agent-switcher'
 
 export async function Header({
-  selectedOrganizationLabel,
   organizationSlug,
   teamId,
   activeAgent,
-}: {
-  selectedOrganizationLabel?: string
-  organizationSlug?: string
-  teamId?: string
+  selectedOrganizationLabel,
+}: Partial<OrganizationTeamParams> & {
   activeAgent?: Agent
+  selectedOrganizationLabel?: string
 }) {
   const {
     session: { activeOrganizationId, activeTeamId },
@@ -41,12 +39,12 @@ export async function Header({
 
   if (activeOrganization) {
     teams = await listOrganizationTeams({
-      organizationId: activeOrganization.id,
+      organizationSlug: activeOrganization.slug,
     })
 
     const currentTeamId =
-      (!teamId || teamId === '~') &&
-      activeOrganizationId === activeOrganization.id
+      activeOrganizationId === activeOrganization.id &&
+      (!teamId || teamId === '~')
         ? activeTeamId
         : teamId
 
@@ -56,16 +54,10 @@ export async function Header({
   let agents: Agent[] = []
 
   if (activeAgent) {
-    const { data } = await sdk.listAgents({
-      params: {
-        organizationId: activeOrganization?.id,
-        teamId: activeTeam?.id,
-      },
+    agents = await listAgents({
+      organizationId: activeOrganization?.id,
+      teamId: activeTeam?.id,
     })
-
-    if (data?.agents) {
-      agents = data.agents
-    }
   }
 
   return (

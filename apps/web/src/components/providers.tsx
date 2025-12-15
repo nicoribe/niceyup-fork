@@ -5,6 +5,7 @@ import { AppProgressProvider as ProgressProvider } from '@bprogress/next'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@workspace/ui/components/sonner'
 import { ThemeProvider } from 'next-themes'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import type * as React from 'react'
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -22,7 +23,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           options={{ showSpinner: false }}
           shallowRouting
         >
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster />
         </ProgressProvider>
       </ThemeProvider>

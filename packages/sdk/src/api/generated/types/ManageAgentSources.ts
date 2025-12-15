@@ -121,6 +121,10 @@ export type ManageAgentSourcesMutationRequest = {
    */
   organizationSlug?: string | null
   /**
+   * @type string
+   */
+  teamId?: string | null
+  /**
    * @type array
    */
   add: string[]

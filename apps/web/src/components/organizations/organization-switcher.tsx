@@ -121,6 +121,7 @@ export function OrganizationSwitcher({
 
                     router.push(`/orgs/${organization.slug}/~/select-team`)
                   }}
+                  disabled={!organization.slug}
                 >
                   <Avatar className="mr-1 size-4 rounded-sm">
                     {organization.logo && (

@@ -31,6 +31,7 @@ export async function listConversations(
     .select({
       id: conversations.id,
       title: conversations.title,
+      updatedAt: conversations.updatedAt,
       ownerTeamId: conversations.ownerTeamId,
       ownerUserId: conversations.ownerUserId,
     })

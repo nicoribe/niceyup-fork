@@ -1,7 +1,6 @@
 import { and, eq } from 'drizzle-orm'
 import { db } from '../../db'
 import { agents, teamMembers, teamsToAgents } from '../../schema'
-import { isOrganizationMemberAdmin } from './organizations'
 
 type ContextListAgentsParams = {
   userId: string
@@ -22,34 +21,18 @@ export async function listAgents(context: ContextListAgentsParams) {
     .from(agents)
 
   if (context.organizationId) {
-    if (context.teamId) {
-      const listAgents = await selectQuery
-        .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
-        .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
-        .where(
-          and(
-            eq(teamsToAgents.teamId, context.teamId),
-            eq(teamMembers.userId, context.userId),
-          ),
-        )
-
-      return listAgents
-    }
-
-    const isAdmin = await isOrganizationMemberAdmin({
-      userId: context.userId,
-      organizationId: context.organizationId,
-    })
-
-    if (isAdmin) {
-      const listAgents = await selectQuery.where(
-        eq(agents.ownerOrganizationId, context.organizationId),
+    const listAgents = await selectQuery
+      .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
+      .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
+      .where(
+        and(
+          eq(agents.ownerOrganizationId, context.organizationId),
+          context.teamId ? eq(teamsToAgents.teamId, context.teamId) : undefined,
+          eq(teamMembers.userId, context.userId),
+        ),
       )
 
-      return listAgents
-    }
-
-    return []
+    return listAgents
   }
 
   const listAgents = await selectQuery.where(
@@ -85,41 +68,20 @@ export async function getAgent(
     .from(agents)
 
   if (context.organizationId) {
-    if (context.teamId) {
-      const [agent] = await selectQuery
-        .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
-        .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
-        .where(
-          and(
-            eq(agents.id, params.agentId),
-            eq(teamsToAgents.teamId, context.teamId),
-            eq(teamMembers.userId, context.userId),
-          ),
-        )
-        .limit(1)
+    const [agent] = await selectQuery
+      .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
+      .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
+      .where(
+        and(
+          eq(agents.id, params.agentId),
+          eq(agents.ownerOrganizationId, context.organizationId),
+          context.teamId ? eq(teamsToAgents.teamId, context.teamId) : undefined,
+          eq(teamMembers.userId, context.userId),
+        ),
+      )
+      .limit(1)
 
-      return agent || null
-    }
-
-    const isAdmin = await isOrganizationMemberAdmin({
-      userId: context.userId,
-      organizationId: context.organizationId,
-    })
-
-    if (isAdmin) {
-      const [agent] = await selectQuery
-        .where(
-          and(
-            eq(agents.id, params.agentId),
-            eq(agents.ownerOrganizationId, context.organizationId),
-          ),
-        )
-        .limit(1)
-
-      return agent || null
-    }
-
-    return null
+    return agent || null
   }
 
   const [agent] = await selectQuery

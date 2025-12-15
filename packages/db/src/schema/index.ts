@@ -34,8 +34,11 @@ export const sources = pgTable('sources', {
   name: text('name').notNull().default('Unnamed'),
   type: text('type').notNull().$type<SourceType>(),
 
+  // source configuration
   chunkSize: integer('chunk_size'),
   chunkOverlap: integer('chunk_overlap'),
+  languageModel: text('language_model'),
+  embeddingModel: text('embedding_model'),
 
   ownerUserId: text('owner_user_id').references(() => users.id),
   ownerOrganizationId: text('owner_organization_id').references(
@@ -201,7 +204,10 @@ export const agents = pgTable('agents', {
   description: text('description'),
   tags: text('tags').array(),
   published: boolean('published').notNull().default(false),
-  // TODO: implement settings
+
+  // agent configuration
+  languageModel: text('language_model'),
+  embeddingModel: text('embedding_model'),
 
   ownerUserId: text('owner_user_id').references(() => users.id),
   ownerOrganizationId: text('owner_organization_id').references(
@@ -218,7 +224,9 @@ export const agentsRelations = relations(agents, ({ many }) => ({
 export const conversations = pgTable('conversations', {
   ...id,
   title: text('title').notNull().default('Untitled'),
-  // TODO: implement settings
+
+  // conversation configuration
+  languageModel: text('language_model'),
 
   agentId: text('agent_id').references(() => agents.id),
 

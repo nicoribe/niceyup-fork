@@ -1,5 +1,6 @@
 import { SignOutLink } from '@/components/auth/sign-out-link'
 import { authenticatedUser } from '@/lib/auth/server'
+import { getInitials } from '@/lib/utils'
 import {
   Avatar,
   AvatarFallback,
@@ -17,16 +18,6 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { Book, ChevronDown, LogOut, MessageSquareMore } from 'lucide-react'
 import Link from 'next/link'
-
-function getInitials(name: string): string {
-  const initials = name
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join('')
-
-  return initials
-}
 
 export async function ProfileButton() {
   const { user } = await authenticatedUser()

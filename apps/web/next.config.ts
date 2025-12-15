@@ -2,10 +2,8 @@ import { env } from '@/lib/env'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   output: env.NEXT_CONFIG_OUTPUT,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },

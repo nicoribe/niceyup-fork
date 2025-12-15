@@ -38,6 +38,10 @@ export type ListConversations200 = {
      * @type string
      */
     title: string
+    /**
+     * @type string, date-time
+     */
+    updatedAt: string
   }[]
 }
 

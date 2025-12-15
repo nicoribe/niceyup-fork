@@ -13,8 +13,8 @@ import {
   FormMessage,
 } from '@workspace/ui/components/form'
 import { Input } from '@workspace/ui/components/input'
+import { Spinner } from '@workspace/ui/components/spinner'
 import { stripSpecialCharacters, validateSlug } from '@workspace/utils'
-import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
@@ -117,9 +117,7 @@ export function CreateOrganizationForm({ modal }: CreateOrganizationFormProps) {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
+            {form.formState.isSubmitting && <Spinner className="mr-2" />}
             Create
           </Button>
         </div>

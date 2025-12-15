@@ -1,6 +1,6 @@
 'use client'
 
-import { revalidateTag } from '@/actions/revalidate'
+import { updateTag } from '@/actions/cache'
 import { useUploadFiles } from '@/hooks/use-upload-files'
 import { env } from '@/lib/env'
 import { sdk } from '@/lib/sdk'
@@ -523,7 +523,7 @@ export function useChat({
       }
 
       if (params.chatId === 'new') {
-        await revalidateTag(`agent-${params.agentId}-chats`)
+        await updateTag('create-chat')
 
         router.push(
           `/orgs/${params.organizationSlug}/${params.teamId}/agents/${params.agentId}/chats/${data.conversationId}`,

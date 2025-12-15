@@ -16,6 +16,8 @@ export default async function Layout({
 }>) {
   const { organizationSlug, teamId, agentId } = await params
 
+  const isPersonalAccount = organizationSlug === 'my-account' && teamId === '~'
+
   const { data, error } = await sdk.getAgent({
     agentId,
     params: { organizationSlug, teamId },
@@ -35,6 +37,8 @@ export default async function Layout({
 
   const member = await getMembership({ organizationSlug })
 
+  const isAdmin = isPersonalAccount || member?.isAdmin
+
   const tabs: TabItem[] = [
     {
       label: <ChevronLeft className="size-4" />,
@@ -47,7 +51,7 @@ export default async function Layout({
     },
   ]
 
-  if (organizationSlug === 'my-account' || member?.isAdmin) {
+  if (isAdmin) {
     tabs.push(
       ...[
         // {
@@ -67,6 +71,14 @@ export default async function Layout({
           label: 'Tools',
           href: `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/tools`,
         },
+        // {
+        //   label: 'Builder',
+        //   href: `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/builder`,
+        // },
+        // {
+        //   label: 'Deploy',
+        //   href: `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/deploy`,
+        // }
       ],
     )
   }
@@ -74,6 +86,7 @@ export default async function Layout({
   tabs.push({
     label: 'Settings',
     href: `/orgs/${organizationSlug}/${teamId}/agents/${agentId}/settings`,
+    deep: true,
   })
 
   return (

@@ -769,7 +769,11 @@ function ChatUserMessageContent() {
 }
 
 function ChatEmptyMessage() {
-  return <p className="italic">No message content</p>
+  return (
+    <p className="italic">
+      No message content content content content content content content content
+    </p>
+  )
 }
 
 function ChatMessageActions() {
