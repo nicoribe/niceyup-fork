@@ -1,7 +1,5 @@
+import { redirect } from 'next/navigation'
+
 export default async function Page() {
-  return (
-    <p className="py-6 text-center text-muted-foreground text-xs">
-      Coming soon
-    </p>
-  )
+  return redirect('/account/overview/organizations')
 }

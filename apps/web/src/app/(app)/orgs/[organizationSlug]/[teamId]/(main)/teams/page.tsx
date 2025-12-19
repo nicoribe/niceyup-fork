@@ -32,7 +32,7 @@ export default async function Page({
             <div className="md:max-w-sm">
               <h2 className="font-semibold text-sm">Teams</h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Manage your teams within the organization.
+                Create and manage teams within your organization.
               </p>
             </div>
           </div>

@@ -15,6 +15,7 @@ export default async function Layout({
           {
             label: 'Overview',
             href: '/account/overview',
+            deep: true,
           },
           // {
           //   label: 'Activity',

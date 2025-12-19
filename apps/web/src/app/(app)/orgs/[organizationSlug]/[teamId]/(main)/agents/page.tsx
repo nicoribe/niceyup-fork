@@ -45,7 +45,7 @@ export default async function Page({
             <div className="md:max-w-sm">
               <h2 className="font-semibold text-sm">Agents</h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Manage your AI agents across different workflows.
+                Create and manage AI agents for your organization.
               </p>
             </div>
           </div>

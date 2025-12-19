@@ -42,7 +42,8 @@ export default async function Layout({
             <div className="md:max-w-sm">
               <h2 className="font-semibold text-sm">Sources</h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Manage the sources of your AI agent.
+                View and manage the data sources used to train and power this AI
+                agent.
               </p>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { DeleteOrganizationForm } from './_components/delete-organization-form'
 import { EditOrganizationLogoForm } from './_components/edit-organization-logo-form'
 import { EditOrganizationNameForm } from './_components/edit-organization-name-form'
 import { EditOrganizationSlugForm } from './_components/edit-organization-slug-form'
+import { LeaveOrganizationForm } from './_components/leave-organization-form'
 import { ViewOrganizationId } from './_components/view-organization-id'
 
 export default async function Page({
@@ -46,6 +47,8 @@ export default async function Page({
       />
 
       <ViewOrganizationId id={organization.id} />
+
+      <LeaveOrganizationForm params={{ organizationId: organization.id }} />
 
       {isOwner && (
         <DeleteOrganizationForm params={{ organizationId: organization.id }} />

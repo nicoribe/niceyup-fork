@@ -15,7 +15,7 @@ export function SourcePreview({
 }) {
   return (
     <div className={cn(className)} {...props}>
-      <p className="py-6 text-center text-muted-foreground text-xs">
+      <p className="py-24 text-center text-muted-foreground text-xs">
         Coming soon ({selectedSourceId})
       </p>
     </div>

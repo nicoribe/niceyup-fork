@@ -64,6 +64,10 @@ export async function listOrganizations(
       name: organizations.name,
       logo: organizations.logo,
       metadata: organizations.metadata,
+      member: {
+        id: members.id,
+        role: members.role,
+      },
     })
     .from(organizations)
     .innerJoin(members, eq(organizations.id, members.organizationId))

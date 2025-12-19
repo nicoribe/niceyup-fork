@@ -46,7 +46,7 @@ export default async function Layout({
             <div className="md:max-w-sm">
               <h2 className="font-semibold text-sm">Settings</h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Configure the settings of your organization.
+                Configure your organization’s preferences and information.
               </p>
             </div>
           </div>

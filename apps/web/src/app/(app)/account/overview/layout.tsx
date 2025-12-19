@@ -1,6 +1,5 @@
 import { Sidebar, type SidebarItem } from '@/components/sidebar'
 import { cn } from '@workspace/ui/lib/utils'
-import { SquareArrowOutUpRightIcon } from 'lucide-react'
 
 export default async function Layout({
   children,
@@ -9,18 +8,12 @@ export default async function Layout({
 }>) {
   const items: SidebarItem[] = [
     {
-      label: 'General',
-      href: '/account/settings/general',
+      label: 'Organizations',
+      href: '/account/overview/organizations',
     },
     {
-      label: 'Authentication',
-      href: '/account/settings/authentication',
-    },
-    {
-      label: 'Documentation',
-      href: '/docs/accounts',
-      target: '_blank',
-      icon: <SquareArrowOutUpRightIcon className="ml-auto size-4" />,
+      label: 'Domains',
+      href: '/account/overview/domains',
     },
   ]
 
@@ -35,9 +28,9 @@ export default async function Layout({
         >
           <div className="flex items-center gap-4">
             <div className="md:max-w-sm">
-              <h2 className="font-semibold text-sm">Account Settings</h2>
+              <h2 className="font-semibold text-sm">Account Overview</h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Manage and customize your account settings on Niceyup.
+                Overview of your account information on Niceyup.
               </p>
             </div>
           </div>
