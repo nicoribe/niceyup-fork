@@ -20,6 +20,7 @@ import { z } from 'zod'
 
 type Params = {
   organizationSlug: OrganizationTeamParams['organizationSlug']
+  organizationId: string
   teamId: string
 }
 
@@ -31,7 +32,11 @@ export function EditTeamNameForm({
   params,
   name,
   isAdmin,
-}: { params: Params; name: string; isAdmin?: boolean }) {
+}: {
+  params: Params
+  name: string
+  isAdmin?: boolean
+}) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,6 +48,7 @@ export function EditTeamNameForm({
     const { data, error } = await authClient.organization.updateTeam({
       teamId: params.teamId,
       data: {
+        organizationId: params.organizationId,
         name: values.name,
       },
     })
@@ -70,9 +76,9 @@ export function EditTeamNameForm({
             render={({ field }) => (
               <FormItem>
                 <div className="flex flex-col space-y-3">
-                  <h2 className="font-medium text-xl">Team name</h2>
+                  <h2 className="font-medium text-xl">Team Name</h2>
                   <p className="text-muted-foreground text-sm">
-                    This is your team's visible name within your organization
+                    This is your team's visible name within your organization.
                   </p>
                   <FormControl>
                     <Input
@@ -92,7 +98,7 @@ export function EditTeamNameForm({
           {isAdmin ? (
             <>
               <p className="text-muted-foreground text-sm">
-                Please use 255 characters at maximum
+                Please use 255 characters at maximum.
               </p>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Spinner className="mr-2" />}

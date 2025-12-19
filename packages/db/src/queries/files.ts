@@ -10,8 +10,7 @@ type CreateFileParams = {
   bucket: FileBucket
   scope: FileScope
   metadata?: FileMetadata
-  ownerUserId?: string | null
-  ownerOrganizationId?: string | null
+  organizationId?: string | null
 }
 
 export async function createFile(params: CreateFileParams, tx?: DBTransaction) {
@@ -25,8 +24,7 @@ export async function createFile(params: CreateFileParams, tx?: DBTransaction) {
       bucket: params.bucket,
       scope: params.scope,
       metadata: params.metadata,
-      ownerUserId: params.ownerUserId,
-      ownerOrganizationId: params.ownerOrganizationId,
+      organizationId: params.organizationId,
     })
     .returning({
       id: files.id,
@@ -37,8 +35,7 @@ export async function createFile(params: CreateFileParams, tx?: DBTransaction) {
       bucket: files.bucket,
       scope: files.scope,
       metadata: files.metadata,
-      ownerUserId: files.ownerUserId,
-      ownerOrganizationId: files.ownerOrganizationId,
+      organizationId: files.organizationId,
     })
 
   return file || null

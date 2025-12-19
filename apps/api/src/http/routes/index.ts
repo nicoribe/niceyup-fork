@@ -3,7 +3,6 @@ import { getAgent } from './agents/get-agent'
 import { listAgentSources } from './agents/list-agent-sources'
 import { listAgents } from './agents/list-agents'
 import { manageAgentSources } from './agents/manage-agent-sources'
-import { authRoutes } from './auth-routes'
 import { createConnection } from './connections/create-connection'
 import { deleteConnection } from './connections/delete-connection'
 import { getConnection } from './connections/get-connection'
@@ -38,7 +37,7 @@ import { updateSource } from './sources/update-source'
 
 export async function routes(app: FastifyTypedInstance) {
   app.register(health)
-  app.register(authRoutes)
+  // app.register(authRoutes)
 
   app.register(getProfile)
 

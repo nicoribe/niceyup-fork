@@ -1,5 +1,10 @@
+import { getMembership } from '@/actions/membership'
 import { getOrganization } from '@/actions/organizations'
 import type { OrganizationTeamParams } from '@/lib/types'
+import { DeleteOrganizationForm } from './_components/delete-organization-form'
+import { EditOrganizationLogoForm } from './_components/edit-organization-logo-form'
+import { EditOrganizationNameForm } from './_components/edit-organization-name-form'
+import { EditOrganizationSlugForm } from './_components/edit-organization-slug-form'
 import { ViewOrganizationId } from './_components/view-organization-id'
 
 export default async function Page({
@@ -7,48 +12,44 @@ export default async function Page({
 }: Readonly<{
   params: Promise<OrganizationTeamParams>
 }>) {
-  const { organizationSlug } = await params
+  const { organizationSlug, teamId } = await params
 
-  // const member = await getMembership({ organizationSlug })
+  const membership = await getMembership({ organizationSlug })
 
-  // const isAdmin = member?.isAdmin
+  const isOwner = membership?.role === 'owner'
+  const isAdmin = membership?.isAdmin
 
   const organization = await getOrganization({ organizationSlug })
 
+  if (!organization) {
+    return null
+  }
+
   return (
     <div className="flex w-full flex-col gap-4">
-      {/* {organization && (
-        <>
-          <EditOrganizationNameForm
-            params={{ organizationSlug }}
-            name={organization.name}
-            isAdmin={isAdmin}
-          />
+      <EditOrganizationNameForm
+        params={{ organizationId: organization.id }}
+        name={organization.name}
+        isAdmin={isAdmin}
+      />
 
-          <EditOrganizationSlugForm
-            params={{ organizationSlug }}
-            slug={organization.slug}
-            isAdmin={isAdmin}
-          />
+      <EditOrganizationSlugForm
+        params={{ organizationId: organization.id }}
+        slug={organization.slug}
+        isAdmin={isAdmin}
+      />
 
-          <EditOrganizationLogoForm
-            params={{ organizationSlug }}
-            logo={organization.logo}
-            isAdmin={isAdmin}
-          />
-        </>
-      )} */}
+      <EditOrganizationLogoForm
+        params={{ organizationId: organization.id, organizationSlug, teamId }}
+        logo={organization.logo}
+        isAdmin={isAdmin}
+      />
 
-      {organization && <ViewOrganizationId id={organization.id} />}
+      <ViewOrganizationId id={organization.id} />
 
-      {/* {organization && (
-        <DeleteOrganizationForm
-          params={{
-            organizationSlug,
-            organizationId: organization.organizationId,
-          }}
-        />
-      )} */}
+      {isOwner && (
+        <DeleteOrganizationForm params={{ organizationId: organization.id }} />
+      )}
     </div>
   )
 }

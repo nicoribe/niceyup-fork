@@ -1,4 +1,4 @@
-import { and, asc, eq, ilike, sql } from 'drizzle-orm'
+import { and, asc, eq, sql } from 'drizzle-orm'
 import { db } from '../../db'
 import {
   members,
@@ -7,21 +7,12 @@ import {
   teams,
   users,
 } from '../../schema/auth'
-import { getOrganizationIdBySlug } from '../organizations'
-import { isOrganizationMemberAdmin } from './organizations'
 
 type ContextGetTeamParams = {
   userId: string
-} & (
-  | {
-      organizationId: string
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug: string
-    }
-)
+  organizationId: string
+  isAdmin: boolean
+}
 
 type GetTeamParams = {
   teamId: string
@@ -31,16 +22,6 @@ export async function getTeam(
   context: ContextGetTeamParams,
   params: GetTeamParams,
 ) {
-  const orgId =
-    context.organizationId ??
-    (await getOrganizationIdBySlug({
-      organizationSlug: context.organizationSlug,
-    }))
-
-  if (!orgId) {
-    return null
-  }
-
   const selectQuery = db
     .select({
       id: teams.id,
@@ -49,18 +30,13 @@ export async function getTeam(
     })
     .from(teams)
 
-  const isAdmin = await isOrganizationMemberAdmin({
-    userId: context.userId,
-    organizationId: orgId,
-  })
-
-  if (isAdmin) {
+  if (context.isAdmin) {
     const [team] = await selectQuery
       .innerJoin(members, eq(teams.organizationId, members.organizationId))
       .where(
         and(
           eq(teams.id, params.teamId),
-          eq(teams.organizationId, orgId),
+          eq(teams.organizationId, context.organizationId),
           eq(members.userId, context.userId),
         ),
       )
@@ -75,7 +51,7 @@ export async function getTeam(
     .where(
       and(
         eq(teams.id, params.teamId),
-        eq(teams.organizationId, orgId),
+        eq(teams.organizationId, context.organizationId),
         eq(teamMembers.userId, context.userId),
       ),
     )
@@ -86,60 +62,30 @@ export async function getTeam(
 
 type ContextListTeamsParams = {
   userId: string
-} & (
-  | {
-      organizationId: string
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug: string
-    }
-)
-
-type ListTeamsParams = {
-  search?: string
+  organizationId: string
+  isAdmin: boolean
 }
 
-export async function listTeams(
-  context: ContextListTeamsParams,
-  params?: ListTeamsParams,
-) {
-  const orgId =
-    context.organizationId ??
-    (await getOrganizationIdBySlug({
-      organizationSlug: context.organizationSlug,
-    }))
-
-  if (!orgId) {
-    return []
-  }
-
+export async function listTeams(context: ContextListTeamsParams) {
   const selectQuery = db
     .select({
       id: teams.id,
       name: teams.name,
-      organizationId: teams.organizationId,
       memberCount:
         sql<number>`(SELECT COUNT(*) FROM ${teamMembers} WHERE ${teamMembers.teamId} = ${teams.id})`.as(
           'memberCount',
         ),
+      organizationId: teams.organizationId,
     })
     .from(teams)
 
-  const isAdmin = await isOrganizationMemberAdmin({
-    userId: context.userId,
-    organizationId: orgId,
-  })
-
-  if (isAdmin) {
+  if (context.isAdmin) {
     const listTeams = await selectQuery
       .innerJoin(members, eq(teams.organizationId, members.organizationId))
       .where(
         and(
-          eq(teams.organizationId, orgId),
+          eq(teams.organizationId, context.organizationId),
           eq(members.userId, context.userId),
-          params?.search ? ilike(teams.name, `%${params.search}%`) : undefined,
         ),
       )
       .orderBy(asc(teams.createdAt))
@@ -152,9 +98,8 @@ export async function listTeams(
     .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
     .where(
       and(
-        eq(teams.organizationId, orgId),
+        eq(teams.organizationId, context.organizationId),
         eq(teamMembers.userId, context.userId),
-        params?.search ? ilike(teams.name, `%${params.search}%`) : undefined,
       ),
     )
     .orderBy(asc(teams.createdAt))
@@ -164,16 +109,9 @@ export async function listTeams(
 
 type ContextListTeamMembersParams = {
   userId: string
-} & (
-  | {
-      organizationId: string
-      organizationSlug?: never
-    }
-  | {
-      organizationId?: never
-      organizationSlug: string
-    }
-)
+  organizationId: string
+  isAdmin: boolean
+}
 
 type ListTeamMembersParams = {
   teamId: string
@@ -183,13 +121,9 @@ export async function listTeamMembers(
   context: ContextListTeamMembersParams,
   params: ListTeamMembersParams,
 ) {
-  const orgId =
-    context.organizationId ??
-    (await getOrganizationIdBySlug({
-      organizationSlug: context.organizationSlug,
-    }))
+  const checkAccessToTeam = await getTeam(context, params)
 
-  if (!orgId) {
+  if (!checkAccessToTeam) {
     return []
   }
 
@@ -200,6 +134,8 @@ export async function listTeamMembers(
       email: users.email,
       image: users.image,
       role: members.role,
+      teamMemberId: teamMembers.id,
+      memberId: members.id,
     })
     .from(teamMembers)
     .innerJoin(teams, eq(teamMembers.teamId, teams.id))
@@ -208,8 +144,8 @@ export async function listTeamMembers(
     .where(
       and(
         eq(teamMembers.teamId, params.teamId),
-        eq(teams.organizationId, orgId),
-        eq(members.organizationId, orgId),
+        eq(teams.organizationId, context.organizationId),
+        eq(members.organizationId, context.organizationId),
       ),
     )
     .orderBy(asc(teamMembers.createdAt))

@@ -1,5 +1,5 @@
-import { getMembership } from '@/actions/organizations'
-import { PermissionDenied } from '@/components/organizations/permission-denied'
+import { isOrganizationMemberAdmin } from '@/actions/membership'
+import { PermissionDenied } from '@/components/permission-denied'
 import type { OrganizationTeamParams } from '@/lib/types'
 
 export default async function Layout({
@@ -11,9 +11,7 @@ export default async function Layout({
 }>) {
   const { organizationSlug } = await params
 
-  const member = await getMembership({ organizationSlug })
-
-  const isAdmin = member?.isAdmin
+  const isAdmin = await isOrganizationMemberAdmin({ organizationSlug })
 
   if (!isAdmin) {
     return <PermissionDenied />

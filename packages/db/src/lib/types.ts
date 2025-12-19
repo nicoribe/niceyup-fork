@@ -53,10 +53,10 @@ export type FileBucket = 'default' | 'engine'
 export type FileScope = 'public' | 'conversations' | 'sources'
 
 export type FileMetadata = {
-  authorId?: string
+  sentByUserId?: string
   // agentIds?: string[]
   // conversationIds?: string[]
   sourceId?: string
 }
 
-export type ConversationExplorerNodeVisibility = 'private' | 'shared' | 'team'
+export type ConversationVisibility = 'private' | 'shared' | 'team'

@@ -1,7 +1,6 @@
 'use client'
 
 import { authClient } from '@/lib/auth/client'
-import { env } from '@/lib/env'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@workspace/ui/components/button'
 import {
@@ -13,6 +12,12 @@ import {
   FormMessage,
 } from '@workspace/ui/components/form'
 import { Input } from '@workspace/ui/components/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@workspace/ui/components/input-group'
 import { Spinner } from '@workspace/ui/components/spinner'
 import { stripSpecialCharacters, validateSlug } from '@workspace/utils'
 import { useRouter } from 'next/navigation'
@@ -84,9 +89,9 @@ export function CreateOrganizationForm({ modal }: CreateOrganizationFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Organization name</FormLabel>
+                <FormLabel>Organization Name</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Acme Inc." />
+                  <Input {...field} placeholder="Acme Inc" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -100,16 +105,12 @@ export function CreateOrganizationForm({ modal }: CreateOrganizationFormProps) {
               <FormItem>
                 <FormLabel>Organization URL</FormLabel>
                 <FormControl>
-                  <div className="flex rounded-md shadow-xs">
-                    <span className="inline-flex items-center rounded-s-md border border-input bg-background px-3 text-muted-foreground text-sm">
-                      {new URL(env.NEXT_PUBLIC_WEB_URL).hostname}/orgs/
-                    </span>
-                    <Input
-                      {...field}
-                      className="-ms-px rounded-s-none shadow-none"
-                      placeholder="acme-inc"
-                    />
-                  </div>
+                  <InputGroup className="w-full max-w-md">
+                    <InputGroupAddon>
+                      <InputGroupText>niceyup.com/orgs/</InputGroupText>
+                    </InputGroupAddon>
+                    <InputGroupInput {...field} placeholder="acme-inc" />
+                  </InputGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,10 +1,10 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
-import { and, eq } from '@workspace/db/orm'
+import { eq } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
 import { connections } from '@workspace/db/schema'
 import { z } from 'zod'
@@ -38,7 +38,7 @@ export async function deleteConnection(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug } = request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -55,13 +55,7 @@ export async function deleteConnection(app: FastifyTypedInstance) {
         })
       }
 
-      const ownerTypeCondition = connection.ownerOrganizationId
-        ? eq(connections.ownerOrganizationId, connection.ownerOrganizationId)
-        : eq(connections.ownerUserId, connection.ownerUserId as string)
-
-      await db
-        .delete(connections)
-        .where(and(eq(connections.id, connectionId), ownerTypeCondition))
+      await db.delete(connections).where(eq(connections.id, connectionId))
 
       return reply.status(204).send()
     },

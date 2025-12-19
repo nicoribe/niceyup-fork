@@ -25,15 +25,7 @@ export type FileBucketScope =
 
 export type FileData = FileBucketScope & {
   metadata?: FileMetadata
-  owner:
-    | {
-        userId: string
-        organizationId?: never
-      }
-    | {
-        userId?: never
-        organizationId: string
-      }
+  organizationId?: string | null
 }
 
 const BucketScope = {
@@ -169,10 +161,7 @@ export async function uploadFileToStorage(params: UploadFileToStorageParams) {
     fileMimeType: params.file.mimetype,
     fileSize,
     filePath,
-    bucket: params.data.bucket,
-    scope: params.data.scope,
-    ownerUserId: params.data.owner.userId,
-    ownerOrganizationId: params.data.owner.organizationId,
+    ...params.data,
   })
 
   if (!createdFile) {

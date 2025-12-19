@@ -1,4 +1,4 @@
-import { Header } from '@/components/organizations/header'
+import { Header } from '@/components/header'
 import { getSessionToken } from '@/lib/auth/session-token'
 import { Button } from '@workspace/ui/components/button'
 import Link from 'next/link'
@@ -19,7 +19,7 @@ export default async function NotFound() {
             </span>
 
             <Button asChild>
-              <Link href="/">Back to Home</Link>
+              <Link href="/">Back to home</Link>
             </Button>
           </div>
         </main>
@@ -35,7 +35,7 @@ export default async function NotFound() {
       </span>
 
       <Button asChild>
-        <Link href="/">Back to Home</Link>
+        <Link href="/">Back to home</Link>
       </Button>
     </div>
   )

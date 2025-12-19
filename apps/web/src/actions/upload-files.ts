@@ -2,9 +2,6 @@
 
 import { env } from '@/lib/env'
 import { sdk } from '@/lib/sdk'
-import type { OrganizationTeamParams } from '@/lib/types'
-
-type ContextGenerateUploadSignatureParams = OrganizationTeamParams
 
 export type GenerateUploadSignatureParams =
   | ({
@@ -12,6 +9,9 @@ export type GenerateUploadSignatureParams =
     } & (
       | {
           scope: 'public'
+          params?: {
+            organizationSlug?: string | null
+          }
           accept?: string
           maxFiles?: number
           maxSize?: number
@@ -19,6 +19,10 @@ export type GenerateUploadSignatureParams =
         }
       | {
           scope: 'conversations'
+          params: {
+            organizationSlug: string
+            teamId?: string | null
+          }
           agentId: string
           conversationId?: string | null
         }
@@ -27,19 +31,21 @@ export type GenerateUploadSignatureParams =
       bucket: 'engine'
     } & {
       scope: 'sources'
+      params: {
+        organizationSlug: string
+      }
       sourceType?: 'file' | 'database'
       explorerNode?: { folderId?: string | null }
     })
 
 export async function generateUploadSignature(
-  context: ContextGenerateUploadSignatureParams,
   params: GenerateUploadSignatureParams,
 ) {
   const { data, error } =
     params.scope === 'sources'
       ? await sdk.generateUploadSignatureSource({
           data: {
-            ...context,
+            ...params.params,
             sourceType: params.sourceType,
             explorerNode: params.explorerNode,
           },
@@ -47,14 +53,13 @@ export async function generateUploadSignature(
       : params.scope === 'conversations'
         ? await sdk.generateUploadSignatureConversation({
             data: {
-              ...context,
+              ...params.params,
               agentId: params.agentId,
               conversationId: params.conversationId,
             },
           })
         : await sdk.generateUploadSignature({
             data: {
-              ...context,
               accept: params.accept,
               maxFiles: params.maxFiles,
               maxSize: params.maxSize,

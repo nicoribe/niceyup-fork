@@ -6,8 +6,12 @@ import type {
 } from '@workspace/ai/types'
 
 export type OrganizationTeamParams = {
-  organizationSlug: 'my-account' | '$id'
+  organizationSlug: '$slug'
   teamId: '~' | '$id'
+}
+
+export type AgentParams = {
+  agentId: '$id'
 }
 
 export type ChatParams = {
@@ -40,6 +44,8 @@ export type Agent = {
 export type Chat = {
   id: string
   title: string
+  visibility: ConversationVisibility
+  createdByUserId?: string | null
   updatedAt?: string
 }
 

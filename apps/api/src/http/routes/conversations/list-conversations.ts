@@ -1,5 +1,5 @@
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
@@ -26,6 +26,9 @@ export async function listConversations(app: FastifyTypedInstance) {
                 z.object({
                   id: z.string(),
                   title: z.string(),
+                  visibility: z.enum(['private', 'shared', 'team']),
+                  teamId: z.string().nullish(),
+                  createdByUserId: z.string().nullish(),
                   updatedAt: z.date(),
                 }),
               ),
@@ -42,7 +45,7 @@ export async function listConversations(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, agentId } =
         request.query
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,

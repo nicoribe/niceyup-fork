@@ -1,7 +1,11 @@
 import { getOrganizationIdBySlug } from '@/actions/organizations'
-import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
 import type { OrganizationTeamParams } from '@/lib/types'
-import { Card, CardContent, CardHeader } from '@workspace/ui/components/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@workspace/ui/components/card'
 import { Users2Icon } from 'lucide-react'
 import { CreateTeamForm } from './_components/create-team-form'
 
@@ -15,7 +19,7 @@ export default async function Page({
   const organizationId = await getOrganizationIdBySlug({ organizationSlug })
 
   if (!organizationId) {
-    return <OrganizationNotFound />
+    return null
   }
 
   return (
@@ -26,9 +30,9 @@ export default async function Page({
             <Users2Icon className="size-6 text-muted-foreground" />
           </div>
 
-          <h1 className="text-center font-semibold text-xl leading-none">
-            Create a team
-          </h1>
+          <CardTitle className="text-center font-semibold text-xl leading-none">
+            Create a Team
+          </CardTitle>
         </CardHeader>
         <CardContent className="mt-5">
           <CreateTeamForm

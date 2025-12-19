@@ -29,6 +29,15 @@ export type GetConversationQueryParams = {
   agentId: string
 }
 
+export const conversationVisibilityEnum = {
+  private: 'private',
+  shared: 'shared',
+  team: 'team',
+} as const
+
+export type ConversationVisibilityEnum =
+  (typeof conversationVisibilityEnum)[keyof typeof conversationVisibilityEnum]
+
 /**
  * @description Success
  */
@@ -45,7 +54,44 @@ export type GetConversation200 = {
      * @type string
      */
     title: string
+    /**
+     * @type string
+     */
+    visibility: ConversationVisibilityEnum
+    /**
+     * @type string
+     */
+    teamId?: string | null
+    /**
+     * @type string
+     */
+    createdByUserId?: string | null
+    /**
+     * @type string, date-time
+     */
+    updatedAt: string
   }
+  /**
+   * @type array
+   */
+  participants: {
+    /**
+     * @type string
+     */
+    id: string
+    /**
+     * @type string
+     */
+    name: string
+    /**
+     * @type string
+     */
+    email: string
+    /**
+     * @type string
+     */
+    image?: string | null
+  }[]
 }
 
 /**

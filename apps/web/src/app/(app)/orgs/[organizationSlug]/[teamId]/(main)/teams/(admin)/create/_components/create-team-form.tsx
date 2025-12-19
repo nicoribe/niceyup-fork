@@ -75,7 +75,7 @@ export function CreateTeamForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Team name</FormLabel>
+                <FormLabel>Team Name</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="Development Team" />
                 </FormControl>

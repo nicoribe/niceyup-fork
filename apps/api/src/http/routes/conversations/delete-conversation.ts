@@ -1,6 +1,6 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
@@ -46,7 +46,7 @@ export async function deleteConversation(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, agentId, destroy } =
         request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -66,7 +66,7 @@ export async function deleteConversation(app: FastifyTypedInstance) {
       }
 
       await db.transaction(async (tx) => {
-        if (userId !== conversation.ownerUserId && !conversation.ownerTeamId) {
+        if (conversation.visibility === 'shared') {
           await tx
             .delete(conversationExplorerNodes)
             .where(
@@ -85,19 +85,13 @@ export async function deleteConversation(app: FastifyTypedInstance) {
               ),
             )
         } else {
-          const explorerOwnerTypeCondition = conversation.ownerTeamId
-            ? eq(
-                conversationExplorerNodes.ownerTeamId,
-                conversation.ownerTeamId,
-              )
-            : eq(
-                conversationExplorerNodes.ownerUserId,
-                conversation.ownerUserId as string,
-              )
+          const explorerOwnerTypeCondition = conversation.teamId
+            ? eq(conversationExplorerNodes.ownerTeamId, conversation.teamId)
+            : eq(conversationExplorerNodes.ownerUserId, userId)
 
-          const ownerTypeCondition = conversation.ownerTeamId
-            ? eq(conversations.ownerTeamId, conversation.ownerTeamId)
-            : eq(conversations.ownerUserId, conversation.ownerUserId as string)
+          const ownerTypeCondition = conversation.teamId
+            ? eq(conversations.teamId, conversation.teamId)
+            : eq(conversations.createdByUserId, userId)
 
           if (destroy) {
             await tx

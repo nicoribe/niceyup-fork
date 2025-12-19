@@ -1,5 +1,10 @@
-import { Card, CardContent, CardHeader } from '@workspace/ui/components/card'
-import { Building2 } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@workspace/ui/components/card'
+import { Building2Icon } from 'lucide-react'
 import { CreateOrganizationForm } from './_components/create-organization-form'
 
 export default async function Page() {
@@ -8,12 +13,12 @@ export default async function Page() {
       <Card>
         <CardHeader>
           <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-border">
-            <Building2 className="size-6 text-muted-foreground" />
+            <Building2Icon className="size-6 text-muted-foreground" />
           </div>
 
-          <h1 className="text-center font-semibold text-xl leading-none">
-            Create an organization
-          </h1>
+          <CardTitle className="text-center font-semibold text-xl leading-none">
+            Create an Organization
+          </CardTitle>
         </CardHeader>
         <CardContent className="mt-5">
           <CreateOrganizationForm />

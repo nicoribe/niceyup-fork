@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
@@ -44,7 +44,7 @@ export async function manageAgentSources(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, add, remove } =
         request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -60,19 +60,25 @@ export async function manageAgentSources(app: FastifyTypedInstance) {
         })
       }
 
-      const sourceOwnerTypeCondition = context.organizationId
-        ? eq(sources.ownerOrganizationId, context.organizationId)
-        : eq(sources.ownerUserId, context.userId)
-
       const [sourcesAdd, sourcesRemove] = await Promise.all([
         db
           .select({ id: sources.id })
           .from(sources)
-          .where(and(inArray(sources.id, add), sourceOwnerTypeCondition)),
+          .where(
+            and(
+              inArray(sources.id, add),
+              eq(sources.organizationId, context.organizationId),
+            ),
+          ),
         db
           .select({ id: sources.id })
           .from(sources)
-          .where(and(inArray(sources.id, remove), sourceOwnerTypeCondition)),
+          .where(
+            and(
+              inArray(sources.id, remove),
+              eq(sources.organizationId, context.organizationId),
+            ),
+          ),
       ])
 
       const sourceAddIdsNotFound = add.filter(
@@ -88,11 +94,9 @@ export async function manageAgentSources(app: FastifyTypedInstance) {
           ...sourceRemoveIdsNotFound,
         ]
 
-        const plural = sourceIdsNotFound.length > 1
-
         throw new BadRequestError({
           code: 'SOURCE_NOT_FOUND',
-          message: `${plural ? 'Sources' : 'Source'} with ${plural ? 'IDs' : 'ID'} ${sourceIdsNotFound.join(', ')} not found or you don’t have access`,
+          message: `The following source IDs were not found or you don’t have access to them: [${sourceIdsNotFound.join(', ')}]`,
         })
       }
 

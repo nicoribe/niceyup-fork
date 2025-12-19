@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
+        source: '/api/:path((?!auth/).*)*',
         destination: `${env.NEXT_PUBLIC_API_URL}/api/:path*`,
       },
     ]

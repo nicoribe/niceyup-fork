@@ -1,4 +1,4 @@
-import { Sidebar, type SidebarItem } from '@/components/organizations/sidebar'
+import { Sidebar, type SidebarItem } from '@/components/sidebar'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { cn } from '@workspace/ui/lib/utils'
 import { SquareArrowOutUpRightIcon } from 'lucide-react'
@@ -16,6 +16,10 @@ export default async function Layout({
     {
       label: 'General',
       href: `/orgs/${organizationSlug}/~/settings/general`,
+    },
+    {
+      label: 'Billing',
+      href: `/orgs/${organizationSlug}/~/settings/billing`,
     },
     {
       label: 'Members',
@@ -42,7 +46,7 @@ export default async function Layout({
             <div className="md:max-w-sm">
               <h2 className="font-semibold text-sm">Settings</h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Configure the settings of your organization
+                Configure the settings of your organization.
               </p>
             </div>
           </div>

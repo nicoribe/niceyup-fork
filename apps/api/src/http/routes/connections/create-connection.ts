@@ -1,6 +1,6 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { db } from '@workspace/db'
@@ -37,7 +37,7 @@ export async function createConnection(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, app, name } = request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -45,16 +45,12 @@ export async function createConnection(app: FastifyTypedInstance) {
 
       // TODO: implement app validation
 
-      const ownerTypeCondition = context.organizationId
-        ? { ownerOrganizationId: context.organizationId }
-        : { ownerUserId: context.userId }
-
       const [connection] = await db
         .insert(connections)
         .values({
           app,
           name,
-          ...ownerTypeCondition,
+          organizationId: context.organizationId,
         })
         .returning({
           id: connections.id,

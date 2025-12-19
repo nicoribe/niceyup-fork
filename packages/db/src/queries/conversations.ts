@@ -12,8 +12,8 @@ export async function getConversation(params: ConversationParams) {
       id: conversations.id,
       title: conversations.title,
       agentId: conversations.agentId,
-      ownerUserId: conversations.ownerUserId,
-      ownerTeamId: conversations.ownerTeamId,
+      teamId: conversations.teamId,
+      createdByUserId: conversations.createdByUserId,
     })
     .from(conversations)
     .where(

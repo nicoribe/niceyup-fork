@@ -1,5 +1,5 @@
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { generateSignatureForUpload } from '@/http/functions/upload-file-to-storage'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
@@ -40,7 +40,7 @@ export async function generateUploadSignatureSource(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, sourceType, explorerNode } =
         request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -53,11 +53,9 @@ export async function generateUploadSignatureSource(app: FastifyTypedInstance) {
             bucket: 'engine',
             scope: 'sources',
             metadata: {
-              authorId: context.userId,
+              sentByUserId: context.userId,
             },
-            owner: context.organizationId
-              ? { organizationId: context.organizationId }
-              : { userId: context.userId },
+            organizationId: context.organizationId,
           },
           sourceType,
           explorerNode,

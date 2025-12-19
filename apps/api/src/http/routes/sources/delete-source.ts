@@ -1,9 +1,6 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import {
-  getNamespaceContext,
-  getOrganizationContext,
-} from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import { env } from '@/lib/env'
 import type { FastifyTypedInstance } from '@/types/fastify'
@@ -51,7 +48,7 @@ export async function deleteSource(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, destroy } = request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -112,30 +109,24 @@ export async function deleteSource(app: FastifyTypedInstance) {
       }
 
       await db.transaction(async (tx) => {
-        const explorerOwnerTypeCondition = source.ownerOrganizationId
-          ? eq(
-              sourceExplorerNodes.ownerOrganizationId,
-              source.ownerOrganizationId,
-            )
-          : eq(sourceExplorerNodes.ownerUserId, source.ownerUserId as string)
-
-        const ownerTypeCondition = source.ownerOrganizationId
-          ? eq(sources.ownerOrganizationId, source.ownerOrganizationId)
-          : eq(sources.ownerUserId, source.ownerUserId as string)
-
         if (destroy) {
           await tx
             .delete(sourceExplorerNodes)
             .where(
               and(
                 eq(sourceExplorerNodes.sourceId, sourceId),
-                explorerOwnerTypeCondition,
+                eq(sourceExplorerNodes.organizationId, context.organizationId),
               ),
             )
 
           await tx
             .delete(sources)
-            .where(and(eq(sources.id, sourceId), ownerTypeCondition))
+            .where(
+              and(
+                eq(sources.id, sourceId),
+                eq(sources.organizationId, context.organizationId),
+              ),
+            )
 
           if (_file) {
             await tx.delete(files).where(eq(files.id, _file.id))
@@ -147,20 +138,25 @@ export async function deleteSource(app: FastifyTypedInstance) {
             .where(
               and(
                 eq(sourceExplorerNodes.sourceId, sourceId),
-                explorerOwnerTypeCondition,
+                eq(sourceExplorerNodes.organizationId, context.organizationId),
               ),
             )
 
           await tx
             .update(sources)
             .set({ deletedAt: new Date() })
-            .where(and(eq(sources.id, sourceId), ownerTypeCondition))
+            .where(
+              and(
+                eq(sources.id, sourceId),
+                eq(sources.organizationId, context.organizationId),
+              ),
+            )
         }
       })
 
       await Promise.all([
         vectorStore.delete({
-          namespace: getNamespaceContext(context),
+          namespace: context.organizationId,
           sourceId,
         }),
 

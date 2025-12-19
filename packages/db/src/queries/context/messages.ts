@@ -5,7 +5,7 @@ import { getConversation } from './conversations'
 
 type ContextGetMessageParams = {
   userId: string
-  organizationId?: string | null
+  organizationId: string
   teamId?: string | null
 }
 

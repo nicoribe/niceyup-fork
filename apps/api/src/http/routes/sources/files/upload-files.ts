@@ -82,14 +82,10 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
         },
       })
 
-      const ownerTypeCondition = data.owner.organizationId
-        ? { ownerOrganizationId: data.owner.organizationId }
-        : { ownerUserId: data.owner.userId }
-
       if (explorerNode.folderId && explorerNode.folderId !== 'root') {
         const folderExplorerNode = await getSourceExplorerNodeFolder({
           id: explorerNode.folderId,
-          ...ownerTypeCondition,
+          organizationId: data.organizationId,
         })
 
         if (!folderExplorerNode) {
@@ -126,7 +122,7 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
                 .values({
                   name: validatedFile.filename,
                   type: sourceType,
-                  ...ownerTypeCondition,
+                  organizationId: data.organizationId,
                 })
                 .returning({
                   id: sources.id,
@@ -142,7 +138,7 @@ export async function uploadFilesSource(app: FastifyTypedInstance) {
               const itemExplorerNode = await createSourceExplorerNodeItem({
                 parentId: explorerNode.folderId,
                 sourceId: source.id,
-                ...ownerTypeCondition,
+                organizationId: data.organizationId,
               })
 
               if (!itemExplorerNode) {

@@ -2,11 +2,10 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '../../db'
 import type { ConnectionApp } from '../../lib/types'
 import { connections } from '../../schema'
-import { isOrganizationMemberAdmin } from './organizations'
 
 type ContextListConnectionsParams = {
-  userId: string
-  organizationId?: string | null
+  organizationId: string
+  isAdmin: boolean
 }
 
 type ListConnectionsParams = {
@@ -17,7 +16,11 @@ export async function listConnections(
   context: ContextListConnectionsParams,
   params: ListConnectionsParams,
 ) {
-  const selectQuery = db
+  if (!context.isAdmin) {
+    return []
+  }
+
+  const listConnections = await db
     .select({
       id: connections.id,
       app: connections.app,
@@ -25,40 +28,20 @@ export async function listConnections(
       payload: connections.payload,
     })
     .from(connections)
-
-  if (context.organizationId) {
-    const isAdmin = await isOrganizationMemberAdmin({
-      userId: context.userId,
-      organizationId: context.organizationId,
-    })
-
-    if (isAdmin) {
-      const listConnections = await selectQuery.where(
-        and(
-          eq(connections.ownerOrganizationId, context.organizationId),
-          params.app ? eq(connections.app, params.app) : undefined,
-        ),
-      )
-
-      return listConnections
-    }
-
-    return []
-  }
-
-  const listConnections = await selectQuery.where(
-    and(
-      eq(connections.ownerUserId, context.userId),
-      params.app ? eq(connections.app, params.app) : undefined,
-    ),
-  )
+    .where(
+      and(
+        eq(connections.organizationId, context.organizationId),
+        params.app ? eq(connections.app, params.app) : undefined,
+      ),
+    )
 
   return listConnections
 }
 
 type ContextGetConnectionParams = {
   userId: string
-  organizationId?: string | null
+  organizationId: string
+  isAdmin: boolean
 }
 
 type GetConnectionParams = {
@@ -69,44 +52,22 @@ export async function getConnection(
   context: ContextGetConnectionParams,
   params: GetConnectionParams,
 ) {
-  const selectQuery = db
+  if (!context.isAdmin) {
+    return null
+  }
+
+  const [connection] = await db
     .select({
       id: connections.id,
       app: connections.app,
       name: connections.name,
       payload: connections.payload,
-      ownerUserId: connections.ownerUserId,
-      ownerOrganizationId: connections.ownerOrganizationId,
     })
     .from(connections)
-
-  if (context.organizationId) {
-    const isAdmin = await isOrganizationMemberAdmin({
-      userId: context.userId,
-      organizationId: context.organizationId,
-    })
-
-    if (isAdmin) {
-      const [connection] = await selectQuery
-        .where(
-          and(
-            eq(connections.id, params.connectionId),
-            eq(connections.ownerOrganizationId, context.organizationId),
-          ),
-        )
-        .limit(1)
-
-      return connection || null
-    }
-
-    return null
-  }
-
-  const [connection] = await selectQuery
     .where(
       and(
         eq(connections.id, params.connectionId),
-        eq(connections.ownerUserId, context.userId),
+        eq(connections.organizationId, context.organizationId),
       ),
     )
     .limit(1)

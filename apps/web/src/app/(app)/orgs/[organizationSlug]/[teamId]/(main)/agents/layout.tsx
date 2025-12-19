@@ -1,5 +1,5 @@
 import { getOrganizationTeam } from '@/actions/organizations'
-import { OrganizationNotFound } from '@/components/organizations/organization-not-found'
+import { OrganizationNotFound } from '@/components/organization-not-found'
 import type { OrganizationTeamParams } from '@/lib/types'
 
 export default async function Layout({
@@ -11,15 +11,13 @@ export default async function Layout({
 }>) {
   const { organizationSlug, teamId } = await params
 
-  const isPersonalAccount = organizationSlug === 'my-account' && teamId === '~'
-
   if (teamId !== '~') {
     const organizationTeam = await getOrganizationTeam({
       organizationSlug,
       teamId,
     })
 
-    if (!isPersonalAccount && !organizationTeam) {
+    if (!organizationTeam) {
       return <OrganizationNotFound />
     }
   }

@@ -1,6 +1,6 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
@@ -47,14 +47,16 @@ export async function getAgent(app: FastifyTypedInstance) {
 
       const { organizationId, organizationSlug, teamId } = request.query
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
         teamId,
       })
 
-      const agent = await queries.context.getAgent(context, { agentId })
+      const agent = await queries.context.getAgent(context, {
+        agentId,
+      })
 
       if (!agent) {
         throw new BadRequestError({

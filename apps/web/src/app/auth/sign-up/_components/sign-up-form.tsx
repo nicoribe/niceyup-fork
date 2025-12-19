@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from '@workspace/ui/components/form'
 import { Input } from '@workspace/ui/components/input'
-import { CheckIcon, EyeIcon, EyeOffIcon, Loader2, XIcon } from 'lucide-react'
+import { Spinner } from '@workspace/ui/components/spinner'
+import { CheckIcon, EyeIcon, EyeOffIcon, XIcon } from 'lucide-react'
 import { redirect, useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
@@ -22,7 +23,7 @@ import { z } from 'zod'
 
 const formSchema = z.object({
   name: z.string().trim().min(3).max(255),
-  email: z.string().trim().email(),
+  email: z.email().trim(),
   password: z.string().trim().min(1, '').max(128),
 })
 
@@ -233,9 +234,7 @@ export function SignUpForm() {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
+            {form.formState.isSubmitting && <Spinner className="mr-2" />}
             Create account
           </Button>
         </div>

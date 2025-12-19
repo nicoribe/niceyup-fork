@@ -1,9 +1,12 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
+import { db } from '@workspace/db'
+import { eq } from '@workspace/db/orm'
 import { queries } from '@workspace/db/queries'
+import { conversationsToUsers, teamMembers, users } from '@workspace/db/schema'
 import { z } from 'zod'
 
 export async function getConversation(app: FastifyTypedInstance) {
@@ -29,7 +32,19 @@ export async function getConversation(app: FastifyTypedInstance) {
               conversation: z.object({
                 id: z.string(),
                 title: z.string(),
+                visibility: z.enum(['private', 'shared', 'team']),
+                teamId: z.string().nullish(),
+                createdByUserId: z.string().nullish(),
+                updatedAt: z.date(),
               }),
+              participants: z.array(
+                z.object({
+                  id: z.string(),
+                  name: z.string(),
+                  email: z.string(),
+                  image: z.string().nullish(),
+                }),
+              ),
             })
             .describe('Success'),
         }),
@@ -45,7 +60,7 @@ export async function getConversation(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, agentId } =
         request.query
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -64,39 +79,27 @@ export async function getConversation(app: FastifyTypedInstance) {
         })
       }
 
-      // let visibility = null
-      // let sharedWith = null
+      const participantsSelectQuery = db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          image: users.image,
+        })
+        .from(users)
 
-      // if (conversation.ownerTeamId) {
-      //   visibility = 'team'
+      const participants = conversation.teamId
+        ? await participantsSelectQuery
+            .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
+            .where(eq(teamMembers.teamId, conversation.teamId))
+        : await participantsSelectQuery
+            .innerJoin(
+              conversationsToUsers,
+              eq(users.id, conversationsToUsers.userId),
+            )
+            .where(eq(conversationsToUsers.conversationId, conversation.id))
 
-      //   sharedWith = await db
-      //     .select({
-      //       id: users.id,
-      //       name: users.name,
-      //       email: users.email,
-      //     })
-      //     .from(users)
-      //     .innerJoin(teamMembers, eq(users.id, teamMembers.userId))
-      //     .where(eq(teamMembers.teamId, conversation.ownerTeamId))
-      // } else {
-      //   visibility = conversation.ownerUserId !== userId ? 'shared' : 'private'
-
-      //   sharedWith = await db
-      //     .select({
-      //       id: users.id,
-      //       name: users.name,
-      //       email: users.email,
-      //     })
-      //     .from(users)
-      //     .innerJoin(
-      //       conversationsToUsers,
-      //       eq(users.id, conversationsToUsers.userId),
-      //     )
-      //     .where(eq(conversationsToUsers.conversationId, conversation.id))
-      // }
-
-      return { conversation }
+      return { conversation, participants }
     },
   )
 }

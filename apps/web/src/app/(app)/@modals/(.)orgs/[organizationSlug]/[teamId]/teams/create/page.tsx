@@ -1,4 +1,4 @@
-import { getMembership } from '@/actions/organizations'
+import { getMembership } from '@/actions/membership'
 import type { OrganizationTeamParams } from '@/lib/types'
 import {
   Dialog,
@@ -16,9 +16,9 @@ export default async function Page({
 }>) {
   const { organizationSlug } = await params
 
-  const member = await getMembership({ organizationSlug })
+  const membership = await getMembership({ organizationSlug })
 
-  const isAdmin = member?.isAdmin
+  const isAdmin = membership?.isAdmin
 
   if (!isAdmin) {
     return null
@@ -33,14 +33,15 @@ export default async function Page({
           </div>
 
           <DialogTitle className="text-center font-semibold text-xl leading-none">
-            Create a team
+            Create a Team
           </DialogTitle>
         </DialogHeader>
+
         <div className="mt-5">
           <CreateTeamForm
             modal
             organizationSlug={organizationSlug}
-            organizationId={member.organizationId}
+            organizationId={membership.organizationId}
           />
         </div>
       </InterceptedDialogContent>

@@ -1,6 +1,5 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
 import { env } from '@/lib/env'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import { queries } from '@workspace/db/queries'
@@ -54,12 +53,21 @@ export async function getFile(app: FastifyTypedInstance) {
       const { organizationId, organizationSlug, teamId, expires } =
         request.query
 
-      const context = await getOrganizationContext({
+      const orgId =
+        organizationId ||
+        (await queries.getOrganizationIdBySlug({ organizationSlug }))
+
+      const context = {
         userId,
-        organizationId,
-        organizationSlug,
-        teamId,
-      })
+        organizationId: orgId,
+        teamId: teamId && teamId !== '~' ? teamId : null,
+        isAdmin: orgId
+          ? await queries.context.isOrganizationMemberAdmin({
+              userId,
+              organizationId: orgId,
+            })
+          : false,
+      }
 
       const file = await queries.context.getFile(context, {
         fileId,

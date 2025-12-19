@@ -6,20 +6,15 @@ import { generateKeyBetween } from 'jittered-fractional-indexing'
 
 type GetSourceExplorerNodeFolderParams = {
   id: string
-  ownerUserId?: string | null
-  ownerOrganizationId?: string | null
+  organizationId: string | null | undefined
 }
 
 export async function getSourceExplorerNodeFolder(
   params: GetSourceExplorerNodeFolderParams,
 ) {
-  if (!params.ownerOrganizationId && !params.ownerUserId) {
+  if (!params.organizationId) {
     return null
   }
-
-  const ownerTypeCondition = params.ownerOrganizationId
-    ? eq(sourceExplorerNodes.ownerOrganizationId, params.ownerOrganizationId)
-    : eq(sourceExplorerNodes.ownerUserId, params.ownerUserId as string)
 
   const [explorerNode] = await db
     .select({
@@ -29,7 +24,7 @@ export async function getSourceExplorerNodeFolder(
     .where(
       and(
         eq(sourceExplorerNodes.id, params.id),
-        ownerTypeCondition,
+        eq(sourceExplorerNodes.organizationId, params.organizationId),
         isNull(sourceExplorerNodes.sourceId),
         isNull(sourceExplorerNodes.deletedAt),
       ),
@@ -42,21 +37,16 @@ export async function getSourceExplorerNodeFolder(
 type CreateSourceExplorerNodeItemParams = {
   parentId?: string | null
   sourceId: string
-  ownerUserId?: string | null
-  ownerOrganizationId?: string | null
+  organizationId: string | null | undefined
 }
 
 export async function createSourceExplorerNodeItem(
   params: CreateSourceExplorerNodeItemParams,
   tx?: DBTransaction,
 ) {
-  if (!params.ownerOrganizationId && !params.ownerUserId) {
+  if (!params.organizationId) {
     return null
   }
-
-  const ownerTypeCondition = params.ownerOrganizationId
-    ? eq(sourceExplorerNodes.ownerOrganizationId, params.ownerOrganizationId)
-    : eq(sourceExplorerNodes.ownerUserId, params.ownerUserId as string)
 
   const [firstSibling] = await (tx ?? db)
     .select({
@@ -68,7 +58,7 @@ export async function createSourceExplorerNodeItem(
         !params.parentId || params.parentId === 'root'
           ? isNull(sourceExplorerNodes.parentId)
           : eq(sourceExplorerNodes.parentId, params.parentId),
-        ownerTypeCondition,
+        eq(sourceExplorerNodes.organizationId, params.organizationId),
         isNull(sourceExplorerNodes.deletedAt),
       ),
     )
@@ -86,8 +76,7 @@ export async function createSourceExplorerNodeItem(
       sourceId: params.sourceId,
       parentId: params.parentId === 'root' ? null : params.parentId,
       fractionalIndex,
-      ownerOrganizationId: params.ownerOrganizationId,
-      ownerUserId: params.ownerUserId,
+      organizationId: params.organizationId,
     })
     .returning({
       id: sourceExplorerNodes.id,

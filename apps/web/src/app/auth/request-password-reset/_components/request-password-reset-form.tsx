@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from '@workspace/ui/components/form'
 import { Input } from '@workspace/ui/components/input'
-import { Loader2 } from 'lucide-react'
+import { Spinner } from '@workspace/ui/components/spinner'
 import { useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
@@ -88,9 +88,7 @@ export function RequestPasswordResetForm() {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
+            {form.formState.isSubmitting && <Spinner className="mr-2" />}
             Send reset instructions
           </Button>
         </div>

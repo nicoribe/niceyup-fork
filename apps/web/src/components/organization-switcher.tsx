@@ -1,0 +1,128 @@
+'use client'
+
+import { setActiveOrganizationTeam } from '@/actions/organizations'
+import { TeamSwitcher } from '@/components/team-switcher'
+import type { Organization, Team } from '@/lib/types'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@workspace/ui/components/avatar'
+import { Button } from '@workspace/ui/components/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@workspace/ui/components/dropdown-menu'
+import {
+  ChevronsUpDownIcon,
+  CircleDashedIcon,
+  PlusCircleIcon,
+  SlashIcon,
+} from 'lucide-react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+
+export function OrganizationSwitcher({
+  selectedOrganizationLabel,
+  activeOrganization,
+  activeTeam,
+  organizations,
+  teams,
+}: {
+  selectedOrganizationLabel?: string
+  activeOrganization?: Organization
+  activeTeam?: Team
+  organizations?: Organization[]
+  teams?: Team[]
+}) {
+  const pathname = usePathname()
+  const router = useRouter()
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="max-w-[250px]">
+            {selectedOrganizationLabel ? (
+              <>
+                <CircleDashedIcon className="mr-1 size-5" />
+                <span className="truncate">{selectedOrganizationLabel}</span>
+              </>
+            ) : activeOrganization ? (
+              <>
+                <Avatar className="size-6 rounded-sm">
+                  {activeOrganization.logo && (
+                    <AvatarImage src={activeOrganization.logo} />
+                  )}
+                  <AvatarFallback className="rounded-sm" />
+                </Avatar>
+                <span className="truncate">{activeOrganization.name}</span>
+                <div className="rounded-sm border px-2 py-0.5">
+                  {/* <span className="text-xs">Hobby</span> */}
+                  <span className="text-xs">Standard</span>
+                  {/* <span className="text-xs">Pro</span> */}
+                </div>
+              </>
+            ) : (
+              <span className="text-muted-foreground">Select organization</span>
+            )}
+            <ChevronsUpDownIcon className="ml-auto size-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          sideOffset={12}
+          className="w-[200px]"
+        >
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+            {organizations?.map((organization) => {
+              return (
+                <DropdownMenuItem
+                  key={organization.id}
+                  onClick={async () => {
+                    await setActiveOrganizationTeam({
+                      organizationId: organization.id,
+                    })
+
+                    router.push(`/orgs/${organization.slug}/~/overview`)
+                  }}
+                  disabled={!organization.slug}
+                >
+                  <Avatar className="mr-1 size-4 rounded-sm">
+                    {organization.logo && (
+                      <AvatarImage src={organization.logo} />
+                    )}
+                    <AvatarFallback className="rounded-sm" />
+                  </Avatar>
+                  <span className="line-clamp-1">{organization.name}</span>
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuGroup>
+
+          {pathname !== '/onboarding/create-organization' && (
+            <DropdownMenuItem asChild>
+              <Link href="/onboarding/create-organization">
+                <PlusCircleIcon className="mr-1 size-4" />
+                Create organization
+              </Link>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {activeOrganization && (
+        <>
+          <SlashIcon className="-rotate-[24deg] size-3 text-border" />
+
+          <TeamSwitcher activeTeam={activeTeam} teams={teams} />
+        </>
+      )}
+    </>
+  )
+}

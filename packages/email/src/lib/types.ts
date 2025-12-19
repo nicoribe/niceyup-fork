@@ -4,3 +4,10 @@ export type User = {
   name: string
   image?: string | null
 }
+
+export type Organization = {
+  id: string
+  name: string
+  slug: string
+  logo?: string | null
+}

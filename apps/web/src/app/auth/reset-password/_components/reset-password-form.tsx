@@ -12,7 +12,8 @@ import {
   FormMessage,
 } from '@workspace/ui/components/form'
 import { Input } from '@workspace/ui/components/input'
-import { CheckIcon, EyeIcon, EyeOffIcon, Loader2, XIcon } from 'lucide-react'
+import { Spinner } from '@workspace/ui/components/spinner'
+import { CheckIcon, EyeIcon, EyeOffIcon, XIcon } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
@@ -209,9 +210,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
+            {form.formState.isSubmitting && <Spinner className="mr-2" />}
             Update password
           </Button>
         </div>

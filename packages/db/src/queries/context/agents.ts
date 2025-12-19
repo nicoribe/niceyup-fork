@@ -1,15 +1,15 @@
-import { and, eq } from 'drizzle-orm'
+import { and, asc, eq } from 'drizzle-orm'
 import { db } from '../../db'
 import { agents, teamMembers, teamsToAgents } from '../../schema'
 
 type ContextListAgentsParams = {
   userId: string
-  organizationId?: string | null
+  organizationId: string
   teamId?: string | null
 }
 
 export async function listAgents(context: ContextListAgentsParams) {
-  const selectQuery = db
+  const listAgents = await db
     .select({
       id: agents.id,
       name: agents.name,
@@ -19,32 +19,23 @@ export async function listAgents(context: ContextListAgentsParams) {
       tags: agents.tags,
     })
     .from(agents)
-
-  if (context.organizationId) {
-    const listAgents = await selectQuery
-      .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
-      .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
-      .where(
-        and(
-          eq(agents.ownerOrganizationId, context.organizationId),
-          context.teamId ? eq(teamsToAgents.teamId, context.teamId) : undefined,
-          eq(teamMembers.userId, context.userId),
-        ),
-      )
-
-    return listAgents
-  }
-
-  const listAgents = await selectQuery.where(
-    eq(agents.ownerUserId, context.userId),
-  )
+    .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
+    .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
+    .where(
+      and(
+        eq(agents.organizationId, context.organizationId),
+        context.teamId ? eq(teamsToAgents.teamId, context.teamId) : undefined,
+        eq(teamMembers.userId, context.userId),
+      ),
+    )
+    .orderBy(asc(agents.createdAt))
 
   return listAgents
 }
 
 type ContextGetAgentParams = {
   userId: string
-  organizationId?: string | null
+  organizationId: string
   teamId?: string | null
 }
 
@@ -56,7 +47,7 @@ export async function getAgent(
   context: ContextGetAgentParams,
   params: GetAgentParams,
 ) {
-  const selectQuery = db
+  const [agent] = await db
     .select({
       id: agents.id,
       name: agents.name,
@@ -66,29 +57,14 @@ export async function getAgent(
       tags: agents.tags,
     })
     .from(agents)
-
-  if (context.organizationId) {
-    const [agent] = await selectQuery
-      .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
-      .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
-      .where(
-        and(
-          eq(agents.id, params.agentId),
-          eq(agents.ownerOrganizationId, context.organizationId),
-          context.teamId ? eq(teamsToAgents.teamId, context.teamId) : undefined,
-          eq(teamMembers.userId, context.userId),
-        ),
-      )
-      .limit(1)
-
-    return agent || null
-  }
-
-  const [agent] = await selectQuery
+    .innerJoin(teamsToAgents, eq(agents.id, teamsToAgents.agentId))
+    .innerJoin(teamMembers, eq(teamMembers.teamId, teamsToAgents.teamId))
     .where(
       and(
         eq(agents.id, params.agentId),
-        eq(agents.ownerUserId, context.userId),
+        eq(agents.organizationId, context.organizationId),
+        eq(teamMembers.userId, context.userId),
+        context.teamId ? eq(teamsToAgents.teamId, context.teamId) : undefined,
       ),
     )
     .limit(1)

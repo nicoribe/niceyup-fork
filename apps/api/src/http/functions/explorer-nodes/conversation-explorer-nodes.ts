@@ -2,12 +2,12 @@ import type { DBTransaction } from '@workspace/db'
 import { db } from '@workspace/db'
 import { and, eq, isNull, sql } from '@workspace/db/orm'
 import { conversationExplorerNodes } from '@workspace/db/schema'
-import type { ConversationExplorerNodeVisibility } from '@workspace/db/types'
+import type { ConversationVisibility } from '@workspace/db/types'
 import { generateKeyBetween } from 'jittered-fractional-indexing'
 
 type GetConversationExplorerNodeFolderParams = {
   id: string
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   agentId: string
   ownerUserId?: string | null
   ownerTeamId?: string | null
@@ -48,7 +48,7 @@ export async function getConversationExplorerNodeFolder(
 }
 
 type CreateConversationExplorerNodeItemParams = {
-  visibility: ConversationExplorerNodeVisibility
+  visibility: ConversationVisibility
   agentId: string
   parentId?: string | null
   conversationId: string

@@ -1,6 +1,12 @@
-import { and, eq } from 'drizzle-orm'
+import { and, asc, eq, isNotNull } from 'drizzle-orm'
 import { db } from '../../db'
-import { members, organizations, teamMembers, teams } from '../../schema/auth'
+import {
+  members,
+  organizations,
+  teamMembers,
+  teams,
+  users,
+} from '../../schema/auth'
 import { getOrganizationIdBySlug } from '../organizations'
 
 type ContextGetOrganizationParams = {
@@ -62,6 +68,7 @@ export async function listOrganizations(
     .from(organizations)
     .innerJoin(members, eq(organizations.id, members.organizationId))
     .where(eq(members.userId, context.userId))
+    .orderBy(asc(organizations.createdAt))
 
   return listOrganizations
 }
@@ -109,7 +116,6 @@ export async function getOrganizationTeam(
       team: {
         id: teams.id,
         name: teams.name,
-        organizationId: teams.organizationId,
       },
     })
     .from(teams)
@@ -175,6 +181,7 @@ export async function listOrganizationTeams(
         eq(teamMembers.userId, context.userId),
       ),
     )
+    .orderBy(asc(teams.createdAt))
 
   return listOrganizationTeams
 }
@@ -276,4 +283,66 @@ export async function isOrganizationMemberAdmin(
     member?.role === 'admin' ||
     member?.role === 'billing'
   )
+}
+
+type ContextGetFirstOrganizationParams = {
+  userId: string
+}
+
+export async function getFirstOrganization(
+  context: ContextGetFirstOrganizationParams,
+) {
+  const [organization] = await db
+    .select({
+      id: organizations.id,
+      slug: organizations.slug,
+    })
+    .from(organizations)
+    .innerJoin(members, eq(organizations.id, members.organizationId))
+    .where(
+      and(eq(members.userId, context.userId), isNotNull(organizations.slug)),
+    )
+    .orderBy(asc(organizations.createdAt))
+    .limit(1)
+
+  return organization || null
+}
+
+type ContextListOrganizationMembersParams = {
+  userId: string
+} & (
+  | {
+      organizationId: string
+      organizationSlug?: never
+    }
+  | {
+      organizationId?: never
+      organizationSlug: string
+    }
+)
+
+export async function listOrganizationMembers(
+  context: ContextListOrganizationMembersParams,
+) {
+  const checkAccessToOrganization = await getOrganization(context, context)
+
+  if (!checkAccessToOrganization) {
+    return []
+  }
+
+  const listOrganizationMembers = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      image: users.image,
+      role: members.role,
+      memberId: members.id,
+    })
+    .from(members)
+    .innerJoin(users, eq(members.userId, users.id))
+    .where(eq(members.organizationId, checkAccessToOrganization.id))
+    .orderBy(asc(members.createdAt))
+
+  return listOrganizationMembers
 }

@@ -11,7 +11,7 @@ import {
 import type {
   ConnectionApp,
   ConnectionPayload,
-  ConversationExplorerNodeVisibility,
+  ConversationVisibility,
   DatabaseSourceDialect,
   DatabaseSourceQueryExample,
   DatabaseSourceTableMetadata,
@@ -40,10 +40,7 @@ export const sources = pgTable('sources', {
   languageModel: text('language_model'),
   embeddingModel: text('embedding_model'),
 
-  ownerUserId: text('owner_user_id').references(() => users.id),
-  ownerOrganizationId: text('owner_organization_id').references(
-    () => organizations.id,
-  ),
+  organizationId: text('organization_id').references(() => organizations.id),
 
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
@@ -184,10 +181,7 @@ export const connections = pgTable('connections', {
   name: text('name').notNull().default('Unnamed'),
   payload: encryptedJson('payload').$type<ConnectionPayload>(),
 
-  ownerUserId: text('owner_user_id').references(() => users.id),
-  ownerOrganizationId: text('owner_organization_id').references(
-    () => organizations.id,
-  ),
+  organizationId: text('organization_id').references(() => organizations.id),
 
   ...timestamps,
 })
@@ -209,10 +203,7 @@ export const agents = pgTable('agents', {
   languageModel: text('language_model'),
   embeddingModel: text('embedding_model'),
 
-  ownerUserId: text('owner_user_id').references(() => users.id),
-  ownerOrganizationId: text('owner_organization_id').references(
-    () => organizations.id,
-  ),
+  organizationId: text('organization_id').references(() => organizations.id),
 
   ...timestamps,
 })
@@ -229,9 +220,8 @@ export const conversations = pgTable('conversations', {
   languageModel: text('language_model'),
 
   agentId: text('agent_id').references(() => agents.id),
-
-  ownerUserId: text('owner_user_id').references(() => users.id),
-  ownerTeamId: text('owner_team_id').references(() => teams.id),
+  teamId: text('team_id').references(() => teams.id),
+  createdByUserId: text('created_by_user_id').references(() => users.id),
 
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
@@ -388,10 +378,7 @@ export const files = pgTable('files', {
   scope: text('scope').notNull().$type<FileScope>(),
   metadata: jsonb('metadata').$type<FileMetadata>(),
 
-  ownerUserId: text('owner_user_id').references(() => users.id),
-  ownerOrganizationId: text('owner_organization_id').references(
-    () => organizations.id,
-  ),
+  organizationId: text('organization_id').references(() => organizations.id),
 
   ...timestamps,
 })
@@ -412,10 +399,7 @@ export const sourceExplorerNodes = pgTable('source_explorer_nodes', {
   parentId: text('parent_id'),
   fractionalIndex: text('fractional_index'),
 
-  ownerUserId: text('owner_user_id').references(() => users.id),
-  ownerOrganizationId: text('owner_organization_id').references(
-    () => organizations.id,
-  ),
+  organizationId: text('organization_id').references(() => organizations.id),
 
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
@@ -447,7 +431,7 @@ export const conversationExplorerNodes = pgTable(
     visibility: text('visibility')
       .notNull()
       .default('private')
-      .$type<ConversationExplorerNodeVisibility>(),
+      .$type<ConversationVisibility>(),
     shared: boolean('shared').notNull().default(false), // True if the owner shared a private conversation with another user
 
     agentId: text('agent_id').references(() => agents.id),

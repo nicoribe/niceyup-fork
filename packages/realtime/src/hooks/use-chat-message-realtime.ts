@@ -5,9 +5,9 @@ import type { AIMessage } from '@workspace/ai/types'
 import * as React from 'react'
 
 type ContextParams = {
-  organizationSlug: 'my-account' | '$id'
+  organizationSlug: '$slug'
   teamId: '~' | '$id'
-  agentId: string
+  agentId: '$id'
   chatId: 'new' | '$id'
 }
 

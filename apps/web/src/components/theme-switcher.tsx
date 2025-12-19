@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import * as React from 'react'
 
@@ -28,23 +28,23 @@ export const ThemeSwitcher = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
-          {theme === 'system' && <Monitor className="size-4" />}
-          {theme === 'light' && <Sun className="size-4" />}
-          {theme === 'dark' && <Moon className="size-4" />}
+          {theme === 'system' && <MonitorIcon className="size-4" />}
+          {theme === 'light' && <SunIcon className="size-4" />}
+          {theme === 'dark' && <MoonIcon className="size-4" />}
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => nextSetTheme('light')}>
-          <Sun className="mr-1 size-4" />
+          <SunIcon className="mr-1 size-4" />
           Light
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => nextSetTheme('dark')}>
-          <Moon className="mr-1 size-4" />
+          <MoonIcon className="mr-1 size-4" />
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => nextSetTheme('system')}>
-          <Monitor className="mr-1 size-4" />
+          <MonitorIcon className="mr-1 size-4" />
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

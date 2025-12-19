@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+
 export default async function Page() {
-  return <p className="text-sm">Settings</p>
+  return redirect('/account/settings/general')
 }

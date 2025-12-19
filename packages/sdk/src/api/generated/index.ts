@@ -581,6 +581,7 @@ export type {
 export type {
   GetConversationPathParams,
   GetConversationQueryParams,
+  ConversationVisibilityEnum,
   GetConversation200,
   GetConversation400,
   GetConversation401,
@@ -694,6 +695,7 @@ export type {
 } from './types/ListConnections'
 export type {
   ListConversationsQueryParams,
+  ConversationsVisibilityEnum,
   ListConversations200,
   ListConversations400,
   ListConversations401,
@@ -1701,8 +1703,10 @@ export { deleteConnection204Enum } from './types/DeleteConnection'
 export { deleteConversation204Enum } from './types/DeleteConversation'
 export { deleteSource204Enum } from './types/DeleteSource'
 export { generateUploadSignatureSourceMutationRequestSourceTypeEnum } from './types/GenerateUploadSignatureSource'
+export { conversationVisibilityEnum } from './types/GetConversation'
 export { fileBucketEnum, fileScopeEnum } from './types/GetFile'
 export { sourceTypeEnum } from './types/GetSource'
+export { conversationsVisibilityEnum } from './types/ListConversations'
 export {
   messagesStatusEnum,
   messagesRoleEnum,

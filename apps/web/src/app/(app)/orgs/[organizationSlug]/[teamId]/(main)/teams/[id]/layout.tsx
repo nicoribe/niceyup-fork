@@ -1,6 +1,6 @@
 import { getTeam } from '@/actions/teams'
-import { Sidebar, type SidebarItem } from '@/components/organizations/sidebar'
-import { TeamNotFound } from '@/components/organizations/team-not-found'
+import { Sidebar, type SidebarItem } from '@/components/sidebar'
+import { TeamNotFound } from '@/components/team-not-found'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { cn } from '@workspace/ui/lib/utils'
 import { SquareArrowOutUpRightIcon } from 'lucide-react'

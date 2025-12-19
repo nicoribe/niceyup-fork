@@ -1,6 +1,6 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
-import { getOrganizationContext } from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { generateSignatureForUpload } from '@/http/functions/upload-file-to-storage'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
@@ -46,7 +46,7 @@ export async function generateUploadSignatureConversation(
         conversationId,
       } = request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -85,13 +85,11 @@ export async function generateUploadSignatureConversation(
             bucket: 'default',
             scope: 'conversations',
             metadata: {
-              authorId: context.userId,
+              sentByUserId: context.userId,
               // agentIds: [agentId],
               // ...(conversationId ? { conversationIds: [conversationId] } : {}),
             },
-            owner: context.organizationId
-              ? { organizationId: context.organizationId }
-              : { userId: context.userId },
+            organizationId: context.organizationId,
           },
         },
         expires: 15 * 60, // 15 minutes

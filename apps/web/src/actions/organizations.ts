@@ -1,8 +1,6 @@
 'use server'
 
 import { authenticatedUser } from '@/lib/auth/server'
-import { getOrganizationContext } from '@/lib/organization-context'
-import type { OrganizationTeamParams } from '@/lib/types'
 import { auth } from '@workspace/auth'
 import { queries } from '@workspace/db/queries'
 import { cacheTag } from 'next/cache'
@@ -25,24 +23,16 @@ type GetOrganizationIdBySlugParams = {
 export async function getOrganizationIdBySlug({
   organizationSlug,
 }: GetOrganizationIdBySlugParams) {
-  if (organizationSlug === 'my-account') {
-    return null
-  }
-
   return await queries.getOrganizationIdBySlug({ organizationSlug })
 }
 
 type GetOrganizationParams = {
-  organizationSlug: OrganizationTeamParams['organizationSlug']
+  organizationSlug: string
 }
 
 export async function getOrganization({
   organizationSlug,
 }: GetOrganizationParams) {
-  if (organizationSlug === 'my-account') {
-    return null
-  }
-
   const {
     user: { id: userId },
   } = await authenticatedUser()
@@ -56,18 +46,14 @@ export async function getOrganization({
 }
 
 type GetOrganizationTeamParams = {
-  organizationSlug: OrganizationTeamParams['organizationSlug']
-  teamId: OrganizationTeamParams['teamId']
+  organizationSlug: string
+  teamId: string
 }
 
 export async function getOrganizationTeam({
   organizationSlug,
   teamId,
 }: GetOrganizationTeamParams) {
-  if (organizationSlug === 'my-account' || teamId === '~') {
-    return null
-  }
-
   const {
     user: { id: userId },
   } = await authenticatedUser()
@@ -80,30 +66,9 @@ export async function getOrganizationTeam({
   return organizationTeam
 }
 
-type GetMembershipParams = {
-  organizationSlug: OrganizationTeamParams['organizationSlug']
-}
-
-export async function getMembership({ organizationSlug }: GetMembershipParams) {
-  if (organizationSlug === 'my-account') {
-    return null
-  }
-
-  const {
-    user: { id: userId },
-  } = await authenticatedUser()
-
-  const membership = await queries.context.getMembership({
-    userId,
-    organizationSlug,
-  })
-
-  return membership
-}
-
 export async function listOrganizations() {
   'use cache: private'
-  cacheTag('create-organization')
+  cacheTag('update-organization')
 
   const {
     user: { id: userId },
@@ -115,7 +80,7 @@ export async function listOrganizations() {
 }
 
 type ListOrganizationTeamsParams = {
-  organizationSlug: string | null | undefined
+  organizationSlug: string
 }
 
 export async function listOrganizationTeams({
@@ -128,27 +93,43 @@ export async function listOrganizationTeams({
     user: { id: userId },
   } = await authenticatedUser()
 
-  const ctx = await getOrganizationContext({ userId, organizationSlug })
-
-  if (!ctx?.organizationId) {
-    return []
-  }
-
   const organizationTeams = await queries.context.listOrganizationTeams(
     { userId },
-    { organizationId: ctx.organizationId },
+    { organizationSlug },
   )
 
   return organizationTeams.map(({ team }) => team)
 }
 
+type ListOrganizationMembersParams = {
+  organizationSlug: string
+}
+
+export async function listOrganizationMembers({
+  organizationSlug,
+}: ListOrganizationMembersParams) {
+  'use cache: private'
+  cacheTag('remove-member')
+
+  const {
+    user: { id: userId },
+  } = await authenticatedUser()
+
+  const members = await queries.context.listOrganizationMembers({
+    userId,
+    organizationSlug,
+  })
+
+  return members
+}
+
 type SetActiveOrganizationTeamParams =
   | {
-      organizationId?: never
+      organizationId?: string
       teamId?: never
     }
   | {
-      organizationId: string | null
+      organizationId: string
       teamId?: string | null
     }
 

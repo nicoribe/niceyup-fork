@@ -6,7 +6,7 @@ import {
   ownerAc,
 } from 'better-auth/plugins/organization/access'
 
-type Roles = { [key in string]?: Role<any> }
+type Roles = { [key in string]: Role }
 
 const statement = {
   ...defaultStatements,

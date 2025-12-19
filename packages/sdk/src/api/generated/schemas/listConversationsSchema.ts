@@ -35,6 +35,9 @@ export const listConversations200Schema = z
       z.object({
         id: z.string(),
         title: z.string(),
+        visibility: z.enum(['private', 'shared', 'team']),
+        teamId: z.string().nullable().nullish(),
+        createdByUserId: z.string().nullable().nullish(),
         updatedAt: z.string().datetime(),
       }),
     ),

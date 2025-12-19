@@ -10,12 +10,6 @@ export default async function Page({
 }>) {
   const { organizationSlug } = await params
 
-  const isPersonalAccount = organizationSlug === 'my-account'
-
-  if (isPersonalAccount) {
-    return redirect('/orgs/my-account/~/overview')
-  }
-
   const {
     session: { activeOrganizationId, activeTeamId },
   } = await authenticatedUser()
@@ -26,5 +20,5 @@ export default async function Page({
     return redirect(`/orgs/${organizationSlug}/${activeTeamId}/overview`)
   }
 
-  return redirect(`/orgs/${organizationSlug}/~/select-team`)
+  return redirect(`/orgs/${organizationSlug}/~/overview`)
 }

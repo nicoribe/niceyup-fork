@@ -190,6 +190,13 @@
       "when": 1765465150905,
       "tag": "0026_bouncy_senator_kelly",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1765840171340,
+      "tag": "0027_zippy_madripoor",
+      "breakpoints": true
     }
   ]
 }

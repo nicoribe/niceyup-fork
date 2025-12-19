@@ -1,8 +1,8 @@
-import { getMembership } from '@/actions/organizations'
+import { isOrganizationMemberAdmin } from '@/actions/membership'
 import { listTeamMembers } from '@/actions/teams'
 import { authenticatedUser } from '@/lib/auth/server'
 import type { OrganizationTeamParams } from '@/lib/types'
-import { TeamMembers } from '../_components/team-members'
+import { TeamMemberList } from './_components/team-member-list'
 
 export default async function Page({
   params,
@@ -15,14 +15,12 @@ export default async function Page({
     user: { id: userId },
   } = await authenticatedUser()
 
-  const member = await getMembership({ organizationSlug })
-
-  const isAdmin = member?.isAdmin
+  const isAdmin = await isOrganizationMemberAdmin({ organizationSlug })
 
   const teamMembers = await listTeamMembers({ organizationSlug, teamId })
 
   return (
-    <TeamMembers
+    <TeamMemberList
       params={{ organizationSlug, teamId }}
       userId={userId}
       isAdmin={isAdmin}

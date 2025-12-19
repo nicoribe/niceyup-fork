@@ -4,7 +4,6 @@ import {
   type GenerateUploadSignatureParams,
   generateUploadSignature,
 } from '@/actions/upload-files'
-import type { OrganizationTeamParams } from '@/lib/types'
 import * as React from 'react'
 
 type UploadedFile =
@@ -26,10 +25,7 @@ type UploadedFile =
       fileName: string
     }
 
-export function useUploadFiles(
-  { organizationSlug, teamId }: OrganizationTeamParams,
-  params: GenerateUploadSignatureParams,
-) {
+export function useUploadFiles(params: GenerateUploadSignatureParams) {
   const [uploading, setUploading] = React.useState<string[]>([])
 
   const uploadFiles = async ({ files: filesToUpload }: { files: File[] }) => {
@@ -39,10 +35,7 @@ export function useUploadFiles(
         ...filesToUpload.map((f) => `${f.name}-${f.size}`),
       ])
 
-      const { data, error } = await generateUploadSignature(
-        { organizationSlug, teamId },
-        params,
-      )
+      const { data, error } = await generateUploadSignature(params)
 
       if (error) {
         return { data: null, error }
@@ -77,10 +70,7 @@ export function useUploadFiles(
         `${fileToUpload.name}-${fileToUpload.size}`,
       ])
 
-      const { data, error } = await generateUploadSignature(
-        { organizationSlug, teamId },
-        params,
-      )
+      const { data, error } = await generateUploadSignature(params)
 
       if (error) {
         return { data: null, error }

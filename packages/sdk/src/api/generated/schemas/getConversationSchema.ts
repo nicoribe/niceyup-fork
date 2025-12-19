@@ -41,7 +41,19 @@ export const getConversation200Schema = z
     conversation: z.object({
       id: z.string(),
       title: z.string(),
+      visibility: z.enum(['private', 'shared', 'team']),
+      teamId: z.string().nullable().nullish(),
+      createdByUserId: z.string().nullable().nullish(),
+      updatedAt: z.string().datetime(),
     }),
+    participants: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        email: z.string(),
+        image: z.string().nullable().nullish(),
+      }),
+    ),
   })
   .describe('Success') as unknown as ToZod<GetConversation200>
 

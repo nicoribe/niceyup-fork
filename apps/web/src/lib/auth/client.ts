@@ -1,6 +1,7 @@
 'use client'
 
 import { env } from '@/lib/env'
+import { roles } from '@workspace/auth/access'
 import {
   createAuthClient,
   organizationClient,
@@ -14,6 +15,7 @@ export const authClient = createAuthClient({
       teams: {
         enabled: true,
       },
+      roles,
     }),
     stripeClient({
       subscription: true,

@@ -17,9 +17,10 @@ export default async function Page() {
           </div>
 
           <DialogTitle className="text-center font-semibold text-xl leading-none">
-            Create an organization
+            Create an Organization
           </DialogTitle>
         </DialogHeader>
+
         <div className="mt-5">
           <CreateOrganizationForm modal />
         </div>

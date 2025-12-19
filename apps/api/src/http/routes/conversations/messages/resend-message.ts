@@ -1,10 +1,7 @@
 import { BadRequestError } from '@/http/errors/bad-request-error'
 import { withDefaultErrorResponses } from '@/http/errors/default-error-responses'
 import { sendUserMessageToAssistant } from '@/http/functions/ai-assistant'
-import {
-  getNamespaceContext,
-  getOrganizationContext,
-} from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import {
@@ -94,7 +91,7 @@ export async function resendMessage(app: FastifyTypedInstance) {
         message,
       } = request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -205,7 +202,7 @@ export async function resendMessage(app: FastifyTypedInstance) {
       const maxContextMessages = 10
 
       sendUserMessageToAssistant({
-        namespace: getNamespaceContext(context),
+        namespace: context.organizationId,
         conversationId,
         userMessage: {
           id: userMessage.id,

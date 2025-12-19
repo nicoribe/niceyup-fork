@@ -10,6 +10,7 @@
   "dependencies": {
     "@react-email/components": "^0.5.7",
     "@workspace/env": "workspace:*",
+    "@workspace/utils": "workspace:*",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "resend": "6.2.2"

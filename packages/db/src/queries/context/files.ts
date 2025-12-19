@@ -1,12 +1,10 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '../../db'
 import { files } from '../../schema'
-import { isOrganizationMemberAdmin } from './organizations'
 
 type ContextGetFileParams = {
-  userId: string
   organizationId?: string | null
-  teamId?: string | null
+  isAdmin?: boolean
 }
 
 type GetFileParams = {
@@ -17,7 +15,11 @@ export async function getFile(
   context: ContextGetFileParams,
   params: GetFileParams,
 ) {
-  const selectQuery = db
+  if (!context.isAdmin) {
+    return null
+  }
+
+  const [file] = await db
     .select({
       id: files.id,
       fileName: files.fileName,
@@ -29,32 +31,13 @@ export async function getFile(
       metadata: files.metadata,
     })
     .from(files)
-
-  if (context.organizationId) {
-    const isAdmin = await isOrganizationMemberAdmin({
-      userId: context.userId,
-      organizationId: context.organizationId,
-    })
-
-    if (isAdmin) {
-      const [file] = await selectQuery
-        .where(
-          and(
-            eq(files.id, params.fileId),
-            eq(files.ownerOrganizationId, context.organizationId),
-          ),
-        )
-        .limit(1)
-
-      return file || null
-    }
-
-    return null
-  }
-
-  const [file] = await selectQuery
     .where(
-      and(eq(files.id, params.fileId), eq(files.ownerUserId, context.userId)),
+      and(
+        eq(files.id, params.fileId),
+        context.organizationId
+          ? eq(files.organizationId, context.organizationId)
+          : isNull(files.organizationId),
+      ),
     )
     .limit(1)
 

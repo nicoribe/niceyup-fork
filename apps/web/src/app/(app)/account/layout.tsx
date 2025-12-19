@@ -1,5 +1,5 @@
-import { Header } from '@/components/organizations/header'
-import { TabBar } from '@/components/organizations/tab-bar'
+import { Header } from '@/components/header'
+import { TabBar } from '@/components/tab-bar'
 
 export default async function Layout({
   children,
@@ -16,13 +16,14 @@ export default async function Layout({
             label: 'Overview',
             href: '/account/overview',
           },
-          {
-            label: 'Activity',
-            href: '/account/activity',
-          },
+          // {
+          //   label: 'Activity',
+          //   href: '/account/activity',
+          // },
           {
             label: 'Settings',
             href: '/account/settings',
+            deep: true,
           },
         ]}
       />

@@ -11,24 +11,17 @@ export async function getOrganizationContext({
   organizationSlug?: string | null
   teamId?: string | null
 }) {
-  if (
+  const orgId =
     organizationId ||
-    (organizationSlug && organizationSlug !== 'my-account')
-  ) {
-    const orgId =
-      organizationId ||
-      (await queries.getOrganizationIdBySlug({ organizationSlug }))
+    (await queries.getOrganizationIdBySlug({ organizationSlug }))
 
-    if (!orgId) {
-      return null
-    }
-
-    return {
-      userId,
-      organizationId: orgId,
-      teamId: teamId !== '~' ? teamId : undefined,
-    }
+  if (!orgId) {
+    return null
   }
 
-  return { userId }
+  return {
+    userId,
+    organizationId: orgId,
+    teamId: teamId && teamId !== '~' ? teamId : null,
+  }
 }

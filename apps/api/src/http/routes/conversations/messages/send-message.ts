@@ -6,10 +6,7 @@ import {
   getConversationExplorerNodeFolder,
 } from '@/http/functions/explorer-nodes/conversation-explorer-nodes'
 import { generateTitleFromUserMessage } from '@/http/functions/generate-title-from-user-message'
-import {
-  getNamespaceContext,
-  getOrganizationContext,
-} from '@/http/functions/organization-context'
+import { getMembershipContext } from '@/http/functions/membership'
 import { authenticate } from '@/http/middlewares/authenticate'
 import type { FastifyTypedInstance } from '@/types/fastify'
 import {
@@ -114,7 +111,7 @@ export async function sendMessage(app: FastifyTypedInstance) {
         explorerNode,
       } = request.body
 
-      const context = await getOrganizationContext({
+      const { context } = await getMembershipContext({
         userId,
         organizationId,
         organizationSlug,
@@ -130,6 +127,11 @@ export async function sendMessage(app: FastifyTypedInstance) {
       }
 
       const ownerTypeCondition =
+        explorerNode?.visibility === 'team'
+          ? { teamId: context.teamId }
+          : { createdByUserId: context.userId }
+
+      const explorerOwnerTypeCondition =
         explorerNode?.visibility === 'team'
           ? { ownerTeamId: context.teamId }
           : { ownerUserId: context.userId }
@@ -151,7 +153,7 @@ export async function sendMessage(app: FastifyTypedInstance) {
             id: explorerNode.folderId,
             visibility: explorerNode.visibility,
             agentId,
-            ...ownerTypeCondition,
+            ...explorerOwnerTypeCondition,
           })
 
           if (!folderExplorerNode) {
@@ -252,7 +254,7 @@ if no relevant information is found in the tool calls, respond, "Sorry, I don't 
                   visibility: explorerNode.visibility,
                   parentId: explorerNode.folderId,
                   conversationId: conversation.id,
-                  ...ownerTypeCondition,
+                  ...explorerOwnerTypeCondition,
                 },
                 tx,
               )
@@ -356,7 +358,7 @@ if no relevant information is found in the tool calls, respond, "Sorry, I don't 
       const maxContextMessages = 10
 
       sendUserMessageToAssistant({
-        namespace: getNamespaceContext(context),
+        namespace: context.organizationId,
         conversationId: _conversationId,
         userMessage: {
           id: userMessage.id,

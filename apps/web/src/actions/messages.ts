@@ -3,13 +3,13 @@
 import { authenticatedUser } from '@/lib/auth/server'
 import { getOrganizationContext } from '@/lib/organization-context'
 import { resumableStreamContext } from '@/lib/resumable-stream'
-import type { OrganizationTeamParams } from '@/lib/types'
+import type { AgentParams, OrganizationTeamParams } from '@/lib/types'
 import { createStreamableValue } from '@workspace/ai/rsc'
 import type { AIMessage } from '@workspace/ai/types'
 import { queries } from '@workspace/db/queries'
 import { JsonLinesTransformStream } from '@workspace/realtime/stream'
 
-type ContextMessageParams = OrganizationTeamParams & { agentId: string }
+type ContextMessageParams = OrganizationTeamParams & AgentParams
 
 type GetMessageParams = {
   conversationId: string

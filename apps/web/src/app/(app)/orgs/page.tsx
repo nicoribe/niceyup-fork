@@ -1,10 +1,12 @@
 import { getOrganizationSlugById } from '@/actions/organizations'
 import { authenticatedUser } from '@/lib/auth/server'
+import { queries } from '@workspace/db/queries'
 import { redirect } from 'next/navigation'
 
 export default async function Page() {
   const {
     session: { activeOrganizationId, activeTeamId },
+    user: { id: userId },
   } = await authenticatedUser()
 
   if (activeOrganizationId) {
@@ -13,13 +15,17 @@ export default async function Page() {
     })
 
     if (organizationSlug) {
-      if (activeTeamId) {
-        return redirect(`/orgs/${organizationSlug}/${activeTeamId}/overview`)
-      }
-
-      return redirect(`/orgs/${organizationSlug}/~/select-team`)
+      return redirect(
+        `/orgs/${organizationSlug}/${activeTeamId || '~'}/overview`,
+      )
     }
   }
 
-  return redirect('/orgs/my-account/~/overview')
+  const organization = await queries.context.getFirstOrganization({ userId })
+
+  if (organization?.slug) {
+    return redirect(`/orgs/${organization.slug}/~/overview`)
+  }
+
+  return redirect('/onboarding/create-organization')
 }

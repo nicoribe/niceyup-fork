@@ -1,11 +1,12 @@
-import { and, desc, eq, isNull } from 'drizzle-orm'
+import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 import { db } from '../../db'
+import type { ConversationVisibility } from '../../lib/types'
 import { conversations } from '../../schema'
 import { getAgent } from './agents'
 
 type ContextListConversationsParams = {
   userId: string
-  organizationId?: string | null
+  organizationId: string
   teamId?: string | null
 }
 
@@ -31,9 +32,16 @@ export async function listConversations(
     .select({
       id: conversations.id,
       title: conversations.title,
+      visibility: sql<ConversationVisibility>`
+        CASE
+          WHEN ${conversations.teamId} IS NOT NULL THEN 'team'
+          WHEN ${conversations.createdByUserId} = ${context.userId} THEN 'private'
+          ELSE 'shared'
+        END
+      `.as('visibility'),
+      teamId: conversations.teamId,
+      createdByUserId: conversations.createdByUserId,
       updatedAt: conversations.updatedAt,
-      ownerTeamId: conversations.ownerTeamId,
-      ownerUserId: conversations.ownerUserId,
     })
     .from(conversations)
     .where(
@@ -49,7 +57,7 @@ export async function listConversations(
 
 type ContextGetConversationParams = {
   userId: string
-  organizationId?: string | null
+  organizationId: string
   teamId?: string | null
 }
 
@@ -76,8 +84,16 @@ export async function getConversation(
     .select({
       id: conversations.id,
       title: conversations.title,
-      ownerTeamId: conversations.ownerTeamId,
-      ownerUserId: conversations.ownerUserId,
+      visibility: sql<ConversationVisibility>`
+        CASE
+          WHEN ${conversations.teamId} IS NOT NULL THEN 'team'
+          WHEN ${conversations.createdByUserId} = ${context.userId} THEN 'private'
+          ELSE 'shared'
+        END
+      `.as('visibility'),
+      teamId: conversations.teamId,
+      createdByUserId: conversations.createdByUserId,
+      updatedAt: conversations.updatedAt,
     })
     .from(conversations)
     .where(

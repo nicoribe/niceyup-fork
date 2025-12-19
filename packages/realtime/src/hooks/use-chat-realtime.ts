@@ -4,9 +4,9 @@ import * as React from 'react'
 import type { AIMessageNode } from '../lib/types'
 
 type ContextParams = {
-  organizationSlug: 'my-account' | '$id'
+  organizationSlug: '$slug'
   teamId: '~' | '$id'
-  agentId: string
+  agentId: '$id'
   chatId: 'new' | '$id'
 }
 
@@ -21,9 +21,7 @@ export function useChatRealtime({ params }: UseChatRealtimeParams) {
   React.useEffect(() => {
     if (
       !params.organizationSlug ||
-      params.organizationSlug === 'my-account' ||
       !params.teamId ||
-      params.teamId === '~' ||
       !params.agentId ||
       !params.chatId ||
       params.chatId === 'new'

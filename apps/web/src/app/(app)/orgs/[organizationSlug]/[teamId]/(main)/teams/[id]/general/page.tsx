@@ -1,4 +1,4 @@
-import { getMembership } from '@/actions/organizations'
+import { isOrganizationMemberAdmin } from '@/actions/membership'
 import { getTeam } from '@/actions/teams'
 import type { OrganizationTeamParams } from '@/lib/types'
 import { DeleteTeamForm } from './_components/delete-team-form'
@@ -12,25 +12,29 @@ export default async function Page({
 }>) {
   const { organizationSlug, id: teamId } = await params
 
-  const member = await getMembership({ organizationSlug })
-
-  const isAdmin = member?.isAdmin
+  const isAdmin = await isOrganizationMemberAdmin({ organizationSlug })
 
   const team = await getTeam({ organizationSlug, teamId })
 
+  if (!team) {
+    return null
+  }
+
   return (
     <div className="flex w-full flex-col gap-4">
-      {team && (
-        <EditTeamNameForm
-          params={{ organizationSlug, teamId }}
-          name={team.name}
-          isAdmin={isAdmin}
-        />
-      )}
+      <EditTeamNameForm
+        params={{
+          organizationSlug,
+          organizationId: team.organizationId,
+          teamId,
+        }}
+        name={team.name}
+        isAdmin={isAdmin}
+      />
 
       <ViewTeamId id={teamId} />
 
-      {team && (
+      {isAdmin && (
         <DeleteTeamForm
           params={{
             organizationSlug,

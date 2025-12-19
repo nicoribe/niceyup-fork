@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from '@workspace/ui/components/form'
 import { Input } from '@workspace/ui/components/input'
-import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react'
+import { Spinner } from '@workspace/ui/components/spinner'
+import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { redirect, useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
@@ -131,9 +132,7 @@ export function SignInForm() {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
+            {form.formState.isSubmitting && <Spinner className="mr-2" />}
             Sign In
           </Button>
         </div>

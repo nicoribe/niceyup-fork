@@ -1,4 +1,4 @@
-import { getMembership } from '@/actions/organizations'
+import { isOrganizationMemberAdmin } from '@/actions/membership'
 import { sdk } from '@/lib/sdk'
 import type { OrganizationTeamParams } from '@/lib/types'
 import {
@@ -31,11 +31,7 @@ export default async function Page({
 }>) {
   const { organizationSlug, teamId } = await params
 
-  const isPersonalAccount = organizationSlug === 'my-account' && teamId === '~'
-
-  const member = await getMembership({ organizationSlug })
-
-  const isAdmin = isPersonalAccount || member?.isAdmin
+  const isAdmin = await isOrganizationMemberAdmin({ organizationSlug })
 
   const { data } = await sdk.listAgents({
     params: { organizationSlug, teamId },
@@ -49,7 +45,7 @@ export default async function Page({
             <div className="md:max-w-sm">
               <h2 className="font-semibold text-sm">Agents</h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Manage your AI agents across different workflows
+                Manage your AI agents across different workflows.
               </p>
             </div>
           </div>
@@ -60,7 +56,7 @@ export default async function Page({
                 <Link
                   href={`/orgs/${organizationSlug}/${teamId}/agents/create`}
                 >
-                  New agent
+                  New Agent
                   <CirclePlusIcon className="ml-1 size-4" />
                 </Link>
               </Button>
@@ -76,7 +72,7 @@ export default async function Page({
               <EmptyHeader>
                 <EmptyTitle>No Agents Yet</EmptyTitle>
                 <EmptyDescription>
-                  Create an agent to get started
+                  Create an agent to get started.
                 </EmptyDescription>
               </EmptyHeader>
 
@@ -86,7 +82,7 @@ export default async function Page({
                     <Link
                       href={`/orgs/${organizationSlug}/${teamId}/agents/create`}
                     >
-                      New agent
+                      New Agent
                       <CirclePlusIcon className="ml-1 size-4" />
                     </Link>
                   </Button>

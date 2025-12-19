@@ -1,20 +1,21 @@
-import { getMembership } from '@/actions/organizations'
+import { isOrganizationMemberAdmin } from '@/actions/membership'
 import type { OrganizationTeamParams } from '@/lib/types'
-import { Dialog } from '@workspace/ui/components/dialog'
+import {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+} from '@workspace/ui/components/dialog'
 import { InterceptedDialogContent } from '@workspace/ui/components/intercepted-dialog-content'
+import { CreateAgentForm } from '../../../../../../orgs/[organizationSlug]/[teamId]/(main)/agents/(admin)/create/_components/create-agent-form'
 
 export default async function Page({
   params,
 }: Readonly<{
   params: Promise<OrganizationTeamParams>
 }>) {
-  const { organizationSlug, teamId } = await params
+  const { organizationSlug } = await params
 
-  const isPersonalAccount = organizationSlug === 'my-account' && teamId === '~'
-
-  const member = await getMembership({ organizationSlug })
-
-  const isAdmin = isPersonalAccount || member?.isAdmin
+  const isAdmin = await isOrganizationMemberAdmin({ organizationSlug })
 
   if (!isAdmin) {
     return null
@@ -23,7 +24,15 @@ export default async function Page({
   return (
     <Dialog defaultOpen>
       <InterceptedDialogContent>
-        <p className="text-sm">Create an agent</p>
+        <DialogHeader>
+          <DialogTitle className="text-center font-semibold text-xl leading-none">
+            Create an Agent
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="mt-5">
+          <CreateAgentForm />
+        </div>
       </InterceptedDialogContent>
     </Dialog>
   )

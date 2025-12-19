@@ -19,24 +19,30 @@ export default async function Layout({
     session: { activeOrganizationId, activeTeamId },
   } = await authenticatedUser()
 
-  const organization = await getOrganization({ organizationSlug })
+  let organization = null
+  let team = null
 
-  const organizationTeam = await getOrganizationTeam({
-    organizationSlug,
-    teamId,
-  })
+  if (teamId !== '~') {
+    const organizationTeam = await getOrganizationTeam({
+      organizationSlug,
+      teamId,
+    })
 
-  if (organizationTeam) {
-    if (organizationTeam.team.id !== (activeTeamId || null)) {
-      await setActiveOrganizationTeam({
-        organizationId: organizationTeam.organization.id,
-        teamId: organizationTeam.team.id,
-      })
-    }
+    organization = organizationTeam?.organization
+    team = organizationTeam?.team
   } else {
-    if ((organization?.id || null) !== (activeOrganizationId || null)) {
+    organization = await getOrganization({ organizationSlug })
+  }
+
+  if (organization) {
+    if (team && team.id !== (activeTeamId || null)) {
       await setActiveOrganizationTeam({
-        organizationId: organization?.id,
+        organizationId: organization.id,
+        teamId: team.id,
+      })
+    } else if (organization.id !== (activeOrganizationId || null)) {
+      await setActiveOrganizationTeam({
+        organizationId: organization.id,
       })
     }
   }

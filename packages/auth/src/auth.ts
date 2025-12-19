@@ -1,7 +1,19 @@
 import { cache } from '@workspace/cache'
 import { db, generateId } from '@workspace/db'
-import { agents } from '@workspace/db/schema'
-import { sendPasswordResetEmail, sendVerificationEmail } from '@workspace/email'
+import { eq } from '@workspace/db/orm'
+import {
+  agents,
+  teamMembers,
+  teams,
+  teamsToAgents,
+  users,
+} from '@workspace/db/schema'
+import {
+  sendOrganizationInvitation,
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from '@workspace/email'
+import { stripSpecialCharacters } from '@workspace/utils'
 import { type BetterAuthOptions, betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI, organization } from 'better-auth/plugins'
@@ -9,6 +21,54 @@ import { ac, roles } from './lib/access'
 import { COOKIE_PREFIX } from './lib/constants'
 import { env } from './lib/env'
 import { stripe } from './lib/stripe'
+
+async function createDefaultTeamAndAgent({
+  organizationId,
+  userId,
+}: { organizationId: string; userId: string }) {
+  await db.transaction(async (tx) => {
+    const [team] = await tx
+      .insert(teams)
+      .values({
+        name: 'Default Team',
+        organizationId,
+      })
+      .returning({
+        id: teams.id,
+      })
+
+    if (!team) {
+      return
+    }
+
+    await tx.insert(teamMembers).values({
+      teamId: team.id,
+      userId,
+    })
+
+    const [agent] = await tx
+      .insert(agents)
+      .values({
+        name: 'Assistant',
+        slug: `assistant-${generateId()}`,
+        description: 'Your personal assistant',
+        tags: ['OpenAI'],
+        organizationId,
+      })
+      .returning({
+        id: agents.id,
+      })
+
+    if (!agent) {
+      return
+    }
+
+    await tx.insert(teamsToAgents).values({
+      teamId: team.id,
+      agentId: agent.id,
+    })
+  })
+}
 
 const config = {
   appName: 'Niceyup',
@@ -65,27 +125,63 @@ const config = {
       await cache.del(key)
     },
   },
-  databaseHooks: {
-    user: {
-      create: {
-        after: async (user) => {
-          await db.insert(agents).values({
-            name: 'Assistant',
-            slug: `assistant-${generateId()}`,
-            description: 'Your personal assistant',
-            tags: ['OpenAI'],
-            ownerUserId: user.id,
-          })
-        },
-      },
-    },
-  },
   plugins: [
     organization({
       ac,
       roles,
       teams: {
         enabled: true,
+        defaultTeam: {
+          enabled: false,
+        },
+        allowRemovingAllTeams: true,
+      },
+      cancelPendingInvitationsOnReInvite: true,
+      requireEmailVerificationOnInvitation: true,
+      invitationExpiresIn: 60 * 60 * 48, // 48 hours
+      sendInvitationEmail: async (data) => {
+        const url = `${env.WEB_URL}/invitations/${data.id}`
+        const expiresIn = '48 hours'
+
+        const [user] = await db
+          .select({
+            name: users.name,
+            image: users.image,
+          })
+          .from(users)
+          .where(eq(users.email, data.email))
+          .limit(1)
+
+        await sendOrganizationInvitation({
+          organization: data.organization,
+          inviter: data.inviter.user,
+          user: {
+            email: data.email,
+            role: data.role,
+            name: user?.name,
+            image: user?.image,
+          },
+          url,
+          expiresIn,
+        })
+      },
+      organizationHooks: {
+        beforeCreateOrganization: async ({ organization }) => {
+          return {
+            data: {
+              ...organization,
+              slug: organization.slug
+                ? stripSpecialCharacters(organization.slug)
+                : undefined,
+            },
+          }
+        },
+        afterCreateOrganization: async ({ member }) => {
+          await createDefaultTeamAndAgent({
+            organizationId: member.organizationId,
+            userId: member.userId,
+          })
+        },
       },
     }),
     stripe(),

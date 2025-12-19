@@ -5,9 +5,9 @@ import * as messages from './messages'
 import * as organizations from './organizations'
 
 export const queries = {
-  context: contextQueries,
   ...organizations,
   ...conversations,
   ...messages,
   ...files,
+  context: contextQueries,
 }
