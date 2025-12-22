@@ -17,6 +17,10 @@ export default async function Layout({
       href: '/account/settings/authentication',
     },
     {
+      label: 'Billing',
+      href: '/account/settings/billing',
+    },
+    {
       label: 'Documentation',
       href: '/docs/accounts',
       target: '_blank',

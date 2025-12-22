@@ -57,7 +57,7 @@ export default async function Page({
                   href={`/orgs/${organizationSlug}/${teamId}/agents/create`}
                 >
                   New Agent
-                  <CirclePlusIcon className="ml-1 size-4" />
+                  <CirclePlusIcon className="size-4" />
                 </Link>
               </Button>
             </div>
@@ -83,7 +83,7 @@ export default async function Page({
                       href={`/orgs/${organizationSlug}/${teamId}/agents/create`}
                     >
                       New Agent
-                      <CirclePlusIcon className="ml-1 size-4" />
+                      <CirclePlusIcon className="size-4" />
                     </Link>
                   </Button>
                 </EmptyContent>

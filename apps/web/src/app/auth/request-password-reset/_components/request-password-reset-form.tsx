@@ -88,7 +88,7 @@ export function RequestPasswordResetForm() {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Spinner className="mr-2" />}
+            {form.formState.isSubmitting && <Spinner />}
             Send reset instructions
           </Button>
         </div>

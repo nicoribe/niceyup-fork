@@ -36,7 +36,7 @@ export function TeamSwitcher({
         <Button variant="ghost" className="max-w-[250px]">
           {activeTeam ? (
             <>
-              <CircleDashedIcon className="mr-1 size-4" />
+              <CircleDashedIcon className="size-4" />
               <span className="truncate">{activeTeam.name}</span>
             </>
           ) : (
@@ -61,7 +61,7 @@ export function TeamSwitcher({
                   router.push(`/orgs/${organizationSlug}/${team.id}/overview`)
                 }}
               >
-                <CircleDashedIcon className="mr-1 size-4" />
+                <CircleDashedIcon className="size-4" />
                 <span className="line-clamp-1">{team.name}</span>
               </DropdownMenuItem>
             )
@@ -71,7 +71,7 @@ export function TeamSwitcher({
         {pathname !== `/orgs/${organizationSlug}/~/teams/create` && (
           <DropdownMenuItem asChild>
             <Link href={`/orgs/${organizationSlug}/~/teams/create`}>
-              <PlusCircleIcon className="mr-1 size-4" />
+              <PlusCircleIcon className="size-4" />
               Create team
             </Link>
           </DropdownMenuItem>

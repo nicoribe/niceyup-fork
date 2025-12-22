@@ -1,9 +1,16 @@
-export default async function Page() {
+import type { AgentParams } from '@/lib/types'
+import { ViewAgentId } from './_components/view-agent-id'
+
+export default async function Page({
+  params,
+}: Readonly<{
+  params: Promise<AgentParams>
+}>) {
+  const { agentId } = await params
+
   return (
-    <div className="rounded-lg border bg-background p-4">
-      <p className="py-24 text-center text-muted-foreground text-xs">
-        Coming soon
-      </p>
+    <div className="flex w-full flex-col gap-4">
+      <ViewAgentId id={agentId} />
     </div>
   )
 }

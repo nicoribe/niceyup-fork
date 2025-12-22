@@ -1,0 +1,26 @@
+{
+  "name": "@workspace/billing",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@polar-sh/better-auth": "1.6.3",
+    "@polar-sh/sdk": "0.42.1",
+    "@workspace/env": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@workspace/tsconfig": "workspace:*",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./better-auth": "./src/lib/better-auth.ts",
+    "./plans": "./src/lib/plans.ts",
+    "./env": "./src/lib/env.ts"
+  }
+}

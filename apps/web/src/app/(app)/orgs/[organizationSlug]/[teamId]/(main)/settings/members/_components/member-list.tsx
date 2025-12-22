@@ -286,7 +286,7 @@ function MemberActionRemove({
       onClick={isLeave ? onLeave : onRemove}
       disabled={isPending}
     >
-      {isPending && <Spinner className="mr-1" />}
+      {isPending && <Spinner />}
       {isLeave ? 'Leave organization' : 'Remove from organization'}
     </DropdownMenuItem>
   )

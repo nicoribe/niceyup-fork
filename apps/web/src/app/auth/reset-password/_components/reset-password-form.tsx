@@ -210,7 +210,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Spinner className="mr-2" />}
+            {form.formState.isSubmitting && <Spinner />}
             Update password
           </Button>
         </div>

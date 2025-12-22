@@ -8,6 +8,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@workspace/ui/components/avatar'
+import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
 import {
   DropdownMenu,
@@ -49,7 +50,7 @@ export function OrganizationSwitcher({
           <Button variant="ghost" className="max-w-[250px]">
             {selectedOrganizationLabel ? (
               <>
-                <CircleDashedIcon className="mr-1 size-5" />
+                <CircleDashedIcon className="size-5" />
                 <span className="truncate">{selectedOrganizationLabel}</span>
               </>
             ) : activeOrganization ? (
@@ -61,11 +62,9 @@ export function OrganizationSwitcher({
                   <AvatarFallback className="rounded-sm" />
                 </Avatar>
                 <span className="truncate">{activeOrganization.name}</span>
-                <div className="rounded-sm border px-2 py-0.5">
-                  {/* <span className="text-xs">Hobby</span> */}
-                  <span className="text-xs">Standard</span>
-                  {/* <span className="text-xs">Pro</span> */}
-                </div>
+                <Badge variant="outline" className="rounded-sm">
+                  Standard
+                </Badge>
               </>
             ) : (
               <span className="text-muted-foreground">Select organization</span>
@@ -93,7 +92,7 @@ export function OrganizationSwitcher({
                   }}
                   disabled={!organization.slug}
                 >
-                  <Avatar className="mr-1 size-4 rounded-sm">
+                  <Avatar className="size-4 rounded-sm">
                     {organization.logo && (
                       <AvatarImage src={organization.logo} />
                     )}
@@ -108,7 +107,7 @@ export function OrganizationSwitcher({
           {pathname !== '/onboarding/create-organization' && (
             <DropdownMenuItem asChild>
               <Link href="/onboarding/create-organization">
-                <PlusCircleIcon className="mr-1 size-4" />
+                <PlusCircleIcon className="size-4" />
                 Create organization
               </Link>
             </DropdownMenuItem>

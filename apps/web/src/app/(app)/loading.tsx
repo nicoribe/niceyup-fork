@@ -1,15 +1,19 @@
+import { Logo } from '@/components/logo'
 import { Separator } from '@workspace/ui/components/separator'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { SlashIcon } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Loading() {
   return (
     <div className="flex flex-1 flex-col bg-background">
-      <header className="flex flex-col items-center justify-center bg-background">
+      <header className="flex flex-col items-center justify-center">
         <div className="no-scrollbar flex w-full items-center justify-between gap-4 overflow-auto px-4 py-2">
           <div className="flex items-center gap-1">
             <div className="px-2">
-              <Skeleton className="size-8" />
+              <Link href="/">
+                <Logo className="size-8" />
+              </Link>
             </div>
 
             <SlashIcon className="-rotate-[24deg] size-3 text-border" />

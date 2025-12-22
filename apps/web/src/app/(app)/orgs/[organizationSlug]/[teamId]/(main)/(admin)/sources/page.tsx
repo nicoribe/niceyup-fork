@@ -18,7 +18,7 @@ export default async function Page() {
           <div className="flex items-center gap-4">
             <Button disabled>
               New Source
-              <CirclePlusIcon className="ml-1 size-4" />
+              <CirclePlusIcon className="size-4" />
             </Button>
           </div>
         </div>

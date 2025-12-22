@@ -10,8 +10,10 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     '@workspace/ai',
     '@workspace/auth',
+    '@workspace/billing',
     '@workspace/cache',
     '@workspace/db',
+    '@workspace/engine',
     '@workspace/env',
     '@workspace/realtime',
     '@workspace/sdk',
@@ -36,6 +38,11 @@ const nextConfig: NextConfig = {
       {
         source: '/auth',
         destination: '/auth/sign-in',
+        permanent: true,
+      },
+      {
+        source: '/docs/:path*',
+        destination: 'https://docs.niceyup.com/:path*',
         permanent: true,
       },
     ]

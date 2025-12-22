@@ -234,7 +234,7 @@ export function SignUpForm() {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Spinner className="mr-2" />}
+            {form.formState.isSubmitting && <Spinner />}
             Create account
           </Button>
         </div>

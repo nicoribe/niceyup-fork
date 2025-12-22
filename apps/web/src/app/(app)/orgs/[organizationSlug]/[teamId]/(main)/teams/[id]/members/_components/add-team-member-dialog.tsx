@@ -213,7 +213,7 @@ function TeamMemberActionAdd({
 
   return (
     <Button variant="outline" disabled={added || isPending} onClick={onAdd}>
-      {isPending && <Spinner className="mr-1" />}
+      {isPending && <Spinner />}
       {added ? 'Added' : 'Add'}
     </Button>
   )

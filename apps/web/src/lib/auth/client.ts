@@ -5,7 +5,7 @@ import { roles } from '@workspace/auth/access'
 import {
   createAuthClient,
   organizationClient,
-  stripeClient,
+  polarClient,
 } from '@workspace/auth/client'
 
 export const authClient = createAuthClient({
@@ -17,8 +17,6 @@ export const authClient = createAuthClient({
       },
       roles,
     }),
-    stripeClient({
-      subscription: true,
-    }),
+    polarClient(),
   ],
 })

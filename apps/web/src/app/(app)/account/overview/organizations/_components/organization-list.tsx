@@ -131,7 +131,9 @@ export function OrganizationList({
               </div>
 
               <div className="flex items-center gap-1">
-                <Badge variant="outline">Standard</Badge>
+                <Badge variant="outline" className="rounded-sm">
+                  Standard
+                </Badge>
               </div>
 
               <div className="ml-auto flex items-center">

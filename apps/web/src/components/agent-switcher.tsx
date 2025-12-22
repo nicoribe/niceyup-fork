@@ -35,7 +35,7 @@ export function AgentSwitcher({
         <Button variant="ghost" className="max-w-[250px]">
           {activeAgent ? (
             <>
-              <CircleDashedIcon className="mr-1 size-4" />
+              <CircleDashedIcon className="size-4" />
               <span className="truncate">{activeAgent.name}</span>
             </>
           ) : (
@@ -57,7 +57,7 @@ export function AgentSwitcher({
                   )
                 }}
               >
-                <CircleDashedIcon className="mr-1 size-4" />
+                <CircleDashedIcon className="size-4" />
                 <span className="line-clamp-1">{agent.name}</span>
               </DropdownMenuItem>
             )
@@ -67,7 +67,7 @@ export function AgentSwitcher({
         {pathname !== `/orgs/${organizationSlug}/${teamId}/agents/create` && (
           <DropdownMenuItem asChild>
             <Link href={`/orgs/${organizationSlug}/${teamId}/agents/create`}>
-              <PlusCircleIcon className="mr-1 size-4" />
+              <PlusCircleIcon className="size-4" />
               Create agent
             </Link>
           </DropdownMenuItem>

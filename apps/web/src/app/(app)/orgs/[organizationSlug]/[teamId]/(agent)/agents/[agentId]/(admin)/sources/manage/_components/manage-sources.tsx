@@ -168,7 +168,7 @@ function ManageSourcesContent({
             onClick={handleSave}
             disabled={loadingSources || submitting || !hasDiff}
           >
-            {submitting && <Spinner className="mr-2" />}
+            {submitting && <Spinner />}
             Save
           </Button>
         </div>

@@ -227,7 +227,7 @@ function TeamMemberActionRemove({
       onClick={onRemove}
       disabled={isPending}
     >
-      {isPending && <Spinner className="mr-1" />}
+      {isPending && <Spinner />}
       Remove from team
     </DropdownMenuItem>
   )

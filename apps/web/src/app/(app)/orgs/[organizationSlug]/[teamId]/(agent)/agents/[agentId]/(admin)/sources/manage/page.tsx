@@ -53,7 +53,7 @@ export default async function Page({
                 <Button asChild>
                   <Link href={`/orgs/${organizationSlug}/~/sources`}>
                     New Source
-                    <CirclePlusIcon className="ml-1 size-4" />
+                    <CirclePlusIcon className="size-4" />
                   </Link>
                 </Button>
               </EmptyContent>

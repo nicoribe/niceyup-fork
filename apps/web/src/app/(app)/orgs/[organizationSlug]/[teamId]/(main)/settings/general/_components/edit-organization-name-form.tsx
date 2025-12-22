@@ -63,14 +63,14 @@ export function EditOrganizationNameForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="rounded-lg border border-border bg-background"
       >
-        <div className="relative flex flex-col space-y-6 p-5 sm:p-10">
+        <div className="relative flex flex-col gap-5 p-5 sm:gap-6 sm:p-6">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <div className="flex flex-col space-y-3">
-                  <h2 className="font-medium text-xl">Organization Name</h2>
+                <div className="flex flex-col gap-3">
+                  <h2 className="font-semibold text-xl">Organization Name</h2>
                   <p className="text-muted-foreground text-sm">
                     This is your organization's visible name within Niceyup. For
                     example, the name of your company or department.
@@ -89,14 +89,14 @@ export function EditOrganizationNameForm({
             )}
           />
         </div>
-        <div className="flex items-center justify-between space-x-4 rounded-b-lg border-border border-t bg-foreground/2 p-3 sm:px-10">
+        <div className="flex items-center justify-between gap-4 rounded-b-lg border-border border-t bg-foreground/2 p-3 sm:px-6">
           {isAdmin ? (
             <>
               <p className="text-muted-foreground text-sm">
                 Please use 255 characters at maximum.
               </p>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && <Spinner className="mr-2" />}
+                {form.formState.isSubmitting && <Spinner />}
                 Save
               </Button>
             </>

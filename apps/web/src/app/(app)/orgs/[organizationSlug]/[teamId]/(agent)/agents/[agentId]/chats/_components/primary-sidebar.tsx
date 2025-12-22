@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
 import {
-  FilesIcon,
+  FolderTreeIcon,
   MessagesSquareIcon,
   PlusIcon,
   SearchIcon,
@@ -36,7 +36,7 @@ export function PrimarySidebar({ params }: { params: Params }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="size-8">
-              <FilesIcon className="size-4" />
+              <FolderTreeIcon className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Explorer</TooltipContent>

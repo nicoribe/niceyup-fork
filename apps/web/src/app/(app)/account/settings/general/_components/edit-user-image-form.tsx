@@ -103,16 +103,16 @@ export function EditUserImageForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="rounded-lg border border-border bg-background"
       >
-        <div className="relative flex flex-col space-y-6 p-5 sm:p-10">
+        <div className="relative flex flex-col gap-5 p-5 sm:gap-6 sm:p-6">
           <FormField
             control={form.control}
             name="image"
             render={({ field }) => (
               <FormItem>
-                <div className="flex flex-col space-y-3">
-                  <h2 className="font-medium text-xl">Avatar</h2>
-                  <div className="flex flex-row items-start justify-between space-x-3">
-                    <div className="flex flex-col items-start space-y-2">
+                <div className="flex flex-col gap-3">
+                  <h2 className="font-semibold text-xl">Avatar</h2>
+                  <div className="flex flex-row items-start justify-between gap-3">
+                    <div className="flex flex-col items-start gap-2">
                       <p className="text-muted-foreground text-sm">
                         This is your user's avatar.
                       </p>
@@ -161,12 +161,12 @@ export function EditUserImageForm({
             )}
           />
         </div>
-        <div className="flex items-center justify-between space-x-4 rounded-b-lg border-border border-t bg-foreground/2 p-3 sm:px-10">
+        <div className="flex items-center justify-between gap-4 rounded-b-lg border-border border-t bg-foreground/2 p-3 sm:px-6">
           <p className="text-muted-foreground text-sm">
             An avatar is optional but strongly recommended.
           </p>
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Spinner className="mr-2" />}
+            {form.formState.isSubmitting && <Spinner />}
             Save
           </Button>
         </div>

@@ -36,15 +36,15 @@ export const ThemeSwitcher = () => {
 
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => nextSetTheme('light')}>
-          <SunIcon className="mr-1 size-4" />
+          <SunIcon className="size-4" />
           Light
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => nextSetTheme('dark')}>
-          <MoonIcon className="mr-1 size-4" />
+          <MoonIcon className="size-4" />
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => nextSetTheme('system')}>
-          <MonitorIcon className="mr-1 size-4" />
+          <MonitorIcon className="size-4" />
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

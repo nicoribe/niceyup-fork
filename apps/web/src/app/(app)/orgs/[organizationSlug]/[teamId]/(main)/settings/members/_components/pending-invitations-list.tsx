@@ -230,7 +230,7 @@ function PendingInvitationActionCancel({
       onClick={onCancel}
       disabled={isPending}
     >
-      {isPending && <Spinner className="mr-1" />}
+      {isPending && <Spinner />}
       Cancel invitation
     </DropdownMenuItem>
   )
@@ -272,7 +272,7 @@ function PendingInvitationActionReInvite({
 
   return (
     <DropdownMenuItem onClick={onReInvite} disabled={isPending}>
-      {isPending && <Spinner className="mr-1" />}
+      {isPending && <Spinner />}
       Re-invite
     </DropdownMenuItem>
   )

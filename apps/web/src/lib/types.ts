@@ -20,7 +20,7 @@ export type ChatParams = {
 
 export type Organization = {
   id: string
-  slug: string | null
+  slug: string
   name: string
   logo?: string | null
   metadata?: unknown
@@ -35,7 +35,7 @@ export type Team = {
 export type Agent = {
   id: string
   name: string
-  slug: string | null
+  slug: string
   logo: string | null
   description: string | null
   tags: string[] | null

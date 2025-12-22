@@ -193,7 +193,7 @@ export const connectionsRelations = relations(connections, ({ many }) => ({
 export const agents = pgTable('agents', {
   ...id,
   name: text('name').notNull().default('Unnamed'),
-  slug: text('slug').unique(),
+  slug: text('slug').notNull().unique(),
   logo: text('logo'),
   description: text('description'),
   tags: text('tags').array(),

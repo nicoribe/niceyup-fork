@@ -18,10 +18,6 @@ export default async function Layout({
       href: `/orgs/${organizationSlug}/~/settings/general`,
     },
     {
-      label: 'Billing',
-      href: `/orgs/${organizationSlug}/~/settings/billing`,
-    },
-    {
       label: 'Members',
       href: `/orgs/${organizationSlug}/~/settings/members`,
     },

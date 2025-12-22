@@ -1,3 +1,4 @@
+import { polarPlugin } from '@workspace/billing/better-auth'
 import { cache } from '@workspace/cache'
 import { db, generateId } from '@workspace/db'
 import { eq } from '@workspace/db/orm'
@@ -20,7 +21,6 @@ import { openAPI, organization } from 'better-auth/plugins'
 import { ac, roles } from './lib/access'
 import { COOKIE_PREFIX } from './lib/constants'
 import { env } from './lib/env'
-import { stripe } from './lib/stripe'
 
 async function createDefaultTeamAndAgent({
   organizationId,
@@ -51,8 +51,8 @@ async function createDefaultTeamAndAgent({
       .values({
         name: 'Assistant',
         slug: `assistant-${generateId()}`,
-        description: 'Your personal assistant',
-        tags: ['OpenAI'],
+        description: 'Your AI-Powered Assistant for Work and Life',
+        tags: ['OpenAI', 'Anthropic', 'Google'],
         organizationId,
       })
       .returning({
@@ -102,6 +102,7 @@ const config = {
         : undefined,
   },
   session: {
+    storeSessionInDatabase: true,
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
   },
@@ -184,7 +185,7 @@ const config = {
         },
       },
     }),
-    stripe(),
+    polarPlugin(),
 
     // API Reference for Better Auth
     ...(env.APP_ENV === 'development' ? [openAPI({ path: '/docs' })] : []),

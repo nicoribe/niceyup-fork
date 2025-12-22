@@ -132,7 +132,7 @@ export function SignInForm() {
           />
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Spinner className="mr-2" />}
+            {form.formState.isSubmitting && <Spinner />}
             Sign In
           </Button>
         </div>
