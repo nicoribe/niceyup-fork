@@ -11,6 +11,10 @@ export const ALLOWED_ROLES = {
 
 export const COOKIE_PREFIX = 'auth' as const
 
+export const DOMAIN_COOKIES = new URL(
+  env.WEB_URL ?? process.env.WEB_URL ?? 'http://localhost:3000',
+).hostname
+
 export const ENABLE_SECURE_COOKIES = env.APP_ENV === 'production'
 
 export const COOKIE_SESSION_TOKEN_NAME =

@@ -1,5 +1,9 @@
 import { auth } from '@workspace/auth'
-import { COOKIE_SESSION_TOKEN_NAME } from '@workspace/auth/constants'
+import {
+  COOKIE_SESSION_TOKEN_NAME,
+  DOMAIN_COOKIES,
+  ENABLE_SECURE_COOKIES,
+} from '@workspace/auth/constants'
 import { headers } from 'next/headers'
 import { type NextRequest, NextResponse } from 'next/server'
 
@@ -18,9 +22,8 @@ export async function GET(request: NextRequest) {
 
   response.cookies.delete({
     name: COOKIE_SESSION_TOKEN_NAME,
-    path: '/',
-    domain: '.niceyup-fork-web.vercel.app',
-    secure: true,
+    domain: DOMAIN_COOKIES,
+    secure: ENABLE_SECURE_COOKIES,
   })
 
   return response
