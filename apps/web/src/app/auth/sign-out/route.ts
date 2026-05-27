@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
 
   const response = NextResponse.redirect(redirectUrl)
 
-  response.cookies.set(COOKIE_SESSION_TOKEN_NAME, '', {
-    expires: new Date(0),
+  response.cookies.delete({
+    name: COOKIE_SESSION_TOKEN_NAME,
     path: '/',
     domain: '.niceyup-fork-web.vercel.app',
     secure: true,
